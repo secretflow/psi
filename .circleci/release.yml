@@ -121,7 +121,7 @@ jobs:
 workflows:
   publish:
     jobs:
-      - build_binary
+      - build_binary:
       - docker_image_publish:
         requires:
           - build_binary

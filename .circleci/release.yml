@@ -67,7 +67,7 @@ jobs:
           name: "Copy binary"
           command: |
             mkdir -p /tmp/binary
-            cp bazel-bin/psi/psi/main /tmp/binary/main
+            cp bazel-bin/psi/psi/main /tmp/binary/
       - persist_to_workspace:
           root: "/tmp"
           paths:
@@ -123,5 +123,5 @@ workflows:
     jobs:
       - build_binary
       - docker_image_publish:
-          requires: 
+          requires:
             - build_binary

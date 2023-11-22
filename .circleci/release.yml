@@ -108,12 +108,12 @@ jobs:
 
             VERSION=$(cat version.txt)
 
-            # secretflow-anolis8:${VERSION}
-            docker tag secretflow/secretflow-anolis8:${VERSION} secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:${VERSION}
+            # psi-anolis8:${VERSION}
+            docker tag secretflow/psi-anolis8:${VERSION} secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:${VERSION}
             docker push secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:${VERSION}
 
-            # secretflow-anolis8:latest
-            docker tag secretflow/secretflow-anolis8:${VERSION} secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest
+            # psi-anolis8:latest
+            docker tag secretflow/psi-anolis8:${VERSION} secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest
             docker push secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest
 
 # Invoke jobs via workflows

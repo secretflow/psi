@@ -77,4 +77,4 @@ workflows:
       equal: ["publish_docker_image", << pipeline.parameters.GHA_Meta >>]
     jobs:
       - continuation/continue:
-          configuration_path: .circleci/release-config.yml
+          configuration_path: .circleci/release.yml

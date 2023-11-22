@@ -1,0 +1,44 @@
+{
+    "protocol_config": {
+        "protocol": "PROTOCOL_KKRT",
+        "kkrt_config": {
+            "bucket_size": 4096
+        },
+        "role": "ROLE_RECEIVER",
+        "broadcast_result": true
+    },
+    "input_config": {
+        "type": "IO_TYPE_FILE_CSV",
+        "path": "/tmp/receiver_input.csv"
+    },
+    "output_config": {
+        "type": "IO_TYPE_FILE_CSV",
+        "path": "/tmp/kkrt_receiver_recovery_output.csv"
+    },
+    "link_config": {
+        "parties": [
+            {
+                "id": "receiver",
+                "host": "127.0.0.1:5300"
+            },
+            {
+                "id": "sender",
+                "host": "127.0.0.1:5400"
+            }
+        ]
+    },
+    "self_link_party": "receiver",
+    "keys": [
+        "id0",
+        "id1"
+    ],
+    "debug_options": {
+        "trace_path": "/tmp/kkrt_receiver_recovery.trace"
+    },
+    "check_duplicates": true,
+    "sort_output": false,
+    "recovery_config": {
+        "enabled": true,
+        "folder": "/tmp/kkrt_receiver_cache"
+    }
+}

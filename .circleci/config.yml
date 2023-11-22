@@ -72,3 +72,9 @@ workflows:
             .bazelrc build-and-run true
             .circleci/test.yml build-and-run true
       - lint
+  publish-workflow:
+    when:
+      equal: ["publish_docker_image", << pipeline.parameters.GHA_Meta >>]
+    jobs:
+      - continuation/continue:
+          configuration_path: .circleci/release-config.yml

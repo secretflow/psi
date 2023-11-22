@@ -1,4 +1,4 @@
-name: "Publish PyPI Package"
+name: "Publish Docker Image"
 on:
   workflow_dispatch:
 
@@ -10,6 +10,6 @@ jobs:
         id: secretflow-deploy
         uses: CircleCI-Public/trigger-circleci-pipeline-action@v1.0.5
         with:
-          GHA_Meta: "publish_pypi"
+          GHA_Meta: "publish_docker_image"
         env:
           CCI_TOKEN: ${{ secrets.CCI_TOKEN }}

@@ -10,6 +10,8 @@ show_help() {
     echo "          tag this version as latest."
     echo "  -u --upload"
     echo "          upload to docker registry."
+    echo "  -s --skip"
+    echo "          skip building binary."
 }
 
 source_file="../psi/version.h"
@@ -21,7 +23,7 @@ PSI_DEV_IDENTIFIER=$(grep "#define PSI_DEV_IDENTIFIER" $source_file | cut -d' ' 
 PSI_VERSION="${PSI_VERSION_MAJOR}.${PSI_VERSION_MINOR}.${PSI_VERSION_PATCH}${PSI_DEV_IDENTIFIER}"
 echo "Current PSI version is $PSI_VERSION."
 
-
+SKIP=0
 while [[ "$#" -ge 1 ]]; do
     case $1 in
         -v|--version)
@@ -41,6 +43,10 @@ while [[ "$#" -ge 1 ]]; do
             UPLOAD=1
             shift
         ;;
+        -s|--skip)
+            SKIP=1
+            shift
+        ;;
         *)
             echo "Unknown argument passed: $1"
             exit 1
@@ -58,12 +64,14 @@ NO_COLOR="\033[0m"
 
 DOCKER_REG="secretflow"
 
-IMAGE_TAG=${DOCKER_REG}/secretflow-psi-anolis8:${VERSION}
-LATEST_TAG=${DOCKER_REG}/secretflow-psi-anolis8:latest
+IMAGE_TAG=${DOCKER_REG}/psi-anolis8:${VERSION}
+LATEST_TAG=${DOCKER_REG}/psi-anolis8:latest
 
-echo -e "Build psi binary ${GREEN}PSI ${PSI_VERSION}${NO_COLOR}..."
-docker run -it  --rm   --mount type=bind,source="$(pwd)/../../psi",target=/home/admin/dev/src -w /home/admin/dev  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow/release-ci:1.2 /home/admin/dev/src/docker/entry.sh
-echo -e "Finish building psi binary ${GREEN}${IMAGE_LITE_TAG}${NO_COLOR}"
+if [[ LATEST -eq 0 ]]; then
+    echo -e "Build psi binary ${GREEN}PSI ${PSI_VERSION}${NO_COLOR}..."
+    docker run -it  --rm   --mount type=bind,source="$(pwd)/../../psi",target=/home/admin/dev/src -w /home/admin/dev  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow/release-ci:1.2 /home/admin/dev/src/docker/entry.sh
+    echo -e "Finish building psi binary ${GREEN}${IMAGE_LITE_TAG}${NO_COLOR}"
+fi
 
 echo -e "Building docker image ${GREEN}${IMAGE_TAG}${NO_COLOR}..."
 docker build . -f Dockerfile -t ${IMAGE_TAG} --build-arg version=${VERSION} --build-arg config_templates="$(cat config_templates.yml)" --build-arg deploy_templates="$(cat deploy_templates.yml)"
@@ -81,3 +89,5 @@ if [[ LATEST -eq 1 ]]; then
         docker push ${LATEST_TAG}
     fi
 fi
+
+echo ${VERSION} > version.txt

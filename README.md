@@ -1,5 +1,7 @@
 # SecretFlow PSI Library
 
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/secretflow/psi/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/secretflow/psi/tree/main)
+
 The repo of Private Set Intersection(PSI) and Private Information Retrieval(PIR) from SecretFlow.
 
 This repo is formerly psi/pir part from secretflow/spu repo.

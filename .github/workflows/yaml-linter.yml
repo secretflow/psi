@@ -1,12 +1,12 @@
 ---
-name: Yaml Lint
+name: Yaml linter
 on:
   push:
     branches:
-    - main
+      - main
   pull_request:
     branches:
-    - main
+      - main
 jobs:
   yaml-linter:
     uses: secretflow/.github/.github/workflows/yaml-linter.yml@main

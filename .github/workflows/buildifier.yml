@@ -3,10 +3,10 @@ name: Bazel files linter
 on:
   push:
     branches:
-    - main
+      - main
   pull_request:
     branches:
-    - main
+      - main
 jobs:
   bazel-formatting-check:
     uses: secretflow/.github/.github/workflows/bazel-linter.yml@main

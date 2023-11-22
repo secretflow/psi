@@ -91,7 +91,7 @@ jobs:
       - checkout
       - setup_remote_docker
       - attach_workspace:
-        at: /tmp/binary
+          at: /tmp/binary
       - run:
           name: Build Docker image
           command: |
@@ -123,5 +123,5 @@ workflows:
     jobs:
       - build_binary
       - docker_image_publish:
-        requires:
-          - build_binary
+          requires: 
+            - build_binary

@@ -21,9 +21,9 @@ psi_cc_library(
     srcs = ["baxos.cc"],
     hdrs = ["baxos.h"],
     deps = [
-        ":paxos",
         ":dense_mtx",
         ":galois128",
+        ":paxos",
         ":paxos_hash",
         ":paxos_utils",
         ":simple_index",
@@ -76,10 +76,10 @@ psi_cc_library(
     deps = [
         ":aes_crhash",
         ":galois128",
-        "@yacl//yacl/math:gadget",
-        "@yacl//yacl/utils:platform_utils",
         "@com_github_ridiculousfish_libdivide//:libdivide",
         "@com_google_absl//absl/types:span",
+        "@yacl//yacl/math:gadget",
+        "@yacl//yacl/utils:platform_utils",
     ],
 )
 
@@ -98,8 +98,8 @@ psi_cc_library(
     hdrs = ["paxos_utils.h"],
     deps = [
         ":galois128",
-        "@yacl//yacl/crypto/tools:prg",
         "@com_google_absl//absl/types:span",
+        "@yacl//yacl/crypto/tools:prg",
     ],
 )
 
@@ -119,11 +119,10 @@ psi_cc_test(
     deps = [
         ":aes_crhash",
         ":galois128",
-        "@yacl//yacl/crypto/tools:prg",
         "@com_google_absl//absl/strings",
+        "@yacl//yacl/crypto/tools:prg",
     ],
 )
-
 
 psi_cc_library(
     name = "galois128",
@@ -135,11 +134,11 @@ psi_cc_library(
         "-march=native",
     ],
     deps = [
+        "@com_google_absl//absl/strings",
         "@yacl//yacl/base:block",
         "@yacl//yacl/base:int128",
         "@yacl//yacl/link",
         "@yacl//yacl/utils:platform_utils",
-        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -160,8 +159,8 @@ psi_cc_library(
     hdrs = ["dense_mtx.h"],
     deps = [
         ":galois128",
-        "@yacl//yacl/crypto/tools:prg",
         "@com_google_absl//absl/types:span",
+        "@yacl//yacl/crypto/tools:prg",
     ],
 )
 
@@ -170,8 +169,8 @@ psi_cc_library(
     srcs = ["simple_index.cc"],
     hdrs = ["simple_index.h"],
     deps = [
-        "@yacl//yacl/base:exception",
         "@boost//:math",
         "@boost//:multiprecision",
+        "@yacl//yacl/base:exception",
     ],
 )

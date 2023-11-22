@@ -21,14 +21,14 @@ psi_cc_library(
     srcs = ["rr22_oprf.cc"],
     hdrs = ["rr22_oprf.h"],
     deps = [
-        "//psi/psi/core/vole_psi/okvs:baxos",
         "//psi/psi/core/vole_psi/okvs:aes_crhash",
+        "//psi/psi/core/vole_psi/okvs:baxos",
         "@yacl//yacl/base:buffer",
+        "@yacl//yacl/crypto/primitives/vole/f2k:silent_vole",
         "@yacl//yacl/crypto/tools:prg",
         "@yacl//yacl/crypto/utils:rand",
-        "@yacl//yacl/crypto/primitives/vole/f2k:silent_vole",
         "@yacl//yacl/link",
-        "@yacl//yacl/math/f2k:f2k",
+        "@yacl//yacl/math/f2k",
         "@yacl//yacl/utils:parallel",
     ],
 )
@@ -49,7 +49,7 @@ psi_cc_library(
     deps = [
         ":rr22_oprf",
         ":rr22_utils",
-        "//psi/psi/utils:utils",
+        "//psi/psi/utils",
     ],
 )
 
@@ -68,8 +68,8 @@ psi_cc_binary(
     deps = [
         ":rr22_psi",
         "//psi/psi/utils:test_utils",
-        "@yacl//yacl/crypto/utils:rand",
         "@com_github_google_benchmark//:benchmark_main",
+        "@yacl//yacl/crypto/utils:rand",
     ],
 )
 
@@ -80,11 +80,11 @@ psi_cc_library(
     deps = [
         "//psi/psi/core/vole_psi/okvs:galois128",
         "//psi/psi/core/vole_psi/okvs:simple_index",
-        "@yacl//yacl/base:int128",
-        "@yacl//yacl/base:buffer",
-        "@yacl//yacl/link",
         "@com_github_ridiculousfish_libdivide//:libdivide",
         "@com_github_sparsehash_sparsehash//:sparsehash",
+        "@yacl//yacl/base:buffer",
+        "@yacl//yacl/base:int128",
+        "@yacl//yacl/link",
     ],
 )
 

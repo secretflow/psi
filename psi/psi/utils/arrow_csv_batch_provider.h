@@ -26,35 +26,36 @@ namespace psi::psi {
 
 class ArrowCsvBatchProvider : public IBasicBatchProvider {
  public:
-  // NOTE(junfeng): block_size is not col num of each batch, which by default is
-  // 1 << 20 (1 Mb).
   explicit ArrowCsvBatchProvider(const std::string& file_path,
-                                 const std::vector<std::string>& keys = {},
-                                 const std::string& separator = ",",
-                                 size_t block_size = 1 << 20);
+                                 const std::vector<std::string>& keys,
+                                 size_t batch_size = 1 << 20);
 
   std::vector<std::string> ReadNextBatch() override;
 
   [[nodiscard]] size_t row_cnt() const { return row_cnt_; }
 
-  [[nodiscard]] size_t batch_size() const { return block_size_; }
+  [[nodiscard]] size_t batch_size() const { return batch_size_; }
 
  private:
   void Init();
 
-  const size_t block_size_;
+  const size_t batch_size_;
 
   const std::string file_path_;
 
   const std::vector<std::string> keys_;
-
-  const std::string separator_;
 
   size_t row_cnt_ = 0;
 
   std::shared_ptr<arrow::io::ReadableFile> infile_;
 
   std::shared_ptr<arrow::csv::StreamingReader> reader_;
+
+  std::shared_ptr<arrow::RecordBatch> batch_;
+
+  int64_t idx_in_batch_ = 0;
+
+  std::vector<std::shared_ptr<arrow::StringArray>> arrays_;
 };
 
 }  // namespace psi::psi

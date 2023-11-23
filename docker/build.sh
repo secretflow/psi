@@ -67,8 +67,9 @@ DOCKER_REG="secretflow"
 IMAGE_TAG=${DOCKER_REG}/psi-anolis8:${VERSION}
 LATEST_TAG=${DOCKER_REG}/psi-anolis8:latest
 
-if [[ LATEST -eq 0 ]]; then
-    echo -e "Build psi binary ${GREEN}PSI ${PSI_VERSION}${NO_COLOR}..."
+echo -e "Build psi binary ${GREEN}PSI ${PSI_VERSION}${NO_COLOR}..."
+
+if [[ SKIP -eq 0 ]]; then
     docker run -it  --rm   --mount type=bind,source="$(pwd)/../../psi",target=/home/admin/dev/src -w /home/admin/dev  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow/release-ci:1.2 /home/admin/dev/src/docker/entry.sh
     echo -e "Finish building psi binary ${GREEN}${IMAGE_LITE_TAG}${NO_COLOR}"
 fi

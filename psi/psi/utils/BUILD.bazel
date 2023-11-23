@@ -42,8 +42,8 @@ psi_cc_library(
     srcs = ["hash_bucket_cache.cc"],
     hdrs = ["hash_bucket_cache.h"],
     deps = [
+        ":arrow_csv_batch_provider",
         ":multiplex_disk_cache",
-        "//psi/psi/utils:batch_provider",
         "@com_google_absl//absl/strings",
     ],
 )
@@ -53,8 +53,8 @@ psi_cc_library(
     srcs = ["csv_checker.cc"],
     hdrs = ["csv_checker.h"],
     deps = [
+        ":utils",
         "//psi/psi/io",
-        "//psi/psi/utils",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/time",
         "@org_apache_arrow//:arrow",

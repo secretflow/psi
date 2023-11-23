@@ -22,7 +22,7 @@
 #include "absl/strings/str_split.h"
 #include "spdlog/spdlog.h"
 
-#include "psi/psi/utils/batch_provider.h"
+#include "psi/psi/utils/arrow_csv_batch_provider.h"
 
 namespace psi::psi {
 
@@ -80,7 +80,7 @@ std::unique_ptr<HashBucketCache> CreateCacheFromCsv(
   auto bucket_cache = std::make_unique<HashBucketCache>(cache_dir, bucket_num,
                                                         use_scoped_tmp_dir);
 
-  auto batch_provider = std::make_unique<CsvBatchProvider>(
+  auto batch_provider = std::make_unique<ArrowCsvBatchProvider>(
       csv_path, schema_names, read_batch_size);
   while (true) {
     auto items = batch_provider->ReadNextBatch();

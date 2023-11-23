@@ -38,10 +38,13 @@ TEST(ArrowCsvBatchProvider, works) {
   file.close();
 
   {
-    ArrowCsvBatchProvider provider(file_path);
+    ArrowCsvBatchProvider provider(file_path, {"id1", "id2", "id3"}, 1);
     EXPECT_EQ(provider.ReadNextBatch(),
-              std::vector<std::string>(
-                  {"1,one,first", "2,two,second", "3,three,third"}));
+              std::vector<std::string>({"1,one,first"}));
+    EXPECT_EQ(provider.ReadNextBatch(),
+              std::vector<std::string>({"2,two,second"}));
+    EXPECT_EQ(provider.ReadNextBatch(),
+              std::vector<std::string>({"3,three,third"}));
     EXPECT_EQ(provider.row_cnt(), 3);
     EXPECT_TRUE(provider.ReadNextBatch().empty());
     EXPECT_TRUE(provider.ReadNextBatch().empty());
@@ -49,22 +52,23 @@ TEST(ArrowCsvBatchProvider, works) {
   }
 
   {
-    ArrowCsvBatchProvider provider(file_path, {}, "#");
-    EXPECT_EQ(provider.ReadNextBatch(),
-              std::vector<std::string>(
-                  {"1#one#first", "2#two#second", "3#three#third"}));
-  }
-
-  {
-    ArrowCsvBatchProvider provider(file_path, {"id2", "id1"});
+    ArrowCsvBatchProvider provider(file_path, {"id2", "id1"}, 3);
     EXPECT_EQ(provider.ReadNextBatch(),
               std::vector<std::string>({"one,1", "two,2", "three,3"}));
+    EXPECT_EQ(provider.row_cnt(), 3);
+    EXPECT_TRUE(provider.ReadNextBatch().empty());
+    EXPECT_TRUE(provider.ReadNextBatch().empty());
+    EXPECT_EQ(provider.row_cnt(), 3);
   }
 
   {
-    ArrowCsvBatchProvider provider(file_path, {"id3"});
+    ArrowCsvBatchProvider provider(file_path, {"id3"}, 5);
     EXPECT_EQ(provider.ReadNextBatch(),
               std::vector<std::string>({"first", "second", "third"}));
+    EXPECT_EQ(provider.row_cnt(), 3);
+    EXPECT_TRUE(provider.ReadNextBatch().empty());
+    EXPECT_TRUE(provider.ReadNextBatch().empty());
+    EXPECT_EQ(provider.row_cnt(), 3);
   }
 
   std::error_code ec;

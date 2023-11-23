@@ -21,55 +21,59 @@
 #include "arrow/datum.h"
 #include "spdlog/spdlog.h"
 
+#include "psi/psi/utils/utils.h"
+
 namespace psi::psi {
 
 ArrowCsvBatchProvider::ArrowCsvBatchProvider(
     const std::string& file_path, const std::vector<std::string>& keys,
-    const std::string& separator, size_t block_size)
-    : block_size_(block_size),
-      file_path_(file_path),
-      keys_(keys),
-      separator_(separator) {
+    size_t batch_size)
+    : batch_size_(batch_size), file_path_(file_path), keys_(keys) {
   Init();
 }
 
 std::vector<std::string> ArrowCsvBatchProvider::ReadNextBatch() {
-  std::shared_ptr<arrow::RecordBatch> batch;
-  arrow::Status status = reader_->ReadNext(&batch);
-  if (!status.ok()) {
-    YACL_THROW("Read csv error.");
-  }
-
-  if (!batch) {
-    SPDLOG_INFO("Reach the end of csv file {}.", file_path_);
-    return {};
-  }
-
-  std::vector<arrow::Datum> join_cols;
-
-  arrow::compute::CastOptions cast_options;
-
-  for (const auto& col : batch->columns()) {
-    join_cols.emplace_back(
-        arrow::compute::Cast(arrow::Datum(*col), arrow::utf8(), cast_options)
-            .ValueOrDie());
-  }
-
-  join_cols.emplace_back(arrow::MakeScalar(separator_));
-
-  arrow::Datum join_datum =
-      arrow::compute::CallFunction("binary_join_element_wise", join_cols)
-          .ValueOrDie();
-
-  std::shared_ptr<arrow::Array> join_array = std::move(join_datum).make_array();
-  auto str_array = std::dynamic_pointer_cast<arrow::StringArray>(join_array);
-
   std::vector<std::string> res;
-  for (int i = 0; i < batch->num_rows(); ++i) {
-    res.emplace_back(str_array->GetString(i));
-  }
 
-  row_cnt_ += batch->num_rows();
+  while (res.size() < batch_size_) {
+    bool new_batch = false;
+
+    if (!batch_ || idx_in_batch_ >= batch_->num_rows()) {
+      arrow::Status status = reader_->ReadNext(&batch_);
+      if (!status.ok()) {
+        YACL_THROW("Read csv error.");
+      }
+
+      new_batch = true;
+    }
+
+    if (!batch_) {
+      SPDLOG_INFO("Reach the end of csv file {}.", file_path_);
+      return res;
+    }
+
+    if (new_batch) {
+      idx_in_batch_ = 0;
+
+      arrays_.clear();
+
+      for (const auto& col : batch_->columns()) {
+        arrays_.emplace_back(
+            std::dynamic_pointer_cast<arrow::StringArray>(col));
+      }
+    }
+
+    for (; idx_in_batch_ < batch_->num_rows() && res.size() < batch_size_;
+         idx_in_batch_++) {
+      std::vector<absl::string_view> values;
+      for (const auto& array : arrays_) {
+        values.emplace_back(array->Value(idx_in_batch_));
+      }
+
+      res.emplace_back(KeysJoin(values));
+      row_cnt_++;
+    }
+  }
 
   return res;
 }
@@ -78,19 +82,21 @@ void ArrowCsvBatchProvider::Init() {
   YACL_ENFORCE(std::filesystem::exists(file_path_),
                "Input file {} doesn't exist.", file_path_);
 
+  YACL_ENFORCE(!keys_.empty(), "You must provide keys.");
+
   arrow::io::IOContext io_context = arrow::io::default_io_context();
   infile_ =
       arrow::io::ReadableFile::Open(file_path_, arrow::default_memory_pool())
           .ValueOrDie();
 
   auto read_options = arrow::csv::ReadOptions::Defaults();
-  read_options.block_size = block_size_;
   auto parse_options = arrow::csv::ParseOptions::Defaults();
   auto convert_options = arrow::csv::ConvertOptions::Defaults();
 
-  if (!keys_.empty()) {
-    convert_options.include_columns = keys_;
+  for (const auto& key : keys_) {
+    convert_options.column_types[key] = arrow::utf8();
   }
+  convert_options.include_columns = keys_;
 
   reader_ = arrow::csv::StreamingReader::Make(io_context, infile_, read_options,
                                               parse_options, convert_options)

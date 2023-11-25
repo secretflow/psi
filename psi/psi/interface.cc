@@ -36,6 +36,10 @@
 
 #include "psi/proto/psi.pb.h"
 
+#include "boost/uuid/uuid.hpp"            // uuid class
+#include "boost/uuid/uuid_generators.hpp" // generators
+#include <boost/uuid/uuid_io.hpp>         // streaming operators etc.
+
 namespace psi::psi {
 
 namespace {
@@ -49,13 +53,15 @@ std::string GenerateSortedIndexFileName(v2::Role role) {
 }
 
 std::string GenerateIndexFileName() {
+  boost::uuids::random_generator uuid_generator;
   return fmt::format("psi_index_{}.csv",
-                     std::to_string(absl::ToUnixNanos(absl::Now())));
+                     boost::uuids::to_string(uuid_generator()));
 }
 
 std::string GenerateSortedIndexFileName() {
+  boost::uuids::random_generator uuid_generator;
   return fmt::format("sorted_psi_index_{}.csv",
-                     std::to_string(absl::ToUnixNanos(absl::Now())));
+                     boost::uuids::to_string(uuid_generator()));
 }
 
 }  // namespace

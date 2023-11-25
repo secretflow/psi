@@ -136,6 +136,7 @@ psi_cc_library(
         "@com_github_google_perfetto//:perfetto",
         "@com_google_absl//absl/status",
         "@yacl//yacl/link",
+        "@boost//:uuid"
     ],
 )
 

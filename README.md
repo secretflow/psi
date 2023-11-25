@@ -27,6 +27,7 @@ docker run -d -it --name psi-dev-$(whoami) \
          --cap-add=SYS_PTRACE --security-opt seccomp=unconfined \
          --cap-add=NET_ADMIN \
          --privileged=true \
+         --entrypoint="bash" \
          secretflow/ubuntu-base-ci:latest
 
 # attach to build container

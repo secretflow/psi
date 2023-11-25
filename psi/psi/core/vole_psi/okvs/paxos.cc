@@ -98,9 +98,9 @@ inline std::vector<uint128_t> MatrixGf128Inv(std::vector<uint128_t> mtx,
   return inv;
 }
 
-inline std::vector<uint128_t> MatrixGf128Mul(const std::vector<uint128_t>& m0,
-                                             const std::vector<uint128_t>& m1,
-                                             size_t row_size, size_t col_size) {
+[[maybe_unused]] inline std::vector<uint128_t> MatrixGf128Mul(
+    const std::vector<uint128_t>& m0, const std::vector<uint128_t>& m1,
+    size_t row_size, size_t col_size) {
   YACL_ENFORCE(row_size == col_size);
 
   std::vector<uint128_t> ret(row_size, col_size);

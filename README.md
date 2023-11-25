@@ -17,20 +17,21 @@ This repo is formerly psi/pir part from secretflow/spu repo.
 
 #### Docker
 
-We use the same dev docker from secretflow/spu.
+We use the same dev docker from secretflow/ubuntu-base-ci.
 
 ```sh
 ## start container
-docker run -d -it --name spu-dev-$(whoami) \
+docker run -d -it --name psi-dev-$(whoami) \
          --mount type=bind,source="$(pwd)",target=/home/admin/dev/ \
          -w /home/admin/dev \
          --cap-add=SYS_PTRACE --security-opt seccomp=unconfined \
          --cap-add=NET_ADMIN \
          --privileged=true \
-         secretflow/spu-ci:latest
+         --entrypoint="bash" \
+         secretflow/ubuntu-base-ci:latest
 
 # attach to build container
-docker exec -it spu-dev-$(whoami) bash
+docker exec -it psi-dev-$(whoami) bash
 ```
 
 #### Linux

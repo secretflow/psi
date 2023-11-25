@@ -309,10 +309,10 @@ void PaxosHash<IdxType>::HashBuildRow1(const uint128_t& input,
   BuildRow(*hash, rows);
 }
 
-template class PaxosHash<uint8_t>;
-template class PaxosHash<uint16_t>;
-template class PaxosHash<uint32_t>;
-template class PaxosHash<uint64_t>;
-template class PaxosHash<uint128_t>;
+template struct PaxosHash<uint8_t>;
+template struct PaxosHash<uint16_t>;
+template struct PaxosHash<uint32_t>;
+template struct PaxosHash<uint64_t>;
+template struct PaxosHash<uint128_t>;
 
 }  // namespace psi::psi::okvs

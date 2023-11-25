@@ -70,7 +70,11 @@ psi_cc_binary(
         "//psi/psi/utils:test_utils",
         "@com_github_google_benchmark//:benchmark_main",
         "@yacl//yacl/crypto/utils:rand",
-    ],
+    ] + select({
+        "@bazel_tools//src/conditions:darwin_x86_64": ["@local_homebrew_x64//:openmp"],
+        "@bazel_tools//src/conditions:darwin_arm64": ["@local_homebrew_arm64//:openmp"],
+        "//conditions:default": [],
+    }),
 )
 
 psi_cc_library(

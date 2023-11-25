@@ -133,6 +133,7 @@ psi_cc_library(
         "//psi/psi:bucket_psi",
         "//psi/psi/utils:index_store",
         "//psi/psi/utils:inner_join",
+        "@boost//:uuid",
         "@com_github_google_perfetto//:perfetto",
         "@com_google_absl//absl/status",
         "@yacl//yacl/link",

@@ -23,6 +23,9 @@
 #include <numeric>
 
 #include "absl/time/time.h"
+#include "boost/uuid/uuid.hpp"
+#include "boost/uuid/uuid_generators.hpp"
+#include "boost/uuid/uuid_io.hpp"
 #include "google/protobuf/util/message_differencer.h"
 #include "yacl/base/exception.h"
 #include "yacl/link/link.h"
@@ -49,13 +52,15 @@ std::string GenerateSortedIndexFileName(v2::Role role) {
 }
 
 std::string GenerateIndexFileName() {
+  boost::uuids::random_generator uuid_generator;
   return fmt::format("psi_index_{}.csv",
-                     std::to_string(absl::ToUnixNanos(absl::Now())));
+                     boost::uuids::to_string(uuid_generator()));
 }
 
 std::string GenerateSortedIndexFileName() {
+  boost::uuids::random_generator uuid_generator;
   return fmt::format("sorted_psi_index_{}.csv",
-                     std::to_string(absl::ToUnixNanos(absl::Now())));
+                     boost::uuids::to_string(uuid_generator()));
 }
 
 }  // namespace

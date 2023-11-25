@@ -253,7 +253,11 @@ CheckCsvReport CheckCsv(const std::string& input_file_path,
 
   // Get hash digest.
   if (generate_key_hash_digest) {
+#ifdef __APPLE__
+    std::string command(fmt::format("shasum -a 256 {}", output_file_path));
+#else
     std::string command(fmt::format("sha256sum {}", output_file_path));
+#endif
     std::array<char, 128> buffer;
     std::string result;
     FILE* pipe = popen(command.c_str(), "r");

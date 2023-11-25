@@ -34,7 +34,7 @@ class ArrowCsvBatchProvider : public IBasicBatchProvider {
 
   [[nodiscard]] size_t row_cnt() const { return row_cnt_; }
 
-  [[nodiscard]] size_t batch_size() const { return batch_size_; }
+  [[nodiscard]] size_t batch_size() const override { return batch_size_; }
 
  private:
   void Init();

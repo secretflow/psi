@@ -14,7 +14,7 @@
 
 #include "psi/psi/rr22/common.h"
 
-#include <omp.h>
+#include "omp.h"
 
 #include "psi/psi/bucket.h"
 

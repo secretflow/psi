@@ -156,18 +156,14 @@ psi_cc_library(
     name = "ecdh_oprf_psi",
     srcs = ["ecdh_oprf_psi.cc"],
     hdrs = ["ecdh_oprf_psi.h"],
-    linkopts = select({
-        "@bazel_tools//src/conditions:darwin": [],
-        "//conditions:default": ["-fopenmp"],
-    }),
     deps = [
         ":communication",
-        "@yacl//yacl/base:exception",
         "//psi/psi/core/ecdh_oprf:ecdh_oprf_selector",
         "//psi/psi/utils:batch_provider",
         "//psi/psi/utils:ec_point_store",
         "//psi/psi/utils:ub_psi_cache",
         "@com_google_absl//absl/strings",
+        "@yacl//yacl/base:exception",
         "@yacl//yacl/link",
         "@yacl//yacl/utils:parallel",
     ] + select({

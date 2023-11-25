@@ -20,6 +20,7 @@
 #include <ctime>
 #include <memory>
 #include <random>
+#include <sstream>
 
 #include "spdlog/spdlog.h"
 #include "yacl/base/exception.h"

@@ -79,7 +79,8 @@ class Baxos {
   template <typename ValueType>
   ValueType Decode(const uint128_t& input, absl::Span<const ValueType> p) {
     ValueType r;
-    decode(absl::Span<uint128_t>(&input, 1), absl::Span<ValueType>(&r, 1), p);
+    decode(absl::Span<const uint128_t>(&input, 1), absl::Span<ValueType>(&r, 1),
+           p);
     return r;
   }
 

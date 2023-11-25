@@ -25,7 +25,11 @@ psi_cc_library(
         "//psi/psi:bucket",
         "//psi/psi:recovery",
         "//psi/psi/core/vole_psi:rr22_psi",
-    ],
+    ] + select({
+        "@bazel_tools//src/conditions:darwin_x86_64": ["@local_homebrew_x64//:openmp"],
+        "@bazel_tools//src/conditions:darwin_arm64": ["@local_homebrew_arm64//:openmp"],
+        "//conditions:default": [],
+    }),
 )
 
 psi_cc_library(

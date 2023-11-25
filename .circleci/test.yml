@@ -28,7 +28,7 @@ jobs:
     # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     docker:
-      - image: secretflow/spu-ci:latest
+      - image: secretflow/ubuntu-base-ci:latest
     resource_class: 2xlarge+
     shell: /bin/bash --login -eo pipefail
     # Add steps to the job
@@ -84,6 +84,39 @@ jobs:
           path: test_binary.tar.gz
       - store_artifacts:
           path: test_logs.tar.gz
+  macos_ut:
+    macos:
+      xcode: 15.1
+    resource_class: macos.m1.large.gen1
+    steps:
+      - checkout
+      - run:
+          name: Checkout devtools
+          command: git clone https://github.com/secretflow/devtools.git ../devtools
+      - run:
+          name: "Install homebrew dependencies"
+          command: brew install bazelisk cmake ninja libomp wget
+      - run:
+          name: "build"
+          command: bazel build //... -c opt --ui_event_filters=-info,-debug,-warning --jobs 12
+      - run:
+          name: "test"
+          command: |
+            set +e
+            declare -i test_status
+            bazel test //... -c opt --ui_event_filters=-info,-debug,-warning --test_output=errors --jobs 12 | tee test_result.log; test_status=${PIPESTATUS[0]}
+
+            sh ../devtools/rename-junit-xml.sh
+            find bazel-bin/ -perm +111 -type f -name "*_test"  -print0 | xargs -0 tar -cvzf test_binary.tar.gz
+            find bazel-testlogs/ -type f -name "test.log"  -print0 | xargs -0 tar -cvzf test_logs.tar.gz
+
+            exit ${test_status}
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: test_binary.tar.gz
+      - store_artifacts:
+          path: test_logs.tar.gz
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -92,3 +125,4 @@ workflows:
     when: << pipeline.parameters.build-and-run >>
     jobs:
       - linux_ut
+      - macos_ut

@@ -95,7 +95,7 @@ jobs:
           command: git clone https://github.com/secretflow/devtools.git ../devtools
       - run:
           name: "Install homebrew dependencies"
-          command: brew install bazelisk cmake ninja libomp wget
+          command: brew install bazelisk cmake ninja libomp wget md5sha1sum
       - run:
           name: "build"
           command: bazel build //... -c opt --ui_event_filters=-info,-debug,-warning --jobs 12

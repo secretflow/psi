@@ -198,7 +198,7 @@ void Rr22OprfSender::SendFast(const std::shared_ptr<yacl::link::Context>& lctx,
   SPDLOG_INFO("begin b xor delta a");
 
   yacl::parallel_for(
-      0, paxos_solve_vec.size(), 1, [&](int64_t begin, int64_t end) {
+      0, paxos_solve_vec.size(), [&](int64_t begin, int64_t end) {
         for (int64_t idx = begin; idx < end; ++idx) {
           b128_span[idx] =
               b128_span[idx] ^
@@ -290,14 +290,14 @@ void Rr22OprfSender::Eval(absl::Span<const uint128_t> inputs,
   okvs::Galois128 delta_gf128(delta_);
 
   if (mode_ == Rr22PsiMode::FastMode) {
-    yacl::parallel_for(0, inputs.size(), 1, [&](int64_t begin, int64_t end) {
+    yacl::parallel_for(0, inputs.size(), [&](int64_t begin, int64_t end) {
       for (int64_t idx = begin; idx < end; ++idx) {
         uint128_t h = aes_crhash.Hash(inputs[idx]);
         outputs[idx] = outputs[idx] ^ (delta_gf128 * h).get<uint128_t>(0);
       }
     });
   } else if (mode_ == Rr22PsiMode::LowCommMode) {
-    yacl::parallel_for(0, inputs.size(), 1, [&](int64_t begin, int64_t end) {
+    yacl::parallel_for(0, inputs.size(), [&](int64_t begin, int64_t end) {
       for (int64_t idx = begin; idx < end; ++idx) {
         uint64_t h =
             yacl::DecomposeUInt128(aes_crhash.Hash(inputs[idx])).second;
@@ -353,7 +353,7 @@ void Rr22OprfSender::Eval(absl::Span<const uint128_t> inputs,
 
   SPDLOG_INFO("paxos decode finished");
 
-  yacl::parallel_for(0, inputs.size(), 1, [&](int64_t begin, int64_t end) {
+  yacl::parallel_for(0, inputs.size(), [&](int64_t begin, int64_t end) {
     for (int64_t idx = begin; idx < end; ++idx) {
       outputs[idx] = outputs[idx] ^ inputs_hash[idx];
     }
@@ -449,7 +449,7 @@ void Rr22OprfReceiver::RecvFast(
 
   SPDLOG_INFO("begin p xor a");
 
-  yacl::parallel_for(0, p128_span.size(), 1, [&](int64_t begin, int64_t end) {
+  yacl::parallel_for(0, p128_span.size(), [&](int64_t begin, int64_t end) {
     for (int64_t idx = begin; idx < end; ++idx) {
       p128_span[idx] = p128_span[idx] ^ a128_span[idx];
     }

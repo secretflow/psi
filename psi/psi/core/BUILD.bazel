@@ -166,11 +166,7 @@ psi_cc_library(
         "@yacl//yacl/base:exception",
         "@yacl//yacl/link",
         "@yacl//yacl/utils:parallel",
-    ] + select({
-        "@bazel_tools//src/conditions:darwin_x86_64": ["@local_homebrew_x64//:openmp"],
-        "@bazel_tools//src/conditions:darwin_arm64": ["@local_homebrew_arm64//:openmp"],
-        "//conditions:default": [],
-    }),
+    ],
 )
 
 psi_cc_test(
@@ -179,6 +175,7 @@ psi_cc_test(
     deps = [
         ":ecdh_oprf_psi",
         "//psi/psi/utils:test_utils",
+        "@boost//:uuid",
         "@com_google_absl//absl/time",
         "@yacl//yacl/crypto/tools:prg",
         "@yacl//yacl/crypto/utils:rand",

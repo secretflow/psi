@@ -22,6 +22,9 @@
 #include <iostream>
 
 #include "boost/algorithm/string.hpp"
+#include "boost/uuid/uuid.hpp"
+#include "boost/uuid/uuid_generators.hpp"
+#include "boost/uuid/uuid_io.hpp"
 #include "gflags/gflags.h"
 #include "google/protobuf/util/json_util.h"
 #include "perfetto.h"
@@ -157,10 +160,11 @@ int main(int argc, char* argv[]) {
       psi::psi::createPSIParty(psi_config);
   psi::psi::v2::PsiReport report = psi_party->Run();
 
+  boost::uuids::random_generator uuid_generator;
   StopTracing(std::move(tracing_session),
               psi_config.debug_options().trace_path().empty()
                   ? fmt::format("/tmp/psi_{}.trace",
-                                std::to_string(absl::ToUnixNanos(absl::Now())))
+                                boost::uuids::to_string(uuid_generator()))
                   : psi_config.debug_options().trace_path());
 
   std::string report_json;

@@ -162,7 +162,7 @@ void GeneralizedCuckooHashTable::Insert(absl::Span<const std::string> items) {
   items_hash_low64_.resize(input_offset + items.size());
   hashes_.resize(input_offset + items.size());
 
-  yacl::parallel_for(0, items.size(), 1, [&](int64_t begin, int64_t end) {
+  yacl::parallel_for(0, items.size(), [&](int64_t begin, int64_t end) {
     for (int i = begin; i < end; ++i) {
       uint128_t item_hash = yacl::crypto::Blake3_128(items[i]);
 
@@ -242,7 +242,7 @@ void SimpleHashTable::Insert(absl::Span<const std::string> items) {
 
   std::vector<std::vector<uint64_t>> hash_bin_idx(items.size());
 
-  yacl::parallel_for(0, items.size(), 1, [&](int64_t begin, int64_t end) {
+  yacl::parallel_for(0, items.size(), [&](int64_t begin, int64_t end) {
     for (int i = begin; i < end; ++i) {
       uint128_t item_hash = yacl::crypto::Blake3_128(items[i]);
 

@@ -46,7 +46,7 @@ void SodiumCurve25519Cryptor::EccMask(absl::Span<const char> batch_points,
   absl::Span<Item> output(reinterpret_cast<Item*>(dest_points.data()),
                           dest_points.size() / sizeof(Item));
 
-  yacl::parallel_for(0, input.size(), 1, [&](int64_t begin, int64_t end) {
+  yacl::parallel_for(0, input.size(), [&](int64_t begin, int64_t end) {
     for (int64_t idx = begin; idx < end; ++idx) {
       mask_functor(input[idx], output[idx]);
     }

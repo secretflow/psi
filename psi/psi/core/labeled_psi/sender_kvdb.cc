@@ -752,33 +752,30 @@ void SenderKvDB::InsertOrAssign(
       // Set up Kuku hash functions
       auto hash_funcs = labeled_psi::HashFunctions(params_);
 
-      yacl::parallel_for(
-          0, oprf_out.size(), 1, [&](int64_t begin, int64_t end) {
-            for (int64_t idx = begin; idx < end; ++idx) {
-              apsi::Item::value_type value{};
-              std::memcpy(value.data(), &oprf_out[idx][0], value.size());
+      yacl::parallel_for(0, oprf_out.size(), [&](int64_t begin, int64_t end) {
+        for (int64_t idx = begin; idx < end; ++idx) {
+          apsi::Item::value_type value{};
+          std::memcpy(value.data(), &oprf_out[idx][0], value.size());
 
-              apsi::HashedItem hashed_item(value);
+          apsi::HashedItem hashed_item(value);
 
-              apsi::LabelKey key;
-              std::memcpy(key.data(), &oprf_out[idx][key_offset_pos],
-                          apsi::label_key_byte_count);
+          apsi::LabelKey key;
+          std::memcpy(key.data(), &oprf_out[idx][key_offset_pos],
+                      apsi::label_key_byte_count);
 
-              apsi::Label label_with_padding =
-                  PaddingData(batch_labels[idx], label_byte_count_);
+          apsi::Label label_with_padding =
+              PaddingData(batch_labels[idx], label_byte_count_);
 
-              apsi::EncryptedLabel encrypted_label = apsi::util::encrypt_label(
-                  label_with_padding, key, label_byte_count_,
-                  nonce_byte_count_);
+          apsi::EncryptedLabel encrypted_label = apsi::util::encrypt_label(
+              label_with_padding, key, label_byte_count_, nonce_byte_count_);
 
-              std::pair<apsi::HashedItem, apsi::EncryptedLabel>
-                  item_label_pair =
-                      std::make_pair(hashed_item, encrypted_label);
+          std::pair<apsi::HashedItem, apsi::EncryptedLabel> item_label_pair =
+              std::make_pair(hashed_item, encrypted_label);
 
-              data_with_indices_vec[idx] =
-                  PreprocessLabeledData(item_label_pair, params_, hash_funcs);
-            }
-          });
+          data_with_indices_vec[idx] =
+              PreprocessLabeledData(item_label_pair, params_, hash_funcs);
+        }
+      });
 
       for (size_t i = 0; i < oprf_out.size(); ++i) {
         for (size_t j = 0; j < data_with_indices_vec[i].size(); ++j) {

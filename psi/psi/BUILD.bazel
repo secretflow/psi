@@ -101,6 +101,7 @@ psi_cc_library(
         "//psi/psi/utils:csv_header_analyzer",
         "//psi/psi/utils:ec_point_store",
         "//psi/psi/utils:file",
+        "@boost//:uuid",
     ],
 )
 
@@ -164,6 +165,7 @@ psi_cc_binary(
         ":trace_categories",
         "//psi:version",
         "@boost//:algorithm",
+        "@boost//:uuid",
         "@com_github_gflags_gflags//:gflags",
     ],
 )

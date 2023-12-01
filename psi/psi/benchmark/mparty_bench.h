@@ -23,9 +23,10 @@
 #include <string>
 #include <vector>
 
-#include "absl/time/clock.h"
-#include "absl/time/time.h"
 #include "benchmark/benchmark.h"
+#include "boost/uuid/uuid.hpp"
+#include "boost/uuid/uuid_generators.hpp"
+#include "boost/uuid/uuid_io.hpp"
 #include "yacl/base/exception.h"
 #include "yacl/base/int128.h"
 #include "yacl/utils/scope_guard.h"
@@ -113,14 +114,15 @@ PSI_BM_DEFINE_ECDH()
         auto online_proc = EcdhOprfPsiServer(options, sk);                     \
                                                                                \
         /* offline: init */                                                    \
-        auto timestamp_str = std::to_string(absl::ToUnixNanos(absl::Now()));   \
+        boost::uuids::random_generator uuid_generator;                         \
+        auto uuid_str = boost::uuids::to_string(uuid_generator());             \
         /* server input */                                                     \
-        auto server_input_path = std::filesystem::path(                        \
-            fmt::format("server-input-{}", timestamp_str));                    \
+        auto server_input_path =                                               \
+            std::filesystem::path(fmt::format("server-input-{}", uuid_str));   \
                                                                                \
         /* server output */                                                    \
         auto server_tmp_cache_path =                                           \
-            std::filesystem::path(fmt::format("tmp-cache-{}", timestamp_str)); \
+            std::filesystem::path(fmt::format("tmp-cache-{}", uuid_str));      \
         /* register remove of temp file. */                                    \
         ON_SCOPE_EXIT([&] {                                                    \
           std::error_code ec;                                                  \

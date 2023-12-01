@@ -35,7 +35,7 @@ std::vector<std::string> KkrtPsiOperator::OnRun(
 
   // hash items to uint128_t
   std::vector<uint128_t> items_hash(inputs.size());
-  yacl::parallel_for(0, inputs.size(), 1, [&](int64_t begin, int64_t end) {
+  yacl::parallel_for(0, inputs.size(), [&](int64_t begin, int64_t end) {
     for (int64_t idx = begin; idx < end; ++idx) {
       items_hash[idx] = yacl::crypto::Blake3_128(inputs[idx]);
     }

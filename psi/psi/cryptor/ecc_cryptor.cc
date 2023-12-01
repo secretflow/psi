@@ -99,7 +99,7 @@ std::string HashInput(const std::shared_ptr<IEccCryptor>& cryptor,
 std::vector<std::string> HashInputs(const std::shared_ptr<IEccCryptor>& cryptor,
                                     const std::vector<std::string>& items) {
   std::vector<std::string> ret(items.size());
-  yacl::parallel_for(0, items.size(), 1, [&](int64_t begin, int64_t end) {
+  yacl::parallel_for(0, items.size(), [&](int64_t begin, int64_t end) {
     for (int64_t idx = begin; idx < end; ++idx) {
       ret[idx] = HashInput(cryptor, items[idx]);
     }

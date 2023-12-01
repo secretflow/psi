@@ -588,7 +588,7 @@ void SenderMemDB::InsertOrAssign(const std::vector<std::string> &keys,
   std::vector<std::pair<apsi::HashedItem, apsi::EncryptedLabel>> hashed_data(
       oprf_out.size());
 
-  yacl::parallel_for(0, oprf_out.size(), 1, [&](int64_t begin, int64_t end) {
+  yacl::parallel_for(0, oprf_out.size(), [&](int64_t begin, int64_t end) {
     for (int64_t i = begin; i < end; ++i) {
       apsi::HashedItem hashed_item;
       std::memcpy(hashed_item.value().data(), oprf_out[i].data(),

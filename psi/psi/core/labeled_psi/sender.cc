@@ -165,7 +165,7 @@ void LabelPsiSender::RunOPRF(
   proto::OprfProto evaluated_proto;
   std::vector<std::string> evaluated_vec(blind_proto.data_size());
   yacl::parallel_for(
-      0, blind_proto.data_size(), 1, [&](int64_t begin, int64_t end) {
+      0, blind_proto.data_size(), [&](int64_t begin, int64_t end) {
         for (int idx = begin; idx < end; ++idx) {
           evaluated_vec[idx] = oprf_server->Evaluate(blind_proto.data(idx));
         }

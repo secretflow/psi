@@ -219,7 +219,7 @@ std::string Bc22PcgPsi::RunmBaRKOprfSender(absl::Span<const std::string> items,
   }
 
   // compute sender's oprf
-  yacl::parallel_for(0, bins.size(), 1, [&](int64_t begin, int64_t end) {
+  yacl::parallel_for(0, bins.size(), [&](int64_t begin, int64_t end) {
     for (int64_t bin_idx = begin; bin_idx < end; ++bin_idx) {
       std::vector<WolverineVoleFieldType> oprf_key(kMaxItemsPerBin);
 
@@ -320,74 +320,71 @@ std::vector<std::string> Bc22PcgPsi::RunmBaRKOprfReceiver(
 
     std::vector<std::string> oprf_blocks_batch(current_batch_size);
 
-    yacl::parallel_for(
-        0, current_batch_size, 1, [&](int64_t begin, int64_t end) {
-          for (int64_t j = begin; j < end; ++j) {
-            size_t bin_idx = idx + j;
+    yacl::parallel_for(0, current_batch_size, [&](int64_t begin, int64_t end) {
+      for (int64_t j = begin; j < end; ++j) {
+        size_t bin_idx = idx + j;
 
-            std::vector<std::string> bin_data(kMaxItemsPerBin);
-            size_t pos = j * coeff_byte_size;
+        std::vector<std::string> bin_data(kMaxItemsPerBin);
+        size_t pos = j * coeff_byte_size;
 
-            size_t k = 0;
-            for (; k < bins[bin_idx].size(); ++k) {
-              bin_data[k] = absl::string_view(
-                  reinterpret_cast<const char *>(
-                      &items_hash_low64[bins[bin_idx][k].InputIdx()]),
-                  sizeof(uint64_t));  // use 64 bit
-            }
+        size_t k = 0;
+        for (; k < bins[bin_idx].size(); ++k) {
+          bin_data[k] = absl::string_view(
+              reinterpret_cast<const char *>(
+                  &items_hash_low64[bins[bin_idx][k].InputIdx()]),
+              sizeof(uint64_t));  // use 64 bit
+        }
 
-            for (; k < kMaxItemsPerBin; ++k) {
-              std::string buf(sizeof(uint64_t), '\0');
-              YACL_ENFORCE(RAND_bytes(reinterpret_cast<uint8_t *>(buf.data()),
-                                      buf.length()) == 1);
-              bin_data[k] = buf;
-            }
-            std::vector<WolverineVoleFieldType> coeff_blocks =
-                GetPolynomialCoefficients(bin_data);
+        for (; k < kMaxItemsPerBin; ++k) {
+          std::string buf(sizeof(uint64_t), '\0');
+          YACL_ENFORCE(RAND_bytes(reinterpret_cast<uint8_t *>(buf.data()),
+                                  buf.length()) == 1);
+          bin_data[k] = buf;
+        }
+        std::vector<WolverineVoleFieldType> coeff_blocks =
+            GetPolynomialCoefficients(bin_data);
 
-            // use vole mask polynomial coefficient
-            // coeff_i - ui
-            size_t vole_start = (idx + j) * kMaxItemsPerBin;
-            for (k = 0; k < coeff_blocks.size(); ++k) {
-              coeff_blocks[k] = mod(
-                  coeff_blocks[k] + (vole_blocks[vole_start + k] >> 64), pr);
-            }
+        // use vole mask polynomial coefficient
+        // coeff_i - ui
+        size_t vole_start = (idx + j) * kMaxItemsPerBin;
+        for (k = 0; k < coeff_blocks.size(); ++k) {
+          coeff_blocks[k] =
+              mod(coeff_blocks[k] + (vole_blocks[vole_start + k] >> 64), pr);
+        }
 
-            // copy to masked_coeff send buffer
-            std::memcpy(
-                reinterpret_cast<uint8_t *>(masked_coeff_buffer.data()) + pos,
-                coeff_blocks.data(), coeff_byte_size);
+        // copy to masked_coeff send buffer
+        std::memcpy(
+            reinterpret_cast<uint8_t *>(masked_coeff_buffer.data()) + pos,
+            coeff_blocks.data(), coeff_byte_size);
 
-            // get vi_0, vi_1, vi_2, i: bin index
-            std::vector<WolverineVoleFieldType> coeff_vole(kMaxItemsPerBin);
-            for (k = 0; k < coeff_vole.size(); ++k) {
-              coeff_vole[k] =
-                  vole_blocks[vole_start + k] & 0xFFFFFFFFFFFFFFFFLL;
-            }
+        // get vi_0, vi_1, vi_2, i: bin index
+        std::vector<WolverineVoleFieldType> coeff_vole(kMaxItemsPerBin);
+        for (k = 0; k < coeff_vole.size(); ++k) {
+          coeff_vole[k] = vole_blocks[vole_start + k] & 0xFFFFFFFFFFFFFFFFLL;
+        }
 
-            for (k = 0; k < bins[bin_idx].size(); ++k) {
-              size_t item_index = bins[bin_idx][k].InputIdx();
+        for (k = 0; k < bins[bin_idx].size(); ++k) {
+          size_t item_index = bins[bin_idx][k].InputIdx();
 
-              // get item_hash as x,
-              absl::string_view item_hash_str = absl::string_view(
-                  reinterpret_cast<const char *>(&items_hash_low64[item_index]),
-                  sizeof(uint64_t));
+          // get item_hash as x,
+          absl::string_view item_hash_str = absl::string_view(
+              reinterpret_cast<const char *>(&items_hash_low64[item_index]),
+              sizeof(uint64_t));
 
-              // compute vi_0 + vi_1*x +vi_2*x^2, i: bin index
-              WolverineVoleFieldType eval =
-                  EvaluatePolynomial(coeff_vole, item_hash_str, 0);
+          // compute vi_0 + vi_1*x +vi_2*x^2, i: bin index
+          WolverineVoleFieldType eval =
+              EvaluatePolynomial(coeff_vole, item_hash_str, 0);
 
-              // compute oprf, H(i, vi_0 + vi_1*x +vi_2*x^2), i: bin index
-              std::vector<uint8_t> hash_res = BaRKOPRFHash(bin_idx, eval);
+          // compute oprf, H(i, vi_0 + vi_1*x +vi_2*x^2), i: bin index
+          std::vector<uint8_t> hash_res = BaRKOPRFHash(bin_idx, eval);
 
-              oprf_encode_vec[item_index] =
-                  absl::string_view(
-                      reinterpret_cast<const char *>(hash_res.data()),
-                      hash_res.size())
-                      .substr(0, compare_bytes_size);
-            }
-          }
-        });
+          oprf_encode_vec[item_index] =
+              absl::string_view(reinterpret_cast<const char *>(hash_res.data()),
+                                hash_res.size())
+                  .substr(0, compare_bytes_size);
+        }
+      }
+    });
 
     link_ctx_->SendAsyncThrottled(
         link_ctx_->NextRank(), masked_coeff_buffer,

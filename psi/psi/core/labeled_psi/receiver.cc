@@ -135,7 +135,7 @@ LabelPsiReceiver::RequestOPRF(
   std::vector<std::string> blind_items(items.size());
   std::vector<std::shared_ptr<IEcdhOprfClient>> oprf_clients(items.size());
 
-  yacl::parallel_for(0, items.size(), 1, [&](int64_t begin, int64_t end) {
+  yacl::parallel_for(0, items.size(), [&](int64_t begin, int64_t end) {
     for (int idx = begin; idx < end; ++idx) {
       oprf_clients[idx] =
           CreateEcdhOprfClient(OprfType::Basic, CurveType::CURVE_FOURQ);
@@ -165,7 +165,7 @@ LabelPsiReceiver::RequestOPRF(
                                               evaluated_buffer.size()));
 
   std::vector<std::string> items_oprf(evaluated_proto.data_size());
-  yacl::parallel_for(0, evaluated_proto.data_size(), 1,
+  yacl::parallel_for(0, evaluated_proto.data_size(),
                      [&](int64_t begin, int64_t end) {
                        for (int idx = begin; idx < end; ++idx) {
                          items_oprf[idx] = oprf_clients[idx]->Finalize(
@@ -346,7 +346,7 @@ LabelPsiReceiver::RequestQuery(
   std::vector<std::vector<std::pair<size_t, std::string>>> results(
       response_proto.results_size());
 
-  yacl::parallel_for(0, response_proto.results_size(), 1,
+  yacl::parallel_for(0, response_proto.results_size(),
                      [&](int64_t begin, int64_t end) {
                        for (int idx = begin; idx < end; ++idx) {
                          const proto::QueryResultProto &query_result_proto =

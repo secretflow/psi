@@ -20,8 +20,9 @@
 #include <utility>
 #include <vector>
 
-#include "absl/time/clock.h"
-#include "absl/time/time.h"
+#include "boost/uuid/uuid.hpp"
+#include "boost/uuid/uuid_generators.hpp"
+#include "boost/uuid/uuid_io.hpp"
 #include "gtest/gtest.h"
 #include "yacl/crypto/utils/rand.h"
 #include "yacl/utils/scope_guard.h"
@@ -31,9 +32,10 @@ namespace psi::psi {
 TEST(UbPsiCacheTest, Simple) {
   size_t data_len = 12;
 
-  auto timestamp_str = std::to_string(absl::ToUnixNanos(absl::Now()));
+  boost::uuids::random_generator uuid_generator;
+  auto uuid_str = boost::uuids::to_string(uuid_generator());
   auto tmp_file_path =
-      std::filesystem::path(fmt::format("tmp-cache-{}", timestamp_str));
+      std::filesystem::path(fmt::format("tmp-cache-{}", uuid_str));
 
   // register remove of temp file.
   ON_SCOPE_EXIT([&] {

@@ -119,11 +119,7 @@ psi_cc_library(
         ":factory",
         "//psi/psi/core/vole_psi:rr22_psi",
         "@yacl//yacl/utils:parallel",
-    ] + select({
-        "@bazel_tools//src/conditions:darwin_x86_64": ["@local_homebrew_x64//:openmp"],
-        "@bazel_tools//src/conditions:darwin_arm64": ["@local_homebrew_arm64//:openmp"],
-        "//conditions:default": [],
-    }),
+    ],
     alwayslink = True,
 )
 

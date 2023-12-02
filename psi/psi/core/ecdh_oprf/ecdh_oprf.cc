@@ -27,7 +27,7 @@ std::vector<std::string> IEcdhOprfServer::Evaluate(
   std::vector<std::string> evaluated_elements(blinded_elements.size());
 
   yacl::parallel_for(
-      0, blinded_elements.size(), 1, [&](int64_t begin, int64_t end) {
+      0, blinded_elements.size(), [&](int64_t begin, int64_t end) {
         for (int64_t idx = begin; idx < end; ++idx) {
           evaluated_elements[idx] = Evaluate(blinded_elements[idx]);
         }
@@ -40,7 +40,7 @@ std::vector<std::string> IEcdhOprfServer::FullEvaluate(
     absl::Span<const std::string> input) const {
   std::vector<std::string> output(input.size());
 
-  yacl::parallel_for(0, input.size(), 1, [&](int64_t begin, int64_t end) {
+  yacl::parallel_for(0, input.size(), [&](int64_t begin, int64_t end) {
     for (int64_t idx = begin; idx < end; ++idx) {
       output[idx] = FullEvaluate(input[idx]);
     }
@@ -53,7 +53,7 @@ std::vector<std::string> IEcdhOprfClient::Blind(
     absl::Span<const std::string> input) const {
   std::vector<std::string> blinded_elements(input.size());
 
-  yacl::parallel_for(0, input.size(), 1, [&](int64_t begin, int64_t end) {
+  yacl::parallel_for(0, input.size(), [&](int64_t begin, int64_t end) {
     for (int64_t idx = begin; idx < end; ++idx) {
       blinded_elements[idx] = Blind(input[idx]);
     }
@@ -68,7 +68,7 @@ std::vector<std::string> IEcdhOprfClient::Finalize(
   std::vector<std::string> output(evaluated_elements.size());
 
   yacl::parallel_for(
-      0, evaluated_elements.size(), 1, [&](int64_t begin, int64_t end) {
+      0, evaluated_elements.size(), [&](int64_t begin, int64_t end) {
         for (int64_t idx = begin; idx < end; ++idx) {
           output[idx] = Finalize(items[idx], evaluated_elements[idx]);
         }
@@ -81,7 +81,7 @@ std::vector<std::string> IEcdhOprfClient::Finalize(
     absl::Span<const std::string> evaluated_elements) const {
   std::vector<std::string> output(evaluated_elements.size());
 
-  yacl::parallel_for(0, evaluated_elements.size(), 1,
+  yacl::parallel_for(0, evaluated_elements.size(),
                      [&](int64_t begin, int64_t end) {
                        for (int64_t idx = begin; idx < end; ++idx) {
                          output[idx] = Finalize(evaluated_elements[idx]);

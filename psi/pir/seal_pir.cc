@@ -236,7 +236,7 @@ std::vector<seal::Plaintext> SealPir::DeSerializePlaintexts(
 
   std::vector<seal::Plaintext> plains(plains_proto.data_size());
 
-  yacl::parallel_for(0, plains_proto.data_size(), 1,
+  yacl::parallel_for(0, plains_proto.data_size(),
                      [&](int64_t begin, int64_t end) {
                        for (int i = begin; i < end; ++i) {
                          plains[i] = DeSerializeSealObject<seal::Plaintext>(
@@ -265,7 +265,7 @@ std::vector<seal::Ciphertext> SealPir::DeSerializeCiphertexts(
     const CiphertextsProto &ciphers_proto, bool safe_load) {
   std::vector<seal::Ciphertext> ciphers(ciphers_proto.ciphers_size());
 
-  yacl::parallel_for(0, ciphers_proto.ciphers_size(), 1,
+  yacl::parallel_for(0, ciphers_proto.ciphers_size(),
                      [&](int64_t begin, int64_t end) {
                        for (int i = begin; i < end; ++i) {
                          ciphers[i] = DeSerializeSealObject<seal::Ciphertext>(
@@ -317,7 +317,7 @@ std::vector<std::vector<seal::Ciphertext>> SealPir::DeSerializeQuery(
       query_proto.query_cipher_size());
 
   yacl::parallel_for(
-      0, query_proto.query_cipher_size(), 1, [&](int64_t begin, int64_t end) {
+      0, query_proto.query_cipher_size(), [&](int64_t begin, int64_t end) {
         for (int64_t i = begin; i < end; ++i) {
           const auto &ciphers = query_proto.query_cipher(i);
 
@@ -452,7 +452,7 @@ void SealPirServer::SetDatabase(
     }
 
     // pre process db
-    yacl::parallel_for(0, db_vec.size(), 1, [&](int64_t begin, int64_t end) {
+    yacl::parallel_for(0, db_vec.size(), [&](int64_t begin, int64_t end) {
       for (uint32_t i = begin; i < end; i++) {
         evaluator_->transform_to_ntt_inplace(db_vec[i],
                                              context_->first_parms_id());
@@ -514,7 +514,7 @@ std::vector<seal::Ciphertext> SealPirServer::ExpandQuery(
     pt1[index] = 1;
 
     // int nstep = -step;
-    yacl::parallel_for(0, step, 1, [&](int64_t begin, int64_t end) {
+    yacl::parallel_for(0, step, [&](int64_t begin, int64_t end) {
       for (int k = begin; k < end; k++) {
         seal::Ciphertext c0;
         seal::Ciphertext c1;
@@ -645,7 +645,7 @@ std::vector<seal::Ciphertext> SealPirServer::GenerateReply(
 
     // Transform expanded query to NTT, and ...
     yacl::parallel_for(
-        0, expanded_query.size(), 1, [&](int64_t begin, int64_t end) {
+        0, expanded_query.size(), [&](int64_t begin, int64_t end) {
           for (uint32_t jj = begin; jj < end; jj++) {
             evaluator_->transform_to_ntt_inplace(expanded_query[jj]);
           }
@@ -653,7 +653,7 @@ std::vector<seal::Ciphertext> SealPirServer::GenerateReply(
 
     // Transform plaintext to NTT. If database is pre-processed, can skip
     if (i > 0) {
-      yacl::parallel_for(0, (*cur).size(), 1, [&](int64_t begin, int64_t end) {
+      yacl::parallel_for(0, cur->size(), [&](int64_t begin, int64_t end) {
         for (uint32_t jj = begin; jj < end; jj++) {
           evaluator_->transform_to_ntt_inplace((*cur)[jj],
                                                context_->first_parms_id());
@@ -672,7 +672,7 @@ std::vector<seal::Ciphertext> SealPirServer::GenerateReply(
     product /= n_i;
     std::vector<seal::Ciphertext> intermediateCtxts(product);
 
-    yacl::parallel_for(0, product, 1, [&](int64_t begin, int64_t end) {
+    yacl::parallel_for(0, product, [&](int64_t begin, int64_t end) {
       for (int k = begin; k < end; k++) {
         uint64_t j = 0;
         while ((*cur)[k + j * product].is_zero()) {
@@ -697,7 +697,7 @@ std::vector<seal::Ciphertext> SealPirServer::GenerateReply(
     });
 
     yacl::parallel_for(
-        0, intermediateCtxts.size(), 1, [&](int64_t begin, int64_t end) {
+        0, intermediateCtxts.size(), [&](int64_t begin, int64_t end) {
           for (uint32_t jj = begin; jj < end; jj++) {
             evaluator_->transform_from_ntt_inplace(intermediateCtxts[jj]);
           }

@@ -125,7 +125,7 @@ void KkrtPSIReceiver::Online() {
       std::vector<HashBucketCache::BucketItem> res;
 
       std::vector<uint128_t> items_hash(bucket_items_list->size());
-      yacl::parallel_for(0, bucket_items_list->size(), 1,
+      yacl::parallel_for(0, bucket_items_list->size(),
                          [&](int64_t begin, int64_t end) {
                            for (int64_t i = begin; i < end; ++i) {
                              items_hash[i] = yacl::crypto::Blake3_128(

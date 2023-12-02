@@ -18,7 +18,7 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 SECRETFLOW_GIT = "https://github.com/secretflow"
 
-YACL_COMMIT_ID = "3baea619ae3f67911d7f072ff7dd39bc6a00ec28"
+YACL_COMMIT_ID = "8492bdf8c39444262fdb53b5fdf19a0b75f0356a"
 
 def psi_deps():
     _com_github_nelhage_rules_boost()
@@ -54,19 +54,6 @@ def psi_deps():
         name = "yacl",
         commit = YACL_COMMIT_ID,
         remote = "{}/yacl.git".format(SECRETFLOW_GIT),
-    )
-
-    # Add homebrew openmp for macOS, somehow..homebrew installs to different location on Apple Silcon/Intel macs.. so we need two rules here
-    native.new_local_repository(
-        name = "local_homebrew_x64",
-        build_file = "@psi//bazel:local_openmp_macos.BUILD",
-        path = "/usr/local/opt/libomp",
-    )
-
-    native.new_local_repository(
-        name = "local_homebrew_arm64",
-        build_file = "@psi//bazel:local_openmp_macos.BUILD",
-        path = "/opt/homebrew/opt/libomp/",
     )
 
 def _bazel_platform():

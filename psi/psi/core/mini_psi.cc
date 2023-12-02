@@ -22,6 +22,7 @@
 
 #include "absl/strings/escaping.h"
 #include "absl/strings/string_view.h"
+#include "omp.h"
 #include "openssl/crypto.h"
 #include "openssl/rand.h"
 #include "spdlog/spdlog.h"
@@ -56,7 +57,7 @@ constexpr size_t kCuckooHashBatchSize = 2000;
 
 std::vector<std::string> HashInputs(const std::vector<std::string>& items) {
   std::vector<std::string> ret(items.size());
-  yacl::parallel_for(0, items.size(), 1, [&](int64_t begin, int64_t end) {
+  yacl::parallel_for(0, items.size(), [&](int64_t begin, int64_t end) {
     for (int64_t idx = begin; idx < end; ++idx) {
       auto hash = yacl::crypto::Sha256(items[idx]);
       ret[idx].resize(hash.size());
@@ -116,7 +117,7 @@ struct MiniPsiSendCtx {
 
     items_hash = HashInputs(items);
 
-    yacl::parallel_for(0, items.size(), 1, [&](int64_t begin, int64_t end) {
+    yacl::parallel_for(0, items.size(), [&](int64_t begin, int64_t end) {
       for (int64_t idx = begin; idx < end; ++idx) {
         polynomial_eval_values[idx] = ::psi::psi::EvalPolynomial(
             polynomial_coeff, absl::string_view(items_hash[idx]), prime256_str);
@@ -210,7 +211,7 @@ struct MiniPsiRecvCtx {
     seeds.resize(data_size);
     seeds_point.resize(data_size);
 
-    yacl::parallel_for(0, data_size, 1, [&](int64_t begin, int64_t end) {
+    yacl::parallel_for(0, data_size, [&](int64_t begin, int64_t end) {
       for (int64_t idx = begin; idx < end; ++idx) {
         yacl::crypto::Prg<uint64_t> prg(
             0, yacl::crypto::PRG_MODE::kNistAesCtrDrbg);
@@ -316,7 +317,7 @@ struct MiniPsiRecvCtx {
   void MaskPeerPublicKey(const std::vector<std::string>& items) {
     masked_values.resize(seeds.size());
 
-    yacl::parallel_for(0, seeds.size(), 1, [&](int64_t begin, int64_t end) {
+    yacl::parallel_for(0, seeds.size(), [&](int64_t begin, int64_t end) {
       for (int64_t idx = begin; idx < end; ++idx) {
         std::string masked(kKeySize, '\0');
         curve25519_donna(reinterpret_cast<unsigned char*>(masked.data()),
@@ -523,7 +524,7 @@ std::vector<std::string> MiniPsiRecvBatch(
   std::vector<std::string> items_hash = HashInputs(items);
   std::vector<uint128_t> items_hash_u128(items.size());
 
-  yacl::parallel_for(0, items.size(), 1, [&](int64_t begin, int64_t end) {
+  yacl::parallel_for(0, items.size(), [&](int64_t begin, int64_t end) {
     for (int64_t idx = begin; idx < end; ++idx) {
       std::memcpy(&items_hash_u128[idx], items_hash[idx].data(),
                   sizeof(uint128_t));
@@ -537,7 +538,7 @@ std::vector<std::string> MiniPsiRecvBatch(
 
   YACL_ENFORCE(cuckoo_index.stash().empty(), "stash size not 0");
 
-  size_t nthreads = yacl::intraop_default_num_threads();
+  size_t nthreads = omp_get_max_threads();
   // send thread num
   if (items.size() < 100000) {
     nthreads = 1;

@@ -23,8 +23,9 @@
 
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_split.h"
-#include "absl/time/clock.h"
-#include "absl/time/time.h"
+#include "boost/uuid/uuid.hpp"
+#include "boost/uuid/uuid_generators.hpp"
+#include "boost/uuid/uuid_io.hpp"
 #include "gtest/gtest.h"
 #include "spdlog/spdlog.h"
 #include "yacl/base/exception.h"
@@ -72,23 +73,24 @@ TEST_P(BasicEcdhOprfTest, Works) {
       params.items_size / 4,
       std::max(static_cast<size_t>(1), params.items_size / 2));
 
-  auto timestamp_str = std::to_string(absl::ToUnixNanos(absl::Now()));
+  boost::uuids::random_generator uuid_generator;
+  auto uuid_str = boost::uuids::to_string(uuid_generator());
   // server input
   auto server_input_path =
-      std::filesystem::path(fmt::format("server-input-{}", timestamp_str));
+      std::filesystem::path(fmt::format("server-input-{}", uuid_str));
   // client input
   auto client_input_path =
-      std::filesystem::path(fmt::format("client-input-{}", timestamp_str));
+      std::filesystem::path(fmt::format("client-input-{}", uuid_str));
 
   // server output
   auto server_output_path =
-      std::filesystem::path(fmt::format("server-output-{}", timestamp_str));
+      std::filesystem::path(fmt::format("server-output-{}", uuid_str));
   // client output
   auto client_output_path =
-      std::filesystem::path(fmt::format("client-output-{}", timestamp_str));
+      std::filesystem::path(fmt::format("client-output-{}", uuid_str));
   // server output
   auto server_tmp_cache_path =
-      std::filesystem::path(fmt::format("tmp-cache-{}", timestamp_str));
+      std::filesystem::path(fmt::format("tmp-cache-{}", uuid_str));
 
   // register remove of temp file.
   ON_SCOPE_EXIT([&] {

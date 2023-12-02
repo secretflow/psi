@@ -31,7 +31,7 @@ void MultiQueryServer::GenerateSimpleHash() {
       query_options_.seal_options.element_number);
 
   // generate item hash, server and client use same seed
-  yacl::parallel_for(0, query_options_.seal_options.element_number, 1,
+  yacl::parallel_for(0, query_options_.seal_options.element_number,
                      [&](int64_t begin, int64_t end) {
                        for (int idx = begin; idx < end; ++idx) {
                          query_index_hash[idx] = HashItemIndex(idx);
@@ -117,7 +117,7 @@ void MultiQueryServer::DoMultiPirAnswer(
       multi_query_proto.querys().size());
 
   yacl::parallel_for(
-      0, multi_query_proto.querys().size(), 1, [&](int64_t begin, int64_t end) {
+      0, multi_query_proto.querys().size(), [&](int64_t begin, int64_t end) {
         for (int64_t idx = begin; idx < end; ++idx) {
           std::vector<std::vector<seal::Ciphertext>> query_ciphers =
               pir_server_[idx]->DeSerializeQuery(multi_query_proto.querys(idx));
@@ -152,7 +152,7 @@ void MultiQueryClient::GenerateSimpleHashMap() {
       query_options_.seal_options.element_number);
 
   // generate item hash, server and client use same seed
-  yacl::parallel_for(0, query_options_.seal_options.element_number, 1,
+  yacl::parallel_for(0, query_options_.seal_options.element_number,
                      [&](int64_t begin, int64_t end) {
                        for (int idx = begin; idx < end; ++idx) {
                          query_index_hash[idx] = HashItemIndex(idx);
@@ -200,7 +200,7 @@ std::vector<MultiQueryItem> MultiQueryClient::GenerateBatchQueryIndex(
   std::vector<uint128_t> query_index_hash(multi_query_index.size());
 
   yacl::parallel_for(
-      0, multi_query_index.size(), 1, [&](int64_t begin, int64_t end) {
+      0, multi_query_index.size(), [&](int64_t begin, int64_t end) {
         for (int64_t idx = begin; idx < end; ++idx) {
           uint128_t item_hash = HashItemIndex(multi_query_index[idx]);
 

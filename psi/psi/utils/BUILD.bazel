@@ -25,6 +25,7 @@ psi_cc_library(
     hdrs = ["multiplex_disk_cache.h"],
     deps = [
         "//psi/psi/io",
+        "@boost//:uuid",
         "@yacl//yacl/base:exception",
     ],
 )
@@ -55,6 +56,7 @@ psi_cc_library(
     deps = [
         ":utils",
         "//psi/psi/io",
+        "@boost//:uuid",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/time",
         "@org_apache_arrow//:arrow",
@@ -110,11 +112,7 @@ psi_cc_library(
     deps = [
         ":hash_bucket_cache",
         ":index_store",
-    ] + select({
-        "@bazel_tools//src/conditions:darwin_x86_64": ["@local_homebrew_x64//:openmp"],
-        "@bazel_tools//src/conditions:darwin_arm64": ["@local_homebrew_arm64//:openmp"],
-        "//conditions:default": [],
-    }),
+    ],
 )
 
 psi_cc_library(
@@ -205,6 +203,7 @@ psi_cc_test(
     srcs = ["ub_psi_cache_test.cc"],
     deps = [
         ":ub_psi_cache",
+        "@boost//:uuid",
         "@com_google_absl//absl/time",
         "@yacl//yacl/crypto/utils:rand",
         "@yacl//yacl/utils:scope_guard",

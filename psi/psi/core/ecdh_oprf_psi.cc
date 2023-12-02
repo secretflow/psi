@@ -484,7 +484,7 @@ size_t EcdhOprfPsiClient::SendBlindedItems(
     std::vector<std::shared_ptr<IEcdhOprfClient>> oprf_clients(items.size());
     std::vector<std::string> blinded_items(items.size());
 
-    yacl::parallel_for(0, items.size(), 1, [&](int64_t begin, int64_t end) {
+    yacl::parallel_for(0, items.size(), [&](int64_t begin, int64_t end) {
       for (int64_t idx = begin; idx < end; ++idx) {
         if (oprf_client_ == nullptr) {
           std::shared_ptr<IEcdhOprfClient> oprf_client_ptr =
@@ -576,7 +576,7 @@ void EcdhOprfPsiClient::RecvEvaluatedItems(
     YACL_ENFORCE(oprf_clients.size() == num_items,
                  "EcdhOprfServer should not be nullptr");
 
-    yacl::parallel_for(0, num_items, 1, [&](int64_t begin, int64_t end) {
+    yacl::parallel_for(0, num_items, [&](int64_t begin, int64_t end) {
       for (int64_t idx = begin; idx < end; ++idx) {
         oprf_items[idx] = absl::Base64Escape(
             oprf_clients[idx]->Finalize(evaluate_items[idx]));

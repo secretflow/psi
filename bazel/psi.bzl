@@ -17,7 +17,7 @@ warpper bazel cc_xx to modify flags.
 """
 
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
-load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake", "configure_make")
+load("@yacl//bazel:yacl.bzl", "OMP_LINK_FLAGS", "yacl_cmake_external")
 
 WARNING_FLAGS = [
     "-Wall",
@@ -50,29 +50,17 @@ def psi_cc_library(
         linkopts = [],
         copts = [],
         deps = [],
-        local_defines = [],
         **kargs):
     cc_library(
         linkopts = linkopts,
         copts = _psi_copts() + copts,
         deps = deps + [
             "@com_github_gabime_spdlog//:spdlog",
-        ],
-        local_defines = local_defines + [
-            "PSI_BUILD",
-        ],
+        ] + OMP_LINK_FLAGS,
         **kargs
     )
 
-def psi_cmake_external(**attrs):
-    if "generate_args" not in attrs:
-        attrs["generate_args"] = ["-GNinja"]
-    return cmake(**attrs)
-
-def psi_configure_make(**attrs):
-    if "args" not in attrs:
-        attrs["args"] = ["-j 4"]
-    return configure_make(**attrs)
+psi_cmake_external = yacl_cmake_external
 
 def _psi_version_file_impl(ctx):
     out = ctx.actions.declare_file(ctx.attr.filename)
@@ -94,7 +82,6 @@ def psi_cc_test(
         linkopts = [],
         copts = [],
         deps = [],
-        local_defines = [],
         **kwargs):
     cc_test(
         # -lm for tcmalloc
@@ -102,9 +89,6 @@ def psi_cc_test(
         copts = _psi_copts() + copts,
         deps = deps + [
             "@com_google_googletest//:gtest_main",
-        ],
-        local_defines = local_defines + [
-            "PSI_BUILD",
         ],
         **kwargs
     )

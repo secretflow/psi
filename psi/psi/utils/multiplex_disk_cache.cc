@@ -19,9 +19,10 @@
 #include <chrono>
 #include <ctime>
 #include <memory>
-#include <random>
-#include <sstream>
 
+#include "boost/uuid/uuid.hpp"
+#include "boost/uuid/uuid_generators.hpp"
+#include "boost/uuid/uuid_io.hpp"
 #include "spdlog/spdlog.h"
 #include "yacl/base/exception.h"
 
@@ -32,16 +33,11 @@ bool ScopedTempDir::CreateUniqueTempDirUnderPath(
   int tries = 0;
 
   const int kMaxTries = 10;
+  boost::uuids::random_generator uuid_generator;
 
   do {
-    std::random_device dev;
-    auto seed = dev() ^ getpid();
-    std::mt19937 prng(seed);
-
-    std::uniform_int_distribution<uint64_t> rand(0);
-    std::stringstream ss;
-    ss << "psi-disk-cache-" << std::hex << rand(prng);
-    dir_ = parent_path / ss.str();
+    auto uuid_str = boost::uuids::to_string(uuid_generator());
+    dir_ = parent_path / uuid_str;
     if (!std::filesystem::exists(dir_)) {
       return std::filesystem::create_directory(dir_);
     }

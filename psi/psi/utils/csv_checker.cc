@@ -23,13 +23,14 @@
 
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_join.h"
-#include "absl/time/clock.h"
-#include "absl/time/time.h"
 #include "arrow/api.h"
 #include "arrow/csv/api.h"
 #include "arrow/io/api.h"
 #include "arrow/ipc/api.h"
 #include "arrow/pretty_print.h"
+#include "boost/uuid/uuid.hpp"
+#include "boost/uuid/uuid_generators.hpp"
+#include "boost/uuid/uuid_io.hpp"
 #include "spdlog/spdlog.h"
 #include "yacl/base/exception.h"
 #include "yacl/crypto/base/hash/hash_utils.h"
@@ -73,8 +74,9 @@ CsvChecker::CsvChecker(const std::string& csv_path,
                                                          io::Schema::STRING);
   auto csv_reader = io::BuildReader(file_opts, csv_opts);
 
-  auto timestamp_str = std::to_string(absl::ToUnixNanos(absl::Now()));
-  std::string keys_file = fmt::format("selected-keys.{}", timestamp_str);
+  boost::uuids::random_generator uuid_generator;
+  auto uuid_str = boost::uuids::to_string(uuid_generator());
+  std::string keys_file = fmt::format("selected-keys.{}", uuid_str);
 
   io::FileIoOptions tmp_file_ops(keys_file);
   auto keys_os = io::BuildOutputStream(tmp_file_ops);
@@ -113,7 +115,7 @@ CsvChecker::CsvChecker(const std::string& csv_path,
 
   if (!skip_check) {
     std::string duplicated_keys_file =
-        fmt::format("duplicate-keys.{}", timestamp_str);
+        fmt::format("duplicate-keys.{}", uuid_str);
     ON_SCOPE_EXIT([&] {
       std::error_code ec;
       std::filesystem::remove(duplicated_keys_file, ec);
@@ -153,10 +155,11 @@ CheckCsvReport CheckCsv(const std::string& input_file_path,
                         bool check_duplicates, bool generate_key_hash_digest) {
   CheckCsvReport report;
 
-  auto timestamp_str = std::to_string(absl::ToUnixNanos(absl::Now()));
+  boost::uuids::random_generator uuid_generator;
+  auto uuid_str = boost::uuids::to_string(uuid_generator());
 
   std::string output_file_path = std::filesystem::temp_directory_path() /
-                                 fmt::format("{}.psi_checked", timestamp_str);
+                                 fmt::format("{}.psi_checked", uuid_str);
 
   YACL_ENFORCE(std::filesystem::exists(input_file_path),
                "Input file {} doesn't exist.", input_file_path);
@@ -224,7 +227,7 @@ CheckCsvReport CheckCsv(const std::string& input_file_path,
   if (check_duplicates) {
     std::string duplicated_output_file_path =
         std::filesystem::temp_directory_path() /
-        fmt::format("{}.psi_checked_duplicates", timestamp_str);
+        fmt::format("{}.psi_checked_duplicates", uuid_str);
 
     std::string cmd = fmt::format(
         "LC_ALL=C tail -n +2 {} | "  // skip header

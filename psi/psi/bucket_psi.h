@@ -19,8 +19,9 @@
 #include <string>
 #include <vector>
 
-#include "absl/time/clock.h"
-#include "absl/time/time.h"
+#include "boost/uuid/uuid.hpp"
+#include "boost/uuid/uuid_generators.hpp"
+#include "boost/uuid/uuid_io.hpp"
 #include "yacl/base/exception.h"
 #include "yacl/link/link.h"
 #include "yacl/utils/scope_guard.h"
@@ -53,15 +54,15 @@ size_t GenerateResult(const std::string& input_path,
                       const T& indices, bool sort_output, bool digest_equal,
                       bool output_difference = false) {
   // use tmp file to avoid `shell Injection`
-  auto timestamp_str = std::to_string(absl::ToUnixNanos(absl::Now()));
-  auto tmp_sort_in_file =
-      std::filesystem::path(output_path)
-          .parent_path()
-          .append(fmt::format("tmp-sort-in-{}", timestamp_str));
+  boost::uuids::random_generator uuid_generator;
+  auto uuid_str = boost::uuids::to_string(uuid_generator());
+  auto tmp_sort_in_file = std::filesystem::path(output_path)
+                              .parent_path()
+                              .append(fmt::format("tmp-sort-in-{}", uuid_str));
   auto tmp_sort_out_file =
       std::filesystem::path(output_path)
           .parent_path()
-          .append(fmt::format("tmp-sort-out-{}", timestamp_str));
+          .append(fmt::format("tmp-sort-out-{}", uuid_str));
   // register remove of temp file.
   ON_SCOPE_EXIT([&] {
     std::error_code ec;

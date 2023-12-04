@@ -90,27 +90,44 @@ jobs:
     resource_class: macos.m1.large.gen1
     steps:
       - checkout
+      - restore_cache:
+          name: "Restore build cache"
+          key: psi-build-comp-{{ arch }}-
       - run:
           name: Checkout devtools
           command: git clone https://github.com/secretflow/devtools.git ../devtools
+      - run:
+          name: Decompress cache
+          command: sh ../devtools/decompress-build-cache.sh psi_build_cache
       - run:
           name: "Install homebrew dependencies"
           command: brew install bazelisk cmake ninja libomp wget md5sha1sum
       - run:
           name: "build"
-          command: bazel build //... -c opt --ui_event_filters=-info,-debug,-warning --jobs 12
+          command: bazel build //... -c opt --ui_event_filters=-info,-debug,-warning --jobs 12 --disk_cache=~/.cache/psi_build_cache
       - run:
           name: "test"
           command: |
             set +e
             declare -i test_status
-            bazel test //... -c opt --ui_event_filters=-info,-debug,-warning --test_output=errors --jobs 12 | tee test_result.log; test_status=${PIPESTATUS[0]}
+            bazel test //... -c opt --ui_event_filters=-info,-debug,-warning --test_output=errors --jobs 12 --disk_cache=~/.cache/psi_build_cache | tee test_result.log; test_status=${PIPESTATUS[0]}
 
             sh ../devtools/rename-junit-xml.sh
             find bazel-bin/ -perm +111 -type f -name "*_test"  -print0 | xargs -0 tar -cvzf test_binary.tar.gz
             find bazel-testlogs/ -type f -name "test.log"  -print0 | xargs -0 tar -cvzf test_logs.tar.gz
 
             exit ${test_status}
+      - run:
+          name: Cleanup and compress cache
+          command: |
+            sh ../devtools/clean_disk_cache.sh ~/.cache/psi_build_cache
+            sh ../devtools/compress-build-cache.sh psi_build_cache
+          when: always
+      - save_cache:
+          key: psi-build-comp-{{ arch }}-{{ .Environment.CIRCLE_BUILD_NUM }}
+          paths:
+            - ~/.cache/psi_build_cache.tar.gz
+          when: always
       - store_test_results:
           path: test-results
       - store_artifacts:

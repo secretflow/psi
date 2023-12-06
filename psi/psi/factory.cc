@@ -37,7 +37,7 @@ std::unique_ptr<AbstractPSIParty> createPSIParty(
         case v2::Role::ROLE_SENDER:
           return std::make_unique<ecdh::EcdhPSISender>(config, lctx);
         default:
-          YACL_THROW("Role is not unspecified.");
+          YACL_THROW("Role is unspecified.");
       }
     }
     case v2::Protocol::PROTOCOL_KKRT: {
@@ -47,7 +47,7 @@ std::unique_ptr<AbstractPSIParty> createPSIParty(
         case v2::Role::ROLE_SENDER:
           return std::make_unique<kkrt::KkrtPSISender>(config, lctx);
         default:
-          YACL_THROW("Role is not unspecified.");
+          YACL_THROW("Role is unspecified.");
       }
     }
     case v2::Protocol::PROTOCOL_RR22: {
@@ -57,7 +57,7 @@ std::unique_ptr<AbstractPSIParty> createPSIParty(
         case v2::Role::ROLE_SENDER:
           return std::make_unique<rr22::Rr22PSISender>(config, lctx);
         default:
-          YACL_THROW("Role is not unspecified.");
+          YACL_THROW("Role is unspecified.");
       }
     }
     default:

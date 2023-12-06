@@ -62,10 +62,8 @@ message EcdhConfig {
 message KkrtConfig {
   // Since the total input may not fit in memory, the input may be splitted into
   // buckets. bucket_size indicate the number of items in each bucket.
-  //
   // If the memory of host is limited, you should set a smaller bucket size.
   // Otherwise, you should use a larger one.
-  //
   // If not set, use default value: 1 << 20.
   uint64 bucket_size = 1;
 }
@@ -74,10 +72,8 @@ message KkrtConfig {
 message Rr22Config {
   // Since the total input may not fit in memory, the input may be splitted into
   // buckets. bucket_size indicate the number of items in each bucket.
-  //
   // If the memory of host is limited, you should set a smaller bucket size.
   // Otherwise, you should use a larger one.
-  //
   // If not set, use default value: 1 << 20.
   uint64 bucket_size = 1;
 
@@ -158,17 +154,19 @@ message RecoveryConfig {
   string folder = 2;
 }
 
+// Logging level for default logger.
+// Default to info.
+// Supports:
+//
+// - trace: SPDLOG_LEVEL_TRACE
+// - debug: SPDLOG_LEVEL_DEBUG
+// - info: SPDLOG_LEVEL_INFO
+// - warn: SPDLOG_LEVEL_WARN
+// - err: SPDLOG_LEVEL_ERROR
+// - critical: SPDLOG_LEVEL_CRITICAL
+// - off: SPDLOG_LEVEL_OFF
+//
 message DebugOptions {
-  // Logging level for default logger.
-  // Default to info.
-  // Supports:
-  // trace - SPDLOG_LEVEL_TRACE,
-  // debug - SPDLOG_LEVEL_DEBUG,
-  // info - SPDLOG_LEVEL_INFO,
-  // warn - SPDLOG_LEVEL_WARN,
-  // err - SPDLOG_LEVEL_ERROR,
-  // critical - SPDLOG_LEVEL_CRITICAL,
-  // off - SPDLOG_LEVEL_OFF,
   string logging_level = 1;
 
   // The path of trace.
@@ -213,85 +211,91 @@ message PsiConfig {
   RecoveryConfig recovery_config = 11;
 
   // Advanced modes which allow duplicate keys.
+  // Advanced mode: Inner Join
+  // If selected, check_duplicates is invalid.
+  // If selected, both parties could have duplicate keys.
+  // ```
+  // e.g. If input of receiver is
+  // | key1 | value1|
+  // |------|-------|
+  // | x    | 1     |
+  // | x    | 2     |
+  // | x    | 3     |
+  // | y    | 4     |
+  // and input of sender is
+  // | key2 | value2|
+  // |------|-------|
+  // | x    | a     |
+  // | x    | b     |
+  // | z    | c     |
+  //
+  // After inner join.
+  // The ourput of receiver is:
+  // | key1 | value1|
+  // |------|-------|
+  // | x    | 1     |
+  // | x    | 2     |
+  // | x    | 3     |
+  // | x    | 1     |
+  // | x    | 2     |
+  // | x    | 3     |
+  // The output of sender is
+  // | key2 | value2|
+  // |------|-------|
+  // | x    | a     |
+  // | x    | b     |
+  // | x    | a     |
+  // | x    | b     |
+  // | x    | a     |
+  // | x    | b     |
+  // ```
+  //
+  // Advanced mode: Left Join
+  // If selected, check_duplicates is invalid.
+  // If selected, both parties could have duplicate keys.
+  // ```
+  // e.g. If input of left side is
+  // | key1 | value1|
+  // |------|-------|
+  // | x    | 1     |
+  // | x    | 2     |
+  // | x    | 3     |
+  // | y    | 4     |
+  // and input of right side is
+  // | key2 | value2|
+  // |------|-------|
+  // | x    | a     |
+  // | x    | b     |
+  // | z    | c     |
+  //
+  // After inner join.
+  // The ourput of left side is:
+  // | key1 | value1|
+  // |------|-------|
+  // | x    | 1     |
+  // | x    | 2     |
+  // | x    | 3     |
+  // | x    | 1     |
+  // | x    | 2     |
+  // | x    | 3     |
+  // | y    | 4     |
+  // The output of right side is
+  // | key2 | value2|
+  // |------|-------|
+  // | x    | a     |
+  // | x    | b     |
+  // | x    | a     |
+  // | x    | b     |
+  // | x    | a     |
+  // | x    | b     |
+  // | n/a  | n/a   |
+  // ```
+  //
   enum AdvancedJoinType {
     ADVANCED_JOIN_TYPE_UNSPECIFIED = 0;
 
-    // Advanced mode: Inner Join
-    // If selected, check_duplicates is invalid.
-    // If selected, both parties could have duplicate keys.
-    // e.g. If input of receiver is
-    // | key1 | value1|
-    // |------|-------|
-    // | x    | 1     |
-    // | x    | 2     |
-    // | x    | 3     |
-    // | y    | 4     |
-    // and input of sender is
-    // | key2 | value2|
-    // |------|-------|
-    // | x    | a     |
-    // | x    | b     |
-    // | z    | c     |
-    //
-    // After inner join.
-    // The ourput of receiver is:
-    // | key1 | value1|
-    // |------|-------|
-    // | x    | 1     |
-    // | x    | 2     |
-    // | x    | 3     |
-    // | x    | 1     |
-    // | x    | 2     |
-    // | x    | 3     |
-    // The output of sender is
-    // | key2 | value2|
-    // |------|-------|
-    // | x    | a     |
-    // | x    | b     |
-    // | x    | a     |
-    // | x    | b     |
-    // | x    | a     |
-    // | x    | b     |
-    //
     ADVANCED_JOIN_TYPE_INNER_JOIN = 1;
 
-    // Advanced mode: Left Join
-    // If selected, check_duplicates is invalid.
-    // If selected, both parties could have duplicate keys.
-    // e.g. If input of left side is | key1 | value1|
-    // |------|-------|
-    // | x    | 1     |
-    // | x    | 2     |
-    // | x    | 3     |
-    // | y    | 4     |
-    // and input of right side is
-    // | key2 | value2|
-    // |------|-------|
-    // | x    | a     |
-    // | x    | b     |
-    // | z    | c     |
-    //
-    // After inner join.
-    // The ourput of left side is:
-    // | key1 | value1|
-    // |------|-------|
-    // | x    | 1     |
-    // | x    | 2     |
-    // | x    | 3     |
-    // | x    | 1     |
-    // | x    | 2     |
-    // | x    | 3     |
-    // | y    | 4     |
-    // The output of right side is
-    // | key2 | value2|
-    // |------|-------|
-    // | x    | a     |
-    // | x    | b     |
-    // | x    | a     |
-    // | x    | b     |
-    // | x    | a     |
-    // | x    | b     |
-    // | n/a  | n/a   |
     ADVANCED_JOIN_TYPE_LEFT_JOIN = 2;
   }
 

@@ -17,7 +17,7 @@ warpper bazel cc_xx to modify flags.
 """
 
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
-load("@yacl//bazel:yacl.bzl", "OMP_LINK_FLAGS", "yacl_cmake_external")
+load("@yacl//bazel:yacl.bzl", "OMP_CFLAGS", "OMP_DEPS", "OMP_LINKFLAGS", "yacl_cmake_external")
 
 WARNING_FLAGS = [
     "-Wall",
@@ -52,11 +52,11 @@ def psi_cc_library(
         deps = [],
         **kargs):
     cc_library(
-        linkopts = linkopts,
-        copts = _psi_copts() + copts,
+        linkopts = linkopts + OMP_LINKFLAGS,
+        copts = _psi_copts() + copts + OMP_CFLAGS,
         deps = deps + [
             "@com_github_gabime_spdlog//:spdlog",
-        ] + OMP_LINK_FLAGS,
+        ] + OMP_DEPS,
         **kargs
     )
 

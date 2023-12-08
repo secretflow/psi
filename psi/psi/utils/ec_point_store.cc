@@ -61,9 +61,9 @@ std::vector<uint64_t> FinalizeAndComputeIndices(
   std::vector<uint64_t> indices;
   for (size_t bin_idx = 0; bin_idx < self->num_bins(); ++bin_idx) {
     std::vector<HashBucketCache::BucketItem> self_results =
-        self->cache_->LoadBucketItems(bin_idx);
+        self->LoadBucketItems(bin_idx);
     std::vector<HashBucketCache::BucketItem> peer_results =
-        peer->cache_->LoadBucketItems(bin_idx);
+        peer->LoadBucketItems(bin_idx);
     std::unordered_set<std::string> peer_set;
     peer_set.reserve(peer_results.size());
     std::for_each(peer_results.begin(), peer_results.end(),
@@ -92,9 +92,9 @@ void FinalizeAndComputeIndices(
   // Compute indices
   for (size_t bin_idx = 0; bin_idx < self->num_bins(); ++bin_idx) {
     std::vector<HashBucketCache::BucketItem> self_results =
-        self->cache_->LoadBucketItems(bin_idx);
+        self->LoadBucketItems(bin_idx);
     std::vector<HashBucketCache::BucketItem> peer_results =
-        peer->cache_->LoadBucketItems(bin_idx);
+        peer->LoadBucketItems(bin_idx);
     std::unordered_set<std::string> peer_set;
     peer_set.reserve(peer_results.size());
     std::for_each(peer_results.begin(), peer_results.end(),
@@ -172,7 +172,7 @@ FinalizeAndComputeIndices(const std::shared_ptr<CachedCsvEcPointStore>& self,
   std::vector<std::string> masked_items;
 
   std::vector<std::string> ids = {CachedCsvEcPointStore::cipher_id};
-  CsvBatchProvider peer_provider(peer->path_, ids, batch_size);
+  CsvBatchProvider peer_provider(peer->Path(), ids, batch_size);
   size_t batch_count = 0;
   size_t compare_thread_num = omp_get_num_procs();
 
@@ -198,9 +198,9 @@ FinalizeAndComputeIndices(const std::shared_ptr<CachedCsvEcPointStore>& self,
           std::min<uint64_t>(batch_peer_data.size(), begin + compare_size);
 
       for (size_t i = begin; i < end; i++) {
-        auto search_ret = self->cache_.find(batch_peer_data[i]);
-        if (search_ret != self->cache_.end()) {
-          batch_indices[idx].push_back(search_ret->second);
+        auto search_ret = self->SearchIndex(batch_peer_data[i]);
+        if (search_ret.has_value()) {
+          batch_indices[idx].push_back(search_ret.value());
           batch_masked_items[idx].push_back(batch_peer_data[i]);
         }
       }

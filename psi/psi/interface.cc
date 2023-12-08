@@ -189,11 +189,9 @@ v2::PsiReport AbstractPSIParty::Finalize() {
   intersection_indices_writer_->Close();
 
   bool sort_output = config_.sort_output();
-  if (!sort_output && inner_join_config_) {
-    SPDLOG_WARN(
-        "Sort_output turns off while inner_join is selected. Sort_output is "
-        "enabled.");
 
+  // NOTE(junfeng): Input are forced to sort for inner join.
+  if (sort_output && inner_join_config_) {
     sort_output = false;
   }
 

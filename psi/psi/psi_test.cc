@@ -675,7 +675,7 @@ INSTANTIATE_TEST_SUITE_P(
                                    {"3"}}}},
                        // keys
                        {{"id1"}, {"id2"}},
-                       /*sort_output = */ false,
+                       /*sort_output = */ true,
                        /*broadcast_result = */ true,
                        /*output_difference = */ false,
                        /*inner_join = */ true},

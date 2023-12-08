@@ -77,14 +77,9 @@ class HashBucketEcPointStore : public IEcPointStore {
 
   uint64_t ItemCount() override;
 
-  friend std::vector<uint64_t> FinalizeAndComputeIndices(
-      const std::shared_ptr<HashBucketEcPointStore>& self,
-      const std::shared_ptr<HashBucketEcPointStore>& peer);
-
-  friend void FinalizeAndComputeIndices(
-      const std::shared_ptr<HashBucketEcPointStore>& self,
-      const std::shared_ptr<HashBucketEcPointStore>& peer,
-      IndexWriter* index_writer);
+  std::vector<HashBucketCache::BucketItem> LoadBucketItems(size_t bin_idx) {
+    return cache_->LoadBucketItems(bin_idx);
+  };
 
  protected:
   std::unique_ptr<HashBucketCache> cache_;
@@ -113,10 +108,16 @@ class CachedCsvEcPointStore : public IEcPointStore {
 
   const static std::string cipher_id;
 
-  friend std::pair<std::vector<uint64_t>, std::vector<std::string>>
-  FinalizeAndComputeIndices(const std::shared_ptr<CachedCsvEcPointStore>& self,
-                            const std::shared_ptr<CachedCsvEcPointStore>& peer,
-                            size_t batch_size);
+  std::string Path() const { return path_; }
+
+  std::optional<size_t> SearchIndex(const std::string& ciphertext) {
+    auto iter = cache_.find(ciphertext);
+    if (iter != cache_.end()) {
+      return iter->second;
+    } else {
+      return {};
+    }
+  }
 
  protected:
   const std::string path_;
@@ -140,4 +141,17 @@ std::vector<uint64_t> GetIndicesByItems(
     const std::vector<std::string>& selected_fields,
     const std::vector<std::string>& items, size_t batch_size);
 
+std::vector<uint64_t> FinalizeAndComputeIndices(
+    const std::shared_ptr<HashBucketEcPointStore>& self,
+    const std::shared_ptr<HashBucketEcPointStore>& peer);
+
+void FinalizeAndComputeIndices(
+    const std::shared_ptr<HashBucketEcPointStore>& self,
+    const std::shared_ptr<HashBucketEcPointStore>& peer,
+    IndexWriter* index_writer);
+
+std::pair<std::vector<uint64_t>, std::vector<std::string>>
+FinalizeAndComputeIndices(const std::shared_ptr<CachedCsvEcPointStore>& self,
+                          const std::shared_ptr<CachedCsvEcPointStore>& peer,
+                          size_t batch_size);
 }  // namespace psi::psi

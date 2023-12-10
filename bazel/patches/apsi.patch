@@ -1,11 +1,11 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 78d54a6..07df321 100644
+index 78d54a6..0b50650 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -140,24 +140,6 @@ else()
+@@ -140,25 +140,6 @@ else()
      message(STATUS "Microsoft Kuku: found")
  endif()
-
+ 
 -# Flatbuffers
 -find_package(Flatbuffers REQUIRED)
 -if(NOT Flatbuffers_FOUND)
@@ -24,11 +24,12 @@ index 78d54a6..07df321 100644
 -else()
 -    message(STATUS "jsoncpp: found")
 -endif()
-
+-
  # [Option] APSI_USE_LOG4CPLUS (default: ON)
  set(APSI_USE_LOG4CPLUS_OPTION_STR "Use Log4cplus for logging")
-@@ -263,9 +245,7 @@ apsi_install_target(apsi APSITargets)
-
+ option(APSI_USE_LOG4CPLUS ${APSI_USE_LOG4CPLUS_OPTION_STR} ON)
+@@ -263,9 +244,7 @@ apsi_install_target(apsi APSITargets)
+ 
  target_link_libraries(apsi
      PUBLIC SEAL::seal
 -    PUBLIC Kuku::kuku
@@ -38,6 +39,15 @@ index 78d54a6..07df321 100644
  if(APSI_USE_LOG4CPLUS)
      target_link_libraries(apsi PUBLIC log4cplus::log4cplus)
  endif()
+@@ -326,7 +305,7 @@ else()
+ endif()
+ 
+ # Use optimized assembly on UNIX
+-if(APSI_USE_ASM AND UNIX AND NOT APPLE AND NOT CYGWIN AND NOT MINGW)
++if(APSI_FOURQ_AMD64 AND APSI_USE_ASM AND UNIX AND NOT APPLE AND NOT CYGWIN AND NOT MINGW)
+     check_language(ASM)
+     if(CMAKE_ASM_COMPILER)
+         enable_language(ASM)
 diff --git a/common/apsi/CMakeLists.txt b/common/apsi/CMakeLists.txt
 index a65bbfe..ee3b975 100644
 --- a/common/apsi/CMakeLists.txt

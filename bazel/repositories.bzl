@@ -242,7 +242,6 @@ def _com_github_grpc_grpc():
         strip_prefix = "grpc-1.51.0",
         type = "tar.gz",
         patch_args = ["-p1"],
-        # Set grpc to use local go toolchain
         patches = ["@psi//bazel:patches/grpc.patch"],
         urls = [
             "https://github.com/grpc/grpc/archive/refs/tags/v1.51.0.tar.gz",
@@ -257,6 +256,8 @@ def _com_github_nelhage_rules_boost():
         name = "com_github_nelhage_rules_boost",
         sha256 = "a7c42df432fae9db0587ff778d84f9dc46519d67a984eff8c79ae35e45f277c1",
         strip_prefix = "rules_boost-%s" % RULES_BOOST_COMMIT,
+        patch_args = ["-p1"],
+        patches = ["@psi//bazel:patches/boost.patch"],
         urls = [
             "https://github.com/nelhage/rules_boost/archive/%s.tar.gz" % RULES_BOOST_COMMIT,
         ],

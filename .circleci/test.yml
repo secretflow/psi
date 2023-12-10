@@ -54,7 +54,9 @@ jobs:
           command: sh ../devtools/decompress-build-cache.sh psi_build_cache
       - run:
           name: "build"
-          command: bazel build //... -c opt --ui_event_filters=-info,-debug,-warning --disk_cache=~/.cache/psi_build_cache --jobs 20
+          command: |
+            source ~/miniconda3/bin/activate base
+            bazel build //... -c opt --ui_event_filters=-info,-debug,-warning --disk_cache=~/.cache/psi_build_cache --jobs 20
       - run:
           name: "test"
           command: |

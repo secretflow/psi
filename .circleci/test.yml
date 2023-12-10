@@ -29,7 +29,10 @@ jobs:
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     docker:
       - image: secretflow/ubuntu-base-ci:latest
-    resource_class: 2xlarge+
+    parameters:
+      resource_class:
+        type: string
+    resource_class: << parameters.resource_class >>
     shell: /bin/bash --login -eo pipefail
     # Add steps to the job
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
@@ -143,5 +146,8 @@ workflows:
   unittest:
     when: << pipeline.parameters.build-and-run >>
     jobs:
-      - linux_ut
+      - linux_ut:
+          matrix:
+            parameters:
+              resource_class: ["2xlarge", "arm-xlarge"]
       - macos_ut

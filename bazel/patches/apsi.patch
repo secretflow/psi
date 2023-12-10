@@ -1,5 +1,14 @@
+From c0ce586da1f98b8603e001852b2f467353a728b4 Mon Sep 17 00:00:00 2001
+From: anakinxc <zhengyancheng.zyc@alibaba-inc.com>
+Date: Sun, 10 Dec 2023 15:32:12 +0800
+Subject: [PATCH] patch
+
+---
+ CMakeLists.txt | 27 +++------------------------
+ 1 file changed, 3 insertions(+), 24 deletions(-)
+
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 78d54a6..0b50650 100644
+index 78d54a6..51ec679 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -140,25 +140,6 @@ else()
@@ -39,6 +48,15 @@ index 78d54a6..0b50650 100644
  if(APSI_USE_LOG4CPLUS)
      target_link_libraries(apsi PUBLIC log4cplus::log4cplus)
  endif()
+@@ -299,7 +278,7 @@ endif()
+ if(APSI_FOURQ_AMD64)
+     target_compile_options(apsi PUBLIC -D_AMD64_)
+     message(STATUS "FourQlib optimization: arch=AMD64")
+-elseif(APSI_FOURQ_ARM64 AND UNIX)
++elseif(APSI_FOURQ_ARM64 AND UNIX AND APPLE)
+     message(STATUS "FourQlib optimization: arch=ARM64")
+ else()
+     target_compile_options(apsi PUBLIC -D_GENERIC_)
 @@ -326,7 +305,7 @@ else()
  endif()
  

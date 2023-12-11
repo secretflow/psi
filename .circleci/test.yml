@@ -29,7 +29,10 @@ jobs:
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     docker:
       - image: secretflow/ubuntu-base-ci:latest
-    resource_class: 2xlarge+
+    parameters:
+      resource_class:
+        type: string
+    resource_class: << parameters.resource_class >>
     shell: /bin/bash --login -eo pipefail
     # Add steps to the job
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
@@ -54,12 +57,15 @@ jobs:
           command: sh ../devtools/decompress-build-cache.sh psi_build_cache
       - run:
           name: "build"
-          command: bazel build //... -c opt --ui_event_filters=-info,-debug,-warning --disk_cache=~/.cache/psi_build_cache --jobs 20
+          command: |
+            source ~/miniconda3/bin/activate base
+            bazel build //... -c opt --ui_event_filters=-info,-debug,-warning --disk_cache=~/.cache/psi_build_cache --jobs 20
       - run:
           name: "test"
           command: |
             set +e
             declare -i test_status
+            source ~/miniconda3/bin/activate base
             bazel test //... -c opt --ui_event_filters=-info,-debug,-warning --test_output=errors --disk_cache=~/.cache/psi_build_cache | tee test_result.log; test_status=${PIPESTATUS[0]}
 
             sh ../devtools/rename-junit-xml.sh
@@ -141,5 +147,8 @@ workflows:
   unittest:
     when: << pipeline.parameters.build-and-run >>
     jobs:
-      - linux_ut
+      - linux_ut:
+          matrix:
+            parameters:
+              resource_class: ["2xlarge", "arm-xlarge"]
       - macos_ut

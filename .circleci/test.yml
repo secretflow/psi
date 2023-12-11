@@ -57,15 +57,12 @@ jobs:
           command: sh ../devtools/decompress-build-cache.sh psi_build_cache
       - run:
           name: "build"
-          command: |
-            source ~/miniconda3/bin/activate base
-            bazel build //... -c opt --ui_event_filters=-info,-debug,-warning --disk_cache=~/.cache/psi_build_cache --jobs 20
+          command: bazel build //... -c opt --ui_event_filters=-info,-debug,-warning --disk_cache=~/.cache/psi_build_cache --jobs 20
       - run:
           name: "test"
           command: |
             set +e
             declare -i test_status
-            source ~/miniconda3/bin/activate base
             bazel test //... -c opt --ui_event_filters=-info,-debug,-warning --test_output=errors --disk_cache=~/.cache/psi_build_cache | tee test_result.log; test_status=${PIPESTATUS[0]}
 
             sh ../devtools/rename-junit-xml.sh

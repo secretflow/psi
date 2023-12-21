@@ -1,12 +1,3 @@
-From c0ce586da1f98b8603e001852b2f467353a728b4 Mon Sep 17 00:00:00 2001
-From: anakinxc <zhengyancheng.zyc@alibaba-inc.com>
-Date: Sun, 10 Dec 2023 15:32:12 +0800
-Subject: [PATCH] patch
-
----
- CMakeLists.txt | 27 +++------------------------
- 1 file changed, 3 insertions(+), 24 deletions(-)
-
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 78d54a6..51ec679 100644
 --- a/CMakeLists.txt

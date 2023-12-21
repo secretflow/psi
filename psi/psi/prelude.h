@@ -16,7 +16,7 @@
 
 #include "fmt/ostream.h"
 
-#include "psi/proto/psi.pb.h"
+#include "psi/proto/psi_v2.pb.h"
 #include "psi/psi/psi.pb.h"
 
 namespace fmt {

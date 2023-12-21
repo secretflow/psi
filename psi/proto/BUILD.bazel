@@ -17,8 +17,8 @@ load("@rules_proto//proto:defs.bzl", "proto_library")
 package(default_visibility = ["//visibility:public"])
 
 proto_library(
-    name = "psi_proto",
-    srcs = ["psi.proto"],
+    name = "psi_v2_proto",
+    srcs = ["psi_v2.proto"],
     deps = [
         "//psi/psi:psi_proto",
         "@yacl//yacl/link:link_proto",
@@ -26,15 +26,15 @@ proto_library(
 )
 
 cc_proto_library(
-    name = "psi_cc_proto",
-    deps = [":psi_proto"],
+    name = "psi_v2_cc_proto",
+    deps = [":psi_v2_proto"],
 )
 
 proto_library(
     name = "kuscia_proto",
     srcs = ["kuscia.proto"],
     deps = [
-        ":psi_proto",
+        ":psi_v2_proto",
     ],
 )
 

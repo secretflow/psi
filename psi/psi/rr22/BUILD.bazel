@@ -21,7 +21,7 @@ psi_cc_library(
     srcs = ["common.cc"],
     hdrs = ["common.h"],
     deps = [
-        "//psi/proto:psi_cc_proto",
+        "//psi/proto:psi_v2_cc_proto",
         "//psi/psi:bucket",
         "//psi/psi:recovery",
         "//psi/psi/core/vole_psi:rr22_psi",

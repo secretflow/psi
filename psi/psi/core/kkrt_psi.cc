@@ -26,6 +26,7 @@
 #include "yacl/crypto/primitives/ot/base_ot.h"
 #include "yacl/crypto/primitives/ot/iknp_ote.h"
 #include "yacl/crypto/primitives/ot/kkrt_ote.h"
+#include "yacl/crypto/tools/prg.h"
 #include "yacl/crypto/utils/rand.h"
 
 #include "psi/psi/core/communication.h"
@@ -164,7 +165,7 @@ void KkrtPsiSend(const std::shared_ptr<yacl::link::Context>& link_ctx,
 
   std::iota(input_permute.begin(), input_permute.end(), 0);
 
-  yacl::crypto::Prg<uint128_t> prg(yacl::crypto::RandSeed());
+  yacl::crypto::Prg<uint128_t> prg(yacl::crypto::SecureRandSeed());
   uint64_t mt_seed;
   prg.Fill(
       absl::MakeSpan(reinterpret_cast<uint8_t*>(&mt_seed), sizeof(mt_seed)));

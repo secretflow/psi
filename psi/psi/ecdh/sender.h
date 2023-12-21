@@ -17,7 +17,7 @@
 #include "psi/psi/interface.h"
 #include "psi/psi/utils/arrow_csv_batch_provider.h"
 
-#include "psi/proto/psi.pb.h"
+#include "psi/proto/psi_v2.pb.h"
 
 namespace psi::psi::ecdh {
 

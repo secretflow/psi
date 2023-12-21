@@ -16,6 +16,7 @@
 
 #include "gtest/gtest.h"
 #include "spdlog/spdlog.h"
+#include "yacl/crypto/tools/prg.h"
 #include "yacl/crypto/utils/rand.h"
 
 namespace psi::psi::okvs {
@@ -57,6 +58,6 @@ TEST_P(PaxosHashTest, Works) {
 
 INSTANTIATE_TEST_SUITE_P(Works_Instances, PaxosHashTest,
                          testing::Values(yacl::MakeUint128(0x1234, 0x5678),
-                                         yacl::crypto::RandU128()));
+                                         yacl::crypto::FastRandU128()));
 
 }  // namespace psi::psi::okvs

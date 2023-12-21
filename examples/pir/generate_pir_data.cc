@@ -46,8 +46,7 @@ int main(int argc, char **argv) {
   size_t alice_item_size = FLAGS_data_count;
   size_t label_size = std::max<size_t>(1, FLAGS_label_len / 2);
 
-  uint64_t seed = yacl::crypto::RandU64();
-  std::mt19937 rand(seed);
+  std::mt19937 rand(yacl::crypto::FastRandU64());
 
   double q1 = FLAGS_query_rate;
 

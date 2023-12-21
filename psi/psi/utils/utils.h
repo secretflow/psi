@@ -16,11 +16,13 @@
 
 #include <chrono>
 #include <cstddef>
+#include <exception>
 #include <filesystem>
 #include <future>
 #include <memory>
 #include <string>
 #include <string_view>
+#include <type_traits>
 #include <vector>
 
 #include "yacl/link/link.h"
@@ -69,13 +71,26 @@ std::vector<size_t> AllGatherItemsSize(
     const std::shared_ptr<yacl::link::Context>& link_ctx, size_t self_size);
 
 template <typename T>
-T SyncWait(const std::shared_ptr<yacl::link::Context>& lctx,
-           std::future<T>* f) {
+typename std::enable_if_t<std::is_void_v<T>> SyncWait(
+    const std::shared_ptr<yacl::link::Context>& lctx, std::future<T>* f) {
   std::shared_ptr<yacl::link::Context> sync_lctx = lctx->Spawn();
   std::vector<yacl::Buffer> flag_list;
   std::chrono::seconds span(5);
+  bool done = false;
+
   while (true) {
-    bool done = f->wait_for(span) == std::future_status::ready;
+    if (!done) {
+      done = f->wait_for(span) == std::future_status::ready;
+      if (done) {
+        // check if exception is raised.
+        try {
+          f->get();
+        } catch (...) {
+          std::exception_ptr ep = std::current_exception();
+          std::rethrow_exception(ep);
+        }
+      }
+    }
     auto flag = done ? kFinishedFlag : kUnFinishedFlag;
     flag_list = yacl::link::AllGather(sync_lctx, flag, "sync wait");
     if (std::find_if(flag_list.begin(), flag_list.end(),
@@ -87,7 +102,43 @@ T SyncWait(const std::shared_ptr<yacl::link::Context>& lctx,
       break;
     }
   }
-  return f->get();
+}
+
+template <typename T>
+typename std::enable_if_t<!std::is_void_v<T>, T> SyncWait(
+    const std::shared_ptr<yacl::link::Context>& lctx, std::future<T>* f) {
+  std::shared_ptr<yacl::link::Context> sync_lctx = lctx->Spawn();
+  std::vector<yacl::Buffer> flag_list;
+  std::chrono::seconds span(5);
+  bool done = false;
+  T res{};
+
+  while (true) {
+    if (!done) {
+      done = f->wait_for(span) == std::future_status::ready;
+      if (done) {
+        // check if exception is raised.
+        try {
+          res = f->get();
+        } catch (...) {
+          std::exception_ptr ep = std::current_exception();
+          std::rethrow_exception(ep);
+        }
+      }
+    }
+    auto flag = done ? kFinishedFlag : kUnFinishedFlag;
+    flag_list = yacl::link::AllGather(sync_lctx, flag, "sync wait");
+    if (std::find_if(flag_list.begin(), flag_list.end(),
+                     [](const yacl::Buffer& b) {
+                       return std::string_view(b.data<char>(), b.size()) ==
+                              kUnFinishedFlag;
+                     }) == flag_list.end()) {
+      // all done
+      break;
+    }
+  }
+
+  return res;
 }
 
 void BroadcastResult(const std::shared_ptr<yacl::link::Context>& link_ctx,

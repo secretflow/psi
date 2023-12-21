@@ -218,7 +218,7 @@ void PayloadMeanWithDp(const DpPsiOptions& /*dp_psi_options*/,
   *mean = sum / intersection_idx.size();
 
   std::pair<uint64_t, uint64_t> seed_pair =
-      yacl::DecomposeUInt128(yacl::crypto::RandSeed());
+      yacl::DecomposeUInt128(yacl::crypto::SecureRandSeed());
   std::default_random_engine rng{
       static_cast<std::random_device::result_type>(seed_pair.first)};
 

@@ -49,8 +49,11 @@ Please check details of configs at :doc:`/reference/psi_v2_config`.
             "debug_options": {
                 "trace_path": "/root/receiver/receiver.trace"
             },
-            "check_duplicates": false,
-            "sort_output": false,
+            "skip_duplicates_check": false,
+            "disable_alignment": false,
+            "advanced_join_type": "ADVANCED_JOIN_TYPE_UNSPECIFIED",
+            "left_side": "ROLE_RECEIVER",
+            "check_hash_digest": false,
             "recovery_config": {
                 "enabled": false,
             }
@@ -94,8 +97,11 @@ Please check details of configs at :doc:`/reference/psi_v2_config`.
             "debug_options": {
                 "trace_path": "/root/sender/sender.trace"
             },
-            "check_duplicates": false,
-            "sort_output": false,
+            "skip_duplicates_check": false,
+            "disable_alignment": false,
+            "advanced_join_type": "ADVANCED_JOIN_TYPE_UNSPECIFIED",
+            "left_side": "ROLE_RECEIVER",
+            "check_hash_digest": false,
             "recovery_config": {
                 "enabled": false,
             }

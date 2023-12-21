@@ -18,7 +18,7 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 SECRETFLOW_GIT = "https://github.com/secretflow"
 
-YACL_COMMIT_ID = "d9f18c74ba2a1bbbe52bd6beac644adf81fb9925"
+YACL_COMMIT_ID = "816ac40ead311507ade19d521e1069b065747b63"
 
 def psi_deps():
     _com_github_nelhage_rules_boost()
@@ -48,6 +48,8 @@ def psi_deps():
     _com_github_floodyberry_curve25519_donna()
     _com_github_ridiculousfish_libdivide()
     _com_github_sparsehash_sparsehash()
+
+    _com_github_intel_ipp()
 
     maybe(
         git_repository,
@@ -123,6 +125,22 @@ def _com_github_emptoolkit_emp_ot():
             "https://github.com/emp-toolkit/emp-ot/archive/refs/tags/0.2.4.tar.gz",
         ],
         build_file = "@psi//bazel:emp-ot.BUILD",
+    )
+
+def _com_github_intel_ipp():
+    maybe(
+        http_archive,
+        name = "com_github_intel_ipp",
+        sha256 = "1ecfa70328221748ceb694debffa0106b92e0f9bf6a484f8e8512c2730c7d730",
+        strip_prefix = "ipp-crypto-ippcp_2021.8",
+        build_file = "@psi//bazel:ipp.BUILD",
+        patch_args = ["-p1"],
+        patches = [
+            "@psi//bazel:patches/ippcp.patch",
+        ],
+        urls = [
+            "https://github.com/intel/ipp-crypto/archive/refs/tags/ippcp_2021.8.tar.gz",
+        ],
     )
 
 def _com_github_emptoolkit_emp_zk():

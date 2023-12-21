@@ -32,8 +32,8 @@ extern "C" {
 }
 
 #include "yacl/base/exception.h"
+#include "yacl/crypto/base/block_cipher/symmetric_crypto.h"
 #include "yacl/crypto/base/hash/hash_utils.h"
-#include "yacl/crypto/base/symmetric_crypto.h"
 #include "yacl/crypto/tools/prg.h"
 #include "yacl/utils/parallel.h"
 
@@ -69,7 +69,7 @@ std::vector<std::string> HashInputs(const std::vector<std::string>& items) {
 
 struct MiniPsiSendCtx {
   MiniPsiSendCtx() {
-    yacl::crypto::Prg<uint64_t> prg(0, yacl::crypto::PRG_MODE::kNistAesCtrDrbg);
+    yacl::crypto::Prg<uint64_t> prg(0, yacl::crypto::PRG_MODE::kAesEcb);
     prg.Fill(absl::MakeSpan(private_key.data(), kKeySize));
 
     curve25519_donna_basepoint(static_cast<unsigned char*>(public_key.data()),
@@ -213,8 +213,7 @@ struct MiniPsiRecvCtx {
 
     yacl::parallel_for(0, data_size, [&](int64_t begin, int64_t end) {
       for (int64_t idx = begin; idx < end; ++idx) {
-        yacl::crypto::Prg<uint64_t> prg(
-            0, yacl::crypto::PRG_MODE::kNistAesCtrDrbg);
+        yacl::crypto::Prg<uint64_t> prg(0, yacl::crypto::PRG_MODE::kAesEcb);
         prg.Fill(absl::MakeSpan(seeds[idx].data(), kKeySize));
 
         curve25519_donna_basepoint(

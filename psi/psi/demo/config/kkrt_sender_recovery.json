@@ -35,8 +35,8 @@
     "debug_options": {
         "trace_path": "/tmp/kkrt_sender_recovery.trace"
     },
-    "check_duplicates": true,
-    "sort_output": false,
+    "skip_duplicates_check": true,
+    "disable_alignment": true,
     "recovery_config": {
         "enabled": true,
         "folder": "/tmp/kkrt_sender_cache"

@@ -50,7 +50,7 @@ TEST_P(GaloisTest, Works) {
 
   EXPECT_EQ(std::memcmp(c.data(), &z, sizeof(uint128_t)), 0);
 
-  uint64_t seed = yacl::crypto::RandU64();
+  uint64_t seed = yacl::crypto::FastRandU64();
   yacl::crypto::Prg<uint64_t> prg(seed);
 
   for (size_t i = 0; i < 100000; ++i) {
@@ -70,10 +70,10 @@ TEST_P(GaloisTest, Works) {
   }
 }
 
-INSTANTIATE_TEST_SUITE_P(Works_Instances, GaloisTest,
-                         testing::Values(TestParams{1, 2}, TestParams{3, 2},
-                                         TestParams{3, 4},
-                                         TestParams{yacl::crypto::RandU64(),
-                                                    yacl::crypto::RandU64()}));
+INSTANTIATE_TEST_SUITE_P(
+    Works_Instances, GaloisTest,
+    testing::Values(TestParams{1, 2}, TestParams{3, 2}, TestParams{3, 4},
+                    TestParams{yacl::crypto::FastRandU64(),
+                               yacl::crypto::FastRandU64()}));
 
 }  // namespace psi::psi::okvs

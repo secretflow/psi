@@ -51,7 +51,7 @@ psi_cc_library(
     ],
     deps = [
         ":psi_cc_proto",
-        "//psi/proto:psi_cc_proto",
+        "//psi/proto:psi_v2_cc_proto",
     ],
 )
 
@@ -130,10 +130,10 @@ psi_cc_library(
     deps = [
         ":recovery",
         ":trace_categories",
-        "//psi/proto:psi_cc_proto",
+        "//psi/proto:psi_v2_cc_proto",
         "//psi/psi:bucket_psi",
+        "//psi/psi/utils:advanced_join",
         "//psi/psi/utils:index_store",
-        "//psi/psi/utils:inner_join",
         "@boost//:uuid",
         "@com_github_google_perfetto//:perfetto",
         "@com_google_absl//absl/status",
@@ -188,7 +188,7 @@ psi_cc_library(
         "recovery.h",
     ],
     deps = [
-        "//psi/proto:psi_cc_proto",
+        "//psi/proto:psi_v2_cc_proto",
         "//psi/psi/cryptor:ecc_cryptor",
         "//psi/psi/io",
         "@yacl//yacl/base:exception",
@@ -215,7 +215,7 @@ psi_cc_library(
     ],
     deps = [
         "//psi/proto:kuscia_cc_proto",
-        "//psi/proto:psi_cc_proto",
+        "//psi/proto:psi_v2_cc_proto",
         "@com_github_tencent_rapidjson//:rapidjson",
         "@yacl//yacl/base:exception",
     ],
@@ -244,7 +244,7 @@ psi_cc_library(
     srcs = ["bucket.cc"],
     hdrs = ["bucket.h"],
     deps = [
-        "//psi/proto:psi_cc_proto",
+        "//psi/proto:psi_v2_cc_proto",
         "//psi/psi:prelude",
         "//psi/psi:recovery",
         "//psi/psi/utils",

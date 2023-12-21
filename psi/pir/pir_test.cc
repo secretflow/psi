@@ -136,7 +136,7 @@ TEST_P(PirTest, Works) {
   apsi::PSIParams psi_params = ::psi::psi::GetPsiParams(params.nr, params.ns);
 
   std::string tmp_store_path =
-      fmt::format("data_{}_{}", yacl::crypto::RandU64(), params.ns);
+      fmt::format("data_{}_{}", yacl::crypto::FastRandU64(), params.ns);
 
   std::filesystem::create_directory(tmp_store_path);
 
@@ -163,13 +163,13 @@ TEST_P(PirTest, Works) {
   // generate test csv data
   {
     std::vector<std::string> receiver_items =
-        GenerateData(yacl::crypto::RandU64(), params.nr);
+        GenerateData(yacl::crypto::FastRandU64(), params.nr);
 
     std::vector<std::string> sender_keys;
     std::vector<std::string> sender_labels;
 
     std::tie(sender_keys, sender_labels) = GenerateSenderData(
-        yacl::crypto::RandU64(), params.ns, params.label_bytes - 4,
+        yacl::crypto::FastRandU64(), params.ns, params.label_bytes - 4,
         absl::MakeSpan(receiver_items), &intersection_idx, &intersection_label);
 
     WriteCsvFile(client_csv_path, id_cloumn_name, receiver_items);

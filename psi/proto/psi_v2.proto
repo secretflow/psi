@@ -99,25 +99,12 @@ message ProtocolConfig {
   Rr22Config rr22_config = 6;
 }
 
-// Stores input or output data.
-// For IoType::IO_TYPE_MEM_RAW.
-message Table {
-  message Row {
-    repeated string values = 1;
-  }
-
-  Row header = 1;
-  repeated Row data = 2;
-}
-
+// TODO(junfeng): support more io types including oss, sql, etc.
 enum IoType {
   IO_TYPE_UNSPECIFIED = 0;
 
   // Local csv file.
   IO_TYPE_FILE_CSV = 1;
-
-  // With Table pb msg.
-  IO_TYPE_MEM_RAW = 2;
 }
 
 // Input configuration.
@@ -126,20 +113,14 @@ message InputConfig {
 
   // Required for FILE.
   string path = 2;
-  // Required for RAW.
-  Table raw = 3;
 }
 
 // Output configuration.
 message OutputConfig {
-  // If true, type of output would be the same as input type. And type would be
-  // ngelected.
-  bool input_type_followed = 1;
-
-  IoType type = 2;
+  IoType type = 1;
 
   // Required for FILE.
-  string path = 3;
+  string path = 2;
 }
 
 // Configuration for recovery.
@@ -176,6 +157,150 @@ message DebugOptions {
 
 // The top level of Configs.
 // run(PsiConfig)->PsiReport
+//
+// Advanced Joins
+// Type: Inner Join
+// e.g. If input of receiver is
+// ```
+// | key1 | value1|
+// |------|-------|
+// | x    | 1     |
+// | x    | 2     |
+// | x    | 3     |
+// | y    | 4     |
+// ```
+// and input of sender is
+// ```
+// | key2 | value2|
+// |------|-------|
+// | x    | a     |
+// | x    | b     |
+// | z    | c     |
+// ```
+//
+// After inner join.
+// The output of receiver is:
+// ```
+// | key1 | value1|
+// |------|-------|
+// | x    | 1     |
+// | x    | 2     |
+// | x    | 3     |
+// | x    | 1     |
+// | x    | 2     |
+// | x    | 3     |
+// ```
+// The output of sender is
+// ```
+// | key2 | value2|
+// |------|-------|
+// | x    | a     |
+// | x    | b     |
+// | x    | a     |
+// | x    | b     |
+// | x    | a     |
+// | x    | b     |
+// ```
+//
+// Type: Left Join
+// After left join.
+// The output of left side is:
+// ```
+// | key1 | value1|
+// |------|-------|
+// | x    | 1     |
+// | x    | 2     |
+// | x    | 3     |
+// | x    | 1     |
+// | x    | 2     |
+// | x    | 3     |
+// | y    | 4     |
+// ```
+// The output of right side is
+// ```
+// | key2 | value2|
+// |------|-------|
+// | x    | a     |
+// | x    | b     |
+// | x    | a     |
+// | x    | b     |
+// | x    | a     |
+// | x    | b     |
+// | n/a  | n/a   |
+// ```
+//
+// Type: Right Join
+// After right join.
+// The output of left side is:
+// ```
+// | key1 | value1|
+// |------|-------|
+// | x    | 1     |
+// | x    | 2     |
+// | x    | 3     |
+// | x    | 1     |
+// | x    | 2     |
+// | x    | 3     |
+// | n/a  | n/a   |
+// ```
+// The output of right side is
+// ```
+// | key2 | value2|
+// |------|-------|
+// | x    | a     |
+// | x    | b     |
+// | x    | a     |
+// | x    | b     |
+// | x    | a     |
+// | x    | b     |
+// | z    | c     |
+// ```
+//
+// Type: Full Join
+// After full join.
+// The output of left side is:
+// ```
+// | key1 | value1|
+// |------|-------|
+// | x    | 1     |
+// | x    | 2     |
+// | x    | 3     |
+// | x    | 1     |
+// | x    | 2     |
+// | x    | 3     |
+// | y    | 4     |
+// | n/a  | n/a   |
+// ```
+// The output of right side is
+// ```
+// | key2 | value2|
+// |------|-------|
+// | x    | a     |
+// | x    | b     |
+// | x    | a     |
+// | x    | b     |
+// | x    | a     |
+// | x    | b     |
+// | n/a  | n/a   |
+// | z    | c     |
+// ```
+//
+// Type: Difference
+// After difference.
+// The output of left side is:
+// ```
+// | key1 | value1|
+// |------|-------|
+// | y    | 4     |
+// | n/a  | n/a   |
+// ```
+// The output of right side is
+// ```
+// | key2 | value2|
+// |------|-------|
+// | n/a  | n/a   |
+// | z    | c     |
+// ```
 message PsiConfig {
   // Configs for protocols.
   ProtocolConfig protocol_config = 1;
@@ -197,111 +322,42 @@ message PsiConfig {
   // Logging level.
   DebugOptions debug_options = 7;
 
-  // If true, a precheck of duplicated items will be conducted.
-  // An early exception would be throw before PSI.
-  bool check_duplicates = 8;
+  // If true, the check of duplicated items will be skiped.
+  bool skip_duplicates_check = 8;
 
-  // It true, output defference instead of intersection.
-  bool output_difference = 9;
+  reserved 9;
 
-  // It true, output is sorted according to keys in InputConfig.
-  bool sort_output = 10;
+  // It true, output is not promised to be aligned.
+  bool disable_alignment = 10;
 
   // Configs for recovery.
   RecoveryConfig recovery_config = 11;
 
-  // Advanced modes which allow duplicate keys.
-  // Advanced mode: Inner Join
-  // If selected, check_duplicates is invalid.
-  // If selected, both parties could have duplicate keys.
-  // ```
-  // e.g. If input of receiver is
-  // | key1 | value1|
-  // |------|-------|
-  // | x    | 1     |
-  // | x    | 2     |
-  // | x    | 3     |
-  // | y    | 4     |
-  // and input of sender is
-  // | key2 | value2|
-  // |------|-------|
-  // | x    | a     |
-  // | x    | b     |
-  // | z    | c     |
-  //
-  // After inner join.
-  // The ourput of receiver is:
-  // | key1 | value1|
-  // |------|-------|
-  // | x    | 1     |
-  // | x    | 2     |
-  // | x    | 3     |
-  // | x    | 1     |
-  // | x    | 2     |
-  // | x    | 3     |
-  // The output of sender is
-  // | key2 | value2|
-  // |------|-------|
-  // | x    | a     |
-  // | x    | b     |
-  // | x    | a     |
-  // | x    | b     |
-  // | x    | a     |
-  // | x    | b     |
-  // ```
-  //
-  // Advanced mode: Left Join
-  // If selected, check_duplicates is invalid.
-  // If selected, both parties could have duplicate keys.
-  // ```
-  // e.g. If input of left side is
-  // | key1 | value1|
-  // |------|-------|
-  // | x    | 1     |
-  // | x    | 2     |
-  // | x    | 3     |
-  // | y    | 4     |
-  // and input of right side is
-  // | key2 | value2|
-  // |------|-------|
-  // | x    | a     |
-  // | x    | b     |
-  // | z    | c     |
-  //
-  // After inner join.
-  // The ourput of left side is:
-  // | key1 | value1|
-  // |------|-------|
-  // | x    | 1     |
-  // | x    | 2     |
-  // | x    | 3     |
-  // | x    | 1     |
-  // | x    | 2     |
-  // | x    | 3     |
-  // | y    | 4     |
-  // The output of right side is
-  // | key2 | value2|
-  // |------|-------|
-  // | x    | a     |
-  // | x    | b     |
-  // | x    | a     |
-  // | x    | b     |
-  // | x    | a     |
-  // | x    | b     |
-  // | n/a  | n/a   |
-  // ```
-  //
+  // Advanced Join allow duplicate keys.
+  // - If selected, duplicates_check is skipped.
+  // - If selected, both parties are allowed to contain duplicate keys.
+  // - If use left join, full join or difference, the size of difference set of
+  // left party is revealed to right party.
+  // - If use right join, full join or difference, the size of difference set of
+  // right party is revealed to left party.
   enum AdvancedJoinType {
     ADVANCED_JOIN_TYPE_UNSPECIFIED = 0;
 
     ADVANCED_JOIN_TYPE_INNER_JOIN = 1;
 
     ADVANCED_JOIN_TYPE_LEFT_JOIN = 2;
+
+    ADVANCED_JOIN_TYPE_RIGHT_JOIN = 3;
+
+    ADVANCED_JOIN_TYPE_FULL_JOIN = 4;
+
+    ADVANCED_JOIN_TYPE_DIFFERENCE = 5;
   }
 
   AdvancedJoinType advanced_join_type = 12;
 
-  // Required if advanced_join_type is ADVANCED_JOIN_TYPE_INNER_JOIN.
+  // Required if advanced_join_type is ADVANCED_JOIN_TYPE_LEFT_JOIN or
+  // ADVANCED_JOIN_TYPE_RIGHT_JOIN.
   Role left_side = 13;
 
   // Check if hash digest of keys from parties are equal to determine whether to
@@ -316,9 +372,6 @@ message PsiReport {
 
   // The count of intersection. Get `-1` when self party can not get result.
   int64 intersection_count = 2;
-
-  // Maybe used if output type is RAW.
-  Table output = 3;
 }
 
 // Save some critical information for future recovery.
@@ -357,33 +410,6 @@ message RecoveryCheckpoint {
   // Saved parsed bucket count.
   // PROTOCOL_KKRT and PROTOCOL_RR22 only.
   uint64 parsed_bucket_count = 6;
-}
-
-// Internal usage only at this moment.
-message InnerJoinConfig {
-  // Path of origin input.
-  string input_path = 1;
-
-  // The role of party,
-  Role role = 2;
-
-  // Keys for PSI.
-  repeated string keys = 3;
-
-  // Path of sorted input depending on keys.
-  string sorted_input_path = 4;
-
-  // Path of unique keys and cnt
-  string unique_input_keys_cnt_path = 5;
-
-  // Path of PSI output with unique_input_keys_cnt_path as input.
-  string self_intersection_cnt_path = 6;
-
-  // Path of received peer intersection count.
-  string peer_intersection_cnt_path = 7;
-
-  // The path of output for inner join.
-  string output_path = 8;
 }
 
 message InternalRecoveryRecord {

@@ -36,7 +36,7 @@
 #include "psi/psi/trace_categories.h"
 #include "psi/version.h"
 
-#include "psi/proto/psi.pb.h"
+#include "psi/proto/psi_v2.pb.h"
 
 DEFINE_string(config, "", "file path of psi config in JSON format.");
 DEFINE_string(kuscia, "", "file path of kuscia task config in JSON format.");

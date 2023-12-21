@@ -243,6 +243,7 @@ CheckCsvReport CheckCsv(const std::string& input_file_path,
                  .ValueOrDie();
     size_t file_size = infile->GetSize().ValueOrDie();
     if (file_size != 0) {
+      SPDLOG_WARN("Input file contains duplicate: {}", input_file_path);
       report.contains_duplicates = true;
       report.duplicates_keys_file_path = duplicated_output_file_path;
     } else {
@@ -263,6 +264,7 @@ CheckCsvReport CheckCsv(const std::string& input_file_path,
 #endif
     std::array<char, 128> buffer;
     std::string result;
+    SPDLOG_INFO("Executing script to get hash digest: {}", command);
     FILE* pipe = popen(command.c_str(), "r");
     if (!pipe) {
       YACL_ENFORCE("Couldn't execute cmd: {}", command);

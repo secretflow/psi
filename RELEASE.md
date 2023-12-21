@@ -4,6 +4,14 @@
 > - `[Bugfix]` prefix for bug fixes.
 > - `[API]` prefix for API changes.
 
+## v0.2.0.dev231221
+
+- [API] Rename check_duplicates to skip_duplicates_check.
+- [API] Rename sort_output to disable_alignment.
+- [Feature] Support left join, right join and full join. The behavior of difference is modified.
+- [Feature] Skip duplicate key check if recovery checkpoint exists.
+- [Bugfix] Fix duplicate key check.
+- [Bugfix] Fix SyncWait.
 
 ## v0.1.0beta
 

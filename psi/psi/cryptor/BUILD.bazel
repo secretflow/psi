@@ -95,7 +95,7 @@ psi_cc_library(
         ":fourq_cryptor",
         ":sm2_cryptor",
         ":sodium_curve25519_cryptor",
-        "//psi/proto:psi_cc_proto",
+        "//psi/proto:psi_v2_cc_proto",
         "//psi/psi:prelude",
         "@yacl//yacl/utils:platform_utils",
     ] + select({

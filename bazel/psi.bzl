@@ -85,7 +85,7 @@ def psi_cc_test(
         **kwargs):
     cc_test(
         # -lm for tcmalloc
-        linkopts = linkopts + ["-lm"],
+        linkopts = linkopts + ["-lm", "-ldl"],
         copts = _psi_copts() + copts,
         deps = deps + [
             "@com_google_googletest//:gtest_main",

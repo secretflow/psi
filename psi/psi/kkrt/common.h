@@ -17,7 +17,7 @@
 
 #include "psi/psi/recovery.h"
 
-#include "psi/proto/psi.pb.h"
+#include "psi/proto/psi_v2.pb.h"
 
 namespace psi::psi::kkrt {
 

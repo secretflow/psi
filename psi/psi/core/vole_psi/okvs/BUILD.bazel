@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library", "psi_cc_test")
+load("//bazel:psi.bzl", "psi_cc_library", "psi_cc_test")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -71,7 +71,7 @@ psi_cc_library(
     srcs = ["paxos_hash.cc"],
     hdrs = ["paxos_hash.h"],
     copts = [
-        "-march=native",
+        "-msse4.2",
     ],
     deps = [
         ":aes_crhash",
@@ -108,7 +108,7 @@ psi_cc_library(
     srcs = ["aes_crhash.cc"],
     hdrs = ["aes_crhash.h"],
     deps = [
-        "@yacl//yacl/crypto/base:symmetric_crypto",
+        "@yacl//yacl/crypto/base/block_cipher:symmetric_crypto",
         "@yacl//yacl/utils:parallel",
     ],
 )
@@ -131,7 +131,7 @@ psi_cc_library(
         "galois128.h",
     ],
     copts = [
-        "-march=native",
+        "-mpclmul",
     ],
     deps = [
         "@com_google_absl//absl/strings",

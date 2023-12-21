@@ -24,9 +24,10 @@
 #include "yacl/link/link.h"
 
 #include "psi/psi/recovery.h"
+#include "psi/psi/utils/advanced_join.h"
 #include "psi/psi/utils/index_store.h"
 
-#include "psi/proto/psi.pb.h"
+#include "psi/proto/psi_v2.pb.h"
 
 namespace psi::psi {
 
@@ -105,7 +106,7 @@ class AbstractPSIParty {
 
   std::string key_hash_digest_;
 
-  std::shared_ptr<v2::InnerJoinConfig> inner_join_config_;
+  std::shared_ptr<AdvancedJoinConfig> advanced_join_config_;
 
   bool need_intersection_deduplication_ = false;
 

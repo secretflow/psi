@@ -35,8 +35,8 @@
     "debug_options": {
         "trace_path": "/tmp/ecdh_receiver_recovery.trace"
     },
-    "check_duplicates": true,
-    "sort_output": false,
+    "skip_duplicates_check": true,
+    "disable_alignment": true,
     "recovery_config": {
         "enabled": true,
         "folder": "/tmp/ecdh_receiver_cache"

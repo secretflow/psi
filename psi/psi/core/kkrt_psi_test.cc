@@ -21,6 +21,7 @@
 #include "gtest/gtest.h"
 #include "yacl/base/exception.h"
 #include "yacl/crypto/base/hash/hash_utils.h"
+#include "yacl/crypto/utils/secparam.h"
 #include "yacl/link/test_util.h"
 
 struct TestParams {
@@ -62,6 +63,7 @@ std::vector<size_t> GetIntersection(const TestParams& params) {
 class KkrtPsiTest : public testing::TestWithParam<TestParams> {};
 
 TEST_P(KkrtPsiTest, Works) {
+  YACL_PRINT_MODULE_SUMMARY();
   auto params = GetParam();
   const int kWorldSize = 2;
   auto contexts = yacl::link::test::SetupWorld(kWorldSize);

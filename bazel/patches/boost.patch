@@ -4,22 +4,22 @@ index e8b00d8..092696f 100644
 +++ b/config.lzma-linux.h
 @@ -56,7 +56,9 @@
  /* #undef HAVE_COMMONCRYPTO_COMMONDIGEST_H */
- 
+
  /* Define to 1 if you have the <cpuid.h> header file. */
 -#define HAVE_CPUID_H 1
 +#ifdef __x86_64__
 +   #define HAVE_CPUID_H 1
 +#endif
- 
+
  /* Define if the GNU dcgettext() function is already present or preinstalled.
     */
 @@ -309,7 +311,9 @@
- 
+
  /* Define to 1 if _mm_clmulepi64_si128 is usable. See configure.ac for
     details. */
 +#ifdef __x86_64__
  #define HAVE_USABLE_CLMUL 1
 +#endif
- 
+
  /* Define to 1 if you have the `utime' function. */
  /* #undef HAVE_UTIME */

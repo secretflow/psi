@@ -91,7 +91,7 @@ index a2abeeb..67aca8b 100644
 @@ -31,7 +31,7 @@ set(CMAKE_C_FLAGS_SECURITY "${CMAKE_C_FLAGS_SECURITY} -Wformat -Wformat-security
  if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
      if(NOT DEFINED NO_FORTIFY_SOURCE)
-         # Security flag that adds compile-time and run-time checks.
+         # Security flag that adds compile-time and run-time checks. 
 -        set(CMAKE_C_FLAGS_SECURITY "${CMAKE_C_FLAGS_SECURITY} -D_FORTIFY_SOURCE=2")
 +        set(CMAKE_C_FLAGS_SECURITY "${CMAKE_C_FLAGS_SECURITY} -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2")
      endif()
@@ -121,7 +121,7 @@ index ea1641d..f98fc2d 100644
 @@ -17,10 +17,6 @@
  # Security Linker flags
 
- set(LINK_FLAG_SECURITY "")
+ set(LINK_FLAG_SECURITY "") 
 -# Data relocation and protection (RELRO)
 -set(LINK_FLAG_SECURITY "${LINK_FLAG_SECURITY} -Wl,-z,relro -Wl,-z,now")
 -# Stack execution protection
@@ -132,7 +132,7 @@ index ea1641d..f98fc2d 100644
 @@ -30,7 +26,7 @@ set(CMAKE_C_FLAGS_SECURITY "${CMAKE_C_FLAGS_SECURITY} -Wformat -Wformat-security
 
  if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
-     # Security flag that adds compile-time and run-time checks.
+     # Security flag that adds compile-time and run-time checks. 
 -    set(CMAKE_C_FLAGS_SECURITY "${CMAKE_C_FLAGS_SECURITY} -D_FORTIFY_SOURCE=2")
 +    set(CMAKE_C_FLAGS_SECURITY "${CMAKE_C_FLAGS_SECURITY} -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=2")
  endif()
@@ -248,3 +248,4 @@ index 315d1a3..8b11c7a 100644
      endif(${ARCH} MATCHES "ia32")
    endif(APPLE)
  endif(UNIX)
+ 

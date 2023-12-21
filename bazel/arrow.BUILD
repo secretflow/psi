@@ -145,6 +145,7 @@ cc_library(
         "cpp/src/arrow/vendored/xxhash",
         "cpp/thirdparty/flatbuffers/include",
     ],
+    linkopts = ["-lpthread"],
     textual_hdrs = [
         "cpp/src/arrow/vendored/xxhash/xxhash.c",
     ],

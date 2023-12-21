@@ -70,9 +70,10 @@ psi_cc_library(
     name = "paxos_hash",
     srcs = ["paxos_hash.cc"],
     hdrs = ["paxos_hash.h"],
-    copts = [
-        "-msse4.2",
-    ],
+    copts = select({
+        "@platforms//cpu:x86_64": ["-msse4.2"],
+        "//conditions:default": [],
+    }),
     deps = [
         ":aes_crhash",
         ":galois128",
@@ -130,9 +131,10 @@ psi_cc_library(
     hdrs = [
         "galois128.h",
     ],
-    copts = [
-        "-mpclmul",
-    ],
+    copts = select({
+        "@platforms//cpu:x86_64": ["-mpclmul"],
+        "//conditions:default": [],
+    }),
     deps = [
         "@com_google_absl//absl/strings",
         "@yacl//yacl/base:block",

@@ -1,15 +1,16 @@
 diff --git a/sdk/perfetto.h b/sdk/perfetto.h
-index 06d111d7a..79869903d 100644
+index 06d111d7a..a1372e4e1 100644
 --- a/sdk/perfetto.h
 +++ b/sdk/perfetto.h
-@@ -237,6 +237,10 @@
+@@ -802,6 +802,11 @@ inline void MaybeSerializeLastLogsForCrashReporting() {}
  
- #include <stddef.h>
+ #include <time.h>
  
++// Workaround old system header from conda-forge
 +#ifndef CLOCK_BOOTTIME
 +#define CLOCK_BOOTTIME 7
 +#endif
 +
- #if defined(__GNUC__) || defined(__clang__)
- #define PERFETTO_LIKELY(_x) __builtin_expect(!!(_x), 1)
- #define PERFETTO_UNLIKELY(_x) __builtin_expect(!!(_x), 0)
+ #include <chrono>
+ #include <string>
+ 

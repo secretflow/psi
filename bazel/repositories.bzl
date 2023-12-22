@@ -388,6 +388,8 @@ def _com_github_google_perfetto():
         ],
         sha256 = "39d7b3635834398828cfd189bd61afb0657ca2a3a08efbfd9866bfbcd440810b",
         strip_prefix = "perfetto-37.0",
+        patch_args = ["-p1"],
+        patches = ["@psi//bazel:patches/perfetto.patch"],
         build_file = "@psi//bazel:perfetto.BUILD",
     )
 

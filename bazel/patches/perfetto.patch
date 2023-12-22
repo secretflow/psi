@@ -1,0 +1,16 @@
+diff --git a/sdk/perfetto.h b/sdk/perfetto.h
+index 06d111d7a..a1372e4e1 100644
+--- a/sdk/perfetto.h
++++ b/sdk/perfetto.h
+@@ -802,6 +802,11 @@ inline void MaybeSerializeLastLogsForCrashReporting() {}
+ 
+ #include <time.h>
+ 
++// Workaround old system header from conda-forge
++#ifndef CLOCK_BOOTTIME
++#define CLOCK_BOOTTIME 7
++#endif
++
+ #include <chrono>
+ #include <string>
+ 

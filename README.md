@@ -6,6 +6,9 @@ The repo of Private Set Intersection(PSI) and Private Information Retrieval(PIR)
 
 This repo is formerly psi/pir part from secretflow/spu repo.
 
+> **Note**<br>
+We invite you to try [Easy PSI](https://www.secretflow.org.cn/docs/quickstart/easy-psi), a standalone PSI product powered by this library.
+
 ## PSI Quick Start with v2 API
 
 For PSI v1 API and PIR, please check [documentation](https://www.secretflow.org.cn/docs/psi).
@@ -54,11 +57,6 @@ receiver.config:
     ],
     "debug_options": {
         "trace_path": "/root/receiver/receiver.trace"
-    },
-    "check_duplicates": false,
-    "sort_output": false,
-    "recovery_config": {
-        "enabled": false,
     }
 }
 ```
@@ -99,11 +97,6 @@ sender.config:
     ],
     "debug_options": {
         "trace_path": "/root/sender/sender.trace"
-    },
-    "check_duplicates": false,
-    "sort_output": false,
-    "recovery_config": {
-        "enabled": false,
     }
 }
 ```

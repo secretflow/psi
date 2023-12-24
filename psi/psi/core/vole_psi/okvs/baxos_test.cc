@@ -35,7 +35,7 @@ TEST_P(BaxosTest, WORKS) {
   size_t ssp = 40;
 
   Baxos baxos;
-  yacl::crypto::Prg<uint128_t> prng(yacl::crypto::RandU128());
+  yacl::crypto::Prg<uint128_t> prng(yacl::crypto::FastRandU128());
 
   uint128_t seed;
   prng.Fill(absl::MakeSpan(&seed, 1));

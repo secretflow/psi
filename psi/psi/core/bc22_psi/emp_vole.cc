@@ -43,7 +43,7 @@ WolverineVole::WolverineVole(PsiRoleType psi_role,
 
 void WolverineVole::Setup() {
   if (party_ == emp::ALICE) {
-    delta_ = yacl::crypto::RandSeed();
+    delta_ = yacl::crypto::SecureRandSeed();
     delta_ =
         delta_ & (static_cast<WolverineVoleFieldType>(0xFFFFFFFFFFFFFFFFLL));
     delta_ = mod(delta_, pr);

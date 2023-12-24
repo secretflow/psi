@@ -33,11 +33,11 @@
 #include "psi/psi/bucket_psi.h"
 #include "psi/psi/prelude.h"
 #include "psi/psi/trace_categories.h"
+#include "psi/psi/utils/advanced_join.h"
 #include "psi/psi/utils/csv_checker.h"
-#include "psi/psi/utils/inner_join.h"
 #include "psi/psi/utils/utils.h"
 
-#include "psi/proto/psi.pb.h"
+#include "psi/proto/psi_v2.pb.h"
 
 namespace psi::psi {
 
@@ -98,46 +98,60 @@ void AbstractPSIParty::Init() {
 
   CheckPeerConfig();
 
-  if (config_.advanced_join_type() ==
-      v2::PsiConfig::ADVANCED_JOIN_TYPE_INNER_JOIN) {
-    SPDLOG_INFO("[AbstractPSIParty::Init][Inner join pre-process] start");
+  if (config_.advanced_join_type() !=
+      v2::PsiConfig::ADVANCED_JOIN_TYPE_UNSPECIFIED) {
+    SPDLOG_INFO("[AbstractPSIParty::Init][Advanced join pre-process] start");
 
     if (config_.recovery_config().enabled()) {
-      inner_join_config_ =
-          std::make_shared<v2::InnerJoinConfig>(BuildInnerJoinConfig(
+      advanced_join_config_ =
+          std::make_shared<AdvancedJoinConfig>(BuildAdvancedJoinConfig(
               config_,
               std::filesystem::path(config_.recovery_config().folder())));
     } else {
-      inner_join_config_ =
-          std::make_shared<v2::InnerJoinConfig>(BuildInnerJoinConfig(config_));
+      advanced_join_config_ = std::make_shared<AdvancedJoinConfig>(
+          BuildAdvancedJoinConfig(config_));
     }
 
     config_.mutable_input_config()->set_path(
-        inner_join_config_->unique_input_keys_cnt_path());
+        advanced_join_config_->unique_input_keys_cnt_path);
     config_.mutable_output_config()->set_path(
-        inner_join_config_->self_intersection_cnt_path());
+        advanced_join_config_->self_intersection_cnt_path);
 
-    auto inner_join_preprocess_f = std::async([&] {
-      InnerJoinGenerateSortedInput(*inner_join_config_);
-      InnerJoinGenerateUniqueInputKeysCnt(*inner_join_config_);
-    });
+    auto advanced_join_preprocess_f = std::async(
+        [&] { AdvancedJoinPreprocess(advanced_join_config_.get()); });
 
-    SyncWait(lctx_, &inner_join_preprocess_f);
+    SyncWait(lctx_, &advanced_join_preprocess_f);
 
-    SPDLOG_INFO("[AbstractPSIParty::Init][Inner join pre-process] end");
+    SPDLOG_INFO("[AbstractPSIParty::Init][Advanced join pre-process] end");
   }
 
+  if (config_.recovery_config().enabled()) {
+    recovery_manager_ =
+        std::make_shared<RecoveryManager>(config_.recovery_config().folder());
+  }
+
+  bool check_duplicates = !config_.skip_duplicates_check();
+  if (check_duplicates && recovery_manager_) {
+    if (recovery_manager_->checkpoint().stage() >=
+        v2::RecoveryCheckpoint::STAGE_INIT_END) {
+      SPDLOG_WARN(
+          "A previous recovery checkpoint is found, duplicates check is "
+          "skipped.");
+      check_duplicates = false;
+    }
+  }
+
+  CheckCsvReport check_csv_report;
   auto check_csv_f = std::async([&] {
-    if (config_.check_duplicates() || config_.check_hash_digest() ||
+    if (check_duplicates || config_.check_hash_digest() ||
         config_.protocol_config().protocol() != v2::PROTOCOL_ECDH) {
       SPDLOG_INFO("[AbstractPSIParty::Init][Check csv pre-process] start");
 
-      CheckCsvReport check_csv_report =
+      check_csv_report =
           CheckCsv(config_.input_config().path(), selected_keys_,
-                   config_.check_duplicates(), config_.check_hash_digest());
+                   check_duplicates, config_.check_hash_digest());
 
       key_hash_digest_ = check_csv_report.key_hash_digest;
-
       report_.set_original_count(check_csv_report.num_rows);
 
       SPDLOG_INFO("[AbstractPSIParty::Init][Check csv pre-process] end");
@@ -146,16 +160,17 @@ void AbstractPSIParty::Init() {
 
   SyncWait(lctx_, &check_csv_f);
 
+  YACL_ENFORCE(
+      !check_csv_report.contains_duplicates,
+      "Input file {} contains duplicates, please check duplicates at {}",
+      config_.input_config().path(),
+      check_csv_report.duplicates_keys_file_path);
+
   // Check if the input are the same between receiver and sender.
   if (config_.check_hash_digest()) {
     std::vector<yacl::Buffer> digest_buf_list =
         yacl::link::AllGather(lctx_, key_hash_digest_, "PSI:SYNC_DIGEST");
     digest_equal_ = HashListEqualTest(digest_buf_list);
-  }
-
-  if (config_.recovery_config().enabled()) {
-    recovery_manager_ =
-        std::make_shared<RecoveryManager>(config_.recovery_config().folder());
   }
 
   std::filesystem::path intersection_indices_writer_path =
@@ -188,17 +203,15 @@ v2::PsiReport AbstractPSIParty::Finalize() {
 
   intersection_indices_writer_->Close();
 
-  bool sort_output = config_.sort_output();
-
-  // NOTE(junfeng): Input are forced to sort for inner join.
-  if (sort_output && inner_join_config_) {
-    sort_output = false;
-  }
-
   std::filesystem::path sorted_intersection_indices_path =
       intersection_indices_writer_->path().parent_path() /
       (recovery_manager_ ? GenerateSortedIndexFileName(role_)
                          : GenerateSortedIndexFileName());
+
+  bool sort_output = !config_.disable_alignment();
+  if (advanced_join_config_) {
+    sort_output = false;
+  }
 
   SPDLOG_INFO("[AbstractPSIParty::Finalize][Generate result] start");
   auto gen_result_f = std::async([&] {
@@ -211,38 +224,34 @@ v2::PsiReport AbstractPSIParty::Finalize() {
       report_.set_intersection_count(GenerateResult(
           config_.input_config().path(), config_.output_config().path(),
           selected_keys_, sorted_intersection_indices_path, sort_output,
-          digest_equal_, !inner_join_config_ && config_.output_difference()));
+          digest_equal_, false));
     }
   });
 
   SyncWait(lctx_, &gen_result_f);
   SPDLOG_INFO("[AbstractPSIParty::Finalize][Generate result] end");
 
-  if (inner_join_config_ && !config_.output_difference()) {
-    SPDLOG_INFO("[AbstractPSIParty::Finalize][Inner join post-precess] start");
-    auto sync_intersection_f = std::async([&] {
-      return InnerJoinSyncIntersectionCnt(lctx_, *inner_join_config_);
-    });
+  if (advanced_join_config_) {
+    SPDLOG_INFO("[AbstractPSIParty::Finalize][Advanced join sync] start");
+    auto sync_intersection_f = std::async(
+        [&] { return AdvancedJoinSync(lctx_, advanced_join_config_.get()); });
 
     SyncWait(lctx_, &sync_intersection_f);
-    SPDLOG_INFO("[AbstractPSIParty::Finalize][Inner join post-precess] end");
-  }
+    SPDLOG_INFO("[AbstractPSIParty::Finalize][Advanced join sync] end");
 
-  lctx_->WaitLinkTaskFinish();
+    SPDLOG_INFO(
+        "[AbstractPSIParty::Finalize][Advanced join generate result] start");
+    AdvancedJoinGenerateResult(*advanced_join_config_);
+    SPDLOG_INFO(
+        "[AbstractPSIParty::Finalize][Advanced join generate result] end");
 
-  if (inner_join_config_) {
-    SPDLOG_INFO("[AbstractPSIParty::Finalize][Generate difference] start");
-    if (config_.output_difference()) {
-      InnerJoinGenerateDifference(*inner_join_config_);
-    } else {
-      InnerJoinGenerateIntersection(*inner_join_config_);
+    report_.set_intersection_count(
+        advanced_join_config_->self_intersection_cnt);
+  } else {
+    if (role_ == v2::ROLE_SENDER &&
+        !config_.protocol_config().broadcast_result()) {
+      report_.set_intersection_count(-1);
     }
-    SPDLOG_INFO("[AbstractPSIParty::Finalize][Generate difference] end");
-  }
-
-  if (role_ == v2::ROLE_SENDER &&
-      !config_.protocol_config().broadcast_result()) {
-    report_.set_intersection_count(-1);
   }
 
   SPDLOG_INFO("[AbstractPSIParty::Finalize] end");
@@ -273,16 +282,20 @@ void AbstractPSIParty::CheckSelfConfig() {
     YACL_THROW("keys are not specified.");
   }
 
+  std::set<std::string> keys_set(config_.keys().begin(), config_.keys().end());
+  YACL_ENFORCE_EQ(static_cast<int>(keys_set.size()), config_.keys().size(),
+                  "Duplicated key is provided.");
+
   if (config_.advanced_join_type() ==
       v2::PsiConfig::ADVANCED_JOIN_TYPE_LEFT_JOIN) {
     YACL_THROW("left join is unsupported.");
   }
 
   if (!config_.protocol_config().broadcast_result() &&
-      config_.advanced_join_type() ==
-          v2::PsiConfig::ADVANCED_JOIN_TYPE_INNER_JOIN) {
+      config_.advanced_join_type() !=
+          v2::PsiConfig::ADVANCED_JOIN_TYPE_UNSPECIFIED) {
     SPDLOG_WARN(
-        "broadcast_result turns off while inner_join is selected. "
+        "broadcast_result turns off while advanced join is enabled. "
         "broadcast_result is modified to true since intersection has to be "
         "sent to both parties.");
 
@@ -292,14 +305,14 @@ void AbstractPSIParty::CheckSelfConfig() {
     config_.mutable_protocol_config()->set_broadcast_result(true);
   }
 
-  if (config_.check_duplicates() &&
-      config_.advanced_join_type() ==
-          v2::PsiConfig::ADVANCED_JOIN_TYPE_INNER_JOIN) {
+  if (!config_.skip_duplicates_check() &&
+      config_.advanced_join_type() !=
+          v2::PsiConfig::ADVANCED_JOIN_TYPE_UNSPECIFIED) {
     SPDLOG_WARN(
-        "check_duplicates turns on while inner_join is selected. "
-        "check_duplicates is ignored.");
+        "The check of duplicated items will be skiped while advanced join "
+        "is enabled. ");
 
-    config_.set_check_duplicates(false);
+    config_.set_skip_duplicates_check(true);
   }
 
   if (!config_.check_hash_digest() && config_.recovery_config().enabled()) {
@@ -321,9 +334,8 @@ void AbstractPSIParty::CheckPeerConfig() {
   config.set_self_link_party("");
   config.mutable_keys()->Clear();
   config.mutable_debug_options()->Clear();
-  config.set_check_duplicates(false);
-  config.set_output_difference(false);
-  config.set_sort_output(false);
+  config.set_skip_duplicates_check(false);
+  config.set_disable_alignment(false);
 
   // Recovery must be enabled by all parties at the same time.
   config.mutable_recovery_config()->set_folder("");

@@ -38,7 +38,7 @@ GenerateTestData(size_t item_size, double p = 0.5) {
   prng.Fill(absl::MakeSpan(inputs_a));
   prng.Fill(absl::MakeSpan(inputs_b));
 
-  std::mt19937 std_rand(yacl::crypto::RandU64());
+  std::mt19937 std_rand(yacl::crypto::FastRandU64());
   std::bernoulli_distribution dist(p);
 
   std::vector<size_t> indices;

@@ -32,8 +32,8 @@
     "debug_options": {
         "trace_path": "/tmp/rr22_receiver_recovery.trace"
     },
-    "check_duplicates": false,
-    "sort_output": false,
+    "skip_duplicates_check": true,
+    "disable_alignment": true,
     "recovery_config": {
         "enabled": true,
         "folder": "/tmp/rr22_receiver_cache"

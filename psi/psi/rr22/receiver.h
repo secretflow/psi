@@ -16,7 +16,7 @@
 #include "psi/psi/interface.h"
 #include "psi/psi/utils/hash_bucket_cache.h"
 
-#include "psi/proto/psi.pb.h"
+#include "psi/proto/psi_v2.pb.h"
 
 namespace psi::psi::rr22 {
 

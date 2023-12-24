@@ -7,7 +7,6 @@
 - Messages
     - [DebugOptions](#debugoptions)
     - [EcdhConfig](#ecdhconfig)
-    - [InnerJoinConfig](#innerjoinconfig)
     - [InputConfig](#inputconfig)
     - [InternalRecoveryRecord](#internalrecoveryrecord)
     - [KkrtConfig](#kkrtconfig)
@@ -18,8 +17,6 @@
     - [RecoveryCheckpoint](#recoverycheckpoint)
     - [RecoveryConfig](#recoveryconfig)
     - [Rr22Config](#rr22config)
-    - [Table](#table)
-    - [Table.Row](#tablerow)
 
 
 
@@ -85,24 +82,6 @@ Configs for ECDH protocol.
  <!-- end HasFields -->
 
 
-### InnerJoinConfig
-Internal usage only at this moment.
-
-
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| input_path | [ string](#string) | Path of origin input. |
-| role | [ Role](#role) | The role of party, |
-| keys | [repeated string](#string) | Keys for PSI. |
-| sorted_input_path | [ string](#string) | Path of sorted input depending on keys. |
-| unique_input_keys_cnt_path | [ string](#string) | Path of unique keys and cnt |
-| self_intersection_cnt_path | [ string](#string) | Path of PSI output with unique_input_keys_cnt_path as input. |
-| peer_intersection_cnt_path | [ string](#string) | Path of received peer intersection count. |
-| output_path | [ string](#string) | The path of output for inner join. |
- <!-- end Fields -->
- <!-- end HasFields -->
-
-
 ### InputConfig
 Input configuration.
 
@@ -111,7 +90,6 @@ Input configuration.
 | ----- | ---- | ----------- |
 | type | [ IoType](#iotype) | none |
 | path | [ string](#string) | Required for FILE. |
-| raw | [ Table](#table) | Required for RAW. |
  <!-- end Fields -->
  <!-- end HasFields -->
 
@@ -146,7 +124,6 @@ Output configuration.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| input_type_followed | [ bool](#bool) | If true, type of output would be the same as input type. And type would be ngelected. |
 | type | [ IoType](#iotype) | none |
 | path | [ string](#string) | Required for FILE. |
  <!-- end Fields -->
@@ -173,6 +150,150 @@ Any items related to PSI protocols.
 The top level of Configs.
 run(PsiConfig)->PsiReport
 
+Advanced Joins
+Type: Inner Join
+e.g. If input of receiver is
+```
+| key1 | value1|
+|------|-------|
+| x    | 1     |
+| x    | 2     |
+| x    | 3     |
+| y    | 4     |
+```
+and input of sender is
+```
+| key2 | value2|
+|------|-------|
+| x    | a     |
+| x    | b     |
+| z    | c     |
+```
+
+After inner join.
+The output of receiver is:
+```
+| key1 | value1|
+|------|-------|
+| x    | 1     |
+| x    | 2     |
+| x    | 3     |
+| x    | 1     |
+| x    | 2     |
+| x    | 3     |
+```
+The output of sender is
+```
+| key2 | value2|
+|------|-------|
+| x    | a     |
+| x    | b     |
+| x    | a     |
+| x    | b     |
+| x    | a     |
+| x    | b     |
+```
+
+Type: Left Join
+After left join.
+The output of left side is:
+```
+| key1 | value1|
+|------|-------|
+| x    | 1     |
+| x    | 2     |
+| x    | 3     |
+| x    | 1     |
+| x    | 2     |
+| x    | 3     |
+| y    | 4     |
+```
+The output of right side is
+```
+| key2 | value2|
+|------|-------|
+| x    | a     |
+| x    | b     |
+| x    | a     |
+| x    | b     |
+| x    | a     |
+| x    | b     |
+| n/a  | n/a   |
+```
+
+Type: Right Join
+After right join.
+The output of left side is:
+```
+| key1 | value1|
+|------|-------|
+| x    | 1     |
+| x    | 2     |
+| x    | 3     |
+| x    | 1     |
+| x    | 2     |
+| x    | 3     |
+| n/a  | n/a   |
+```
+The output of right side is
+```
+| key2 | value2|
+|------|-------|
+| x    | a     |
+| x    | b     |
+| x    | a     |
+| x    | b     |
+| x    | a     |
+| x    | b     |
+| z    | c     |
+```
+
+Type: Full Join
+After full join.
+The output of left side is:
+```
+| key1 | value1|
+|------|-------|
+| x    | 1     |
+| x    | 2     |
+| x    | 3     |
+| x    | 1     |
+| x    | 2     |
+| x    | 3     |
+| y    | 4     |
+| n/a  | n/a   |
+```
+The output of right side is
+```
+| key2 | value2|
+|------|-------|
+| x    | a     |
+| x    | b     |
+| x    | a     |
+| x    | b     |
+| x    | a     |
+| x    | b     |
+| n/a  | n/a   |
+| z    | c     |
+```
+
+Type: Difference
+After difference.
+The output of left side is:
+```
+| key1 | value1|
+|------|-------|
+| y    | 4     |
+| n/a  | n/a   |
+```
+The output of right side is
+```
+| key2 | value2|
+|------|-------|
+| n/a  | n/a   |
+| z    | c     |
+```
+
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
@@ -183,12 +304,11 @@ run(PsiConfig)->PsiReport
 | self_link_party | [ string](#string) | none |
 | keys | [repeated string](#string) | keys for intersection. |
 | debug_options | [ DebugOptions](#debugoptions) | Logging level. |
-| check_duplicates | [ bool](#bool) | If true, a precheck of duplicated items will be conducted. An early exception would be throw before PSI. |
-| output_difference | [ bool](#bool) | It true, output defference instead of intersection. |
-| sort_output | [ bool](#bool) | It true, output is sorted according to keys in InputConfig. |
+| skip_duplicates_check | [ bool](#bool) | If true, the check of duplicated items will be skiped. |
+| disable_alignment | [ bool](#bool) | It true, output is not promised to be aligned. |
 | recovery_config | [ RecoveryConfig](#recoveryconfig) | Configs for recovery. |
 | advanced_join_type | [ PsiConfig.AdvancedJoinType](#psiconfigadvancedjointype) | none |
-| left_side | [ Role](#role) | Required if advanced_join_type is ADVANCED_JOIN_TYPE_INNER_JOIN. |
+| left_side | [ Role](#role) | Required if advanced_join_type is ADVANCED_JOIN_TYPE_LEFT_JOIN or ADVANCED_JOIN_TYPE_RIGHT_JOIN. |
 | check_hash_digest | [ bool](#bool) | Check if hash digest of keys from parties are equal to determine whether to early-stop. |
  <!-- end Fields -->
  <!-- end HasFields -->
@@ -202,7 +322,6 @@ Execution Report.
 | ----- | ---- | ----------- |
 | original_count | [ int64](#int64) | The data count of input. |
 | intersection_count | [ int64](#int64) | The count of intersection. Get `-1` when self party can not get result. |
-| output | [ Table](#table) | Maybe used if output type is RAW. |
  <!-- end Fields -->
  <!-- end HasFields -->
 
@@ -249,43 +368,18 @@ Configs for RR22 protocol.
 | low_comm_mode | [ bool](#bool) | none |
  <!-- end Fields -->
  <!-- end HasFields -->
-
-
-### Table
-Stores input or output data.
-For IoType::IO_TYPE_MEM_RAW.
-
-
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| header | [ Table.Row](#tablerow) | none |
-| data | [repeated Table.Row](#tablerow) | none |
- <!-- end Fields -->
- <!-- end HasFields -->
-
-
-### Table.Row
-
-
-
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| values | [repeated string](#string) | none |
- <!-- end Fields -->
- <!-- end HasFields -->
  <!-- end messages -->
 
 ## Enums
 
 
 ### IoType
-
+TODO(junfeng): support more io types including oss, sql, etc.
 
 | Name | Number | Description |
 | ---- | ------ | ----------- |
 | IO_TYPE_UNSPECIFIED | 0 | none |
 | IO_TYPE_FILE_CSV | 1 | Local csv file. |
-| IO_TYPE_MEM_RAW | 2 | With Table pb msg. |
 
 
 
@@ -304,92 +398,22 @@ PSI protocols.
 
 
 ### PsiConfig.AdvancedJoinType
-Advanced modes which allow duplicate keys.
-Advanced mode: Inner Join
-If selected, check_duplicates is invalid.
-If selected, both parties could have duplicate keys.
-```
-e.g. If input of receiver is
-| key1 | value1|
-|------|-------|
-| x    | 1     |
-| x    | 2     |
-| x    | 3     |
-| y    | 4     |
-and input of sender is
-| key2 | value2|
-|------|-------|
-| x    | a     |
-| x    | b     |
-| z    | c     |
-
-After inner join.
-The ourput of receiver is:
-| key1 | value1|
-|------|-------|
-| x    | 1     |
-| x    | 2     |
-| x    | 3     |
-| x    | 1     |
-| x    | 2     |
-| x    | 3     |
-The output of sender is
-| key2 | value2|
-|------|-------|
-| x    | a     |
-| x    | b     |
-| x    | a     |
-| x    | b     |
-| x    | a     |
-| x    | b     |
-```
-
-Advanced mode: Left Join
-If selected, check_duplicates is invalid.
-If selected, both parties could have duplicate keys.
-```
-e.g. If input of left side is
-| key1 | value1|
-|------|-------|
-| x    | 1     |
-| x    | 2     |
-| x    | 3     |
-| y    | 4     |
-and input of right side is
-| key2 | value2|
-|------|-------|
-| x    | a     |
-| x    | b     |
-| z    | c     |
-
-After inner join.
-The ourput of left side is:
-| key1 | value1|
-|------|-------|
-| x    | 1     |
-| x    | 2     |
-| x    | 3     |
-| x    | 1     |
-| x    | 2     |
-| x    | 3     |
-| y    | 4     |
-The output of right side is
-| key2 | value2|
-|------|-------|
-| x    | a     |
-| x    | b     |
-| x    | a     |
-| x    | b     |
-| x    | a     |
-| x    | b     |
-| n/a  | n/a   |
-```
+Advanced Join allow duplicate keys.
+- If selected, duplicates_check is skipped.
+- If selected, both parties are allowed to contain duplicate keys.
+- If use left join, full join or difference, the size of difference set of
+left party is revealed to right party.
+- If use right join, full join or difference, the size of difference set of
+right party is revealed to left party.
 
 | Name | Number | Description |
 | ---- | ------ | ----------- |
 | ADVANCED_JOIN_TYPE_UNSPECIFIED | 0 | none |
 | ADVANCED_JOIN_TYPE_INNER_JOIN | 1 | none |
 | ADVANCED_JOIN_TYPE_LEFT_JOIN | 2 | none |
+| ADVANCED_JOIN_TYPE_RIGHT_JOIN | 3 | none |
+| ADVANCED_JOIN_TYPE_FULL_JOIN | 4 | none |
+| ADVANCED_JOIN_TYPE_DIFFERENCE | 5 | none |
 
 
 
@@ -430,19 +454,17 @@ Role of parties.
 ### ContextDescProto
 Configuration for link config.
 
-NOTE for 'recv time'
-
 'recv time' is the max time that a party will wait for a given event.
 for example:
-```
 
+```
      begin recv                 end recv
 |--------|-------recv-time----------|------------------| alice's timeline
 
                         begin send     end send
 |-----busy-work-------------|-------------|------------| bob's timeline
-
 ```
+
 in above case, when alice begins recv for a specific event, bob is still
 busy doing its job, when alice's wait time exceed wait_timeout_ms, it raise
 exception, although bob now is starting to send data.

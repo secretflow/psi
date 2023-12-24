@@ -33,7 +33,7 @@ namespace {
 std::tuple<std::vector<uint128_t>, std::vector<uint128_t>, std::vector<size_t>>
 GenerateTestData(size_t item_size, [[maybe_unused]] double p = 0.5) {
   // uint128_t seed = yacl::MakeUint128(0, 0);
-  uint128_t seed = yacl::crypto::RandSeed();
+  uint128_t seed = yacl::crypto::FastRandSeed();
   yacl::crypto::Prg<uint128_t> prng(seed);
 
   std::vector<uint128_t> inputs_a(item_size);
@@ -42,7 +42,7 @@ GenerateTestData(size_t item_size, [[maybe_unused]] double p = 0.5) {
   prng.Fill(absl::MakeSpan(inputs_a));
   prng.Fill(absl::MakeSpan(inputs_b));
 
-  std::mt19937 std_rand(yacl::crypto::RandU64());
+  std::mt19937 std_rand(yacl::crypto::FastRandU64());
   std::bernoulli_distribution dist(p);
 
   std::vector<size_t> indices;

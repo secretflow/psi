@@ -12,4 +12,4 @@ docker run --rm -v $(pwd)/reference/:/out \
                 -v $(pwd)/../:/protos \
                 -v $(pwd)/../../yacl/yacl:/protos/yacl \
                 pseudomuto/protoc-gen-doc \
-                --doc_opt=/out/psi_v2_config_md.tmpl,psi_v2_config.md psi/proto/psi.proto yacl/link/link.proto
+                --doc_opt=/out/psi_v2_config_md.tmpl,psi_v2_config.md psi/proto/psi_v2.proto yacl/link/link.proto

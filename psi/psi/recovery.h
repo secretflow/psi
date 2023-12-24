@@ -23,7 +23,7 @@
 
 #include "psi/psi/cryptor/ecc_cryptor.h"
 
-#include "psi/proto/psi.pb.h"
+#include "psi/proto/psi_v2.pb.h"
 
 namespace psi::psi {
 
@@ -84,11 +84,6 @@ class RecoveryManager {
   // The folder to store KKRT and RR22 input bucket store.
   std::filesystem::path input_bucket_store_path() const {
     return input_bucket_store_path_;
-  }
-
-  bool post_precess_stage_finished() const {
-    return checkpoint_.stage() ==
-           v2::RecoveryCheckpoint::STAGE_POST_PROCESS_END;
   }
 
   uint64_t ecdh_dual_masked_cnt_from_peer() const {

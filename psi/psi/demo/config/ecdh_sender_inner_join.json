@@ -35,7 +35,7 @@
     "debug_options": {
         "trace_path": "/tmp/ecdh_sender_inner_join.trace"
     },
-    "check_duplicates": true,
-    "sort_output": false,
+    "skip_duplicates_check": true,
+    "disable_alignment": true,
     "advanced_join_type": "ADVANCED_JOIN_TYPE_INNER_JOIN"
 }

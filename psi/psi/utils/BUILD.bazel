@@ -256,11 +256,12 @@ psi_cc_test(
 )
 
 psi_cc_library(
-    name = "inner_join",
-    srcs = ["inner_join.cc"],
-    hdrs = ["inner_join.h"],
+    name = "advanced_join",
+    srcs = ["advanced_join.cc"],
+    hdrs = ["advanced_join.h"],
     deps = [
-        "//psi/proto:psi_cc_proto",
+        "//psi/proto:psi_v2_cc_proto",
+        "//psi/psi:prelude",
         "//psi/psi/utils",
         "@org_apache_arrow//:arrow",
         "@yacl//yacl/base:exception",
@@ -269,10 +270,10 @@ psi_cc_library(
 )
 
 psi_cc_test(
-    name = "inner_join_test",
-    srcs = ["inner_join_test.cc"],
+    name = "advanced_join_test",
+    srcs = ["advanced_join_test.cc"],
     deps = [
-        ":inner_join",
+        ":advanced_join",
     ],
 )
 

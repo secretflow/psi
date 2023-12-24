@@ -220,7 +220,7 @@ std::vector<size_t> AllGatherItemsSize(
 }
 
 std::vector<size_t> GetShuffledIdx(size_t items_size) {
-  std::mt19937 rng(yacl::crypto::RandU64());
+  std::mt19937 rng(yacl::crypto::FastRandU64());
 
   std::vector<size_t> shuffled_idx_vec(items_size);
   std::iota(shuffled_idx_vec.begin(), shuffled_idx_vec.end(), 0);

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 common --experimental_repo_remote_exec
+common --experimental_cc_shared_library
 
 build --incompatible_new_actions_api=false
 build --copt=-fdiagnostics-color=always

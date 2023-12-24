@@ -37,7 +37,7 @@
 #include "psi/psi/prelude.h"
 #include "psi/psi/utils/utils.h"
 
-#include "psi/proto/psi.pb.h"
+#include "psi/proto/psi_v2.pb.h"
 
 namespace psi::psi {
 namespace {
@@ -53,10 +53,10 @@ struct TestParams {
   std::vector<TestTable> inputs;
   std::vector<TestTable> outputs;
   std::vector<std::vector<std::string>> keys;
-  bool sort_output = false;
+  bool disable_alignment = true;
   bool broadcast_result = false;
-  bool output_difference = false;
-  bool inner_join = false;
+  v2::PsiConfig::AdvancedJoinType advanced_join_type =
+      v2::PsiConfig::ADVANCED_JOIN_TYPE_UNSPECIFIED;
 };
 
 void SaveTableAsFile(const TestTable& data, const std::string& path) {
@@ -215,11 +215,9 @@ TEST_P(PsiTest, Works) {
     config.mutable_input_config()->set_type(v2::IO_TYPE_FILE_CSV);
     config.mutable_keys()->Add(params.keys[idx].begin(),
                                params.keys[idx].end());
-    config.set_check_duplicates(true);
     config.mutable_output_config()->set_path(output_paths[idx]);
     config.mutable_output_config()->set_type(v2::IO_TYPE_FILE_CSV);
-    config.set_output_difference(params.output_difference);
-    config.set_sort_output(params.sort_output);
+    config.set_disable_alignment(params.disable_alignment);
     config.mutable_protocol_config()->set_protocol(protocol);
     if (protocol == v2::PROTOCOL_ECDH) {
       config.mutable_protocol_config()->mutable_ecdh_config()->set_curve(
@@ -227,10 +225,8 @@ TEST_P(PsiTest, Works) {
     }
     config.mutable_protocol_config()->set_broadcast_result(
         params.broadcast_result);
-    if (params.inner_join) {
-      config.set_advanced_join_type(
-          v2::PsiConfig::ADVANCED_JOIN_TYPE_INNER_JOIN);
-    }
+    config.set_advanced_join_type(params.advanced_join_type);
+    config.set_left_side(v2::Role::ROLE_RECEIVER);
 
     std::unique_ptr<AbstractPSIParty> party;
     if (idx == 0) {
@@ -266,7 +262,7 @@ TEST_P(PsiTest, Works) {
       std::rethrow_exception(exptr);
     }
 
-    if (i == 0 || params.broadcast_result || params.inner_join) {
+    if (i == 0 || params.broadcast_result || params.advanced_join_type) {
       TestTable output_hat = LoadTableFromFile(output_paths[i].string(),
                                                params.outputs[i].headers);
 
@@ -281,7 +277,7 @@ INSTANTIATE_TEST_SUITE_P(
         testing::Values(v2::PROTOCOL_ECDH, v2::PROTOCOL_KKRT,
                         v2::PROTOCOL_RR22),
         testing::Values(
-            TestParams{"testcase 1: sort_output false",
+            TestParams{"testcase 1: disable_alignment true",
                        // inputs
                        {TestTable{// header
 
@@ -315,10 +311,9 @@ INSTANTIATE_TEST_SUITE_P(
                                    {"1"}}}},
                        // keys
                        {{"id1"}, {"id2"}},
-                       /*sort_output = */ false,
-                       /*broadcast_result = */ true,
-                       /*output_difference = */ false},
-            TestParams{"testcase 2: sort_output true",
+                       /*disable_alignment = */ true,
+                       /*broadcast_result = */ true},
+            TestParams{"testcase 2: disable_alignment false",
                        // inputs
                        {TestTable{// header
 
@@ -352,9 +347,8 @@ INSTANTIATE_TEST_SUITE_P(
                                    {"3"}}}},
                        // keys
                        {{"id1"}, {"id2"}},
-                       /*sort_output = */ true,
-                       /*broadcast_result = */ true,
-                       /*output_difference = */ false},
+                       /*disable_alignment = */ false,
+                       /*broadcast_result = */ true},
 
             TestParams{"testcase 3: broadcast_result false",
                        // inputs
@@ -383,9 +377,8 @@ INSTANTIATE_TEST_SUITE_P(
                                    {"3"}}}},
                        // keys
                        {{"id1"}, {"id2"}},
-                       /*sort_output = */ true,
-                       /*broadcast_result = */ false,
-                       /*output_difference = */ false},
+                       /*disable_alignment = */ false,
+                       /*broadcast_result = */ false},
             TestParams{"testcase 4: w/ payload",
                        // inputs
                        {TestTable{// header
@@ -413,9 +406,8 @@ INSTANTIATE_TEST_SUITE_P(
                                    {"3", "third1"}}}},
                        // keys
                        {{"id1"}, {"id2"}},
-                       /*sort_output = */ true,
-                       /*broadcast_result = */ false,
-                       /*output_difference = */ false},
+                       /*disable_alignment = */ false,
+                       /*broadcast_result = */ false},
             TestParams{"testcase 5: chinese characters",
                        // inputs
                        {TestTable{// header
@@ -443,9 +435,8 @@ INSTANTIATE_TEST_SUITE_P(
                                    {"测试3", "测试third1"}}}},
                        // keys
                        {{"测试id1"}, {"测试id2"}},
-                       /*sort_output = */ true,
-                       /*broadcast_result = */ false,
-                       /*output_difference = */ false},
+                       /*disable_alignment = */ false,
+                       /*broadcast_result = */ false},
             TestParams{"testcase 6: multikey",
                        // inputs
                        {TestTable{// header
@@ -479,9 +470,8 @@ INSTANTIATE_TEST_SUITE_P(
                                    {"测试3", "测试3", "测试third1"}}}},
                        // keys
                        {{"测试id1", "测试id2"}, {"测试id3", "测试id4"}},
-                       /*sort_output = */ true,
-                       /*broadcast_result = */ false,
-                       /*output_difference = */ false},
+                       /*disable_alignment = */ false,
+                       /*broadcast_result = */ false},
             TestParams{"testcase 7: same input",
                        // inputs
                        {TestTable{// header
@@ -519,9 +509,8 @@ INSTANTIATE_TEST_SUITE_P(
                                    {"5"}}}},
                        // keys
                        {{"id1"}, {"id2"}},
-                       /*sort_output = */ false,
-                       /*broadcast_result = */ true,
-                       /*output_difference = */ false},
+                       /*disable_alignment = */ true,
+                       /*broadcast_result = */ true},
             TestParams{"testcase 8: output_difference",
                        // inputs
                        {TestTable{// header
@@ -554,22 +543,35 @@ INSTANTIATE_TEST_SUITE_P(
                                   {// row
                                    {"2"},
                                    // row
+                                   {"5"},
+                                   // row
                                    {"7"},
                                    // row
-                                   {"5"}}},
+                                   {"NA"},
+                                   // row
+                                   {"NA"},
+                                   // row
+                                   {"NA"}}},
                         TestTable{// header
                                   {"id2"},
                                   {// row
+                                   {"NA"},
+                                   // row
+                                   {"NA"},
+                                   // row
+                                   {"NA"},
+                                   // row
+                                   {"6"},
+                                   // row
                                    {"8"},
                                    // row
-                                   {"9"},
-                                   // row
-                                   {"6"}}}},
+                                   {"9"}}}},
                        // keys
                        {{"id1"}, {"id2"}},
-                       /*sort_output = */ false,
+                       /*disable_alignment = */ true,
                        /*broadcast_result = */ true,
-                       /*output_difference = */ true},
+                       /*advanced_join_type = */
+                       v2::PsiConfig::ADVANCED_JOIN_TYPE_DIFFERENCE},
             TestParams{"testcase 9: output_difference with no intersection",
                        // inputs
                        {TestTable{// header
@@ -592,24 +594,37 @@ INSTANTIATE_TEST_SUITE_P(
                        {TestTable{// header
                                   {"id1"},
                                   {// row
-                                   {"3"},
-                                   // row
                                    {"1"},
                                    // row
-                                   {"5"}}},
+                                   {"3"},
+                                   // row
+                                   {"5"},
+                                   // row
+                                   {"NA"},
+                                   // row
+                                   {"NA"},
+                                   // row
+                                   {"NA"}}},
                         TestTable{// header
                                   {"id2"},
                                   {// row
+                                   {"NA"},
+                                   // row
+                                   {"NA"},
+                                   // row
+                                   {"NA"},
+                                   // row
                                    {"2"},
                                    // row
-                                   {"6"},
+                                   {"4"},
                                    // row
-                                   {"4"}}}},
+                                   {"6"}}}},
                        // keys
                        {{"id1"}, {"id2"}},
-                       /*sort_output = */ false,
+                       /*disable_alignment = */ true,
                        /*broadcast_result = */ true,
-                       /*output_difference = */ true},
+                       /*advanced_join_type = */
+                       v2::PsiConfig::ADVANCED_JOIN_TYPE_DIFFERENCE},
             TestParams{"testcase 10: inner_join",
                        // inputs
                        {TestTable{// header
@@ -675,67 +690,10 @@ INSTANTIATE_TEST_SUITE_P(
                                    {"3"}}}},
                        // keys
                        {{"id1"}, {"id2"}},
-                       /*sort_output = */ true,
+                       /*disable_alignment = */ false,
                        /*broadcast_result = */ true,
-                       /*output_difference = */ false,
-                       /*inner_join = */ true},
-            TestParams{"testcase 11: inner_join and output_difference",
-                       // inputs
-                       {TestTable{// header
-                                  {"id1"},
-                                  {// row
-                                   {"3"},
-                                   // row
-                                   {"1"},
-                                   // row
-                                   {"0"},
-                                   // row
-                                   {"2"},
-                                   // row
-                                   {"2"},
-                                   // row
-                                   {"3"},
-                                   // row
-                                   {"3"},
-                                   // row
-                                   {"5"}}},
-                        TestTable{// header
-                                  {"id2"},
-                                  {// row
-                                   {"6"},
-                                   // row
-                                   {"3"},
-                                   // row
-                                   {"1"},
-                                   // row
-                                   {"6"},
-                                   // row
-                                   {"1"},
-                                   // row
-                                   {"3"}}}},
-                       // outputs
-                       {TestTable{// header
-                                  {"id1"},
-                                  {// row
-                                   {"0"},
-                                   // row
-                                   {"2"},
-                                   // row
-                                   {"2"},
-                                   // row
-                                   {"5"}}},
-                        TestTable{// header
-                                  {"id2"},
-                                  {// row
-                                   {"6"},
-                                   // row
-                                   {"6"}}}},
-                       // keys
-                       {{"id1"}, {"id2"}},
-                       /*sort_output = */ false,
-                       /*broadcast_result = */ true,
-                       /*output_difference = */ true,
-                       /*inner_join = */ true})));
+                       /*advanced_join_type = */
+                       v2::PsiConfig::ADVANCED_JOIN_TYPE_INNER_JOIN})));
 
 }  // namespace
 }  // namespace psi::psi

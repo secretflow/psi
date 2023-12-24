@@ -124,6 +124,18 @@ psi_cc_library(
 )
 
 psi_cc_library(
+    name = "fnp04_mp_psi",
+    srcs = ["fnp04_mp_psi.cc"],
+    hdrs = ["fnp04_mp_psi.h"],
+    deps = [
+        ":base_operator",
+        ":factory",
+        "//psi/psi/core/fnp04_mp_psi",
+    ],
+    alwayslink = True,
+)
+
+psi_cc_library(
     name = "operator",
     deps = [
         ":bc22_2party_psi",
@@ -132,5 +144,6 @@ psi_cc_library(
         ":kkrt_2party_psi",
         ":nparty_psi",
         ":rr22_2party_psi",
+        ":fnp04_mp_psi",
     ],
 )

@@ -20,6 +20,8 @@ SECRETFLOW_GIT = "https://github.com/secretflow"
 
 YACL_COMMIT_ID = "d9f18c74ba2a1bbbe52bd6beac644adf81fb9925"
 
+HEU_COMMIT_ID = "8792c8e204c0ae944d0e849bddd2877ea796444c"
+
 def psi_deps():
     _com_github_nelhage_rules_boost()
     _bazel_platform()
@@ -54,6 +56,13 @@ def psi_deps():
         name = "yacl",
         commit = YACL_COMMIT_ID,
         remote = "{}/yacl.git".format(SECRETFLOW_GIT),
+    )
+
+    maybe(
+        git_repository,
+        name = "heu",
+        commit = HEU_COMMIT_ID,
+        remote = "{}/heu.git".format(SECRETFLOW_GIT),
     )
 
 def _bazel_platform():

@@ -26,6 +26,8 @@
 
 namespace {
 
+constexpr uint32_t kLinkRecvTimeout = 30 * 60 * 1000;
+
 static std::random_device rd{};
 static std::independent_bits_engine<std::default_random_engine,
                                     sizeof(size_t) * 8, size_t>
@@ -66,6 +68,7 @@ FNP04Party::FNP04Party(const Options& options) : options_{options} {
   KeyGenerator::Generate(&sk, &pk);
   encryptors_[me] = std::make_shared<Encryptor>(pk);
   decryptor_ = std::make_shared<Decryptor>(pk, sk);
+  ctx->SetRecvTimeout(kLinkRecvTimeout);
 }
 
 std::vector<std::string> FNP04Party::Run(

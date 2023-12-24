@@ -141,9 +141,9 @@ psi_cc_library(
         ":bc22_2party_psi",
         ":dp_2party_psi",
         ":ecdh_3party_psi",
+        ":fnp04_mp_psi",
         ":kkrt_2party_psi",
         ":nparty_psi",
         ":rr22_2party_psi",
-        ":fnp04_mp_psi",
     ],
 )

@@ -21,10 +21,10 @@ psi_cc_library(
     srcs = ["fnp04_mp_psi.cc"],
     hdrs = ["fnp04_mp_psi.h"],
     deps = [
-        "@yacl//yacl/link",
-        "@heu//heu/library/algorithms/paillier_zahlen",
-        "//psi/psi/utils:test_utils",
         "//psi/psi/utils",
+        "//psi/psi/utils:test_utils",
+        "@heu//heu/library/algorithms/paillier_zahlen",
+        "@yacl//yacl/link",
     ],
 )
 

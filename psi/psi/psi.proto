@@ -86,9 +86,9 @@ enum CurveType {
   // Cryptography (SEC) http://www.secg.org/sec2-v2.pdf
   CURVE_SECP256K1 = 4;
 
-  // TODO: @changjun.zl support ristretto255 
+  // TODO: @changjun.zl support ristretto255
   // Ristretto255 implements abstract prime-order group interface of Curve25519
-  // CURVE_RISTRETTO255 = 5; 
+  // CURVE_RISTRETTO255 = 5;
 }
 
 // The input parameters of psi.

@@ -14,6 +14,8 @@
 
 #include "psi/psi/utils/utils.h"
 
+#include <omp.h>
+
 #include "spdlog/spdlog.h"
 #include "yacl/base/exception.h"
 #include "yacl/crypto/utils/rand.h"
@@ -80,11 +82,14 @@ void MultiKeySort(const std::string& in_csv, const std::string& out_csv,
                "mismatched header, field_names={}, line={}",
                fmt::join(keys, ","), line);
 
+  int mcpus = omp_get_num_procs();
+
   // Sort the csv body and append to out csv.
   std::string cmd = fmt::format(
-      "tail -n +2 {} | LC_ALL=C sort {} --buffer-size=3G --parallel=8 "
-      "--temporary-directory=./ --stable --field-separator=, {} {} >>{}",
-      in_csv, numeric_sort ? "-n" : "", fmt::join(sort_keys, " "),
+      "tail -n +2 {} | LC_ALL=C sort {} --parallel={} --buffer-size=1G "
+      "--stable "
+      "--field-separator=, {} {} >>{}",
+      in_csv, numeric_sort ? "-n" : "", mcpus, fmt::join(sort_keys, " "),
       unique ? "| LC_ALL=C uniq" : "", out_csv);
   SPDLOG_INFO("Executing sort scripts: {}", cmd);
   int ret = system(cmd.c_str());
@@ -188,12 +193,12 @@ size_t FilterFileByIndices(const std::string& input, const std::string& output,
       (output_difference ? (idx - header_line_count - reader.read_cnt())
                          : reader.read_cnt());
 
-  YACL_ENFORCE_EQ(actual_count, target_count,
-                  "logstic error, reader.read_cnt={}, actual_count={}, "
-                  "target_count={}, output_difference={}, please be "
-                  "sure the `indices` is sorted",
-                  reader.read_cnt(), actual_count, target_count,
-                  output_difference);
+  YACL_ENFORCE_EQ(
+      actual_count, target_count,
+      "logstic error, reader.read_cnt={}, actual_count={}, input_path={}, "
+      "target_count={}, output_difference={}, please be "
+      "sure the `indices` is sorted",
+      reader.read_cnt(), actual_count, input, target_count, output_difference);
 
   out->Close();
   in->Close();

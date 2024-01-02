@@ -108,8 +108,6 @@ class AbstractPSIParty {
 
   std::shared_ptr<AdvancedJoinConfig> advanced_join_config_;
 
-  bool need_intersection_deduplication_ = false;
-
  private:
   void CheckPeerConfig();
 

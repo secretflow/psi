@@ -43,7 +43,6 @@ bool HashListEqualTest(const std::vector<yacl::Buffer>& hash_list);
 
 std::unique_ptr<CsvChecker> CheckInput(
     std::shared_ptr<yacl::link::Context> lctx, const std::string& input_path,
-    const std::string& output_path,
     const std::vector<std::string>& selected_fields, bool precheck_required,
     bool ic_mode);
 

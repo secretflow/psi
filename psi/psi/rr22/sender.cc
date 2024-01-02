@@ -35,8 +35,7 @@ void Rr22PSISender::Init() {
 
   AbstractPSISender::Init();
 
-  CommonInit(key_hash_digest_, &config_, recovery_manager_.get(),
-             &need_intersection_deduplication_);
+  CommonInit(key_hash_digest_, &config_, recovery_manager_.get());
   SPDLOG_INFO("[Rr22PSISender::Init] end");
 }
 

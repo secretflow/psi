@@ -3,6 +3,13 @@
 > - `[Feature]` prefix for new features.
 > - `[Bugfix]` prefix for bug fixes.
 > - `[API]` prefix for API changes.
+> - `[Improvement]` prefix for implementation improvement.
+
+## v0.2.0.dev231228
+
+- [Bugfix] Fix RR22 race condition.
+- [Improvement] modify sort buffer size.
+
 
 ## v0.2.0.dev231221
 

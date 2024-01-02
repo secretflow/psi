@@ -28,6 +28,9 @@
 #include "arrow/csv/api.h"
 #include "arrow/io/api.h"
 #include "arrow/ipc/api.h"
+#include "boost/uuid/uuid.hpp"
+#include "boost/uuid/uuid_generators.hpp"
+#include "boost/uuid/uuid_io.hpp"
 #include "gtest/gtest.h"
 #include "spdlog/spdlog.h"
 #include "yacl/link/test_util.h"
@@ -199,7 +202,11 @@ TEST_P(PsiTest, Works) {
   std::replace(test_suite_name.begin(), test_suite_name.end(), '/', '_');
   std::replace(test_case_name.begin(), test_case_name.end(), '/', '_');
 
-  std::string test_name = test_suite_name + "-" + test_case_name;
+  boost::uuids::random_generator uuid_generator;
+  auto uuid_str = boost::uuids::to_string(uuid_generator());
+
+  std::string test_name =
+      test_suite_name + "-" + test_case_name + "-" + uuid_str;
 
   std::vector<std::filesystem::path> input_paths =
       GenTempPaths(test_name + "-input", 2);
@@ -255,7 +262,7 @@ TEST_P(PsiTest, Works) {
       report = f_links[i].get();
     } catch (const std::exception& e) {
       exptr = std::current_exception();
-      SPDLOG_ERROR("Error in mask self: {}", e.what());
+      SPDLOG_ERROR("Error from party {}: {}", i, e.what());
     }
 
     if (exptr) {

@@ -51,18 +51,12 @@ jobs:
             echo "Canceling workflow as too much time has elapsed"
             curl -X POST --header "Content-Type: application/json" "https://circleci.com/api/v2/workflow/${CIRCLE_WORKFLOW_ID}/cancel?circle-token=${BUILD_TIMER_TOKEN}"
       - checkout
-      - restore_cache:
-          name: "Restore build cache"
-          key: psi-release-comp-{{ arch }}-
       - run:
           name: "Checkout devtools"
           command: git clone https://github.com/secretflow/devtools.git ../devtools
       - run:
-          name: "Decompress cache"
-          command: sh ../devtools/decompress-build-cache.sh psi_release_cache
-      - run:
           name: "Build"
-          command: bazel build psi/psi:main -c opt --config=linux-release --ui_event_filters=-info,-debug,-warning --disk_cache=~/.cache/psi_release_cache --jobs 20
+          command: bazel build psi/psi:main -c opt --config=linux-release --ui_event_filters=-info,-debug,-warning --jobs 20
       - run:
           name: "Copy binary"
           command: |
@@ -72,18 +66,6 @@ jobs:
           root: "/tmp/binary"
           paths:
             - "main"
-      - run:
-          name: "Cleanup and compress cache"
-          command: |
-            sh ../devtools/clean_disk_cache.sh ~/.cache/psi_release_cache
-            sh ../devtools/compress-build-cache.sh psi_release_cache
-          when: always
-      - save_cache:
-          key: psi-release-comp-{{ arch }}-{{ .Environment.CIRCLE_BUILD_NUM }}
-          paths:
-            - /root/.cache/psi_release_cache.tar.gz
-          when: always
-
   docker_image_publish:
     docker:
       - image: cimg/deploy:2023.06.1

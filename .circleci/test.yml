@@ -120,8 +120,4 @@ workflows:
           matrix:
             parameters:
               resource_class: ["2xlarge", "arm.2xlarge"]
-          context:
-            - gcs
-      - macos_ut:
-          context:
-            - gcs
+      - macos_ut

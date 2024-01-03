@@ -235,6 +235,7 @@ psi_cc_test(
     deps = [
         ":factory",
         "//psi/psi/utils:arrow_csv_batch_provider",
+        "@boost//:uuid",
         "@yacl//yacl/utils:scope_guard",
     ],
 )

@@ -23,7 +23,6 @@ class CsvChecker {
  public:
   explicit CsvChecker(const std::string& csv_path,
                       const std::vector<std::string>& schema_names,
-                      const std::string& tmp_cache_dir,
                       bool skip_check = false);
 
   uint32_t data_count() const { return data_count_; }

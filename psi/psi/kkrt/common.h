@@ -25,7 +25,6 @@ namespace psi::psi::kkrt {
 constexpr size_t kDefaultNumOt = 512;
 
 void CommonInit(const std::string& key_hash_digest, v2::PsiConfig* config,
-                RecoveryManager* recovery_manager,
-                bool* need_intersection_deduplication);
+                RecoveryManager* recovery_manager);
 
 }  // namespace psi::psi::kkrt

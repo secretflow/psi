@@ -215,9 +215,9 @@ v2::PsiReport AbstractPSIParty::Finalize() {
 
   SPDLOG_INFO("[AbstractPSIParty::Finalize][Generate result] start");
   auto gen_result_f = std::async([&] {
-    MultiKeySort(
-        intersection_indices_writer_->path(), sorted_intersection_indices_path,
-        std::vector<std::string>{kIdx}, true, need_intersection_deduplication_);
+    MultiKeySort(intersection_indices_writer_->path(),
+                 sorted_intersection_indices_path,
+                 std::vector<std::string>{kIdx}, true, false);
 
     if (role_ == v2::ROLE_RECEIVER ||
         config_.protocol_config().broadcast_result()) {

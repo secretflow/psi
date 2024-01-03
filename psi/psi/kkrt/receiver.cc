@@ -38,8 +38,7 @@ void KkrtPSIReceiver::Init() {
 
   AbstractPSIReceiver::Init();
 
-  CommonInit(key_hash_digest_, &config_, recovery_manager_.get(),
-             &need_intersection_deduplication_);
+  CommonInit(key_hash_digest_, &config_, recovery_manager_.get());
   SPDLOG_INFO("[KkrtPSIReceiver::Init] end");
 }
 

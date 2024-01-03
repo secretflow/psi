@@ -124,7 +124,6 @@ bool HashListEqualTest(const std::vector<yacl::Buffer>& hash_list) {
 
 std::unique_ptr<CsvChecker> CheckInput(
     std::shared_ptr<yacl::link::Context> lctx, const std::string& input_path,
-    const std::string& output_path,
     const std::vector<std::string>& selected_fields, bool precheck_required,
     bool ic_mode) {
   // input dataset pre check
@@ -132,10 +131,8 @@ std::unique_ptr<CsvChecker> CheckInput(
               input_path, precheck_required);
   std::unique_ptr<CsvChecker> checker;
   auto csv_check_f = std::async([&] {
-    checker = std::make_unique<CsvChecker>(
-        input_path, selected_fields,
-        std::filesystem::path(output_path).parent_path().string(),
-        !precheck_required);
+    checker = std::make_unique<CsvChecker>(input_path, selected_fields,
+                                           !precheck_required);
   });
   // keep alive
   if (ic_mode) {
@@ -187,9 +184,9 @@ PsiResultReport BucketPsi::Run(ProgressCallbacks progress_callbacks,
       config_.psi_type() != PsiType::ECDH_OPRF_UB_PSI_2PC_ONLINE &&
       config_.psi_type() != PsiType::ECDH_OPRF_UB_PSI_2PC_SHUFFLE_ONLINE) {
     progress->NextSubProgress("Precheck");
-    auto checker = CheckInput(lctx_, config_.input_params().path(),
-                              config_.output_params().path(), selected_fields_,
-                              config_.input_params().precheck(), ic_mode_);
+    auto checker =
+        CheckInput(lctx_, config_.input_params().path(), selected_fields_,
+                   config_.input_params().precheck(), ic_mode_);
     report.set_original_count(checker->data_count());
 
     // gather others hash digest
@@ -221,12 +218,8 @@ PsiResultReport BucketPsi::Run(ProgressCallbacks progress_callbacks,
           config_.input_params().path());
       std::shared_ptr<CsvChecker> checker;
       auto csv_check_f = std::async([&] {
-        checker = std::make_shared<CsvChecker>(
-            config_.input_params().path(), selected_fields_,
-            std::filesystem::path(config_.input_params().path())
-                .parent_path()
-                .string(),
-            false);
+        checker = std::make_shared<CsvChecker>(config_.input_params().path(),
+                                               selected_fields_, false);
       });
 
       csv_check_f.get();

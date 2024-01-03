@@ -46,6 +46,10 @@ std::vector<size_t> GetIntersection(
     bool compress, size_t mask_size, size_t ssp) {
   num_threads = std::max<size_t>(1, num_threads);
 
+  if (self_oprfs.size() < num_threads) {
+    num_threads = self_oprfs.size();
+  }
+
   int128_t truncate_mask = yacl::MakeUint128(0, 0);
   for (size_t i = 0; i < mask_size; ++i) {
     truncate_mask = 0xff | (truncate_mask << 8);

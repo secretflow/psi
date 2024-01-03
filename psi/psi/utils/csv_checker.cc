@@ -15,6 +15,7 @@
 #include "psi/psi/utils/csv_checker.h"
 
 #include <fmt/core.h>
+#include <omp.h>
 
 #include <cstddef>
 #include <filesystem>
@@ -59,7 +60,7 @@ bool CheckIfBOMExists(const std::string& file_path) {
 
 CsvChecker::CsvChecker(const std::string& csv_path,
                        const std::vector<std::string>& schema_names,
-                       const std::string& tmp_cache_dir, bool skip_check) {
+                       bool skip_check) {
   YACL_ENFORCE(!CheckIfBOMExists(csv_path),
                "the file {} starts with BOM(Byte Order Mark).", csv_path);
 
@@ -125,10 +126,12 @@ CsvChecker::CsvChecker(const std::string& csv_path,
       }
     });
 
+    int mcpus = omp_get_num_procs();
+
     std::string cmd = fmt::format(
-        "LC_ALL=C sort --buffer-size=1G --temporary-directory={} "
-        "--stable {} | LC_ALL=C uniq -d > {}",
-        tmp_cache_dir, keys_file, duplicated_keys_file);
+        "LC_ALL=C sort --parallel={} --buffer-size=1G --stable {} | LC_ALL=C "
+        "uniq -d > {}",
+        mcpus, keys_file, duplicated_keys_file);
     SPDLOG_INFO("Executing duplicated scripts: {}", cmd);
     int ret = system(cmd.c_str());
     YACL_ENFORCE(ret == 0, "failed to execute cmd={}, ret={}", cmd, ret);
@@ -229,11 +232,12 @@ CheckCsvReport CheckCsv(const std::string& input_file_path,
         std::filesystem::temp_directory_path() /
         fmt::format("{}.psi_checked_duplicates", uuid_str);
 
+    int mcpus = omp_get_num_procs();
     std::string cmd = fmt::format(
         "LC_ALL=C tail -n +2 {} | "  // skip header
-        "LC_ALL=C sort --buffer-size=1G "
+        "LC_ALL=C sort --parallel={} --buffer-size=1G "
         "--stable | LC_ALL=C uniq -d > {}",
-        output_file_path, duplicated_output_file_path);
+        output_file_path, mcpus, duplicated_output_file_path);
     SPDLOG_INFO("Executing script to get duplicates: {}", cmd);
     int ret = system(cmd.c_str());
     YACL_ENFORCE(ret == 0, "Failed to execute cmd={}, ret={}", cmd, ret);

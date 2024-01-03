@@ -263,6 +263,7 @@ psi_cc_library(
         "//psi/proto:psi_v2_cc_proto",
         "//psi/psi:prelude",
         "//psi/psi/utils",
+        "@boost//:uuid",
         "@org_apache_arrow//:arrow",
         "@yacl//yacl/base:exception",
         "@yacl//yacl/link",

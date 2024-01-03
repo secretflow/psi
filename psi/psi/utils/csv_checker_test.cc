@@ -76,8 +76,8 @@ TEST_P(CsvCheckerTest, Works) {
   b_os->Write(params.content_b);
   b_os->Close();
 
-  CsvChecker checker_a(tmp_file_path_a_, params.ids_a, "./", params.skip_check);
-  CsvChecker checker_b(tmp_file_path_b_, params.ids_b, "./", params.skip_check);
+  CsvChecker checker_a(tmp_file_path_a_, params.ids_a, params.skip_check);
+  CsvChecker checker_b(tmp_file_path_b_, params.ids_b, params.skip_check);
 
   ASSERT_EQ(params.item_size_a, checker_a.data_count());
   ASSERT_EQ(params.item_size_b, checker_b.data_count());
@@ -119,8 +119,8 @@ TEST_P(CsvCheckerDigestEqualTest, HashDigestEqual) {
   b_os->Write(params.content_b);
   b_os->Close();
 
-  CsvChecker checker_a(tmp_file_path_a_, params.ids_a, "./", params.skip_check);
-  CsvChecker checker_b(tmp_file_path_b_, params.ids_b, "./", params.skip_check);
+  CsvChecker checker_a(tmp_file_path_a_, params.ids_a, params.skip_check);
+  CsvChecker checker_b(tmp_file_path_b_, params.ids_b, params.skip_check);
 
   ASSERT_EQ(params.item_size_a, checker_a.data_count());
   ASSERT_EQ(params.item_size_b, checker_b.data_count());
@@ -180,7 +180,7 @@ TEST_P(CsvCheckerFailedTest, FailedWorks) {
   os->Write(params.content);
   os->Close();
 
-  ASSERT_ANY_THROW(CsvChecker checker(tmp_file_path_, params.ids, "./", false));
+  ASSERT_ANY_THROW(CsvChecker checker(tmp_file_path_, params.ids, false));
 }
 
 INSTANTIATE_TEST_SUITE_P(

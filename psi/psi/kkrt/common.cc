@@ -19,15 +19,13 @@
 namespace psi::psi::kkrt {
 
 void CommonInit(const std::string& key_hash_digest, v2::PsiConfig* config,
-                RecoveryManager* recovery_manager,
-                bool* need_intersection_deduplication) {
+                RecoveryManager* recovery_manager) {
   if (config->protocol_config().kkrt_config().bucket_size() == 0) {
     config->mutable_protocol_config()->mutable_kkrt_config()->set_bucket_size(
         kDefaultBucketSize);
   }
 
   if (recovery_manager) {
-    *need_intersection_deduplication = true;
     recovery_manager->MarkInitEnd(*config, key_hash_digest);
   }
 }

@@ -66,6 +66,8 @@ void Rr22PsiSender(const Rr22PsiOptions& options,
                    const std::shared_ptr<yacl::link::Context>& lctx,
                    const std::vector<uint128_t>& inputs);
 
+// return psi result indices,
+// indices are not sorted; need to be sorted by caller.
 std::vector<size_t> Rr22PsiReceiver(
     const Rr22PsiOptions& options,
     const std::shared_ptr<yacl::link::Context>& lctx,

@@ -38,7 +38,7 @@ EcdhPsiContext::EcdhPsiContext(EcdhPsiOptions options)
   YACL_ENFORCE(options_.link_ctx->WorldSize() == 2);
 
   main_link_ctx_ = options_.link_ctx;
-  dual_mask_link_ctx_ = options_.link_ctx->Spawn();
+  dual_mask_link_ctx_ = options_.link_ctx->Spawn("ecdh_dual_mask");
 }
 
 void EcdhPsiContext::CheckConfig() {
@@ -103,7 +103,7 @@ void EcdhPsiContext::MaskSelf(
     const auto tag = fmt::format("ECDHPSI:X^A:{}", batch_count);
     SendBatch(masked_items, batch_count, tag);
     if (batch_items.empty()) {
-      SPDLOG_INFO("MaskSelf:{}--finished, batch_count={}, self_item_count={}",
+      SPDLOG_INFO("MaskSelf:{} --finished, batch_count={}, self_item_count={}",
                   Id(), batch_count, item_count);
       if (options_.statistics) {
         options_.statistics->self_item_count = item_count;
@@ -161,7 +161,7 @@ void EcdhPsiContext::MaskPeer(
       SendDualMaskedBatchNonBlock(dual_masked_peers, batch_count, tag);
     }
     if (peer_items.empty()) {
-      SPDLOG_INFO("MaskPeer:{}--finished, batch_count={}, peer_item_count={}",
+      SPDLOG_INFO("MaskPeer:{} --finished, batch_count={}, peer_item_count={}",
                   Id(), batch_count, item_count);
       if (options_.statistics) {
         options_.statistics->peer_item_count = item_count;
@@ -344,12 +344,18 @@ void RunEcdhPsi(const EcdhPsiOptions& options,
     SPDLOG_INFO("processed_item_cnt = {}", processed_item_cnt);
   }
 
-  std::future<void> f_mask_self = std::async(
-      [&] { return handler.MaskSelf(batch_provider, processed_item_cnt); });
-  std::future<void> f_mask_peer =
-      std::async([&] { return handler.MaskPeer(peer_ec_point_store); });
-  std::future<void> f_recv_peer = std::async(
-      [&] { return handler.RecvDualMaskedSelf(self_ec_point_store); });
+  std::future<void> f_mask_self = std::async([&] {
+    handler.MaskSelf(batch_provider, processed_item_cnt);
+    SPDLOG_INFO("ID {}: MaskSelf finished.", handler.Id());
+  });
+  std::future<void> f_mask_peer = std::async([&] {
+    handler.MaskPeer(peer_ec_point_store);
+    SPDLOG_INFO("ID {}: MaskPeer finished.", handler.Id());
+  });
+  std::future<void> f_recv_peer = std::async([&] {
+    handler.RecvDualMaskedSelf(self_ec_point_store);
+    SPDLOG_INFO("ID {}: RecvDualMaskedSelf finished.", handler.Id());
+  });
 
   // Wait for end of logic flows or exceptions.
   // Note: exception_ptr is `shared_ptr` style, hence could be used to prolong
@@ -362,21 +368,22 @@ void RunEcdhPsi(const EcdhPsiOptions& options,
     f_mask_self.get();
   } catch (const std::exception& e) {
     mask_self_exptr = std::current_exception();
-    SPDLOG_ERROR("Error in mask self: {}", e.what());
+    SPDLOG_ERROR("ID {}: Error in MaskSelf: {}", handler.Id(), e.what());
   }
 
   try {
     f_mask_peer.get();
   } catch (const std::exception& e) {
     mask_peer_exptr = std::current_exception();
-    SPDLOG_ERROR("Error in mask peer: {}", e.what());
+    SPDLOG_ERROR("ID {}: Error in MaskPeer: {}", handler.Id(), e.what());
   }
 
   try {
     f_recv_peer.get();
   } catch (const std::exception& e) {
     recv_peer_exptr = std::current_exception();
-    SPDLOG_ERROR("Error in recv peer: {}", e.what());
+    SPDLOG_ERROR("ID {}: Error in RecvDualMaskedSelf: {}", handler.Id(),
+                 e.what());
   }
 
   if (mask_self_exptr) {

@@ -27,6 +27,9 @@
 #include "arrow/csv/api.h"
 #include "arrow/io/api.h"
 #include "arrow/ipc/api.h"
+#include "boost/uuid/uuid.hpp"
+#include "boost/uuid/uuid_generators.hpp"
+#include "boost/uuid/uuid_io.hpp"
 #include "spdlog/spdlog.h"
 #include "yacl/base/exception.h"
 
@@ -68,7 +71,11 @@ AdvancedJoinConfig BuildAdvancedJoinConfig(v2::PsiConfig::AdvancedJoinType type,
 
   advanced_join_config.keys = keys;
 
-  std::string prefix = role == v2::ROLE_RECEIVER ? "receiver_" : "sender_";
+  boost::uuids::random_generator uuid_generator;
+  std::string uuid_str = boost::uuids::to_string(uuid_generator());
+
+  std::string prefix = fmt::format(
+      "{}_{}_", role == v2::ROLE_RECEIVER ? "receiver" : "sender", uuid_str);
   std::filesystem::path sorted_input_path =
       root / (prefix + "advanced_join_sorted_input.csv");
   std::filesystem::path unique_input_keys_cnt_path =

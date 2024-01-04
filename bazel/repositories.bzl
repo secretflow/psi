@@ -19,7 +19,7 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 SECRETFLOW_GIT = "https://github.com/secretflow"
 
 YACL_COMMIT_ID = "235bd30fd2532f9374cbbc49bc5898da34b59ebf"
-YACK_SHA256 = "3428c680663dca8a735e53c711ad30af5001f7f37bcd98b78138adb09f79a37b"
+YACL_SHA256 = "3428c680663dca8a735e53c711ad30af5001f7f37bcd98b78138adb09f79a37b"
 
 def psi_deps():
     _com_github_nelhage_rules_boost()

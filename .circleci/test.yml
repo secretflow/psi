@@ -85,11 +85,13 @@ jobs:
           name: Checkout devtools
           command: git clone https://github.com/secretflow/devtools.git ../devtools
       - run:
-          name: Setup GCS
-          command: ../devtools/base64_converter.py --str ${gcs_content} --out_file ../gcs.json
-      - run:
           name: "Install homebrew dependencies"
           command: brew install bazelisk cmake ninja libomp wget md5sha1sum
+      - run:
+          name: Setup GCS
+          command: |
+            echo ${gcs_content} > ../gcs.data
+            ../devtools/bazel_cache_setup.py --in_file=../gcs.data --out_file=../gcs.json --min_download
       - run:
           name: "build"
           command: bazel build //... -c opt --ui_event_filters=-info,-debug,-warning
@@ -98,7 +100,7 @@ jobs:
           command: |
             set +e
             declare -i test_status
-            bazel test //... -c opt --remote_cache=https://storage.googleapis.com/secretflow | tee test_result.log; test_status=${PIPESTATUS[0]}
+            bazel test //... -c opt | tee test_result.log; test_status=${PIPESTATUS[0]}
 
             sh ../devtools/rename-junit-xml.sh
             find bazel-bin/ -perm +111 -type f -name "*_test"  -print0 | xargs -0 tar -cvzf test_binary.tar.gz

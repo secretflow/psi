@@ -52,6 +52,10 @@ void Rr22PSISender::PreProcess() {
                          config_.protocol_config().rr22_config().bucket_size(),
                          config_.protocol_config().protocol());
 
+  parallelism_ = NegotiateParallelismNum(
+      lctx_, config_.protocol_config().rr22_config().parallelism(),
+      config_.protocol_config().protocol());
+
   if (bucket_count_ > 0) {
     std::vector<std::string> keys(config_.keys().begin(), config_.keys().end());
 
@@ -106,42 +110,51 @@ void Rr22PSISender::Online() {
   Rr22PsiOptions rr22_options = GenerateRr22PsiOptions(
       config_.protocol_config().rr22_config().low_comm_mode());
 
-  for (; bucket_idx < input_bucket_store_->BucketNum(); bucket_idx++) {
-    auto bucket_items_list =
-        PrepareBucketData(config_.protocol_config().protocol(), bucket_idx,
-                          lctx_, input_bucket_store_.get());
+  if (recovery_manager_ == nullptr)
+    intersection_indices_writer_->InitBucketWrite(
+        input_bucket_store_->BucketNum());
+  PsiParallelFor(
+      bucket_idx, input_bucket_store_->BucketNum(),
+      recovery_manager_ ? 1 : parallelism_, [&](size_t bucket_idx) {
+        auto bucket_items_list =
+            PrepareBucketData(config_.protocol_config().protocol(), bucket_idx,
+                              lctx_, input_bucket_store_.get());
 
-    if (!bucket_items_list.has_value()) {
-      continue;
-    }
+        if (!bucket_items_list.has_value()) {
+          return;
+        }
 
-    auto run_f = std::async([&] {
-      std::vector<uint128_t> items_hash(bucket_items_list->size());
-      yacl::parallel_for(0, bucket_items_list->size(),
-                         [&](int64_t begin, int64_t end) {
-                           for (int64_t i = begin; i < end; ++i) {
-                             items_hash[i] = yacl::crypto::Blake3_128(
-                                 bucket_items_list->at(i).base64_data);
-                           }
-                         });
+        auto run_f = std::async([&] {
+          std::vector<uint128_t> items_hash(bucket_items_list->size());
+          yacl::parallel_for(0, bucket_items_list->size(),
+                             [&](int64_t begin, int64_t end) {
+                               for (int64_t i = begin; i < end; ++i) {
+                                 items_hash[i] = yacl::crypto::Blake3_128(
+                                     bucket_items_list->at(i).base64_data);
+                               }
+                             });
 
-      Rr22PsiSender(rr22_options, lctx_, items_hash);
-    });
+          Rr22PsiSender(rr22_options, lctx_, items_hash);
+        });
 
-    SyncWait(lctx_, &run_f);
+        SyncWait(lctx_, &run_f);
 
-    auto write_bucket_res_f = std::async([&] {
-      HandleBucketResultBySender(config_.protocol_config().broadcast_result(),
-                                 lctx_, *bucket_items_list,
-                                 intersection_indices_writer_.get());
-    });
+        auto write_bucket_res_f = std::async([&] {
+          HandleBucketResultBySender(
+              config_.protocol_config().broadcast_result(), lctx_,
+              *bucket_items_list, intersection_indices_writer_.get(),
+              recovery_manager_ == nullptr ? std::optional<size_t>(bucket_idx)
+                                           : std::nullopt);
+        });
 
-    SyncWait(lctx_, &write_bucket_res_f);
+        SyncWait(lctx_, &write_bucket_res_f);
 
-    if (recovery_manager_) {
-      recovery_manager_->UpdateParsedBucketCount(bucket_idx + 1);
-    }
-  }
+        if (recovery_manager_) {
+          recovery_manager_->UpdateParsedBucketCount(bucket_idx + 1);
+        }
+      });
+  if (recovery_manager_ == nullptr)
+    intersection_indices_writer_->WaitBucketWriteDone();
 
   SPDLOG_INFO("[Rr22PSISender::Online] end");
 }

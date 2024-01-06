@@ -34,11 +34,11 @@ std::optional<std::vector<HashBucketCache::BucketItem>> PrepareBucketData(
 void HandleBucketResultBySender(
     bool broadcast_result, const std::shared_ptr<yacl::link::Context>& lctx,
     const std::vector<HashBucketCache::BucketItem>& bucket_items_list,
-    IndexWriter* writer);
+    IndexWriter* writer, std::optional<size_t> bucket_idx = std::nullopt);
 
 void HandleBucketResultByReceiver(
     bool broadcast_result, const std::shared_ptr<yacl::link::Context>& lctx,
     const std::vector<HashBucketCache::BucketItem>& result_list,
-    IndexWriter* writer);
+    IndexWriter* writer, std::optional<size_t> bucket_idx = std::nullopt);
 
 }  // namespace psi::psi

@@ -38,6 +38,8 @@ class Rr22PSISender final : public AbstractPSISender {
 
   uint64_t bucket_count_ = 0;
 
+  uint64_t parallelism_ = 1;
+
   std::unique_ptr<HashBucketCache> input_bucket_store_;
 };
 

@@ -17,6 +17,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
+#include <future>
 #include <memory>
 #include <optional>
 #include <vector>
@@ -36,13 +37,19 @@ class IndexWriter {
 
   ~IndexWriter();
 
-  size_t WriteCache(const std::vector<uint64_t>& indexes);
+  size_t WriteCache(const std::vector<uint64_t>& indexes,
+                    std::optional<size_t> bucket_idx = std::nullopt);
 
-  size_t WriteCache(uint64_t index);
+  size_t WriteCache(uint64_t index,
+                    std::optional<size_t> bucket_idx = std::nullopt);
+
+  void InitBucketWrite(uint32_t bucket_num);
+
+  void WaitBucketWriteDone();
 
   void Close();
 
-  void Commit();
+  void Commit(std::optional<size_t> bucket_idx = std::nullopt);
 
   [[nodiscard]] size_t cache_cnt() const { return cache_cnt_; }
 
@@ -55,11 +62,11 @@ class IndexWriter {
  private:
   std::filesystem::path path_;
 
-  size_t cache_cnt_ = 0;
+  std::atomic<size_t> cache_cnt_ = 0;
 
-  size_t write_cnt_ = 0;
+  std::atomic<size_t> write_cnt_ = 0;
 
-  size_t cache_size_ = 0;
+  std::atomic<size_t> cache_size_ = 0;
 
   std::shared_ptr<arrow::ArrayBuilder> builder_;
 
@@ -68,6 +75,12 @@ class IndexWriter {
   std::shared_ptr<arrow::ipc::RecordBatchWriter> writer_;
 
   std::shared_ptr<arrow::Schema> schema_;
+
+  std::vector<std::shared_ptr<arrow::ArrayBuilder>> builders_;
+  std::mutex mutex_;
+  std::condition_variable cond_var_;
+  std::promise<bool> done_;
+  std::queue<std::shared_ptr<arrow::RecordBatch>> queue_;
 };
 
 class IndexReader {

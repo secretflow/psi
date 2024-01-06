@@ -56,7 +56,7 @@ std::optional<std::vector<HashBucketCache::BucketItem>> PrepareBucketData(
 void HandleBucketResultBySender(
     bool broadcast_result, const std::shared_ptr<yacl::link::Context>& lctx,
     const std::vector<HashBucketCache::BucketItem>& bucket_items_list,
-    IndexWriter* writer) {
+    IndexWriter* writer, std::optional<size_t> bucket_idx) {
   if (broadcast_result) {
     std::vector<std::string> result_list;
     BroadcastResult(lctx, &result_list);
@@ -67,26 +67,26 @@ void HandleBucketResultBySender(
 
     if (result_list.size() == bucket_items_list.size()) {
       for (const auto& item : bucket_items_list) {
-        writer->WriteCache(item.index);
+        writer->WriteCache(item.index, bucket_idx);
       }
     } else {
       std::sort(result_list.begin(), result_list.end());
       for (const auto& item : bucket_items_list) {
         if (std::binary_search(result_list.begin(), result_list.end(),
                                item.base64_data)) {
-          writer->WriteCache(item.index);
+          writer->WriteCache(item.index, bucket_idx);
         }
       }
     }
 
-    writer->Commit();
+    writer->Commit(bucket_idx);
   }
 }
 
 void HandleBucketResultByReceiver(
     bool broadcast_result, const std::shared_ptr<yacl::link::Context>& lctx,
     const std::vector<HashBucketCache::BucketItem>& result_list,
-    IndexWriter* writer) {
+    IndexWriter* writer, std::optional<size_t> bucket_idx) {
   if (broadcast_result) {
     std::vector<std::string> item_data_list;
     item_data_list.reserve(result_list.size());
@@ -99,10 +99,10 @@ void HandleBucketResultByReceiver(
   }
 
   for (const auto& item : result_list) {
-    writer->WriteCache(item.index);
+    writer->WriteCache(item.index, bucket_idx);
   }
 
-  writer->Commit();
+  writer->Commit(bucket_idx);
 }
 
 }  // namespace psi::psi

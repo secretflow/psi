@@ -149,4 +149,52 @@ std::vector<size_t> GetShuffledIdx(size_t items_size);
 std::vector<uint8_t> PaddingData(yacl::ByteContainerView data, size_t max_len);
 std::string UnPaddingData(yacl::ByteContainerView data);
 
+class Limiter {
+ private:
+  std::mutex mtx;
+  std::condition_variable cv;
+  size_t count;
+  const size_t max_count;
+
+ public:
+  Limiter(size_t max_count) : count(0), max_count(max_count) {}
+
+  void acquire() {
+    std::unique_lock<std::mutex> lock(mtx);
+    cv.wait(lock, [this]() { return count < max_count; });
+    ++count;
+  }
+
+  void release() {
+    std::unique_lock<std::mutex> lock(mtx);
+    --count;
+    lock.unlock();
+    cv.notify_one();
+  }
+
+  void wait() {
+    std::unique_lock<std::mutex> lock(mtx);
+    cv.wait(lock, [this]() { return count == 0; });
+  }
+};
+
+#define PsiParallelFor(begin, end, parallelism, ...)               \
+  do {                                                             \
+    Limiter limiter(parallelism);                                  \
+    for (; begin < end; begin++) {                                 \
+      if (parallelism == 1)                                        \
+        __VA_ARGS__(begin);                                        \
+      else {                                                       \
+        std::shared_ptr<yacl::link::Context> ctx = lctx_->Spawn(); \
+        limiter.acquire();                                         \
+        std::thread th([&, begin, lctx_ = ctx]() {                 \
+          __VA_ARGS__(begin);                                      \
+          limiter.release();                                       \
+        });                                                        \
+        th.detach();                                               \
+      }                                                            \
+    }                                                              \
+    limiter.wait();                                                \
+  } while (false);
+
 }  // namespace psi::psi

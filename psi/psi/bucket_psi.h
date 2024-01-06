@@ -99,6 +99,9 @@ size_t NegotiateBucketNum(const std::shared_ptr<yacl::link::Context>& lctx,
                           size_t self_items_count, size_t self_bucket_size,
                           int psi_type);
 
+size_t NegotiateParallelismNum(const std::shared_ptr<yacl::link::Context>& lctx,
+                               size_t self_parallelism, int psi_type);
+
 class BucketPsi {
  public:
   // ic_mode: 互联互通模式，对方可以是非隐语应用

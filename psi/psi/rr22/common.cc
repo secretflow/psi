@@ -35,6 +35,11 @@ void CommonInit(const std::string& key_hash_digest, v2::PsiConfig* config,
         kDefaultBucketSize);
   }
 
+  if (config->protocol_config().rr22_config().parallelism() == 0) {
+    config->mutable_protocol_config()->mutable_rr22_config()->set_parallelism(
+        omp_get_num_procs());
+  }
+
   if (recovery_manager) {
     recovery_manager->MarkInitEnd(*config, key_hash_digest);
   }

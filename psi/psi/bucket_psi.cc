@@ -399,6 +399,19 @@ size_t NegotiateBucketNum(const std::shared_ptr<yacl::link::Context>& lctx,
   return max_bucket_count;
 }
 
+size_t NegotiateParallelismNum(const std::shared_ptr<yacl::link::Context>& lctx,
+                               size_t self_parallelism, int psi_type) {
+  std::vector<size_t> items_size_list =
+      AllGatherItemsSize(lctx, self_parallelism);
+
+  size_t max_parallelism =
+      *std::min_element(items_size_list.begin(), items_size_list.end());
+
+  SPDLOG_INFO("psi protocol={}, max_parallelism={}", psi_type, max_parallelism);
+
+  return max_parallelism;
+}
+
 std::vector<uint64_t> BucketPsi::RunBucketPsi(
     std::shared_ptr<Progress>& progress, uint64_t self_items_count) {
   std::vector<uint64_t> ret;

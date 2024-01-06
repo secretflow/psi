@@ -51,28 +51,80 @@ IndexWriter::IndexWriter(const std::filesystem::path& path, size_t cache_size,
   YACL_ENFORCE(builder_->Resize(cache_size_ * sizeof(uint64_t)).ok());
 }
 
-size_t IndexWriter::WriteCache(const std::vector<uint64_t>& indexes) {
+size_t IndexWriter::WriteCache(const std::vector<uint64_t>& indexes,
+                               std::optional<size_t> bucket_idx) {
   YACL_ENFORCE(!outfile_->closed());
 
   for (auto i : indexes) {
-    WriteCache(i);
+    WriteCache(i, bucket_idx);
   }
 
   return write_cnt_;
 }
 
-size_t IndexWriter::WriteCache(uint64_t index) {
+size_t IndexWriter::WriteCache(uint64_t index,
+                               std::optional<size_t> bucket_idx) {
   YACL_ENFORCE(!outfile_->closed());
 
-  YACL_ENFORCE(builder_->AppendScalar(arrow::UInt64Scalar(index)).ok());
+  if (bucket_idx)
+    YACL_ENFORCE(
+        builders_[*bucket_idx]->AppendScalar(arrow::UInt64Scalar(index)).ok());
+  else
+    YACL_ENFORCE(builder_->AppendScalar(arrow::UInt64Scalar(index)).ok());
+
   cache_cnt_++;
   write_cnt_++;
 
   return write_cnt_;
 }
 
-void IndexWriter::Commit() {
+void IndexWriter::InitBucketWrite(uint32_t bucket_num) {
+  builders_ = std::vector<std::shared_ptr<arrow::ArrayBuilder>>(bucket_num);
+  for (size_t i = 0; i < bucket_num; i++) {
+    builders_[i] = arrow::MakeBuilder(arrow::uint64()).ValueOrDie();
+    YACL_ENFORCE(builders_[i]->Resize(cache_size_ * sizeof(uint64_t)).ok());
+  }
+  std::thread writerThread([&]() {
+    for (uint32_t i = 0; i < bucket_num; i++) {
+      std::shared_ptr<arrow::RecordBatch> record_batch;
+      {
+        std::unique_lock<std::mutex> lock(mutex_);
+        cond_var_.wait(lock, [this]() { return !queue_.empty(); });
+
+        record_batch = queue_.front();
+        queue_.pop();
+      }
+
+      YACL_ENFORCE(record_batch);
+      if (!writer_->WriteRecordBatch(*record_batch).ok()) {
+        YACL_THROW("writer WriteRecordBatch failed.");
+      }
+    }
+    done_.set_value(true);
+  });
+  writerThread.detach();
+}
+
+void IndexWriter::WaitBucketWriteDone() { done_.get_future().get(); }
+
+void IndexWriter::Commit(std::optional<size_t> bucket_idx) {
   YACL_ENFORCE(!outfile_->closed());
+
+  if (bucket_idx) {
+    auto builder = builders_[*bucket_idx];
+    std::vector<std::shared_ptr<arrow::Array>> output_arrays;
+    output_arrays.emplace_back(builder->Finish().ValueOrDie());
+
+    std::shared_ptr<arrow::RecordBatch> output_batch = arrow::RecordBatch::Make(
+        schema_, output_arrays[0]->length(), output_arrays);
+
+    std::unique_lock<std::mutex> lock(mutex_);
+    queue_.push(output_batch);
+    cond_var_.notify_one();
+    builders_[*bucket_idx] = nullptr;
+
+    return;
+  }
 
   if (cache_cnt_ == 0) {
     return;

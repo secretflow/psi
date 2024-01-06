@@ -78,6 +78,8 @@ message Rr22Config {
   uint64 bucket_size = 1;
 
   bool low_comm_mode = 2;
+
+  uint64 parallelism = 10;
 }
 
 // Any items related to PSI protocols.

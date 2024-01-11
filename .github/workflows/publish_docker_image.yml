@@ -2,6 +2,7 @@ name: "Publish docker image"
 on:
   workflow_dispatch:
 
+permissions: read-all
 jobs:
   trigger-circleci:
     runs-on: ubuntu-latest

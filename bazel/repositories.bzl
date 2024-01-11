@@ -16,11 +16,6 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
-SECRETFLOW_GIT = "https://github.com/secretflow"
-
-YACL_COMMIT_ID = "5feaa30e6a2ab3be5a01a7a4ee3c1613d11386d9"
-YACL_SHA256 = "7ff9f93b0de554fa454a4c995dc0533a7b998173e6f0468be5b40a6092555a4e"
-
 def psi_deps():
     _com_github_nelhage_rules_boost()
     _bazel_platform()
@@ -59,10 +54,10 @@ def _yacl():
         http_archive,
         name = "yacl",
         urls = [
-            "https://github.com/secretflow/yacl/archive/{commit}.tar.gz".format(commit = YACL_COMMIT_ID),
+            "https://github.com/secretflow/yacl/archive/5feaa30e6a2ab3be5a01a7a4ee3c1613d11386d9.tar.gz",
         ],
-        strip_prefix = "yacl-{commit}".format(commit = YACL_COMMIT_ID),
-        sha256 = YACL_SHA256,
+        strip_prefix = "yacl-5feaa30e6a2ab3be5a01a7a4ee3c1613d11386d9",
+        sha256 = "7ff9f93b0de554fa454a4c995dc0533a7b998173e6f0468be5b40a6092555a4e",
     )
 
 def _bazel_platform():

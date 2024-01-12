@@ -235,10 +235,10 @@ def _com_google_flatbuffers():
     maybe(
         http_archive,
         name = "com_google_flatbuffers",
-        sha256 = "8aff985da30aaab37edf8e5b02fda33ed4cbdd962699a8e2af98fdef306f4e4d",
-        strip_prefix = "flatbuffers-23.3.3",
+        sha256 = "1cce06b17cddd896b6d73cc047e36a254fb8df4d7ea18a46acf16c4c0cd3f3f3",
+        strip_prefix = "flatbuffers-23.5.26",
         urls = [
-            "https://github.com/google/flatbuffers/archive/refs/tags/v23.3.3.tar.gz",
+            "https://github.com/google/flatbuffers/archive/refs/tags/v23.5.26.tar.gz",
         ],
     )
 

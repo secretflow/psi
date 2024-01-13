@@ -338,10 +338,10 @@ def _org_apache_thrift():
         http_archive,
         name = "org_apache_thrift",
         build_file = "@psi//bazel:thrift.BUILD",
-        sha256 = "5da60088e60984f4f0801deeea628d193c33cec621e78c8a43a5d8c4055f7ad9",
-        strip_prefix = "thrift-0.13.0",
+        sha256 = "6428911db505702c51f7d993155a4a4c8afee83fdd021b52f2eccd8d34780629",
+        strip_prefix = "thrift-0.19.0",
         urls = [
-            "https://github.com/apache/thrift/archive/v0.13.0.tar.gz",
+            "https://github.com/apache/thrift/archive/v0.19.0.tar.gz",
         ],
     )
 

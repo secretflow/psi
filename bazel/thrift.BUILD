@@ -48,17 +48,6 @@ cc_library(
 )
 
 genrule(
-    name = "version_h",
-    srcs = [
-        "compiler/cpp/src/thrift/version.h.in",
-    ],
-    outs = [
-        "compiler/cpp/src/thrift/version.h",
-    ],
-    cmd = "sed 's/@PACKAGE_VERSION@/0.12.0/g' $< > $@",
-)
-
-genrule(
     name = "config_h",
     srcs = ["build/cmake/config.h.in"],
     outs = ["lib/cpp/src/thrift/config.h"],

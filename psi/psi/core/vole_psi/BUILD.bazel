@@ -24,7 +24,7 @@ psi_cc_library(
         "//psi/psi/core/vole_psi/okvs:aes_crhash",
         "//psi/psi/core/vole_psi/okvs:baxos",
         "@yacl//yacl/base:buffer",
-        "@yacl//yacl/crypto/primitives/vole/f2k:silent_vole",
+        "@yacl//yacl/crypto/primitives/vole:silent_vole",
         "@yacl//yacl/crypto/tools:prg",
         "@yacl//yacl/crypto/utils:rand",
         "@yacl//yacl/link",

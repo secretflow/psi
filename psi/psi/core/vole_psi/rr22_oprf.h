@@ -18,7 +18,7 @@
 #include <vector>
 
 #include "yacl/base/int128.h"
-#include "yacl/crypto/primitives/vole/f2k/silent_vole.h"
+#include "yacl/crypto/primitives/vole/silent_vole.h"
 #include "yacl/link/context.h"
 
 #include "psi/psi/core/vole_psi/okvs/baxos.h"

@@ -38,7 +38,7 @@ EcdhPsiContext::EcdhPsiContext(EcdhPsiOptions options)
   YACL_ENFORCE(options_.link_ctx->WorldSize() == 2);
 
   main_link_ctx_ = options_.link_ctx;
-  dual_mask_link_ctx_ = options_.link_ctx->Spawn("ecdh_dual_mask");
+  dual_mask_link_ctx_ = options_.link_ctx->Spawn();
 }
 
 void EcdhPsiContext::CheckConfig() {

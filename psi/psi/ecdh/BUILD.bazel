@@ -42,3 +42,26 @@ psi_cc_library(
         "//psi/psi/utils:arrow_csv_batch_provider",
     ],
 )
+
+psi_cc_library(
+    name = "client",
+    srcs = ["client.cc"],
+    hdrs = ["client.h"],
+    deps = [
+        "//psi/psi:interface",
+        "//psi/psi/core:ecdh_oprf_psi",
+        "//psi/psi/utils:sync",
+    ],
+)
+
+psi_cc_library(
+    name = "server",
+    srcs = ["server.cc"],
+    hdrs = ["server.h"],
+    deps = [
+        "//psi/psi:interface",
+        "//psi/psi/core:ecdh_oprf_psi",
+        "//psi/psi/utils:ec",
+        "//psi/psi/utils:sync",
+    ],
+)

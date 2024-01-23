@@ -21,7 +21,7 @@
 #include "arrow/datum.h"
 #include "spdlog/spdlog.h"
 
-#include "psi/psi/utils/utils.h"
+#include "psi/psi/utils/key.h"
 
 namespace psi::psi {
 

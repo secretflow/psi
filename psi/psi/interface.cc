@@ -17,10 +17,6 @@
 #include <spdlog/spdlog.h>
 
 #include <cstddef>
-#include <cstdint>
-#include <filesystem>
-#include <memory>
-#include <numeric>
 
 #include "absl/time/time.h"
 #include "boost/uuid/uuid.hpp"
@@ -35,7 +31,8 @@
 #include "psi/psi/trace_categories.h"
 #include "psi/psi/utils/advanced_join.h"
 #include "psi/psi/utils/csv_checker.h"
-#include "psi/psi/utils/utils.h"
+#include "psi/psi/utils/key.h"
+#include "psi/psi/utils/sync.h"
 
 #include "psi/proto/psi_v2.pb.h"
 
@@ -67,40 +64,29 @@ std::string GenerateSortedIndexFileName() {
 
 constexpr size_t kIndexWriterBatchSize = 1 << 10;
 
-AbstractPSIParty::AbstractPSIParty(const v2::PsiConfig &config, v2::Role role,
+AbstractPsiParty::AbstractPsiParty(const v2::PsiConfig &config, v2::Role role,
                                    std::shared_ptr<yacl::link::Context> lctx)
     : config_(config),
       role_(role),
       selected_keys_(config_.keys().begin(), config_.keys().end()),
       lctx_(std::move(lctx)) {}
 
-void AbstractPSIParty::Init() {
-  TRACE_EVENT("init", "AbstractPSIParty::Init");
-  SPDLOG_INFO("[AbstractPSIParty::Init] start");
-
-  if (!lctx_) {
-    yacl::link::ContextDesc lctx_desc(config_.link_config());
-    int rank = -1;
-    for (int i = 0; i < config_.link_config().parties().size(); i++) {
-      if (config_.link_config().parties(i).id() == config_.self_link_party()) {
-        rank = i;
-      }
-    }
-    YACL_ENFORCE_GE(rank, 0, "Couldn't find rank in YACL Link.");
-
-    lctx_ = yacl::link::FactoryBrpc().CreateContext(lctx_desc, rank);
-  }
-
-  // Test connection.
-  lctx_->ConnectToMesh();
+void AbstractPsiParty::Init() {
+  TRACE_EVENT("init", "AbstractPsiParty::Init");
+  SPDLOG_INFO("[AbstractPsiParty::Init] start");
 
   CheckSelfConfig();
+
+  if (lctx_) {
+    // Test connection.
+    lctx_->ConnectToMesh();
+  }
 
   CheckPeerConfig();
 
   if (config_.advanced_join_type() !=
       v2::PsiConfig::ADVANCED_JOIN_TYPE_UNSPECIFIED) {
-    SPDLOG_INFO("[AbstractPSIParty::Init][Advanced join pre-process] start");
+    SPDLOG_INFO("[AbstractPsiParty::Init][Advanced join pre-process] start");
 
     if (config_.recovery_config().enabled()) {
       advanced_join_config_ =
@@ -122,7 +108,7 @@ void AbstractPSIParty::Init() {
 
     SyncWait(lctx_, &advanced_join_preprocess_f);
 
-    SPDLOG_INFO("[AbstractPSIParty::Init][Advanced join pre-process] end");
+    SPDLOG_INFO("[AbstractPsiParty::Init][Advanced join pre-process] end");
   }
 
   if (config_.recovery_config().enabled()) {
@@ -145,7 +131,7 @@ void AbstractPSIParty::Init() {
   auto check_csv_f = std::async([&] {
     if (check_duplicates || config_.check_hash_digest() ||
         config_.protocol_config().protocol() != v2::PROTOCOL_ECDH) {
-      SPDLOG_INFO("[AbstractPSIParty::Init][Check csv pre-process] start");
+      SPDLOG_INFO("[AbstractPsiParty::Init][Check csv pre-process] start");
 
       check_csv_report =
           CheckCsv(config_.input_config().path(), selected_keys_,
@@ -154,7 +140,7 @@ void AbstractPSIParty::Init() {
       key_hash_digest_ = check_csv_report.key_hash_digest;
       report_.set_original_count(check_csv_report.num_rows);
 
-      SPDLOG_INFO("[AbstractPSIParty::Init][Check csv pre-process] end");
+      SPDLOG_INFO("[AbstractPsiParty::Init][Check csv pre-process] end");
     }
   });
 
@@ -194,12 +180,12 @@ void AbstractPSIParty::Init() {
       }
     }
   }
-  SPDLOG_INFO("[AbstractPSIParty::Init] end");
+  SPDLOG_INFO("[AbstractPsiParty::Init] end");
 }
 
-v2::PsiReport AbstractPSIParty::Finalize() {
-  TRACE_EVENT("finalize", "AbstractPSIParty::Finalize");
-  SPDLOG_INFO("[AbstractPSIParty::Finalize] start");
+PsiResultReport AbstractPsiParty::Finalize() {
+  TRACE_EVENT("finalize", "AbstractPsiParty::Finalize");
+  SPDLOG_INFO("[AbstractPsiParty::Finalize] start");
 
   intersection_indices_writer_->Close();
 
@@ -213,7 +199,7 @@ v2::PsiReport AbstractPSIParty::Finalize() {
     sort_output = false;
   }
 
-  SPDLOG_INFO("[AbstractPSIParty::Finalize][Generate result] start");
+  SPDLOG_INFO("[AbstractPsiParty::Finalize][Generate result] start");
   auto gen_result_f = std::async([&] {
     MultiKeySort(intersection_indices_writer_->path(),
                  sorted_intersection_indices_path,
@@ -229,21 +215,21 @@ v2::PsiReport AbstractPSIParty::Finalize() {
   });
 
   SyncWait(lctx_, &gen_result_f);
-  SPDLOG_INFO("[AbstractPSIParty::Finalize][Generate result] end");
+  SPDLOG_INFO("[AbstractPsiParty::Finalize][Generate result] end");
 
   if (advanced_join_config_) {
-    SPDLOG_INFO("[AbstractPSIParty::Finalize][Advanced join sync] start");
+    SPDLOG_INFO("[AbstractPsiParty::Finalize][Advanced join sync] start");
     auto sync_intersection_f = std::async(
         [&] { return AdvancedJoinSync(lctx_, advanced_join_config_.get()); });
 
     SyncWait(lctx_, &sync_intersection_f);
-    SPDLOG_INFO("[AbstractPSIParty::Finalize][Advanced join sync] end");
+    SPDLOG_INFO("[AbstractPsiParty::Finalize][Advanced join sync] end");
 
     SPDLOG_INFO(
-        "[AbstractPSIParty::Finalize][Advanced join generate result] start");
+        "[AbstractPsiParty::Finalize][Advanced join generate result] start");
     AdvancedJoinGenerateResult(*advanced_join_config_);
     SPDLOG_INFO(
-        "[AbstractPSIParty::Finalize][Advanced join generate result] end");
+        "[AbstractPsiParty::Finalize][Advanced join generate result] end");
 
     report_.set_intersection_count(
         advanced_join_config_->self_intersection_cnt);
@@ -254,12 +240,12 @@ v2::PsiReport AbstractPSIParty::Finalize() {
     }
   }
 
-  SPDLOG_INFO("[AbstractPSIParty::Finalize] end");
+  SPDLOG_INFO("[AbstractPsiParty::Finalize] end");
 
   return report_;
 }
 
-void AbstractPSIParty::CheckSelfConfig() {
+void AbstractPsiParty::CheckSelfConfig() {
   if (config_.protocol_config().protocol() == v2::PROTOCOL_ECDH) {
     if (config_.protocol_config().ecdh_config().curve() == CURVE_INVALID_TYPE) {
       YACL_THROW("Curve type is not specified.");
@@ -285,11 +271,6 @@ void AbstractPSIParty::CheckSelfConfig() {
   std::set<std::string> keys_set(config_.keys().begin(), config_.keys().end());
   YACL_ENFORCE_EQ(static_cast<int>(keys_set.size()), config_.keys().size(),
                   "Duplicated key is provided.");
-
-  if (config_.advanced_join_type() ==
-      v2::PsiConfig::ADVANCED_JOIN_TYPE_LEFT_JOIN) {
-    YACL_THROW("left join is unsupported.");
-  }
 
   if (!config_.protocol_config().broadcast_result() &&
       config_.advanced_join_type() !=
@@ -324,14 +305,12 @@ void AbstractPSIParty::CheckSelfConfig() {
   }
 }
 
-void AbstractPSIParty::CheckPeerConfig() {
+void AbstractPsiParty::CheckPeerConfig() {
   v2::PsiConfig config = config_;
 
   // The fields below don't need to verify.
   config.mutable_input_config()->Clear();
   config.mutable_output_config()->Clear();
-  config.mutable_link_config()->Clear();
-  config.set_self_link_party("");
   config.mutable_keys()->Clear();
   config.mutable_debug_options()->Clear();
   config.set_skip_duplicates_check(false);
@@ -378,12 +357,58 @@ void AbstractPSIParty::CheckPeerConfig() {
   }
 }
 
-AbstractPSIReceiver::AbstractPSIReceiver(
-    const v2::PsiConfig &config, std::shared_ptr<yacl::link::Context> lctx)
-    : AbstractPSIParty(config, v2::Role::ROLE_RECEIVER, std::move(lctx)) {}
+PsiResultReport AbstractUbPsiParty::Run() {
+  Init();
 
-AbstractPSISender::AbstractPSISender(const v2::PsiConfig &config,
+  switch (config_.mode()) {
+    case v2::UbPsiConfig::MODE_OFFLINE_GEN_CACHE: {
+      OfflineGenCache();
+      break;
+    }
+    case v2::UbPsiConfig::MODE_OFFLINE_TRANSFER_CACHE: {
+      OfflineTransferCache();
+      break;
+    }
+    case v2::UbPsiConfig::MODE_OFFLINE: {
+      Offline();
+      break;
+    }
+    case v2::UbPsiConfig::MODE_ONLINE: {
+      Online();
+      break;
+    }
+    case v2::UbPsiConfig::MODE_FULL: {
+      Offline();
+      Online();
+      break;
+    }
+    default: {
+      YACL_THROW("unsupported mode.");
+    }
+  }
+
+  return report_;
+}
+
+AbstractPsiReceiver::AbstractPsiReceiver(
+    const v2::PsiConfig &config, std::shared_ptr<yacl::link::Context> lctx)
+    : AbstractPsiParty(config, v2::Role::ROLE_RECEIVER, std::move(lctx)) {}
+
+AbstractPsiSender::AbstractPsiSender(const v2::PsiConfig &config,
                                      std::shared_ptr<yacl::link::Context> lctx)
-    : AbstractPSIParty(config, v2::Role::ROLE_SENDER, std::move(lctx)) {}
+    : AbstractPsiParty(config, v2::Role::ROLE_SENDER, std::move(lctx)) {}
+
+AbstractUbPsiParty::AbstractUbPsiParty(
+    const v2::UbPsiConfig &config, v2::Role role,
+    std::shared_ptr<yacl::link::Context> lctx)
+    : config_(config), role_(role), lctx_(std::move(lctx)) {}
+
+AbstractUbPsiServer::AbstractUbPsiServer(
+    const v2::UbPsiConfig &config, std::shared_ptr<yacl::link::Context> lctx)
+    : AbstractUbPsiParty(config, v2::Role::ROLE_SERVER, std::move(lctx)) {}
+
+AbstractUbPsiClient::AbstractUbPsiClient(
+    const v2::UbPsiConfig &config, std::shared_ptr<yacl::link::Context> lctx)
+    : AbstractUbPsiParty(config, v2::Role::ROLE_CLIENT, std::move(lctx)) {}
 
 }  // namespace psi::psi

@@ -38,13 +38,13 @@
 #include "psi/psi/core/ecdh_oprf_psi.h"
 #include "psi/psi/core/ecdh_psi.h"
 #include "psi/psi/cryptor/cryptor_selector.h"
-#include "psi/psi/io/io.h"
 #include "psi/psi/prelude.h"
 #include "psi/psi/utils/batch_provider.h"
 #include "psi/psi/utils/csv_header_analyzer.h"
 #include "psi/psi/utils/ec_point_store.h"
-#include "psi/psi/utils/file.h"
+#include "psi/psi/utils/io.h"
 #include "psi/psi/utils/serialize.h"
+#include "psi/psi/utils/sync.h"
 
 namespace psi::psi {
 
@@ -110,6 +110,20 @@ class ProgressLoop {
 
 }  // namespace
 
+void CreateOutputFolder(const std::string& path) {
+  // create output folder.
+  auto out_dir_path = std::filesystem::path(path).parent_path();
+  if (out_dir_path.empty()) {
+    return;  // create file under CWD, no need to create parent dir
+  }
+
+  std::error_code ec;
+  std::filesystem::create_directory(out_dir_path, ec);
+  YACL_ENFORCE(ec.value() == 0,
+               "failed to create output dir={} for path={}, reason = {}",
+               out_dir_path.string(), path, ec.message());
+}
+
 bool HashListEqualTest(const std::vector<yacl::Buffer>& hash_list) {
   YACL_ENFORCE(!hash_list.empty(), "unsupported hash_list size={}",
                hash_list.size());
@@ -120,6 +134,115 @@ bool HashListEqualTest(const std::vector<yacl::Buffer>& hash_list) {
     return false;
   }
   return true;
+}
+
+size_t FilterFileByIndices(const std::string& input, const std::string& output,
+                           const std::vector<uint64_t>& indices,
+                           bool output_difference, size_t header_line_count) {
+  auto in = io::BuildInputStream(io::FileIoOptions(input));
+  auto out = io::BuildOutputStream(io::FileIoOptions(output));
+
+  std::string line;
+  size_t idx = 0;
+  size_t actual_count = 0;
+  auto indices_iter = indices.begin();
+  while (in->GetLine(&line)) {
+    if (idx < header_line_count) {
+      out->Write(line);
+      out->Write("\n");
+    } else {
+      if (!output_difference) {
+        if (indices_iter == indices.end()) {
+          break;
+        }
+      }
+
+      if ((indices_iter != indices.end() &&
+           *indices_iter == idx - header_line_count) != output_difference) {
+        out->Write(line);
+        out->Write("\n");
+        actual_count++;
+      }
+
+      if (indices_iter != indices.end() &&
+          *indices_iter == idx - header_line_count) {
+        indices_iter++;
+      }
+    }
+    idx++;
+  }
+  size_t target_count =
+      (output_difference ? (idx - header_line_count - indices.size())
+                         : indices.size());
+
+  YACL_ENFORCE_EQ(actual_count, target_count,
+                  "logstic error, indices.size={}, actual_count={}, "
+                  "target_count={}, output_difference={}, please be "
+                  "sure the `indices` is sorted",
+                  indices.size(), actual_count, target_count,
+                  output_difference);
+
+  out->Close();
+  in->Close();
+
+  return indices.size();
+}
+
+size_t FilterFileByIndices(const std::string& input, const std::string& output,
+                           const std::filesystem::path& indices,
+                           bool output_difference, size_t header_line_count) {
+  auto in = io::BuildInputStream(io::FileIoOptions(input));
+  auto out = io::BuildOutputStream(io::FileIoOptions(output));
+
+  std::string line;
+  size_t idx = 0;
+  size_t actual_count = 0;
+  IndexReader reader(indices);
+
+  std::optional<uint64_t> intersection_index = reader.GetNext();
+
+  while (in->GetLine(&line)) {
+    if (idx < header_line_count) {
+      out->Write(line);
+      out->Write("\n");
+    } else {
+      if (!output_difference) {
+        if (!intersection_index.has_value()) {
+          break;
+        }
+      }
+
+      if ((intersection_index.has_value() &&
+           intersection_index.value() == idx - header_line_count) !=
+          output_difference) {
+        out->Write(line);
+        out->Write("\n");
+        actual_count++;
+      }
+
+      if (intersection_index.has_value() &&
+          intersection_index.value() == idx - header_line_count) {
+        intersection_index = reader.GetNext();
+      }
+    }
+    idx++;
+  }
+
+  size_t target_count =
+      (output_difference ? (idx - header_line_count - reader.read_cnt())
+                         : reader.read_cnt());
+
+  YACL_ENFORCE_EQ(
+      actual_count, target_count,
+      "logstic error, reader.read_cnt={}, actual_count={}, input_path={}, "
+      "target_count={}, output_difference={}, please be "
+      "sure the `indices` is sorted",
+      reader.read_cnt(), actual_count, input, target_count, output_difference);
+
+  out->Close();
+  in->Close();
+
+  return reader.read_cnt();
 }
 
 std::unique_ptr<CsvChecker> CheckInput(
@@ -276,6 +399,9 @@ void BucketPsi::Init() {
     config_.set_bucket_size(kBucketSize);
   }
   SPDLOG_INFO("bucket size set to {}", config_.bucket_size());
+
+  // Test connection.
+  lctx_->ConnectToMesh();
 
   MemoryPsiConfig config;
   config.set_psi_type(config_.psi_type());

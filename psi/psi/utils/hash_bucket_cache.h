@@ -23,7 +23,7 @@
 #include "fmt/format.h"
 #include "yacl/base/exception.h"
 
-#include "psi/psi/io/io.h"
+#include "psi/psi/utils/io.h"
 #include "psi/psi/utils/multiplex_disk_cache.h"
 
 namespace psi::psi {

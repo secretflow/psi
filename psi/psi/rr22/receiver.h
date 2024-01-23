@@ -20,12 +20,12 @@
 
 namespace psi::psi::rr22 {
 
-class Rr22PSIReceiver final : public AbstractPSIReceiver {
+class Rr22PsiReceiver final : public AbstractPsiReceiver {
  public:
-  explicit Rr22PSIReceiver(const v2::PsiConfig &config,
+  explicit Rr22PsiReceiver(const v2::PsiConfig &config,
                            std::shared_ptr<yacl::link::Context> lctx = nullptr);
 
-  ~Rr22PSIReceiver() override = default;
+  ~Rr22PsiReceiver() override = default;
 
  private:
   void Init() override;

@@ -15,35 +15,36 @@
 #include "psi/psi/rr22/receiver.h"
 
 #include "yacl/crypto/base/hash/hash_utils.h"
+#include "yacl/crypto/utils/rand.h"
 #include "yacl/utils/parallel.h"
 
-#include "psi/psi/bucket.h"
 #include "psi/psi/bucket_psi.h"
 #include "psi/psi/prelude.h"
 #include "psi/psi/rr22/common.h"
 #include "psi/psi/trace_categories.h"
+#include "psi/psi/utils/bucket.h"
 #include "psi/psi/utils/serialize.h"
-#include "psi/psi/utils/utils.h"
+#include "psi/psi/utils/sync.h"
 
 namespace psi::psi::rr22 {
 
-Rr22PSIReceiver::Rr22PSIReceiver(const v2::PsiConfig &config,
+Rr22PsiReceiver::Rr22PsiReceiver(const v2::PsiConfig &config,
                                  std::shared_ptr<yacl::link::Context> lctx)
-    : AbstractPSIReceiver(config, std::move(lctx)) {}
+    : AbstractPsiReceiver(config, std::move(lctx)) {}
 
-void Rr22PSIReceiver::Init() {
-  TRACE_EVENT("init", "Rr22PSIReceiver::Init");
-  SPDLOG_INFO("[Rr22PSIReceiver::Init] start");
+void Rr22PsiReceiver::Init() {
+  TRACE_EVENT("init", "Rr22PsiReceiver::Init");
+  SPDLOG_INFO("[Rr22PsiReceiver::Init] start");
 
-  AbstractPSIReceiver::Init();
+  AbstractPsiReceiver::Init();
 
   CommonInit(key_hash_digest_, &config_, recovery_manager_.get());
-  SPDLOG_INFO("[Rr22PSIReceiver::Init] end");
+  SPDLOG_INFO("[Rr22PsiReceiver::Init] end");
 }
 
-void Rr22PSIReceiver::PreProcess() {
-  TRACE_EVENT("pre-process", "Rr22PSIReceiver::PreProcess");
-  SPDLOG_INFO("[Rr22PSIReceiver::PreProcess] start");
+void Rr22PsiReceiver::PreProcess() {
+  TRACE_EVENT("pre-process", "Rr22PsiReceiver::PreProcess");
+  SPDLOG_INFO("[Rr22PsiReceiver::PreProcess] start");
 
   if (digest_equal_) {
     return;
@@ -77,12 +78,12 @@ void Rr22PSIReceiver::PreProcess() {
     recovery_manager_->MarkPreProcessEnd();
   }
 
-  SPDLOG_INFO("[Rr22PSIReceiver::PreProcess] end");
+  SPDLOG_INFO("[Rr22PsiReceiver::PreProcess] end");
 }
 
-void Rr22PSIReceiver::Online() {
-  TRACE_EVENT("online", "Rr22PSIReceiver::Online");
-  SPDLOG_INFO("[Rr22PSIReceiver::Online] start");
+void Rr22PsiReceiver::Online() {
+  TRACE_EVENT("online", "Rr22PsiReceiver::Online");
+  SPDLOG_INFO("[Rr22PsiReceiver::Online] start");
 
   if (digest_equal_) {
     return;
@@ -120,6 +121,12 @@ void Rr22PSIReceiver::Online() {
     auto run_f = std::async([&] {
       std::vector<HashBucketCache::BucketItem> res;
 
+      // Gather Items Size
+      std::vector<size_t> items_size =
+          AllGatherItemsSize(lctx_, bucket_items_list->size());
+      size_t max_size =
+          std::max(items_size[lctx_->Rank()], items_size[lctx_->NextRank()]);
+
       std::vector<uint128_t> items_hash(bucket_items_list->size());
       yacl::parallel_for(0, bucket_items_list->size(),
                          [&](int64_t begin, int64_t end) {
@@ -128,9 +135,15 @@ void Rr22PSIReceiver::Online() {
                                  bucket_items_list->at(i).base64_data);
                            }
                          });
+      if (bucket_items_list->size() < max_size) {
+        items_hash.resize(max_size);
+        for (size_t idx = bucket_items_list->size(); idx < max_size; idx++) {
+          items_hash[idx] = yacl::crypto::SecureRandU128();
+        }
+      }
 
       std::vector<size_t> rr22_psi_result =
-          Rr22PsiReceiver(rr22_options, lctx_, items_hash);
+          ::psi::psi::Rr22PsiReceiver(rr22_options, lctx_, items_hash);
       res.reserve(rr22_psi_result.size());
 
       for (auto index : rr22_psi_result) {
@@ -155,12 +168,12 @@ void Rr22PSIReceiver::Online() {
     }
   }
 
-  SPDLOG_INFO("[Rr22PSIReceiver::Online] end");
+  SPDLOG_INFO("[Rr22PsiReceiver::Online] end");
 }
 
-void Rr22PSIReceiver::PostProcess() {
-  TRACE_EVENT("post-process", "Rr22PSIReceiver::PostProcess");
-  SPDLOG_INFO("[Rr22PSIReceiver::PostProcess] start");
+void Rr22PsiReceiver::PostProcess() {
+  TRACE_EVENT("post-process", "Rr22PsiReceiver::PostProcess");
+  SPDLOG_INFO("[Rr22PsiReceiver::PostProcess] start");
 
   if (digest_equal_) {
     return;
@@ -170,7 +183,7 @@ void Rr22PSIReceiver::PostProcess() {
     recovery_manager_->MarkPostProcessEnd();
   }
 
-  SPDLOG_INFO("[Rr22PSIReceiver::PostProcess] end");
+  SPDLOG_INFO("[Rr22PsiReceiver::PostProcess] end");
 }
 
 }  // namespace psi::psi::rr22

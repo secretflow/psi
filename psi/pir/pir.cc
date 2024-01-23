@@ -33,10 +33,11 @@
 #include "psi/psi/core/labeled_psi/sender_kvdb.h"
 #include "psi/psi/core/labeled_psi/sender_memdb.h"
 #include "psi/psi/cryptor/ecc_cryptor.h"
-#include "psi/psi/io/io.h"
 #include "psi/psi/utils/batch_provider.h"
+#include "psi/psi/utils/io.h"
 #include "psi/psi/utils/serialize.h"
-#include "psi/psi/utils/utils.h"
+#include "psi/psi/utils/sync.h"
+
 namespace psi::pir {
 
 namespace {

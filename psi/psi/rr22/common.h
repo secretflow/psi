@@ -17,7 +17,7 @@
 
 #include "psi/psi/core/vole_psi/rr22_oprf.h"
 #include "psi/psi/core/vole_psi/rr22_psi.h"
-#include "psi/psi/recovery.h"
+#include "psi/psi/utils/recovery.h"
 
 #include "psi/proto/psi_v2.pb.h"
 

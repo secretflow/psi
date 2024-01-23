@@ -18,6 +18,7 @@
 #include <cmath>
 #include <future>
 #include <ostream>
+#include <random>
 
 #include "sparsehash/dense_hash_map"
 #include "yacl/base/byte_container_view.h"
@@ -25,7 +26,7 @@
 #include "psi/psi/core/vole_psi/okvs/galois128.h"
 #include "psi/psi/core/vole_psi/rr22_oprf.h"
 #include "psi/psi/core/vole_psi/rr22_utils.h"
-#include "psi/psi/utils/utils.h"
+#include "psi/psi/utils/sync.h"
 
 namespace psi::psi {
 
@@ -64,6 +65,7 @@ void Rr22PsiSender(const Rr22PsiOptions& options,
   if ((sender_size == 0) || (receiver_size == 0)) {
     return;
   }
+  YACL_ENFORCE(sender_size <= receiver_size);
 
   size_t mask_size = sizeof(uint128_t);
   if (options.compress) {
@@ -71,7 +73,8 @@ void Rr22PsiSender(const Rr22PsiOptions& options,
                                     options.malicious);
   }
 
-  Rr22OprfSender oprf_sender(kRr22OprfBinSize, options.ssp, options.mode);
+  Rr22OprfSender oprf_sender(kRr22OprfBinSize, options.ssp, options.mode,
+                             options.code_type, options.malicious);
 
   yacl::Buffer inputs_hash_buffer(inputs.size() * sizeof(uint128_t));
   absl::Span<uint128_t> inputs_hash =
@@ -85,14 +88,15 @@ void Rr22PsiSender(const Rr22PsiOptions& options,
       absl::MakeSpan((uint128_t*)(sender_oprf_buffer.data()), inputs.size());
 
   SPDLOG_INFO("oprf eval begin");
-  for (size_t i = 0; i < sender_size; i += receiver_size) {
-    size_t current_batch_size = std::min(receiver_size, sender_size - i);
-    oprf_sender.Eval(absl::MakeSpan(&inputs[i], current_batch_size),
-                     absl::MakeSpan(&inputs_hash[i], current_batch_size),
-                     absl::MakeSpan(&sender_oprfs[i], current_batch_size),
-                     options.num_threads);
-  }
+  oprf_sender.Eval(inputs, inputs_hash, sender_oprfs, options.num_threads);
+
   SPDLOG_INFO("oprf eval end");
+
+  // random shuffle sender's oprf values
+  SPDLOG_INFO("oprf shuffle begin");
+  std::mt19937 g(yacl::crypto::SecureRandU64());
+  std::shuffle(sender_oprfs.begin(), sender_oprfs.end(), g);
+  SPDLOG_INFO("oprf shuffle end");
 
   yacl::ByteContainerView oprf_byteview;
   if (options.compress) {
@@ -145,10 +149,13 @@ std::vector<size_t> Rr22PsiReceiver(
     return {};
   }
 
+  YACL_ENFORCE(sender_size <= receiver_size);
+
   size_t mask_size = ComputeTruncateSize(sender_size, receiver_size,
                                          options.ssp, options.malicious);
 
-  Rr22OprfReceiver oprf_receiver(kRr22OprfBinSize, options.ssp, options.mode);
+  Rr22OprfReceiver oprf_receiver(kRr22OprfBinSize, options.ssp, options.mode,
+                                 options.code_type, options.malicious);
 
   SPDLOG_INFO("out buffer begin");
   yacl::Buffer outputs_buffer(inputs.size() * sizeof(uint128_t));

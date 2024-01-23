@@ -21,7 +21,7 @@ psi_cc_library(
     srcs = ["ecc_cryptor.cc"],
     hdrs = ["ecc_cryptor.h"],
     deps = [
-        "//psi/psi:psi_cc_proto",
+        "//psi/proto:psi_cc_proto",
         "@com_google_absl//absl/types:span",
         "@yacl//yacl/base:exception",
         "@yacl//yacl/crypto/base/hash:hash_utils",
@@ -35,6 +35,7 @@ psi_cc_library(
     hdrs = ["sodium_curve25519_cryptor.h"],
     deps = [
         ":ecc_cryptor",
+        ":hash_to_curve_elligator2",
         "@com_github_libsodium//:libsodium",
         "@com_github_openssl_openssl//:openssl",
         "@yacl//yacl/base:exception",
@@ -53,6 +54,7 @@ psi_cc_library(
     ],
     deps = [
         ":ecc_cryptor",
+        ":hash_to_curve_elligator2",
         "@com_github_intel_ipp//:ipp",
         "@com_github_openssl_openssl//:openssl",
         "@yacl//yacl/base:exception",
@@ -148,5 +150,24 @@ psi_cc_test(
         ":sm2_cryptor",
         "@yacl//yacl/crypto/base/hash:hash_utils",
         "@yacl//yacl/crypto/tools:prg",
+    ],
+)
+
+psi_cc_library(
+    name = "hash_to_curve_elligator2",
+    srcs = ["hash_to_curve_elligator2.cc"],
+    hdrs = ["hash_to_curve_elligator2.h"],
+    deps = [
+        "@yacl//yacl/base:byte_container_view",
+        "@yacl//yacl/crypto/base/hash:hash_utils",
+        "@yacl//yacl/math/mpint",
+    ],
+)
+
+psi_cc_test(
+    name = "hash_to_curve_elligator2_test",
+    srcs = ["hash_to_curve_elligator2_test.cc"],
+    deps = [
+        ":hash_to_curve_elligator2",
     ],
 )

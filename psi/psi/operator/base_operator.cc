@@ -20,7 +20,7 @@
 #include "yacl/base/exception.h"
 
 #include "psi/psi/utils/serialize.h"
-#include "psi/psi/utils/utils.h"
+#include "psi/psi/utils/sync.h"
 
 namespace psi::psi {
 

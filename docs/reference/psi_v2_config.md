@@ -7,16 +7,15 @@
 - Messages
     - [DebugOptions](#debugoptions)
     - [EcdhConfig](#ecdhconfig)
-    - [InputConfig](#inputconfig)
     - [InternalRecoveryRecord](#internalrecoveryrecord)
+    - [IoConfig](#ioconfig)
     - [KkrtConfig](#kkrtconfig)
-    - [OutputConfig](#outputconfig)
     - [ProtocolConfig](#protocolconfig)
     - [PsiConfig](#psiconfig)
-    - [PsiReport](#psireport)
     - [RecoveryCheckpoint](#recoverycheckpoint)
     - [RecoveryConfig](#recoveryconfig)
     - [Rr22Config](#rr22config)
+    - [UbPsiConfig](#ubpsiconfig)
 
 
 
@@ -26,17 +25,7 @@
     - [PsiConfig.AdvancedJoinType](#psiconfigadvancedjointype)
     - [RecoveryCheckpoint.Stage](#recoverycheckpointstage)
     - [Role](#role)
-
-
-
-
-
-- Messages
-    - [ContextDescProto](#contextdescproto)
-    - [PartyProto](#partyproto)
-    - [RetryOptionsProto](#retryoptionsproto)
-    - [SSLOptionsProto](#ssloptionsproto)
-
+    - [UbPsiConfig.Mode](#ubpsiconfigmode)
 
 
 
@@ -82,18 +71,6 @@ Configs for ECDH protocol.
  <!-- end HasFields -->
 
 
-### InputConfig
-Input configuration.
-
-
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| type | [ IoType](#iotype) | none |
-| path | [ string](#string) | Required for FILE. |
- <!-- end Fields -->
- <!-- end HasFields -->
-
-
 ### InternalRecoveryRecord
 
 
@@ -107,6 +84,18 @@ Input configuration.
  <!-- end HasFields -->
 
 
+### IoConfig
+IO configuration.
+
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| type | [ IoType](#iotype) | none |
+| path | [ string](#string) | Required for FILE. |
+ <!-- end Fields -->
+ <!-- end HasFields -->
+
+
 ### KkrtConfig
 Configs for KKRT protocol
 
@@ -114,18 +103,6 @@ Configs for KKRT protocol
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | bucket_size | [ uint64](#uint64) | Since the total input may not fit in memory, the input may be splitted into buckets. bucket_size indicate the number of items in each bucket. If the memory of host is limited, you should set a smaller bucket size. Otherwise, you should use a larger one. If not set, use default value: 1 << 20. |
- <!-- end Fields -->
- <!-- end HasFields -->
-
-
-### OutputConfig
-Output configuration.
-
-
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| type | [ IoType](#iotype) | none |
-| path | [ string](#string) | Required for FILE. |
  <!-- end Fields -->
  <!-- end HasFields -->
 
@@ -298,10 +275,8 @@ The output of right side is
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | protocol_config | [ ProtocolConfig](#protocolconfig) | Configs for protocols. |
-| input_config | [ InputConfig](#inputconfig) | Configs for input. |
-| output_config | [ OutputConfig](#outputconfig) | Configs for output. |
-| link_config | [ yacl.link.ContextDescProto](#yacllinkcontextdescproto) | Configs for network. |
-| self_link_party | [ string](#string) | none |
+| input_config | [ IoConfig](#ioconfig) | Configs for input. |
+| output_config | [ IoConfig](#ioconfig) | Configs for output. |
 | keys | [repeated string](#string) | keys for intersection. |
 | debug_options | [ DebugOptions](#debugoptions) | Logging level. |
 | skip_duplicates_check | [ bool](#bool) | If true, the check of duplicated items will be skiped. |
@@ -310,18 +285,6 @@ The output of right side is
 | advanced_join_type | [ PsiConfig.AdvancedJoinType](#psiconfigadvancedjointype) | none |
 | left_side | [ Role](#role) | Required if advanced_join_type is ADVANCED_JOIN_TYPE_LEFT_JOIN or ADVANCED_JOIN_TYPE_RIGHT_JOIN. |
 | check_hash_digest | [ bool](#bool) | Check if hash digest of keys from parties are equal to determine whether to early-stop. |
- <!-- end Fields -->
- <!-- end HasFields -->
-
-
-### PsiReport
-Execution Report.
-
-
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| original_count | [ int64](#int64) | The data count of input. |
-| intersection_count | [ int64](#int64) | The count of intersection. Get `-1` when self party can not get result. |
  <!-- end Fields -->
  <!-- end HasFields -->
 
@@ -366,6 +329,27 @@ Configs for RR22 protocol.
 | ----- | ---- | ----------- |
 | bucket_size | [ uint64](#uint64) | Since the total input may not fit in memory, the input may be splitted into buckets. bucket_size indicate the number of items in each bucket. If the memory of host is limited, you should set a smaller bucket size. Otherwise, you should use a larger one. If not set, use default value: 1 << 20. |
 | low_comm_mode | [ bool](#bool) | none |
+ <!-- end Fields -->
+ <!-- end HasFields -->
+
+
+### UbPsiConfig
+config for unbalanced psi.
+
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| mode | [ UbPsiConfig.Mode](#ubpsiconfigmode) | Required. |
+| role | [ Role](#role) | Required for all modes except MODE_OFFLINE_GEN_CACHE. |
+| input_config | [ IoConfig](#ioconfig) | Config for origin input. Servers: Required for MODE_OFFLINE_GEN_CACHE, MODE_OFFLINE, MODE_FULL. Clients: Required for MODE_ONLINE and MODE_FULL. |
+| keys | [repeated string](#string) | Join keys. Servers: Required for MODE_OFFLINE_GEN_CACHE, MODE_OFFLINE, MODE_FULL. Clients: Required for MODE_ONLINE and MODE_FULL. |
+| server_secret_key_config | [ IoConfig](#ioconfig) | Servers: Required for MODE_OFFLINE_GEN_CACHE, MODE_OFFLINE, MODE_ONLINE and MODE_FULL. |
+| cache_config | [ IoConfig](#ioconfig) | Required. |
+| server_get_result | [ bool](#bool) | none |
+| client_get_result | [ bool](#bool) | none |
+| disable_alignment | [ bool](#bool) | It true, output is not promised to be aligned. Valid if both server_get_result and client_get_result are true. |
+| output_config | [ IoConfig](#ioconfig) | Required for MODE_ONLINE and MODE_FULL. |
+| debug_options | [ DebugOptions](#debugoptions) | Logging level. |
  <!-- end Fields -->
  <!-- end HasFields -->
  <!-- end messages -->
@@ -439,105 +423,27 @@ Role of parties.
 | Name | Number | Description |
 | ---- | ------ | ----------- |
 | ROLE_UNSPECIFIED | 0 | none |
-| ROLE_RECEIVER | 1 | receiver In 2P symmetric PSI, receiver would always receive the result. |
-| ROLE_SENDER | 2 | sender In 2P symmetric PSI, sender is the other participant apart from receiver. |
-
-
- <!-- end Enums -->
-
-
- <!-- end services -->
-
-## Messages
-
-
-### ContextDescProto
-Configuration for link config.
-
-'recv time' is the max time that a party will wait for a given event.
-for example:
-
-```
-     begin recv                 end recv
-|--------|-------recv-time----------|------------------| alice's timeline
-
-                        begin send     end send
-|-----busy-work-------------|-------------|------------| bob's timeline
-```
-
-in above case, when alice begins recv for a specific event, bob is still
-busy doing its job, when alice's wait time exceed wait_timeout_ms, it raise
-exception, although bob now is starting to send data.
-
-so for long time work(that one party may wait for the others for very long
-time), this value should be changed accordingly.
-
-
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| id | [ string](#string) | the UUID of this communication. optional |
-| parties | [repeated PartyProto](#partyproto) | party description, describes the world. |
-| connect_retry_times | [ uint32](#uint32) | connect to mesh retry time. |
-| connect_retry_interval_ms | [ uint32](#uint32) | connect to mesh retry interval. |
-| recv_timeout_ms | [ uint64](#uint64) | recv timeout in milliseconds. |
-| http_max_payload_size | [ uint32](#uint32) | http max payload size, if a single http request size is greater than this limit, it will be unpacked into small chunks then reassembled. This field does affect performance. Please choose wisely. |
-| http_timeout_ms | [ uint32](#uint32) | a single http request timetout. |
-| throttle_window_size | [ uint32](#uint32) | throttle window size for channel. if there are more than limited size messages are flying, `SendAsync` will block until messages are processed or throw exception after wait for `recv_timeout_ms` |
-| brpc_channel_protocol | [ string](#string) | BRPC client channel protocol. |
-| brpc_channel_connection_type | [ string](#string) | BRPC client channel connection type. |
-| enable_ssl | [ bool](#bool) | ssl options for link channel. |
-| client_ssl_opts | [ SSLOptionsProto](#ssloptionsproto) | ssl configs for channel this config is ignored if enable_ssl == false; |
-| server_ssl_opts | [ SSLOptionsProto](#ssloptionsproto) | ssl configs for service this config is ignored if enable_ssl == false; |
-| chunk_parallel_send_size | [ uint32](#uint32) | chunk parallel send size for channel. if need chunked send when send message, the max paralleled send size is chunk_parallel_send_size |
-| retry_opts | [ RetryOptionsProto](#retryoptionsproto) | retry options |
- <!-- end Fields -->
- <!-- end HasFields -->
-
-
-### PartyProto
+| ROLE_RECEIVER | 1 | receiver In 2P symmetric PSI, receivers would always receive the result in the origin protocol. |
+| ROLE_SENDER | 2 | sender In 2P symmetric PSI, senders are the other participants apart from receiver. |
+| ROLE_SERVER | 3 | server In 2P unbalanced PSI, servers own a much larger dataset. |
+| ROLE_CLIENT | 4 | server In 2P unbalanced PSI, clients own a much smaller dataset. |
 
 
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| id | [ string](#string) | none |
-| host | [ string](#string) | none |
- <!-- end Fields -->
- <!-- end HasFields -->
+
+### UbPsiConfig.Mode
 
 
-### RetryOptionsProto
-Retry options.
+| Name | Number | Description |
+| ---- | ------ | ----------- |
+| MODE_UNSPECIFIED | 0 | none |
+| MODE_OFFLINE_GEN_CACHE | 1 | Servers generate cache only. First part of offline stage. |
+| MODE_OFFLINE_TRANSFER_CACHE | 2 | Servers send cache to clients only. Second part of offline stage. |
+| MODE_OFFLINE | 3 | Run offline stage. |
+| MODE_ONLINE | 4 | Run online stage. |
+| MODE_FULL | 5 | Run all stages. |
 
 
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| max_retry | [ uint32](#uint32) | max retry count default 3 |
-| retry_interval_ms | [ uint32](#uint32) | time between retries at first retry default 1 second |
-| retry_interval_incr_ms | [ uint32](#uint32) | The amount of time to increase the interval between retries default 2s |
-| max_retry_interval_ms | [ uint32](#uint32) | The maximum interval between retries default 10s |
-| error_codes | [repeated uint32](#uint32) | retry on these brpc error codes, if empty, retry on all codes |
-| http_codes | [repeated uint32](#uint32) | retry on these http codes, if empty, retry on all http codes |
-| aggressive_retry | [ bool](#bool) | do aggressive retry， this means that retries will be made on additional error codes |
- <!-- end Fields -->
- <!-- end HasFields -->
-
-
-### SSLOptionsProto
-SSL options.
-
-
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| certificate_path | [ string](#string) | Certificate file path |
-| private_key_path | [ string](#string) | Private key file path |
-| verify_depth | [ int32](#int32) | Set the maximum depth of the certificate chain for verification If 0, turn off the verification |
-| ca_file_path | [ string](#string) | Set the trusted CA file to verify the peer's certificate If empty, use the system default CA files |
- <!-- end Fields -->
- <!-- end HasFields -->
- <!-- end messages -->
-
-## Enums
  <!-- end Enums -->
  <!-- end Files -->
 

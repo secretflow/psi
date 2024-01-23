@@ -38,8 +38,8 @@
 #include "spdlog/spdlog.h"
 
 #include "psi/psi/core/ecdh_oprf/ecdh_oprf_selector.h"
+#include "psi/psi/core/labeled_psi/padding.h"
 #include "psi/psi/core/labeled_psi/sender_memdb.h"
-#include "psi/psi/utils/utils.h"
 
 // Kuku
 #include "kuku/locfunc.h"

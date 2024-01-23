@@ -56,6 +56,8 @@ struct TestParams {
   uint64_t items_num;
 
   Rr22PsiMode mode = Rr22PsiMode::FastMode;
+
+  bool malicious = false;
 };
 
 }  // namespace
@@ -81,6 +83,7 @@ TEST_P(Rr22PsiTest, CorrectTest) {
   Rr22PsiOptions psi_options(40, 0, true);
 
   psi_options.mode = params.mode;
+  psi_options.malicious = params.malicious;
 
   auto psi_sender_proc =
       std::async([&] { Rr22PsiSender(psi_options, lctxs[0], inputs_a); });
@@ -89,21 +92,25 @@ TEST_P(Rr22PsiTest, CorrectTest) {
 
   psi_sender_proc.get();
   std::vector<size_t> indices_psi = psi_receiver_proc.get();
+  std::sort(indices_psi.begin(), indices_psi.end());
 
   SPDLOG_INFO("{}?={}", indices.size(), indices_psi.size());
   EXPECT_EQ(indices.size(), indices_psi.size());
 
+#if 0
   for (size_t i = 0; i < indices.size(); ++i) {
     SPDLOG_INFO("i:{} index:{} a:{}, b:{}", i, indices_psi[i],
                 inputs_a[indices_psi[i]], inputs_b[indices_psi[i]]);
   }
+#endif
 
   EXPECT_EQ(indices_psi, indices);
 }
 
-INSTANTIATE_TEST_SUITE_P(CorrectTest_Instances, Rr22PsiTest,
-                         testing::Values(TestParams{35, Rr22PsiMode::FastMode},
-                                         TestParams{35,
-                                                    Rr22PsiMode::LowCommMode}));
+INSTANTIATE_TEST_SUITE_P(
+    CorrectTest_Instances, Rr22PsiTest,
+    testing::Values(TestParams{35, Rr22PsiMode::FastMode},
+                    TestParams{35, Rr22PsiMode::LowCommMode},
+                    TestParams{35, Rr22PsiMode::FastMode, true}));
 
 }  // namespace psi::psi

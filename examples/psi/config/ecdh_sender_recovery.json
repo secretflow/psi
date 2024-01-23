@@ -1,0 +1,46 @@
+{
+    "psi_config": {
+        "protocol_config": {
+            "protocol": "PROTOCOL_ECDH",
+            "ecdh_config": {
+                "curve": "CURVE_25519"
+            },
+            "role": "ROLE_SENDER",
+            "broadcast_result": true
+        },
+        "input_config": {
+            "type": "IO_TYPE_FILE_CSV",
+            "path": "/tmp/sender_input.csv"
+        },
+        "output_config": {
+            "type": "IO_TYPE_FILE_CSV",
+            "path": "/tmp/ecdh_sender_recovery_output.csv"
+        },
+        "keys": [
+            "id0",
+            "id1"
+        ],
+        "debug_options": {
+            "trace_path": "/tmp/ecdh_sender_recovery.trace"
+        },
+        "skip_duplicates_check": true,
+        "disable_alignment": true,
+        "recovery_config": {
+            "enabled": true,
+            "folder": "/tmp/ecdh_sender_cache"
+        }
+    },
+    "link_config": {
+        "parties": [
+            {
+                "id": "receiver",
+                "host": "127.0.0.1:5300"
+            },
+            {
+                "id": "sender",
+                "host": "127.0.0.1:5400"
+            }
+        ]
+    },
+    "self_link_party": "sender"
+}

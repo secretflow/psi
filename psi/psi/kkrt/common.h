@@ -15,7 +15,7 @@
 
 #include <cstdint>
 
-#include "psi/psi/recovery.h"
+#include "psi/psi/utils/recovery.h"
 
 #include "psi/proto/psi_v2.pb.h"
 

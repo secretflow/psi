@@ -138,10 +138,14 @@ struct EcGroupSt {
 
   const EC_GROUP* get() const { return group_ptr.get(); }
 
+  // prime number Field (GFp)
   BigNumSt bn_p;
 
+  // parameter a of y^2=x^3+ax+b
   BigNumSt bn_a;
+  // parameter b of y^2=x^3+ax+b
   BigNumSt bn_b;
+  // ecc point group order
   BigNumSt bn_n;
 
   ECGroupPtr group_ptr;

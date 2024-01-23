@@ -12,21 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library", "psi_cc_test")
-load("@rules_proto//proto:defs.bzl", "proto_library")
-load("@rules_cc//cc:defs.bzl", "cc_proto_library")
+load("//bazel:psi.bzl", "psi_cc_library", "psi_cc_test")
 
 package(default_visibility = ["//visibility:public"])
-
-proto_library(
-    name = "psi_proto",
-    srcs = ["psi.proto"],
-)
-
-cc_proto_library(
-    name = "psi_cc_proto",
-    deps = [":psi_proto"],
-)
 
 psi_cc_library(
     name = "memory_psi",
@@ -36,11 +24,11 @@ psi_cc_library(
     ],
     deps = [
         ":prelude",
-        ":psi_cc_proto",
+        "//psi/proto:psi_cc_proto",
         "//psi/psi/core:ecdh_psi",
         "//psi/psi/operator",
         "//psi/psi/operator:factory",
-        "//psi/psi/utils",
+        "//psi/psi/utils:sync",
     ],
 )
 
@@ -50,7 +38,7 @@ psi_cc_library(
         "prelude.h",
     ],
     deps = [
-        ":psi_cc_proto",
+        "//psi/proto:psi_cc_proto",
         "//psi/proto:psi_v2_cc_proto",
     ],
 )
@@ -72,13 +60,15 @@ psi_cc_library(
     ],
     deps = [
         ":prelude",
-        ":psi_cc_proto",
+        "//psi/proto:psi_cc_proto",
         "//psi/psi/core:ecdh_oprf_psi",
         "//psi/psi/utils:batch_provider",
         "//psi/psi/utils:csv_checker",
         "//psi/psi/utils:csv_header_analyzer",
+        "//psi/psi/utils:ec",
         "//psi/psi/utils:ec_point_store",
         "//psi/psi/utils:progress",
+        "//psi/psi/utils:sync",
         "@com_google_absl//absl/synchronization",
         "@com_google_absl//absl/time",
         "@yacl//yacl/utils:scope_guard",
@@ -95,12 +85,11 @@ psi_cc_library(
         ":bucket_ub_psi",
         ":memory_psi",
         ":prelude",
-        ":psi_cc_proto",
+        "//psi/proto:psi_cc_proto",
         "//psi/psi/utils:batch_provider",
         "//psi/psi/utils:csv_checker",
         "//psi/psi/utils:csv_header_analyzer",
         "//psi/psi/utils:ec_point_store",
-        "//psi/psi/utils:file",
         "@boost//:uuid",
     ],
 )
@@ -128,12 +117,12 @@ psi_cc_library(
     srcs = ["interface.cc"],
     hdrs = ["interface.h"],
     deps = [
-        ":recovery",
         ":trace_categories",
         "//psi/proto:psi_v2_cc_proto",
         "//psi/psi:bucket_psi",
         "//psi/psi/utils:advanced_join",
         "//psi/psi/utils:index_store",
+        "//psi/psi/utils:recovery",
         "@boost//:uuid",
         "@com_github_google_perfetto//:perfetto",
         "@com_google_absl//absl/status",
@@ -146,8 +135,10 @@ psi_cc_library(
     srcs = ["factory.cc"],
     hdrs = ["factory.h"],
     deps = [
+        "//psi/psi/ecdh:client",
         "//psi/psi/ecdh:receiver",
         "//psi/psi/ecdh:sender",
+        "//psi/psi/ecdh:server",
         "//psi/psi/kkrt:receiver",
         "//psi/psi/kkrt:sender",
         "//psi/psi/rr22:receiver",
@@ -156,17 +147,16 @@ psi_cc_library(
     ],
 )
 
-psi_cc_binary(
-    name = "main",
-    srcs = ["main.cc"],
+psi_cc_library(
+    name = "launch",
+    srcs = ["launch.cc"],
+    hdrs = ["launch.h"],
     deps = [
+        ":bucket_psi",
         ":factory",
-        ":kuscia_adapter",
         ":trace_categories",
-        "//psi:version",
         "@boost//:algorithm",
         "@boost//:uuid",
-        "@com_github_gflags_gflags//:gflags",
     ],
 )
 
@@ -179,56 +169,6 @@ psi_cc_library(
     ],
 )
 
-psi_cc_library(
-    name = "recovery",
-    srcs = [
-        "recovery.cc",
-    ],
-    hdrs = [
-        "recovery.h",
-    ],
-    deps = [
-        "//psi/proto:psi_v2_cc_proto",
-        "//psi/psi/cryptor:ecc_cryptor",
-        "//psi/psi/io",
-        "@yacl//yacl/base:exception",
-        "@yacl//yacl/link",
-    ],
-)
-
-psi_cc_test(
-    name = "recovery_test",
-    srcs = ["recovery_test.cc"],
-    deps = [
-        ":recovery",
-        "//psi/psi/cryptor:cryptor_selector",
-    ],
-)
-
-psi_cc_library(
-    name = "kuscia_adapter",
-    srcs = [
-        "kuscia_adapter.cc",
-    ],
-    hdrs = [
-        "kuscia_adapter.h",
-    ],
-    deps = [
-        "//psi/proto:kuscia_cc_proto",
-        "//psi/proto:psi_v2_cc_proto",
-        "@com_github_tencent_rapidjson//:rapidjson",
-        "@yacl//yacl/base:exception",
-    ],
-)
-
-psi_cc_test(
-    name = "kuscia_adapter_test",
-    srcs = ["kuscia_adapter_test.cc"],
-    deps = [
-        ":kuscia_adapter",
-    ],
-)
-
 psi_cc_test(
     name = "psi_test",
     srcs = ["psi_test.cc"],
@@ -237,18 +177,5 @@ psi_cc_test(
         "//psi/psi/utils:arrow_csv_batch_provider",
         "@boost//:uuid",
         "@yacl//yacl/utils:scope_guard",
-    ],
-)
-
-psi_cc_library(
-    name = "bucket",
-    srcs = ["bucket.cc"],
-    hdrs = ["bucket.h"],
-    deps = [
-        "//psi/proto:psi_v2_cc_proto",
-        "//psi/psi:prelude",
-        "//psi/psi:recovery",
-        "//psi/psi/utils",
-        "//psi/psi/utils:hash_bucket_cache",
     ],
 )

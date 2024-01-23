@@ -21,8 +21,10 @@
 
 namespace psi::psi {
 
-std::unique_ptr<AbstractPSIParty> createPSIParty(
-    const v2::PsiConfig& config,
-    std::shared_ptr<yacl::link::Context> lctx = nullptr);
+std::unique_ptr<AbstractPsiParty> createPsiParty(
+    const v2::PsiConfig& config, std::shared_ptr<yacl::link::Context> lctx);
+
+std::unique_ptr<AbstractUbPsiParty> createUbPsiParty(
+    const v2::UbPsiConfig& config, std::shared_ptr<yacl::link::Context> lctx);
 
 }  // namespace psi::psi

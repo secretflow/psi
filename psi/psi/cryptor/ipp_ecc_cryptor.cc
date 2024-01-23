@@ -14,10 +14,13 @@
 
 #include "psi/psi/cryptor/ipp_ecc_cryptor.h"
 
+#include <algorithm>
 #include <array>
 
 #include "crypto_mb/x25519.h"
 #include "yacl/utils/parallel.h"
+
+#include "psi/psi/cryptor/hash_to_curve_elligator2.h"
 
 namespace psi::psi {
 
@@ -69,6 +72,11 @@ void IppEccCryptor::EccMask(absl::Span<const char> batch_points,
                    output.subspan(idx, current_batch_size));
     }
   });
+}
+
+std::vector<uint8_t> IppElligator2Cryptor::HashToCurve(
+    absl::Span<const char> item_data) const {
+  return HashToCurveElligator2(item_data);
 }
 
 }  // namespace psi::psi

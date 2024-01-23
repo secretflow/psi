@@ -22,10 +22,12 @@
 #include "yacl/base/buffer.h"
 #include "yacl/base/byte_container_view.h"
 #include "yacl/crypto/tools/prg.h"
+#include "yacl/crypto/tools/ro.h"
 #include "yacl/crypto/utils/rand.h"
 #include "yacl/math/f2k/f2k.h"
 #include "yacl/utils/parallel.h"
 
+#include "psi/psi/core/vole_psi/davis_meyer_hash.h"
 #include "psi/psi/core/vole_psi/okvs/galois128.h"
 
 namespace psi::psi {
@@ -147,10 +149,24 @@ void Rr22OprfSender::SendFast(const std::shared_ptr<yacl::link::Context>& lctx,
   baxos_.Init(paxos_init_size, bin_size_, kPaxosWeight, ssp_,
               okvs::PaxosParam::DenseType::GF128, baxos_seed);
 
+  uint128_t ws = 0;
+  if (malicious_) {
+    SPDLOG_INFO("malicious version");
+    // generate ws
+    ws = yacl::crypto::SecureRandU128();
+    // send hash of ws to receiver
+    yacl::crypto::RandomOracle ro(yacl::crypto::HashAlgorithm::SHA256, 32);
+    yacl::Buffer ws_hash =
+        ro(yacl::ByteContainerView(&ws, sizeof(uint128_t)), 32);
+
+    lctx->SendAsyncThrottled(lctx->NextRank(), ws_hash,
+                             fmt::format("send ws_hash"));
+  }
+
   paxos_size_ = baxos_.size();
 
   // vole send function
-  yacl::crypto::SilentVoleSender vole_sender(code_type_);
+  yacl::crypto::SilentVoleSender vole_sender(code_type_, malicious_);
 
   b_ = yacl::Buffer(std::max<size_t>(256, baxos_.size()) * sizeof(uint128_t));
   absl::Span<uint128_t> b128_span =
@@ -166,6 +182,18 @@ void Rr22OprfSender::SendFast(const std::shared_ptr<yacl::link::Context>& lctx,
 
   auto hash_inputs_proc =
       std::async([&] { HashInputMulDelta(inputs, hash_outputs); });
+
+  if (malicious_) {
+    yacl::Buffer wr_buf = lctx->Recv(lctx->NextRank(), fmt::format("recv wr"));
+    YACL_ENFORCE(wr_buf.size() == sizeof(uint128_t));
+    std::memcpy(&w_, wr_buf.data(), wr_buf.size());
+
+    lctx->SendAsyncThrottled(lctx->NextRank(),
+                             yacl::ByteContainerView(&ws, sizeof(uint128_t)),
+                             fmt::format("recv ws"));
+
+    w_ = w_ ^ ws;
+  }
 
   SPDLOG_INFO("recv paxos solve ...");
 
@@ -294,6 +322,9 @@ void Rr22OprfSender::Eval(absl::Span<const uint128_t> inputs,
       for (int64_t idx = begin; idx < end; ++idx) {
         uint128_t h = aes_crhash.Hash(inputs[idx]);
         outputs[idx] = outputs[idx] ^ (delta_gf128 * h).get<uint128_t>(0);
+        if (malicious_) {
+          outputs[idx] = outputs[idx] ^ w_;
+        }
       }
     });
   } else if (mode_ == Rr22PsiMode::LowCommMode) {
@@ -305,7 +336,11 @@ void Rr22OprfSender::Eval(absl::Span<const uint128_t> inputs,
       }
     });
   }
-  aes_crhash.Hash(outputs, outputs);
+  if (malicious_) {
+    DavisMeyerHash(outputs, inputs, outputs);
+  } else {
+    aes_crhash.Hash(outputs, outputs);
+  }
 }
 
 void Rr22OprfSender::HashInputMulDelta(absl::Span<const uint128_t> inputs,
@@ -345,6 +380,7 @@ void Rr22OprfSender::Eval(absl::Span<const uint128_t> inputs,
 
   if (mode_ == Rr22PsiMode::FastMode) {
     baxos_.Decode(inputs, outputs, b128_span, num_threads);
+
   } else if (mode_ == Rr22PsiMode::LowCommMode) {
     paxos_.Decode(inputs, outputs, b128_span);
   } else {
@@ -356,12 +392,20 @@ void Rr22OprfSender::Eval(absl::Span<const uint128_t> inputs,
   yacl::parallel_for(0, inputs.size(), [&](int64_t begin, int64_t end) {
     for (int64_t idx = begin; idx < end; ++idx) {
       outputs[idx] = outputs[idx] ^ inputs_hash[idx];
+
+      if (malicious_) {
+        outputs[idx] = outputs[idx] ^ w_;
+      }
     }
   });
 
-  okvs::AesCrHash aes_crhash(kAesHashSeed);
+  if (malicious_) {
+    DavisMeyerHash(outputs, inputs, outputs);
+  } else {
+    okvs::AesCrHash aes_crhash(kAesHashSeed);
 
-  aes_crhash.Hash(outputs, outputs);
+    aes_crhash.Hash(outputs, outputs);
+  }
 }
 
 void Rr22OprfReceiver::Recv(const std::shared_ptr<yacl::link::Context>& lctx,
@@ -392,6 +436,17 @@ void Rr22OprfReceiver::RecvFast(
   paxos.Init(paxos_init_size, bin_size_, kPaxosWeight, ssp_,
              okvs::PaxosParam::DenseType::GF128, paxos_seed);
 
+  uint128_t w = 0;
+  uint128_t wr = 0;
+  yacl::Buffer ws_hash_buf;
+  if (malicious_) {
+    SPDLOG_INFO("malicious version");
+    // generate wr
+    wr = yacl::crypto::SecureRandU128();
+    ws_hash_buf = lctx->Recv(lctx->NextRank(), fmt::format("recv ws_hash"));
+    YACL_ENFORCE(ws_hash_buf.size() == 32);
+  }
+
   paxos_size_ = paxos.size();
 
   // c + b = a * delta
@@ -402,7 +457,7 @@ void Rr22OprfReceiver::RecvFast(
 
   // vole recv function
   auto vole_recv_proc = std::async([&] {
-    yacl::crypto::SilentVoleReceiver vole_receiver(code_type_);
+    yacl::crypto::SilentVoleReceiver vole_receiver(code_type_, malicious_);
 
     a = yacl::Buffer(std::max<size_t>(256, paxos.size()) * sizeof(uint128_t));
     c = yacl::Buffer(std::max<size_t>(256, paxos.size()) * sizeof(uint128_t));
@@ -437,13 +492,46 @@ void Rr22OprfReceiver::RecvFast(
 
   vole_recv_proc.get();
 
+  if (malicious_) {
+    // send wr
+    lctx->SendAsyncThrottled(lctx->NextRank(),
+                             yacl::ByteContainerView(&wr, sizeof(uint128_t)),
+                             fmt::format("send wr"));
+
+    // recv sender's ws
+    yacl::Buffer ws_buf = lctx->Recv(lctx->NextRank(), fmt::format("recv ws"));
+    YACL_ENFORCE(ws_buf.size() == sizeof(uint128_t));
+
+    yacl::crypto::RandomOracle ro(yacl::crypto::HashAlgorithm::SHA256, 32);
+    yacl::Buffer ws_hash = ro(ws_buf, 32);
+    // check ws and hash of ws
+    // if check failed, aborts protocol
+    YACL_ENFORCE(
+        std::memcmp(ws_hash.data(), ws_hash_buf.data(), ws_hash.size()) == 0,
+        "server seed not match");
+    uint128_t ws;
+    std::memcpy(&ws, ws_buf.data(), sizeof(uint128_t));
+    w = wr ^ ws;
+  }
+
   auto oprf_eval_proc = std::async([&] {
     SPDLOG_INFO("begin compute self oprf");
     paxos.Decode(absl::MakeSpan(inputs), outputs,
                  absl::MakeSpan(c128_span.data(), paxos.size()), num_threads);
 
-    SPDLOG_INFO("call aes hash");
-    aes_crhash.Hash(outputs, outputs);
+    if (malicious_) {
+      for (size_t i = 0; i < outputs.size(); ++i) {
+        outputs[i] = outputs[i] ^ w;
+      }
+    }
+
+    if (malicious_) {
+      SPDLOG_INFO("call Davis-Meyer hash");
+      DavisMeyerHash(outputs, inputs, outputs);
+    } else {
+      SPDLOG_INFO("call aes crhash");
+      aes_crhash.Hash(outputs, outputs);
+    }
     SPDLOG_INFO("end compute self oprf");
   });
 

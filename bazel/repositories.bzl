@@ -14,7 +14,6 @@
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 def psi_deps():
     _com_github_nelhage_rules_boost()
@@ -44,9 +43,7 @@ def psi_deps():
     _com_github_floodyberry_curve25519_donna()
     _com_github_ridiculousfish_libdivide()
     _com_github_sparsehash_sparsehash()
-
     _com_github_intel_ipp()
-
     _yacl()
 
 def _yacl():

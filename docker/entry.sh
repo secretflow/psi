@@ -8,6 +8,6 @@ cd src_copied
 
 
 
-bazel build psi/psi:main -c opt --config=linux-release --repository_cache=/tmp/bazel_repo_cache
-chmod 777 bazel-bin/psi/psi/main
-cp bazel-bin/psi/psi/main ../src/docker/
+bazel build psi:main -c opt --config=linux-release --repository_cache=/tmp/bazel_repo_cache
+chmod 777 bazel-bin/psi/main
+cp bazel-bin/psi/main ../src/docker/

@@ -21,6 +21,7 @@
 #include "yacl/utils/parallel.h"
 
 #include "psi/psi/operator/factory.h"
+#include "psi/psi/utils/sync.h"
 
 using DurationMillis = std::chrono::duration<double, std::milli>;
 
@@ -46,8 +47,14 @@ std::vector<std::string> Rr22PsiOperator::OnRun(
     const std::vector<std::string>& inputs) {
   std::vector<std::string> result;
 
+  // Gather Items Size
+  std::vector<size_t> items_size = AllGatherItemsSize(link_ctx_, inputs.size());
+  size_t max_size = std::max(items_size[link_ctx_->Rank()],
+                             items_size[link_ctx_->NextRank()]);
+
   // hash items to uint128_t
   std::vector<uint128_t> items_hash(inputs.size());
+
   SPDLOG_INFO("begin items hash");
   yacl::parallel_for(0, inputs.size(), [&](int64_t begin, int64_t end) {
     for (int64_t idx = begin; idx < end; ++idx) {
@@ -55,6 +62,15 @@ std::vector<std::string> Rr22PsiOperator::OnRun(
     }
   });
   SPDLOG_INFO("end items hash");
+
+  // padding receiver's input to max_size
+  if ((options_.receiver_rank == link_ctx_->Rank()) &&
+      (inputs.size() < max_size)) {
+    items_hash.resize(max_size);
+    for (size_t idx = inputs.size(); idx < max_size; idx++) {
+      items_hash[idx] = yacl::crypto::SecureRandU128();
+    }
+  }
 
   const auto psi_core_start = std::chrono::system_clock::now();
 
@@ -104,8 +120,24 @@ std::unique_ptr<PsiBaseOperator> CreateLowCommOperator(
   return std::make_unique<Rr22PsiOperator>(options);
 }
 
+std::unique_ptr<PsiBaseOperator> CreateMaliciousOperator(
+    const MemoryPsiConfig& config,
+    const std::shared_ptr<yacl::link::Context>& lctx) {
+  auto options = Rr22PsiOperator::ParseConfig(config, lctx);
+
+  options.rr22_options.mode = Rr22PsiMode::FastMode;
+
+  options.rr22_options.malicious = true;
+  options.rr22_options.code_type = yacl::crypto::CodeType::ExAcc7;
+
+  return std::make_unique<Rr22PsiOperator>(options);
+}
+
 REGISTER_OPERATOR(RR22_FAST_PSI_2PC, CreateFastOperator);
 REGISTER_OPERATOR(RR22_LOWCOMM_PSI_2PC, CreateLowCommOperator);
+
+// malicious
+REGISTER_OPERATOR(RR22_MALICIOUS_PSI_2PC, CreateMaliciousOperator);
 
 }  // namespace
 

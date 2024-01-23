@@ -21,7 +21,7 @@
 
 #include "yacl/crypto/base/hash/hash_utils.h"
 
-#include "psi/psi/psi.pb.h"
+#include "psi/proto/psi.pb.h"
 
 namespace psi::psi::test {
 

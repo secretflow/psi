@@ -26,7 +26,7 @@
 #include <string>
 #include <vector>
 
-#include "examples/utils.h"
+#include "examples/pir/utils.h"
 #include "spdlog/spdlog.h"
 #include "yacl/link/test_util.h"
 
@@ -36,7 +36,7 @@
 #include "psi/psi/core/labeled_psi/receiver.h"
 #include "psi/psi/core/labeled_psi/sender.h"
 
-#include "psi/pir/pir.pb.h"
+#include "psi/proto/pir.pb.h"
 
 using DurationMillis = std::chrono::duration<double, std::milli>;
 

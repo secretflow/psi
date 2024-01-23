@@ -20,12 +20,12 @@
 
 namespace psi::psi::rr22 {
 
-class Rr22PSISender final : public AbstractPSISender {
+class Rr22PsiSender final : public AbstractPsiSender {
  public:
-  explicit Rr22PSISender(const v2::PsiConfig &config,
+  explicit Rr22PsiSender(const v2::PsiConfig &config,
                          std::shared_ptr<yacl::link::Context> lctx = nullptr);
 
-  ~Rr22PSISender() override = default;
+  ~Rr22PsiSender() override = default;
 
  private:
   void Init() override;

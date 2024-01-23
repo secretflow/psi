@@ -20,7 +20,7 @@
 
 #include "psi/psi/core/labeled_psi/sender_db.h"
 
-#include "psi/pir/pir.pb.h"
+#include "psi/proto/pir.pb.h"
 
 namespace psi::pir {
 

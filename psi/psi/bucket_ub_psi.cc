@@ -20,33 +20,15 @@
 #include "yacl/crypto/utils/rand.h"
 #include "yacl/utils/scope_guard.h"
 
-#include "psi/psi/io/io.h"
 #include "psi/psi/prelude.h"
+#include "psi/psi/utils/ec.h"
+#include "psi/psi/utils/io.h"
 #include "psi/psi/utils/serialize.h"
-#include "psi/psi/utils/utils.h"
+#include "psi/psi/utils/sync.h"
 
 namespace psi::psi {
 
 namespace {
-
-std::vector<uint8_t> ReadEcSecretKeyFile(const std::string& file_path) {
-  size_t file_byte_size = 0;
-  try {
-    file_byte_size = std::filesystem::file_size(file_path);
-  } catch (std::filesystem::filesystem_error& e) {
-    YACL_THROW("ReadEcSecretKeyFile {} Error: {}", file_path, e.what());
-  }
-  YACL_ENFORCE(file_byte_size == kEccKeySize,
-               "error format: key file bytes is not {}", kEccKeySize);
-
-  std::vector<uint8_t> secret_key(kEccKeySize);
-
-  auto in = io::BuildInputStream(io::FileIoOptions(file_path));
-  in->Read(secret_key.data(), kEccKeySize);
-  in->Close();
-
-  return secret_key;
-}
 
 std::vector<std::string> GetItemsByIndices(
     const std::string& input_path,
@@ -119,9 +101,9 @@ std::pair<std::vector<uint64_t>, size_t> UbPsi(
       break;
     case PsiType::ECDH_OPRF_UB_PSI_2PC_TRANSFER_CACHE:
       if (lctx->Rank() == config.receiver_rank()) {
-        results = UbPsiClientTransferCache(config, lctx, psi_options, tmp_dir);
+        results = UbPsiClientTransferCache(config, lctx, psi_options);
       } else {
-        results = UbPsiServerTransferCache(config, lctx, psi_options, tmp_dir);
+        results = UbPsiServerTransferCache(config, lctx, psi_options);
       }
       break;
     case PsiType::ECDH_OPRF_UB_PSI_2PC_SHUFFLE_ONLINE:
@@ -133,9 +115,9 @@ std::pair<std::vector<uint64_t>, size_t> UbPsi(
       break;
     case PsiType::ECDH_OPRF_UB_PSI_2PC_OFFLINE:
       if (lctx->Rank() == config.receiver_rank()) {
-        results = UbPsiClientOffline(config, lctx, psi_options, tmp_dir);
+        results = UbPsiClientOffline(config, lctx, psi_options);
       } else {
-        results = UbPsiServerOffline(config, lctx, psi_options, tmp_dir);
+        results = UbPsiServerOffline(config, lctx, psi_options);
       }
       break;
     case PsiType::ECDH_OPRF_UB_PSI_2PC_ONLINE:
@@ -174,7 +156,7 @@ std::pair<std::vector<uint64_t>, size_t> UbPsiServerGenCache(
                          config.input_params().select_fields().end());
 
   std::shared_ptr<IShuffledBatchProvider> batch_provider =
-      std::make_shared<CachedCsvBatchProvider>(
+      std::make_shared<SimpleShuffledBatchProvider>(
           config.input_params().path(), selected_fields, psi_options.batch_size,
           config.bucket_size(), true);
 
@@ -193,12 +175,9 @@ std::pair<std::vector<uint64_t>, size_t> UbPsiServerGenCache(
 // transfer cache
 std::pair<std::vector<uint64_t>, size_t> UbPsiClientTransferCache(
     BucketPsiConfig config, std::shared_ptr<yacl::link::Context> lctx,
-    const EcdhOprfPsiOptions& psi_options, const std::string& tmp_dir) {
+    const EcdhOprfPsiOptions& psi_options) {
   std::shared_ptr<EcdhOprfPsiClient> ub_psi_client_transfer_cache =
       std::make_shared<EcdhOprfPsiClient>(psi_options);
-
-  std::string self_ec_point_store_path =
-      fmt::format("{}/tmp-self-cipher-store-{}.csv", tmp_dir, lctx->Rank());
 
   auto peer_ec_point_store = std::make_shared<CachedCsvEcPointStore>(
       config.preprocess_path(), false, "peer", false);
@@ -218,11 +197,9 @@ std::pair<std::vector<uint64_t>, size_t> UbPsiClientTransferCache(
 
 std::pair<std::vector<uint64_t>, size_t> UbPsiServerTransferCache(
     BucketPsiConfig config, std::shared_ptr<yacl::link::Context> lctx,
-    const EcdhOprfPsiOptions& psi_options, const std::string& /*tmp_dir*/) {
-  std::array<uint8_t, kEccKeySize> server_private_key;
-
+    const EcdhOprfPsiOptions& psi_options) {
   std::shared_ptr<EcdhOprfPsiServer> ub_psi_server_transfer_cache =
-      std::make_shared<EcdhOprfPsiServer>(psi_options, server_private_key);
+      std::make_shared<EcdhOprfPsiServer>(psi_options);
 
   std::shared_ptr<IBasicBatchProvider> batch_provider =
       std::make_shared<UbPsiCacheProvider>(
@@ -323,35 +300,13 @@ std::pair<std::vector<uint64_t>, size_t> UbPsiServerShuffleOnline(
 // offline
 std::pair<std::vector<uint64_t>, size_t> UbPsiClientOffline(
     BucketPsiConfig config, std::shared_ptr<yacl::link::Context> lctx,
-    const EcdhOprfPsiOptions& psi_options, const std::string& tmp_dir) {
-  std::shared_ptr<EcdhOprfPsiClient> dh_oprf_psi_client_offline =
-      std::make_shared<EcdhOprfPsiClient>(psi_options);
-
-  std::string self_ec_point_store_path =
-      fmt::format("{}/tmp-self-cipher-store-{}.csv", tmp_dir, lctx->Rank());
-
-  auto self_ec_point_store = std::make_shared<CachedCsvEcPointStore>(
-      self_ec_point_store_path, true, "self", false);
-
-  auto peer_ec_point_store = std::make_shared<CachedCsvEcPointStore>(
-      config.preprocess_path(), false, "peer", false);
-
-  SPDLOG_INFO("Start Sync");
-  AllGatherItemsSize(lctx, 0);
-  SPDLOG_INFO("After Sync");
-
-  dh_oprf_psi_client_offline->RecvFinalEvaluatedItems(peer_ec_point_store);
-
-  peer_ec_point_store->Flush();
-
-  std::vector<uint64_t> results;
-
-  return std::make_pair(results, 0);
+    const EcdhOprfPsiOptions& psi_options) {
+  return UbPsiClientTransferCache(config, lctx, psi_options);
 }
 
 std::pair<std::vector<uint64_t>, size_t> UbPsiServerOffline(
     BucketPsiConfig config, std::shared_ptr<yacl::link::Context> lctx,
-    const EcdhOprfPsiOptions& psi_options, const std::string& /*tmp_dir*/) {
+    const EcdhOprfPsiOptions& psi_options) {
   std::vector<uint8_t> server_private_key =
       ReadEcSecretKeyFile(config.ecdh_secret_key_path());
 
@@ -364,7 +319,7 @@ std::pair<std::vector<uint64_t>, size_t> UbPsiServerOffline(
                          config.input_params().select_fields().end());
 
   std::shared_ptr<IShuffledBatchProvider> batch_provider =
-      std::make_shared<CachedCsvBatchProvider>(
+      std::make_shared<SimpleShuffledBatchProvider>(
           config.input_params().path(), selected_fields, psi_options.batch_size,
           config.bucket_size(), true);
 

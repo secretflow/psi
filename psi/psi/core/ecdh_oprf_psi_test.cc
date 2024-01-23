@@ -35,9 +35,9 @@
 #include "yacl/utils/scope_guard.h"
 
 #include "psi/psi/core/ecdh_oprf/ecdh_oprf_selector.h"
-#include "psi/psi/io/io.h"
 #include "psi/psi/utils/batch_provider.h"
 #include "psi/psi/utils/ec_point_store.h"
+#include "psi/psi/utils/io.h"
 #include "psi/psi/utils/test_utils.h"
 
 namespace psi::psi {
@@ -143,8 +143,8 @@ TEST_P(BasicEcdhOprfTest, Works) {
 
   // server batch provider
   std::vector<std::string> cloumn_ids = {"id"};
-  std::shared_ptr<CachedCsvBatchProvider> batch_provider_server =
-      std::make_shared<CachedCsvBatchProvider>(
+  std::shared_ptr<SimpleShuffledBatchProvider> batch_provider_server =
+      std::make_shared<SimpleShuffledBatchProvider>(
           server_input_path.string(), cloumn_ids, kEcdhOprfPsiBatchSize, 100000,
           true);
 

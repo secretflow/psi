@@ -18,8 +18,10 @@
 
 #include "yacl/base/exception.h"
 
+#include "psi/psi/ecdh/client.h"
 #include "psi/psi/ecdh/receiver.h"
 #include "psi/psi/ecdh/sender.h"
+#include "psi/psi/ecdh/server.h"
 #include "psi/psi/kkrt/receiver.h"
 #include "psi/psi/kkrt/sender.h"
 #include "psi/psi/rr22/receiver.h"
@@ -27,41 +29,53 @@
 
 namespace psi::psi {
 
-std::unique_ptr<AbstractPSIParty> createPSIParty(
+std::unique_ptr<AbstractPsiParty> createPsiParty(
     const v2::PsiConfig& config, std::shared_ptr<yacl::link::Context> lctx) {
   switch (config.protocol_config().protocol()) {
     case v2::Protocol::PROTOCOL_ECDH: {
       switch (config.protocol_config().role()) {
         case v2::Role::ROLE_RECEIVER:
-          return std::make_unique<ecdh::EcdhPSIReceiver>(config, lctx);
+          return std::make_unique<ecdh::EcdhPsiReceiver>(config, lctx);
         case v2::Role::ROLE_SENDER:
-          return std::make_unique<ecdh::EcdhPSISender>(config, lctx);
+          return std::make_unique<ecdh::EcdhPsiSender>(config, lctx);
         default:
-          YACL_THROW("Role is unspecified.");
+          YACL_THROW("Role is invalid.");
       }
     }
     case v2::Protocol::PROTOCOL_KKRT: {
       switch (config.protocol_config().role()) {
         case v2::Role::ROLE_RECEIVER:
-          return std::make_unique<kkrt::KkrtPSIReceiver>(config, lctx);
+          return std::make_unique<kkrt::KkrtPsiReceiver>(config, lctx);
         case v2::Role::ROLE_SENDER:
-          return std::make_unique<kkrt::KkrtPSISender>(config, lctx);
+          return std::make_unique<kkrt::KkrtPsiSender>(config, lctx);
         default:
-          YACL_THROW("Role is unspecified.");
+          YACL_THROW("Role is invalid.");
       }
     }
     case v2::Protocol::PROTOCOL_RR22: {
       switch (config.protocol_config().role()) {
         case v2::Role::ROLE_RECEIVER:
-          return std::make_unique<rr22::Rr22PSIReceiver>(config, lctx);
+          return std::make_unique<rr22::Rr22PsiReceiver>(config, lctx);
         case v2::Role::ROLE_SENDER:
-          return std::make_unique<rr22::Rr22PSISender>(config, lctx);
+          return std::make_unique<rr22::Rr22PsiSender>(config, lctx);
         default:
-          YACL_THROW("Role is unspecified.");
+          YACL_THROW("Role is invalid.");
       }
     }
     default:
       YACL_THROW("Protocol is unspecified.");
+  }
+}
+
+std::unique_ptr<AbstractUbPsiParty> createUbPsiParty(
+    const v2::UbPsiConfig& config, std::shared_ptr<yacl::link::Context> lctx) {
+  switch (config.role()) {
+    case v2::Role::ROLE_SERVER:
+      return std::make_unique<ecdh::EcdhUbPsiServer>(config, lctx);
+    case v2::Role::ROLE_CLIENT:
+      return std::make_unique<ecdh::EcdhUbPsiClient>(config, lctx);
+    default:
+      YACL_THROW("Role is invalid.");
   }
 }
 

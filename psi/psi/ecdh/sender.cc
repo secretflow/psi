@@ -24,34 +24,34 @@
 #include "psi/psi/cryptor/cryptor_selector.h"
 #include "psi/psi/ecdh/common.h"
 #include "psi/psi/trace_categories.h"
-#include "psi/psi/utils/utils.h"
+#include "psi/psi/utils/sync.h"
 
-#include "psi/psi/psi.pb.h"
+#include "psi/proto/psi.pb.h"
 
 namespace psi::psi::ecdh {
 
-EcdhPSISender::EcdhPSISender(const v2::PsiConfig &config,
+EcdhPsiSender::EcdhPsiSender(const v2::PsiConfig &config,
                              std::shared_ptr<yacl::link::Context> lctx)
-    : AbstractPSISender(config, std::move(lctx)) {
+    : AbstractPsiSender(config, std::move(lctx)) {
   trunc_intersection_indices_ = true;
 }
 
-void EcdhPSISender::Init() {
-  TRACE_EVENT("init", "EcdhPSISender::Init");
-  SPDLOG_INFO("[EcdhPSISender::Init] start");
+void EcdhPsiSender::Init() {
+  TRACE_EVENT("init", "EcdhPsiSender::Init");
+  SPDLOG_INFO("[EcdhPsiSender::Init] start");
 
-  AbstractPSISender::Init();
+  AbstractPsiSender::Init();
 
   if (recovery_manager_) {
     recovery_manager_->MarkInitEnd(config_, key_hash_digest_);
   }
 
-  SPDLOG_INFO("[EcdhPSISender::Init] end");
+  SPDLOG_INFO("[EcdhPsiSender::Init] end");
 }
 
-void EcdhPSISender::PreProcess() {
-  TRACE_EVENT("pre-process", "EcdhPSISender::PreProcess");
-  SPDLOG_INFO("[EcdhPSISender::PreProcess] start");
+void EcdhPsiSender::PreProcess() {
+  TRACE_EVENT("pre-process", "EcdhPsiSender::PreProcess");
+  SPDLOG_INFO("[EcdhPsiSender::PreProcess] start");
 
   if (digest_equal_) {
     return;
@@ -90,12 +90,12 @@ void EcdhPSISender::PreProcess() {
         kDefaultBinNum);
   }
 
-  SPDLOG_INFO("[EcdhPSISender::PreProcess] end");
+  SPDLOG_INFO("[EcdhPsiSender::PreProcess] end");
 }
 
-void EcdhPSISender::Online() {
-  TRACE_EVENT("online", "EcdhPSISender::Online");
-  SPDLOG_INFO("[EcdhPSISender::Online] start");
+void EcdhPsiSender::Online() {
+  TRACE_EVENT("online", "EcdhPsiSender::Online");
+  SPDLOG_INFO("[EcdhPsiSender::Online] start");
 
   if (digest_equal_) {
     return;
@@ -118,12 +118,12 @@ void EcdhPSISender::Online() {
     recovery_manager_->MarkOnlineEnd();
   }
 
-  SPDLOG_INFO("[EcdhPSISender::Online] end");
+  SPDLOG_INFO("[EcdhPsiSender::Online] end");
 }
 
-void EcdhPSISender::PostProcess() {
-  TRACE_EVENT("post-process", "EcdhPSISender::PostProcess");
-  SPDLOG_INFO("[EcdhPSISender::PostProcess] start");
+void EcdhPsiSender::PostProcess() {
+  TRACE_EVENT("post-process", "EcdhPsiSender::PostProcess");
+  SPDLOG_INFO("[EcdhPsiSender::PostProcess] start");
 
   if (digest_equal_) {
     return;
@@ -140,7 +140,7 @@ void EcdhPSISender::PostProcess() {
     recovery_manager_->MarkPostProcessEnd();
   }
 
-  SPDLOG_INFO("[EcdhPSISender::PostProcess] end");
+  SPDLOG_INFO("[EcdhPsiSender::PostProcess] end");
 }
 
 }  // namespace psi::psi::ecdh

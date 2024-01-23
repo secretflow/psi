@@ -21,7 +21,7 @@
 #include "yacl/base/exception.h"
 #include "yacl/link/link.h"
 
-#include "psi/psi/psi.pb.h"
+#include "psi/proto/psi.pb.h"
 
 namespace psi::psi {
 

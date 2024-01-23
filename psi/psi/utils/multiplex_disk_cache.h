@@ -22,7 +22,7 @@
 #include "spdlog/spdlog.h"
 #include "yacl/base/exception.h"
 
-#include "psi/psi/io/io.h"
+#include "psi/psi/utils/io.h"
 
 namespace psi::psi {
 

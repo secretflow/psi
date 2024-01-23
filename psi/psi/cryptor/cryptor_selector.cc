@@ -47,6 +47,21 @@ std::unique_ptr<IEccCryptor> GetSodiumCryptor() {
   return std::make_unique<SodiumCurve25519Cryptor>();
 }
 
+std::unique_ptr<IEccCryptor> GetElligator2IppCryptor() {
+#ifdef __x86_64__
+  if (yacl::hasAVX512ifma()) {
+    SPDLOG_INFO("Using IPPCP elligator2");
+    return std::make_unique<IppElligator2Cryptor>();
+  }
+#endif
+  return {};
+}
+
+std::unique_ptr<IEccCryptor> GetElligator2SodiumCryptor() {
+  SPDLOG_INFO("Using libSodium elligator2");
+  return std::make_unique<SodiumElligator2Cryptor>();
+}
+
 std::unique_ptr<IEccCryptor> GetFourQCryptor() {
 #ifdef __x86_64__
   if (yacl::hasAVX2()) {
@@ -85,6 +100,14 @@ std::unique_ptr<IEccCryptor> CreateEccCryptor(CurveType type) {
     case CurveType::CURVE_SECP256K1: {
       SPDLOG_INFO("Using Secp256k1");
       cryptor = std::make_unique<Sm2Cryptor>(type);
+      break;
+    }
+
+    case CURVE_25519_ELLIGATOR2: {
+      cryptor = GetElligator2IppCryptor();
+      if (cryptor == nullptr) {
+        cryptor = GetElligator2SodiumCryptor();
+      }
       break;
     }
     default: {

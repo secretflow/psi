@@ -37,8 +37,8 @@
 #include "yacl/crypto/base/hash/hash_utils.h"
 #include "yacl/utils/scope_guard.h"
 
-#include "psi/psi/io/io.h"
-#include "psi/psi/utils/utils.h"
+#include "psi/psi/utils/io.h"
+#include "psi/psi/utils/key.h"
 
 namespace psi::psi {
 namespace {

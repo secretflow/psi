@@ -1,0 +1,32 @@
+{
+    "ub_psi_config": {
+        "mode": "MODE_FULL",
+        "role": "ROLE_SERVER",
+        "server_secret_key_config": {
+            "path": "/tmp/server_secret_key.key"
+        },
+        "cache_config": {
+            "path": "/tmp/server_cache.sf"
+        },
+        "input_config": {
+            "path": "/tmp/server_input.csv"
+        },
+        "keys": [
+            "id0",
+            "id1"
+        ]
+    },
+    "link_config": {
+        "parties": [
+            {
+                "id": "server",
+                "host": "127.0.0.1:5300"
+            },
+            {
+                "id": "client",
+                "host": "127.0.0.1:5400"
+            }
+        ]
+    },
+    "self_link_party": "server"
+}

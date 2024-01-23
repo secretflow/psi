@@ -12,24 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("//bazel:psi.bzl", "psi_cc_binary")
+load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library")
 
 package(default_visibility = ["//visibility:public"])
+
+psi_cc_library(
+    name = "utils",
+    srcs = ["utils.cc"],
+    hdrs = ["utils.h"],
+    deps = [
+        "@com_github_gflags_gflags//:gflags",
+        "@com_google_absl//absl/strings",
+        "@yacl//yacl/link:factory",
+    ],
+)
 
 psi_cc_binary(
     name = "keyword_pir_setup",
     srcs = ["keyword_pir_setup.cc"],
-    data = [
-        "//examples/data:psi",
-    ],
     linkopts = [
         "-lm",
     ],
     deps = [
-        "//examples:utils",
+        ":utils",
+        "//psi/pir",
+        "//psi/psi/core/labeled_psi",
         "@com_google_absl//absl/strings",
-        "@psi//psi/pir",
-        "@psi//psi/psi/core/labeled_psi",
         "@yacl//yacl/crypto/utils:rand",
     ],
 )
@@ -37,19 +45,15 @@ psi_cc_binary(
 psi_cc_binary(
     name = "keyword_pir_server",
     srcs = ["keyword_pir_server.cc"],
-    data = [
-        "//examples/data:psi",
-    ],
     linkopts = [
         "-lm",
     ],
     deps = [
-        "//examples:utils",
+        ":utils",
+        "//psi/pir",
+        "//psi/psi/core/labeled_psi",
+        "//psi/psi/utils:serialize",
         "@com_google_absl//absl/strings",
-        "@psi//psi/pir",
-        "@psi//psi/psi/core/labeled_psi",
-        "@psi//psi/psi/utils",
-        "@psi//psi/psi/utils:serialize",
         "@yacl//yacl/crypto/utils:rand",
     ],
 )
@@ -57,19 +61,15 @@ psi_cc_binary(
 psi_cc_binary(
     name = "keyword_pir_mem_server",
     srcs = ["keyword_pir_mem_server.cc"],
-    data = [
-        "//examples/data:psi",
-    ],
     linkopts = [
         "-lm",
     ],
     deps = [
-        "//examples:utils",
+        ":utils",
+        "//psi/pir",
+        "//psi/psi/core/labeled_psi",
+        "//psi/psi/utils:serialize",
         "@com_google_absl//absl/strings",
-        "@psi//psi/pir",
-        "@psi//psi/psi/core/labeled_psi",
-        "@psi//psi/psi/utils",
-        "@psi//psi/psi/utils:serialize",
         "@yacl//yacl/crypto/utils:rand",
     ],
 )
@@ -77,19 +77,15 @@ psi_cc_binary(
 psi_cc_binary(
     name = "keyword_pir_client",
     srcs = ["keyword_pir_client.cc"],
-    data = [
-        "//examples/data:psi",
-    ],
     linkopts = [
         "-lm",
     ],
     deps = [
-        "//examples:utils",
+        ":utils",
+        "//psi/pir",
+        "//psi/psi/core/labeled_psi",
+        "//psi/psi/utils:serialize",
         "@com_google_absl//absl/strings",
-        "@psi//psi/pir",
-        "@psi//psi/psi/core/labeled_psi",
-        "@psi//psi/psi/utils",
-        "@psi//psi/psi/utils:serialize",
         "@yacl//yacl/crypto/utils:rand",
         "@yacl//yacl/io/rw:csv_writer",
     ],
@@ -99,7 +95,7 @@ psi_cc_binary(
     name = "generate_pir_data",
     srcs = ["generate_pir_data.cc"],
     deps = [
-        "//examples:utils",
+        ":utils",
         "@com_google_absl//absl/strings",
         "@yacl//yacl/crypto/utils:rand",
     ],

@@ -25,9 +25,9 @@
 
 #include "psi/psi/core/communication.h"
 #include "psi/psi/cryptor/ecc_cryptor.h"
-#include "psi/psi/recovery.h"
 #include "psi/psi/utils/batch_provider.h"
 #include "psi/psi/utils/ec_point_store.h"
+#include "psi/psi/utils/recovery.h"
 
 #include "psi/psi/utils/serializable.pb.h"
 

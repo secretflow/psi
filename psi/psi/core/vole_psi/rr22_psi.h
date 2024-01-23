@@ -60,6 +60,8 @@ struct Rr22PsiOptions {
   // run the protocol with malicious security
   // not supported by now
   bool malicious = false;
+
+  yacl::crypto::CodeType code_type = yacl::crypto::CodeType::Silver5;
 };
 
 void Rr22PsiSender(const Rr22PsiOptions& options,

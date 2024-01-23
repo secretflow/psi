@@ -39,10 +39,10 @@ psi_cc_library(
     hdrs = ["ecdh_psi.h"],
     deps = [
         ":communication",
-        "//psi/psi:recovery",
         "//psi/psi/cryptor:cryptor_selector",
         "//psi/psi/utils:batch_provider",
         "//psi/psi/utils:ec_point_store",
+        "//psi/psi/utils:recovery",
         "@com_google_absl//absl/strings",
         "@yacl//yacl/link",
         "@yacl//yacl/utils:parallel",

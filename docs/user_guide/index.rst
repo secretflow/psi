@@ -1,7 +1,7 @@
 User Guide
 ==========
 
-This parts covers different topics of the library.
+PSI v2 is recommended to use. We are still working on PIR code refactoring.
 
 .. toctree::
    :maxdepth: 1

@@ -22,34 +22,34 @@
 #include "psi/psi/cryptor/cryptor_selector.h"
 #include "psi/psi/ecdh/common.h"
 #include "psi/psi/trace_categories.h"
-#include "psi/psi/utils/utils.h"
+#include "psi/psi/utils/sync.h"
 
-#include "psi/psi/psi.pb.h"
+#include "psi/proto/psi.pb.h"
 
 namespace psi::psi::ecdh {
 
-EcdhPSIReceiver::EcdhPSIReceiver(const v2::PsiConfig &config,
+EcdhPsiReceiver::EcdhPsiReceiver(const v2::PsiConfig &config,
                                  std::shared_ptr<yacl::link::Context> lctx)
-    : AbstractPSIReceiver(config, std::move(lctx)) {
+    : AbstractPsiReceiver(config, std::move(lctx)) {
   trunc_intersection_indices_ = true;
 }
 
-void EcdhPSIReceiver::Init() {
-  TRACE_EVENT("init", "EcdhPSIReceiver::Init");
-  SPDLOG_INFO("[EcdhPSIReceiver::Init] start");
+void EcdhPsiReceiver::Init() {
+  TRACE_EVENT("init", "EcdhPsiReceiver::Init");
+  SPDLOG_INFO("[EcdhPsiReceiver::Init] start");
 
-  AbstractPSIReceiver::Init();
+  AbstractPsiReceiver::Init();
 
   if (recovery_manager_) {
     recovery_manager_->MarkInitEnd(config_, key_hash_digest_);
   }
 
-  SPDLOG_INFO("[EcdhPSIReceiver::Init] end");
+  SPDLOG_INFO("[EcdhPsiReceiver::Init] end");
 }
 
-void EcdhPSIReceiver::PreProcess() {
-  TRACE_EVENT("pre-process", "EcdhPSIReceiver::PreProcess");
-  SPDLOG_INFO("[EcdhPSIReceiver::PreProcess] start");
+void EcdhPsiReceiver::PreProcess() {
+  TRACE_EVENT("pre-process", "EcdhPsiReceiver::PreProcess");
+  SPDLOG_INFO("[EcdhPsiReceiver::PreProcess] start");
 
   if (digest_equal_) {
     return;
@@ -88,12 +88,12 @@ void EcdhPSIReceiver::PreProcess() {
         kDefaultBinNum);
   }
 
-  SPDLOG_INFO("[EcdhPSIReceiver::PreProcess] end");
+  SPDLOG_INFO("[EcdhPsiReceiver::PreProcess] end");
 }
 
-void EcdhPSIReceiver::Online() {
-  TRACE_EVENT("online", "EcdhPSIReceiver::Online");
-  SPDLOG_INFO("[EcdhPSIReceiver::Online] start");
+void EcdhPsiReceiver::Online() {
+  TRACE_EVENT("online", "EcdhPsiReceiver::Online");
+  SPDLOG_INFO("[EcdhPsiReceiver::Online] start");
 
   if (digest_equal_) {
     return;
@@ -117,12 +117,12 @@ void EcdhPSIReceiver::Online() {
     recovery_manager_->MarkOnlineEnd();
   }
 
-  SPDLOG_INFO("[EcdhPSIReceiver::Online] end");
+  SPDLOG_INFO("[EcdhPsiReceiver::Online] end");
 }
 
-void EcdhPSIReceiver::PostProcess() {
-  TRACE_EVENT("post-process", "EcdhPSIReceiver::PostProcess");
-  SPDLOG_INFO("[EcdhPSIReceiver::PostProcess] start");
+void EcdhPsiReceiver::PostProcess() {
+  TRACE_EVENT("post-process", "EcdhPsiReceiver::PostProcess");
+  SPDLOG_INFO("[EcdhPsiReceiver::PostProcess] start");
 
   if (digest_equal_) {
     return;
@@ -139,7 +139,7 @@ void EcdhPSIReceiver::PostProcess() {
     recovery_manager_->MarkPostProcessEnd();
   }
 
-  SPDLOG_INFO("[EcdhPSIReceiver::PostProcess] end");
+  SPDLOG_INFO("[EcdhPsiReceiver::PostProcess] end");
 }
 
 }  // namespace psi::psi::ecdh

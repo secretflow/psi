@@ -19,7 +19,7 @@
 #include "psi/psi/core/ecdh_psi.h"
 #include "psi/psi/operator/factory.h"
 #include "psi/psi/prelude.h"
-#include "psi/psi/utils/utils.h"
+#include "psi/psi/utils/sync.h"
 
 namespace psi::psi {
 

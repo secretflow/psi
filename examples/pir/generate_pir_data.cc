@@ -23,7 +23,7 @@
 #include <vector>
 
 #include "absl/strings/escaping.h"
-#include "examples/utils.h"
+#include "examples/pir/utils.h"
 #include "fmt/format.h"
 #include "spdlog/spdlog.h"
 #include "yacl/crypto/utils/rand.h"

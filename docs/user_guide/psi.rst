@@ -1,7 +1,8 @@
 PSI v1 QuickStart
 =================
 
-Quick start with SPU Private Set Intersection (PSI).
+Quick start with Private Set Intersection (PSI) V1 APIs.
+
 
 Supported Protocols
 ----------------------
@@ -51,147 +52,42 @@ Our implementation of ECDH-PSI protocol supports multiple ECC curves:
 
 Please check :doc:`/development/psi_protocol_intro` for details.
 
-PSI Example
-------------
+Prepare data and config
+-----------------------
 
-In-memory psi example
->>>>>>>>>>>>>>>>>>>>>
+Please check details of configs at :doc:`/reference/psi_v1_config`.
 
-A simple in-memory psi example.
+To launch PSI, please check LuanchConfig at :doc:`/reference/launch_config` and fillin **runtime_config.legacy_psi_config**.
 
-:psi_code_host:`C++ simple in-memory psi example </psi/blob/master/examples/cpp/simple_in_memory_psi.cc>` .
+Release Docker
+--------------
 
-Streaming psi example
->>>>>>>>>>>>>>>>>>>>>
+Check official release docker image at `dockerhub <https://hub.docker.com/r/secretflow/psi-anolis8>`_. We also have mirrors at Alibaba Cloud: secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8.
 
-A streaming example where users could perform PSI for billion items.
-Read data from in_path, and Write PSI result to out_path.
-Select psi protocol from ecdh/kkrt.
+Run PSI
+-------
 
-:psi_code_host:`C++ streaming psi example </psi/blob/master/examples/cpp/simple_psi.cc>` .
+In the first terminal, run the following command::
 
-:psi_code_host:`Python streaming psi example </psi/blob/master/examples/python/psi/simple_psi.py>` .
+    docker run -it  --rm  --network host --mount type=bind,source=/tmp/receiver,target=/root/receiver -w /root  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:0.1.0beta bash -c "./main --config receiver/receiver.config"
 
-dp psi example
->>>>>>>>>>>>>>>>>>>>>
-example for dp psi.
 
-:psi_code_host:`dp psi example </psi/blob/master/examples/cpp/simple_dp_psi.cc>` .
+In the other terminal, run the following command simultaneously::
 
-How To Run
-----------
+    docker run -it  --rm  --network host --mount type=bind,source=/tmp/sender,target=/root/sender -w /root  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:0.1.0beta bash -c "./main --config sender/sender.config"
 
-Run In-memory C++ PSI example
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-First build simple_in_memory_psi.
+Building from source
+--------------------
 
-.. code-block:: bash
+You could build psi binary with bazel::
 
-  bazel build //examples/cpp:simple_in_memory_psi
+    bazel build psi/psi:main -c opt
 
-Start two terminals.
 
-In the first terminal.
+Then use binary with::
 
-.. code-block:: bash
-
-  simple_in_memory_psi -- -rank 0 -data_size 1000
-
-In the second terminal.
-
-.. code-block:: bash
-
-  simple_in_memory_psi -- -rank 1 -data_size 1000
-
-Run Streaming C++ PSI example
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-Start two terminals.
-
-Taking ECDH-PSI as an example, protocol is 1. KKRT-PSI sets protocol to 2, BC22 PCG-PSI sets protocol to 3.
-
-Get PSI result in rank 0.
-
-First build simple_psi.
-
-.. code-block:: bash
-
-  bazel build //examples/cpp:simple_psi
-
-In the first terminal.
-
-.. code-block:: bash
-
-  simple_psi -rank 0 -protocol 1 -in_path ./examples/data/psi_1.csv -field_names id -out_path /tmp/p1.out
-
-In the second terminal.
-
-.. code-block:: bash
-
-  simple_psi -rank 1 -protocol 1 -in_path ./examples/data/psi_2.csv -field_names id -out_path /tmp/p2.out
-
-Run Streaming Python PSI example
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-PSI protocols support ECDH_PSI_2PC, KKRT_PSI_2PC, and BC22_PSI_2PC.
-
-Get PSI result in rank 0.
-
-Start two terminals.
-
-In the first terminal.
-
-.. code-block:: bash
-
-  python3 ./examples/python/psi/simple_psi.py --rank 0 --protocol ECDH_PSI_2PC --in_path ./examples/data/psi_1.csv --field_names id --out_path /tmp/p1.out
-
-In the second terminal.
-
-.. code-block:: bash
-
-  python3 ./examples/python/psi/simple_psi.py --rank 1 --protocol ECDH_PSI_2PC --in_path ./examples/data/psi_2.csv --field_names id --out_path /tmp/p2.out
-
-Run DP PSI c++ example
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-First build simple_dp_psi.
-
-.. code-block:: bash
-
-  bazel build //examples/cpp:simple_dp_psi
-
-Start two terminals.
-
-In the first terminal.
-
-.. code-block:: bash
-
-  simple_dp_psi -rank 0 -in_path ./examples/data/psi_1.csv -field_names id
-
-In the second terminal.
-
-.. code-block:: bash
-
-  simple_dp_psi -rank 1 -in_path ./examples/data/psi_2.csv -field_names id -out_path /tmp/p1.out
-
-Run Unbalanced PSI python example
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-Start two terminals.
-
-In the first terminal.
-
-.. code-block:: bash
-
-  python3 ./examples/python/psi/unbalanced_psi.py --rank 1 --in_path ./examples/data/psi_1.csv --field_names id
-
-In the second terminal.
-
-.. code-block:: bash
-
-  python3 ./examples/python/psi/unbalanced_psi.py --rank 0 -in_path ./examples/data/psi_2.csv -field_names id -out_path /tmp/p1.out
-
+    ./bazel-bin/psi/psi/main --config <config JSON file path>
 
 Benchmark
 ----------

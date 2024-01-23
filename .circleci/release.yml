@@ -56,12 +56,12 @@ jobs:
           command: git clone https://github.com/secretflow/devtools.git ../devtools
       - run:
           name: "Build"
-          command: bazel build psi/psi:main -c opt --config=linux-release --ui_event_filters=-info,-debug,-warning --jobs 20
+          command: bazel build psi:main -c opt --config=linux-release --ui_event_filters=-info,-debug,-warning --jobs 20
       - run:
           name: "Copy binary"
           command: |
             mkdir -p /tmp/binary
-            cp bazel-bin/psi/psi/main /tmp/binary/
+            cp bazel-bin/psi/main /tmp/binary/
       - persist_to_workspace:
           root: "/tmp/binary"
           paths:

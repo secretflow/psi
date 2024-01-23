@@ -54,9 +54,9 @@ The Bucket-psi configuration.
 | output_params | [ OutputParams](#outputparams) | The output parameters of psi. |
 | curve_type | [ CurveType](#curvetype) | Optional, specified elliptic curve cryptography used in psi when needed. |
 | bucket_size | [ uint32](#uint32) | Optional, specified the hash bucket size used in psi. |
-| preprocess_path | [ string](#string) | Optional，The path of offline preprocess file. |
+| preprocess_path | [ string](#string) | Optional，the path of offline preprocess file. |
 | ecdh_secret_key_path | [ string](#string) | Optional，secret key path of ecdh_oprf, 256bit/32bytes binary file. |
-| dppsi_params | [ DpPsiParams](#dppsiparams) | Optional，Params for dp-psi |
+| dppsi_params | [ DpPsiParams](#dppsiparams) | Optional，params for dp-psi |
  <!-- end Fields -->
  <!-- end HasFields -->
 
@@ -149,6 +149,7 @@ The specified elliptic curve cryptography used in psi.
 | CURVE_FOURQ | 2 | FourQ: four-dimensional decompositions on a Q-curve over the Mersenne prime |
 | CURVE_SM2 | 3 | SM2 is an elliptic curve based cryptosystem (ECC) published as a Chinese National Standard as GBT.32918.1-2016 and published in ISO/IEC 14888-3:2018 |
 | CURVE_SECP256K1 | 4 | parameters of the elliptic curve defined in Standards for Efficient Cryptography (SEC) http://www.secg.org/sec2-v2.pdf |
+| CURVE_25519_ELLIGATOR2 | 5 | Curve25519 with rfc9380 elligator2 hash_to_curve |
 
 
 
@@ -173,6 +174,7 @@ The algorithm type of psi.
 | DP_PSI_2PC | 12 | Differentially-Private PSI https://arxiv.org/pdf/2208.13249.pdf bases on ECDH-PSI, and provides: Differentially private PSI results. |
 | RR22_FAST_PSI_2PC | 13 | Blazing Fast PSI https://eprint.iacr.org/2022/320.pdf two mode: fast mode or low communication mode |
 | RR22_LOWCOMM_PSI_2PC | 14 | none |
+| RR22_MALICIOUS_PSI_2PC | 15 | none |
 
 
  <!-- end Enums -->

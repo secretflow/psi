@@ -111,6 +111,9 @@ static void BM_Rr22FastPsi(benchmark::State& state) {
     psi::psi::Rr22PsiOptions psi_options(40, thread_num, true);
     if (mode == 1) {
       psi_options.mode = psi::psi::Rr22PsiMode::LowCommMode;
+    } else if (mode == 2) {
+      psi_options.mode = psi::psi::Rr22PsiMode::FastMode;
+      psi_options.malicious = true;
     }
 
     auto psi_sender_proc = std::async(
@@ -151,4 +154,5 @@ BENCHMARK(BM_Rr22FastPsi)
     ->Args({1 << 21, 1})
     ->Args({1 << 22, 1})
     ->Args({1 << 23, 1})
-    ->Args({1 << 24, 1});
+    ->Args({1 << 24, 1})
+    ->Args({1 << 24, 2});  // fast mode malicious

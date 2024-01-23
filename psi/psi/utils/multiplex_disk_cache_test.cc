@@ -18,7 +18,7 @@
 
 #include "gtest/gtest.h"
 
-#include "psi/psi/io/io.h"
+#include "psi/psi/utils/io.h"
 
 namespace psi::psi {
 

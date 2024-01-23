@@ -23,8 +23,8 @@
 #include <utility>
 #include <vector>
 
-#include "psi/psi/io/io.h"
 #include "psi/psi/utils/csv_header_analyzer.h"
+#include "psi/psi/utils/io.h"
 
 namespace psi::psi {
 
@@ -127,13 +127,27 @@ class CsvBatchProvider : public IBasicBatchProvider,
   std::unique_ptr<CsvHeaderAnalyzer> label_analyzer_;
 };
 
-class CachedCsvBatchProvider : public IShuffledBatchProvider {
+// NOTE(junfeng):
+// SimpleShuffledBatchProvider consists a IBasicBatchProvider to provide data
+// and two buffers to speed-up reading.
+// When SimpleShuffledBatchProvider reads one buffer, IBasicBatchProvider
+// loads a new batch to the other buffer at the same time.
+// 1. batch_size indicates the size of returns of ReadNextShuffledBatch.
+// 2. provider_batch_size indicates the batch size of IBasicBatchProvider, or
+// the size of buffers. provider_batch_size should be greater than batch_size.
+// 3. If a IBasicBatchProvider is not provided, a default CsvBatchProvider will
+// be constructed.
+class SimpleShuffledBatchProvider : public IShuffledBatchProvider {
  public:
-  explicit CachedCsvBatchProvider(const std::string& path,
-                                  const std::vector<std::string>& target_fields,
-                                  size_t batch_size,
-                                  size_t bucket_size = 100000000,
-                                  bool shuffle = false);
+  SimpleShuffledBatchProvider(const std::string& path,
+                              const std::vector<std::string>& target_fields,
+                              size_t batch_size,
+                              size_t provider_batch_size = 100000000,
+                              bool shuffle = false);
+
+  explicit SimpleShuffledBatchProvider(
+      const std::shared_ptr<IBasicBatchProvider>& provider, size_t batch_size,
+      bool shuffle = false);
 
   std::tuple<std::vector<std::string>, std::vector<size_t>, std::vector<size_t>>
   ReadNextShuffledBatch() override;
@@ -141,11 +155,13 @@ class CachedCsvBatchProvider : public IShuffledBatchProvider {
   [[nodiscard]] size_t batch_size() const override { return batch_size_; }
 
  private:
-  void ReadAndShuffle(size_t read_index, bool thread_model = false);
+  void Init();
+
+  void ReadAndShuffle(size_t read_index, bool blocked);
 
   const size_t batch_size_;
-  std::shared_ptr<CsvBatchProvider> provider_;
-  size_t bucket_size_;
+  std::shared_ptr<IBasicBatchProvider> provider_;
+  size_t provider_batch_size_;
   bool shuffle_;
 
   std::array<std::vector<std::string>, 2> bucket_items_;

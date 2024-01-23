@@ -30,16 +30,29 @@
 #include "psi/psi/utils/csv_checker.h"
 #include "psi/psi/utils/hash_bucket_cache.h"
 #include "psi/psi/utils/index_store.h"
+#include "psi/psi/utils/key.h"
 #include "psi/psi/utils/progress.h"
-#include "psi/psi/utils/utils.h"
 
-#include "psi/psi/psi.pb.h"
+#include "psi/proto/psi.pb.h"
 
 namespace psi::psi {
 
 using ProgressCallbacks = std::function<void(const Progress::Data&)>;
 
 bool HashListEqualTest(const std::vector<yacl::Buffer>& hash_list);
+
+void CreateOutputFolder(const std::string& path);
+
+// NOTE(junfeng): `indices` must be sorted
+size_t FilterFileByIndices(const std::string& input, const std::string& output,
+                           const std::vector<uint64_t>& indices,
+                           bool output_difference,
+                           size_t header_line_count = 1);
+
+size_t FilterFileByIndices(const std::string& input, const std::string& output,
+                           const std::filesystem::path& indices,
+                           bool output_difference,
+                           size_t header_line_count = 1);
 
 std::unique_ptr<CsvChecker> CheckInput(
     std::shared_ptr<yacl::link::Context> lctx, const std::string& input_path,

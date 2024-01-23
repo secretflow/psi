@@ -10,6 +10,8 @@ This is the repo of Private Set Intersection(PSI) and Private Information Retrie
 
 This repo is formerly psi/pir part from `secretflow/spu <https://github.com/secretflow/spu>`_ repo.
 
+We invite you to try `Easy PSI <https://www.secretflow.org.cn/docs/quickstart/easy-psi>`_, a standalone PSI product powered by this library.
+
 .. toctree::
    :maxdepth: 2
    :hidden:

@@ -1,0 +1,19 @@
+{
+    "ub_psi_config": {
+        "mode": "MODE_OFFLINE_GEN_CACHE",
+        "role": "ROLE_SERVER",
+        "input_config": {
+            "path": "/tmp/server_input.csv"
+        },
+        "keys": [
+            "id0",
+            "id1"
+        ],
+        "server_secret_key_config": {
+            "path": "/tmp/server_secret_key.key"
+        },
+        "cache_config": {
+            "path": "/tmp/server_cache.sf"
+        }
+    }
+}

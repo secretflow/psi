@@ -36,9 +36,8 @@
 #include "yacl/link/test_util.h"
 
 #include "psi/psi/factory.h"
-#include "psi/psi/io/io.h"
 #include "psi/psi/prelude.h"
-#include "psi/psi/utils/utils.h"
+#include "psi/psi/utils/io.h"
 
 #include "psi/proto/psi_v2.pb.h"
 
@@ -216,7 +215,7 @@ TEST_P(PsiTest, Works) {
 
   auto lctxs = yacl::link::test::SetupWorld(2);
 
-  auto proc = [&](int idx) -> v2::PsiReport {
+  auto proc = [&](int idx) -> PsiResultReport {
     v2::PsiConfig config;
     config.mutable_input_config()->set_path(input_paths[idx]);
     config.mutable_input_config()->set_type(v2::IO_TYPE_FILE_CSV);
@@ -235,20 +234,20 @@ TEST_P(PsiTest, Works) {
     config.set_advanced_join_type(params.advanced_join_type);
     config.set_left_side(v2::Role::ROLE_RECEIVER);
 
-    std::unique_ptr<AbstractPSIParty> party;
+    std::unique_ptr<AbstractPsiParty> party;
     if (idx == 0) {
       config.mutable_protocol_config()->set_role(v2::Role::ROLE_RECEIVER);
-      party = createPSIParty(config, lctxs[idx]);
+      party = createPsiParty(config, lctxs[idx]);
     } else {
       config.mutable_protocol_config()->set_role(v2::Role::ROLE_SENDER);
-      party = createPSIParty(config, lctxs[idx]);
+      party = createPsiParty(config, lctxs[idx]);
     }
 
     return party->Run();
   };
 
   size_t world_size = lctxs.size();
-  std::vector<std::future<v2::PsiReport>> f_links(world_size);
+  std::vector<std::future<PsiResultReport>> f_links(world_size);
   for (size_t i = 0; i < world_size; i++) {
     SaveTableAsFile(params.inputs[i], input_paths[i].string());
     f_links[i] = std::async(proc, i);
@@ -257,7 +256,7 @@ TEST_P(PsiTest, Works) {
   for (size_t i = 0; i < world_size; i++) {
     std::exception_ptr exptr = nullptr;
 
-    v2::PsiReport report;
+    PsiResultReport report;
     try {
       report = f_links[i].get();
     } catch (const std::exception& e) {

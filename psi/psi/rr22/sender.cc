@@ -17,31 +17,32 @@
 #include "yacl/crypto/base/hash/hash_utils.h"
 #include "yacl/utils/parallel.h"
 
-#include "psi/psi/bucket.h"
 #include "psi/psi/bucket_psi.h"
 #include "psi/psi/core/vole_psi/rr22_psi.h"
 #include "psi/psi/rr22/common.h"
 #include "psi/psi/trace_categories.h"
+#include "psi/psi/utils/bucket.h"
+#include "psi/psi/utils/sync.h"
 
 namespace psi::psi::rr22 {
 
-Rr22PSISender::Rr22PSISender(const v2::PsiConfig &config,
+Rr22PsiSender::Rr22PsiSender(const v2::PsiConfig &config,
                              std::shared_ptr<yacl::link::Context> lctx)
-    : AbstractPSISender(config, std::move(lctx)) {}
+    : AbstractPsiSender(config, std::move(lctx)) {}
 
-void Rr22PSISender::Init() {
-  TRACE_EVENT("init", "Rr22PSISender::Init");
-  SPDLOG_INFO("[Rr22PSISender::Init] start");
+void Rr22PsiSender::Init() {
+  TRACE_EVENT("init", "Rr22PsiSender::Init");
+  SPDLOG_INFO("[Rr22PsiSender::Init] start");
 
-  AbstractPSISender::Init();
+  AbstractPsiSender::Init();
 
   CommonInit(key_hash_digest_, &config_, recovery_manager_.get());
-  SPDLOG_INFO("[Rr22PSISender::Init] end");
+  SPDLOG_INFO("[Rr22PsiSender::Init] end");
 }
 
-void Rr22PSISender::PreProcess() {
-  TRACE_EVENT("pre-process", "Rr22PSISender::PreProcess");
-  SPDLOG_INFO("[Rr22PSISender::PreProcess] start");
+void Rr22PsiSender::PreProcess() {
+  TRACE_EVENT("pre-process", "Rr22PsiSender::PreProcess");
+  SPDLOG_INFO("[Rr22PsiSender::PreProcess] start");
 
   if (digest_equal_) {
     return;
@@ -75,12 +76,12 @@ void Rr22PSISender::PreProcess() {
     recovery_manager_->MarkPreProcessEnd();
   }
 
-  SPDLOG_INFO("[Rr22PSISender::PreProcess] end");
+  SPDLOG_INFO("[Rr22PsiSender::PreProcess] end");
 }
 
-void Rr22PSISender::Online() {
-  TRACE_EVENT("online", "Rr22PSISender::Online");
-  SPDLOG_INFO("[Rr22PSISender::Online] start");
+void Rr22PsiSender::Online() {
+  TRACE_EVENT("online", "Rr22PsiSender::Online");
+  SPDLOG_INFO("[Rr22PsiSender::Online] start");
 
   if (digest_equal_) {
     return;
@@ -116,6 +117,9 @@ void Rr22PSISender::Online() {
     }
 
     auto run_f = std::async([&] {
+      [[maybe_unused]] std::vector<size_t> items_size =
+          AllGatherItemsSize(lctx_, bucket_items_list->size());
+
       std::vector<uint128_t> items_hash(bucket_items_list->size());
       yacl::parallel_for(0, bucket_items_list->size(),
                          [&](int64_t begin, int64_t end) {
@@ -125,7 +129,7 @@ void Rr22PSISender::Online() {
                            }
                          });
 
-      Rr22PsiSender(rr22_options, lctx_, items_hash);
+      ::psi::psi::Rr22PsiSender(rr22_options, lctx_, items_hash);
     });
 
     SyncWait(lctx_, &run_f);
@@ -143,12 +147,12 @@ void Rr22PSISender::Online() {
     }
   }
 
-  SPDLOG_INFO("[Rr22PSISender::Online] end");
+  SPDLOG_INFO("[Rr22PsiSender::Online] end");
 }
 
-void Rr22PSISender::PostProcess() {
-  TRACE_EVENT("post-process", "Rr22PSISender::PostProcess");
-  SPDLOG_INFO("[Rr22PSISender::PostProcess] start");
+void Rr22PsiSender::PostProcess() {
+  TRACE_EVENT("post-process", "Rr22PsiSender::PostProcess");
+  SPDLOG_INFO("[Rr22PsiSender::PostProcess] start");
 
   if (digest_equal_) {
     return;
@@ -158,7 +162,7 @@ void Rr22PSISender::PostProcess() {
     recovery_manager_->MarkPostProcessEnd();
   }
 
-  SPDLOG_INFO("[Rr22PSISender::PostProcess] end");
+  SPDLOG_INFO("[Rr22PsiSender::PostProcess] end");
 }
 
 }  // namespace psi::psi::rr22

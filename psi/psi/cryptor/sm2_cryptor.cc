@@ -47,10 +47,9 @@ void Sm2Cryptor::EccMask(absl::Span<const char> batch_points,
     bn_sk.FromBytes(
         absl::string_view(reinterpret_cast<const char*>(&this->private_key_[0]),
                           kEccKeySize),
-        ec_group.bn_p);
+        ec_group.bn_n);
 
     // pointmul
-
     EcPointSt ec_point2 = ec_point.PointMul(ec_group, bn_sk);
 
     ec_point2.ToBytes(

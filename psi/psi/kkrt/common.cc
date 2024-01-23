@@ -14,7 +14,7 @@
 
 #include "psi/psi/kkrt/common.h"
 
-#include "psi/psi/bucket.h"
+#include "psi/psi/utils/bucket.h"
 
 namespace psi::psi::kkrt {
 

@@ -22,12 +22,12 @@
 
 namespace psi::psi::kkrt {
 
-class KkrtPSISender final : public AbstractPSISender {
+class KkrtPsiSender final : public AbstractPsiSender {
  public:
-  explicit KkrtPSISender(const v2::PsiConfig &config,
+  explicit KkrtPsiSender(const v2::PsiConfig &config,
                          std::shared_ptr<yacl::link::Context> lctx = nullptr);
 
-  ~KkrtPSISender() override = default;
+  ~KkrtPsiSender() override = default;
 
  private:
   void Init() override;

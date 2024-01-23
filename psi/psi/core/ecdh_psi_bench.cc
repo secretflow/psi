@@ -43,6 +43,9 @@ std::optional<psi::psi::CurveType> GetOverrideCurveType() {
     if (std::strcmp(env, "FOURQ") == 0) {
       return psi::psi::CurveType::CURVE_FOURQ;
     }
+    if (std::strcmp(env, "ELLIGATOR2") == 0) {
+      return psi::psi::CurveType::CURVE_25519_ELLIGATOR2;
+    }
   }
   return {};
 }

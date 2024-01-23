@@ -45,7 +45,7 @@ psi_cc_binary(
         "mparty_bench.h",
     ],
     deps = [
-        "//psi/psi:psi_cc_proto",
+        "//psi/proto:psi_cc_proto",
         "//psi/psi/core:ecdh_oprf_psi",
         "//psi/psi/core:ecdh_psi",
         "//psi/psi/core:kkrt_psi",

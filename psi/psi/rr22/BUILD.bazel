@@ -22,9 +22,9 @@ psi_cc_library(
     hdrs = ["common.h"],
     deps = [
         "//psi/proto:psi_v2_cc_proto",
-        "//psi/psi:bucket",
-        "//psi/psi:recovery",
         "//psi/psi/core/vole_psi:rr22_psi",
+        "//psi/psi/utils:bucket",
+        "//psi/psi/utils:recovery",
     ],
 )
 

@@ -34,6 +34,7 @@ struct TestParams {
   uint64_t items_num = 16;
 
   Rr22PsiMode mode = Rr22PsiMode::FastMode;
+  bool malicious = false;
 };
 
 }  // namespace
@@ -152,9 +153,10 @@ TEST_P(Rr22OprfTest, OprfTest) {
   EXPECT_EQ(oprf_a, oprf_b);
 }
 
-INSTANTIATE_TEST_SUITE_P(OprfTest_Instances, Rr22OprfTest,
-                         testing::Values(TestParams{15, Rr22PsiMode::FastMode},
-                                         TestParams{15,
-                                                    Rr22PsiMode::LowCommMode}));
+INSTANTIATE_TEST_SUITE_P(
+    OprfTest_Instances, Rr22OprfTest,
+    testing::Values(TestParams{15, Rr22PsiMode::FastMode},
+                    TestParams{15, Rr22PsiMode::LowCommMode},
+                    TestParams{15, Rr22PsiMode::FastMode, true}));
 
 }  // namespace psi::psi

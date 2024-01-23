@@ -22,12 +22,12 @@
 
 namespace psi::psi::kkrt {
 
-class KkrtPSIReceiver final : public AbstractPSIReceiver {
+class KkrtPsiReceiver final : public AbstractPsiReceiver {
  public:
-  explicit KkrtPSIReceiver(const v2::PsiConfig &config,
+  explicit KkrtPsiReceiver(const v2::PsiConfig &config,
                            std::shared_ptr<yacl::link::Context> lctx = nullptr);
 
-  ~KkrtPSIReceiver() override = default;
+  ~KkrtPsiReceiver() override = default;
 
  private:
   void Init() override;

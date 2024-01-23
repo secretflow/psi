@@ -24,7 +24,7 @@
 
 #include "psi/psi/core/ecdh_oprf_psi.h"
 
-#include "psi/psi/psi.pb.h"
+#include "psi/proto/psi.pb.h"
 
 namespace psi::psi {
 
@@ -37,11 +37,11 @@ std::pair<std::vector<uint64_t>, size_t> UbPsiServerGenCache(
 
 std::pair<std::vector<uint64_t>, size_t> UbPsiClientTransferCache(
     BucketPsiConfig config, std::shared_ptr<yacl::link::Context> lctx,
-    const EcdhOprfPsiOptions& psi_options, const std::string& tmp_dir);
+    const EcdhOprfPsiOptions& psi_options);
 
 std::pair<std::vector<uint64_t>, size_t> UbPsiServerTransferCache(
     BucketPsiConfig config, std::shared_ptr<yacl::link::Context> lctx,
-    const EcdhOprfPsiOptions& psi_options, const std::string& tmp_dir);
+    const EcdhOprfPsiOptions& psi_options);
 
 std::pair<std::vector<uint64_t>, size_t> UbPsiClientShuffleOnline(
     BucketPsiConfig config, std::shared_ptr<yacl::link::Context> lctx,
@@ -53,11 +53,11 @@ std::pair<std::vector<uint64_t>, size_t> UbPsiServerShuffleOnline(
 
 std::pair<std::vector<uint64_t>, size_t> UbPsiClientOffline(
     BucketPsiConfig config, std::shared_ptr<yacl::link::Context> lctx,
-    const EcdhOprfPsiOptions& psi_options, const std::string& tmp_dir);
+    const EcdhOprfPsiOptions& psi_options);
 
 std::pair<std::vector<uint64_t>, size_t> UbPsiServerOffline(
     BucketPsiConfig config, std::shared_ptr<yacl::link::Context> lctx,
-    const EcdhOprfPsiOptions& psi_options, const std::string& tmp_dir);
+    const EcdhOprfPsiOptions& psi_options);
 
 std::pair<std::vector<uint64_t>, size_t> UbPsiClientOnline(
     BucketPsiConfig config, std::shared_ptr<yacl::link::Context> lctx,

@@ -22,7 +22,7 @@
 #include <filesystem>
 #include <string>
 
-#include "examples/utils.h"
+#include "examples/pir/utils.h"
 #include "yacl/io/rw/csv_writer.h"
 
 #include "psi/pir/pir.h"
@@ -30,9 +30,8 @@
 #include "psi/psi/core/labeled_psi/receiver.h"
 #include "psi/psi/utils/batch_provider.h"
 #include "psi/psi/utils/serialize.h"
-#include "psi/psi/utils/utils.h"
 
-#include "psi/pir/pir.pb.h"
+#include "psi/proto/pir.pb.h"
 
 using DurationMillis = std::chrono::duration<double, std::milli>;
 

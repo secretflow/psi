@@ -1,0 +1,32 @@
+{
+    "ub_psi_config": {
+        "mode": "MODE_ONLINE",
+        "role": "ROLE_CLIENT",
+        "input_config": {
+            "path": "/tmp/client_input.csv"
+        },
+        "output_config": {
+            "path": "/tmp/client_output.csv"
+        },
+        "keys": [
+            "id0",
+            "id1"
+        ],
+        "cache_config": {
+            "path": "/tmp/client_cache"
+        }
+    },
+    "link_config": {
+        "parties": [
+            {
+                "id": "server",
+                "host": "127.0.0.1:5300"
+            },
+            {
+                "id": "client",
+                "host": "127.0.0.1:5400"
+            }
+        ]
+    },
+    "self_link_party": "client"
+}

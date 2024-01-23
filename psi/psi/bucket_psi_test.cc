@@ -23,7 +23,7 @@
 #include "yacl/crypto/utils/rand.h"
 #include "yacl/link/test_util.h"
 
-#include "psi/psi/io/io.h"
+#include "psi/psi/utils/io.h"
 
 namespace psi::psi {
 

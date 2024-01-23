@@ -1,0 +1,43 @@
+// Copyright 2024 Ant Group Co., Ltd.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+syntax = "proto3";
+
+import "psi/proto/psi.proto";
+import "psi/proto/psi_v2.proto";
+import "yacl/link/link.proto";
+
+package psi;
+
+message LaunchConfig {
+  // Configs for network.
+  yacl.link.ContextDescProto link_config = 1;
+
+  // With link_config.
+  string self_link_party = 2;
+
+  oneof runtime_config {
+    // Please check at psi.proto.
+    psi.BucketPsiConfig legacy_psi_config = 3;
+
+    // Please check at psi_v2.proto.
+    psi.v2.PsiConfig psi_config = 4;
+
+    // Please check at psi_v2.proto.
+    psi.v2.UbPsiConfig ub_psi_config = 5;
+
+    // TODO(junfeng): add PIR config here.
+  }
+}

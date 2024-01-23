@@ -26,7 +26,7 @@
 #include "openssl/rand.h"
 #include "yacl/base/exception.h"
 
-#include "psi/psi/psi.pb.h"
+#include "psi/proto/psi.pb.h"
 
 namespace psi::psi {
 

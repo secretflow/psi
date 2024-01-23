@@ -23,6 +23,14 @@
 
 #include "psi/psi/core/vole_psi/okvs/baxos.h"
 
+// Reference:
+// Blazing Fast PSI from Improved OKVS and Subfield VOLE
+// https://eprint.iacr.org/2022/320
+// 5. SubField VOLE and PSI  Fig 11
+//
+// VOLE-PSI: Fast OPRF and Circuit-PSI from Vector-OLE
+// https://eprint.iacr.org/2021/266.pdf
+// 3.2 Malicious Secure Oblivious PRF.
 namespace psi::psi {
 
 enum class Rr22PsiMode {
@@ -96,6 +104,7 @@ class Rr22Oprf {
   Rr22PsiMode mode_;
 
   bool malicious_ = false;
+  uint128_t w_ = 0;
 
   bool debug_ = false;
 
@@ -108,7 +117,11 @@ class Rr22OprfSender : public Rr22Oprf {
       size_t bin_size, size_t ssp, Rr22PsiMode mode = Rr22PsiMode::FastMode,
       const yacl::crypto::CodeType& code_type = yacl::crypto::CodeType::Silver5,
       bool malicious = false)
-      : Rr22Oprf(bin_size, ssp, mode, code_type, malicious) {}
+      : Rr22Oprf(bin_size, ssp, mode, code_type, malicious) {
+    if (malicious && mode == Rr22PsiMode::LowCommMode) {
+      YACL_THROW("RR22 malicious psi not support LowCommMode");
+    }
+  }
 
   void Send(const std::shared_ptr<yacl::link::Context>& lctx, size_t n,
             absl::Span<const uint128_t> inputs,
@@ -147,7 +160,11 @@ class Rr22OprfReceiver : public Rr22Oprf {
       size_t bin_size, size_t ssp, Rr22PsiMode mode = Rr22PsiMode::FastMode,
       const yacl::crypto::CodeType& code_type = yacl::crypto::CodeType::Silver5,
       bool malicious = false)
-      : Rr22Oprf(bin_size, ssp, mode, code_type, malicious) {}
+      : Rr22Oprf(bin_size, ssp, mode, code_type, malicious) {
+    if (malicious && mode == Rr22PsiMode::LowCommMode) {
+      YACL_THROW("RR22 malicious psi not support LowCommMode");
+    }
+  }
 
   void Recv(const std::shared_ptr<yacl::link::Context>& lctx,
             size_t paxos_init_size, const std::vector<uint128_t>& inputs,

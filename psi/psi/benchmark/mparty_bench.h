@@ -37,9 +37,9 @@
 #include "psi/psi/core/kkrt_psi.h"
 #include "psi/psi/core/mini_psi.h"
 #include "psi/psi/cryptor/cryptor_selector.h"
-#include "psi/psi/io/io.h"
 #include "psi/psi/utils/batch_provider.h"
 #include "psi/psi/utils/ec_point_store.h"
+#include "psi/psi/utils/io.h"
 #include "psi/psi/utils/test_utils.h"
 
 namespace psi::psi::bench {
@@ -140,8 +140,8 @@ PSI_BM_DEFINE_ECDH()
                                                                                \
         WriteCsvFile(server_input_path.string(), items);                       \
         std::vector<std::string> cloumn_ids = {"id"};                          \
-        std::shared_ptr<CachedCsvBatchProvider> item_provider =                \
-            std::make_shared<CachedCsvBatchProvider>(                          \
+        std::shared_ptr<SimpleShuffledBatchProvider> item_provider =           \
+            std::make_shared<SimpleShuffledBatchProvider>(                     \
                 server_input_path.string(), cloumn_ids, kEcdhOprfPsiBatchSize, \
                 100000, true);                                                 \
                                                                                \

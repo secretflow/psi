@@ -23,7 +23,7 @@
 #include "yacl/utils/scope_guard.h"
 
 #include "psi/psi/bucket_psi.h"
-#include "psi/psi/io/io.h"
+#include "psi/psi/utils/io.h"
 #include "psi/psi/utils/test_utils.h"
 
 namespace psi::psi {

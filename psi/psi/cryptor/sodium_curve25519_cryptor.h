@@ -14,6 +14,9 @@
 
 #pragma once
 
+#include <memory>
+#include <vector>
+
 #include "openssl/crypto.h"
 #include "openssl/rand.h"
 #include "yacl/base/exception.h"
@@ -35,6 +38,7 @@ namespace psi::psi {
 // Several Real-World Applications of Curve_25519
 // The vulnerability has been assigned CVE-2017-0379
 //
+
 class SodiumCurve25519Cryptor : public IEccCryptor {
  public:
   SodiumCurve25519Cryptor() {
@@ -57,6 +61,11 @@ class SodiumCurve25519Cryptor : public IEccCryptor {
 
   std::vector<uint8_t> KeyExchange(
       const std::shared_ptr<yacl::link::Context> &link_ctx);
+};
+
+class SodiumElligator2Cryptor : public SodiumCurve25519Cryptor {
+  std::vector<uint8_t> HashToCurve(
+      absl::Span<const char> item_data) const override;
 };
 
 }  // namespace psi::psi

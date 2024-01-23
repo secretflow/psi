@@ -34,7 +34,7 @@
 #include "yacl/base/exception.h"
 
 #include "psi/psi/prelude.h"
-#include "psi/psi/utils/utils.h"
+#include "psi/psi/utils/key.h"
 
 #include "psi/proto/psi_v2.pb.h"
 

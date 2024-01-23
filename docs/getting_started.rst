@@ -7,14 +7,14 @@ Welcome to SecretFlow PSI Library. There are multiple methods to use PSI/PIR.
 * Python packages
 
     * `SPU <https://pypi.org/project/spu/>`_ warps the library as Python bindings. You could call PSI/PIR with spu.
-    * `SecretFlow <https://pypi.org/project/secretflow/>`_ warps spu further.
+    * `SecretFlow <https://pypi.org/project/secretflow/>`_ warps SPU further.
 
 
 * Applications
 
     * `SCQL <https://www.secretflow.org.cn/docs/scql/latest/zh-Hans>`_ integrates this library to do JOIN operations.
     * `SecretPad <https://www.secretflow.org.cn/docs/quickstart/mvp-platform>`_ provides PSI component.
-    * `Easy PSI <https://www.secretflow.org.cn/docs/quickstart/easy-psi>`_ provides most functionality of this library to users.
+    * `Easy PSI <https://www.secretflow.org.cn/docs/quickstart/easy-psi>`_ provides most functionality of this library with User Interface.
 
 
 For PSI, we have a developing v2 PSI.
@@ -22,17 +22,17 @@ For PSI, we have a developing v2 PSI.
 +------------------------+------------------------------------------------+---------------------------------------------+
 |                        | PSI v1 APIs                                    | PSI v2 APIs                                 |
 +========================+================================================+=============================================+
-| Supported Protocols    | ECDH, BC22, KKRT, ECDH_OPRF_UB, DP_PSI, RR22   | ECDH, KKRT, RR22                            |
+| Supported Protocols    | ECDH, BC22, KKRT, ECDH_OPRF_UB, DP_PSI, RR22   | ECDH, KKRT, RR22, ECDH_OPRF_UB              |
 +------------------------+------------------------------------------------+---------------------------------------------+
 | CSV parser             | Support a subset of csv files.                 | Apache Arrow, support all legal csv files.  |
 +------------------------+------------------------------------------------+---------------------------------------------+
 | Recovery after failure | Unsupported                                    | Supported                                   |
 +------------------------+------------------------------------------------+---------------------------------------------+
-| Inner join             | Unsupported at library level                   | Supported natively                          |
+| Support duplicated keys| Unsupported                                    | Supported                                   |
 +------------------------+------------------------------------------------+---------------------------------------------+
 | Release Docker         | Not provided                                   | Provided                                    |
 +------------------------+------------------------------------------------+---------------------------------------------+
-| Python Binding         | with SPU                                       | Not provided                                |
+| Python Binding         | with SPU                                       | with SPU                                    |
 +------------------------+------------------------------------------------+---------------------------------------------+
 
 
@@ -62,10 +62,30 @@ SPU
 
 Please check `SPU Installation Guidelines <https://www.secretflow.org.cn/docs/spu/latest/en-US/getting_started/install>`_.
 
+APIs: https://www.secretflow.org.cn/docs/spu/latest/en-US/reference/py_api
+
 SecretFlow
 """"""""""
 
 Please check `SecretFlow Installation page <https://www.secretflow.org.cn/docs/secretflow/latest/en-US/getting_started/installation>`_.
+
+APIs:
+
+- PSI v1:
+    - https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_df
+    - https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_csv
+    - https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_join_df
+    - https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_join_csv
+
+- PSI v2:
+    - https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_v2
+
+- PIR:
+    - https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.pir_setup
+    - https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.pir_query
+    - https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.pir_memory_query
+
+- Component: https://www.secretflow.org.cn/docs/secretflow/latest/en-US/component/comp_list#psi
 
 Applications
 ^^^^^^^^^^^^
@@ -74,6 +94,10 @@ SCQL
 """"
 
 Please check `SCQL Quickstart tutorial <https://www.secretflow.org.cn/docs/scql/latest/en-US/intro/tutorial>`_.
+
+Featured operators using PSI:
+    - https://www.secretflow.org.cn/docs/scql/latest/en-US/reference/operators#in
+    - https://www.secretflow.org.cn/docs/scql/latest/en-US/reference/operators#join
 
 SecretPad
 """""""""
@@ -123,7 +147,7 @@ You need to install:
 * ninja
 * nasm>=2.15
 * python>=3.8
-* bazel==6.2.1
+* bazel==6.4.0
 * golang
 * xxd
 * lld
@@ -141,8 +165,6 @@ We use bazel for building and testing::
 
     # test
     bazel test //...
-
-
 
 Reporting an Issue
 ------------------

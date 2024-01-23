@@ -23,6 +23,8 @@ extern "C" {
 #include "yacl/crypto/base/hash/hash_utils.h"
 #include "yacl/utils/parallel.h"
 
+#include "psi/psi/cryptor/hash_to_curve_elligator2.h"
+
 namespace psi::psi {
 
 void SodiumCurve25519Cryptor::EccMask(absl::Span<const char> batch_points,
@@ -70,6 +72,11 @@ std::vector<uint8_t> SodiumCurve25519Cryptor::KeyExchange(
                         (const unsigned char*)peer_pubkey_buf.data()));
   const auto shared_key = yacl::crypto::Blake3(dh_key);
   return {shared_key.begin(), shared_key.end()};
+}
+
+std::vector<uint8_t> SodiumElligator2Cryptor::HashToCurve(
+    absl::Span<const char> item_data) const {
+  return HashToCurveElligator2(item_data);
 }
 
 }  // namespace psi::psi

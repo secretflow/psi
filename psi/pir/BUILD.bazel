@@ -85,24 +85,16 @@ psi_cc_test(
     ],
 )
 
-proto_library(
-    name = "pir_proto",
-    srcs = ["pir.proto"],
-)
-
-cc_proto_library(
-    name = "pir_cc_proto",
-    deps = [":pir_proto"],
-)
-
 psi_cc_library(
     name = "pir",
     srcs = ["pir.cc"],
     hdrs = ["pir.h"],
     deps = [
-        ":pir_cc_proto",
+        "//psi/proto:pir_cc_proto",
         "//psi/psi/core:cuckoo_index",
         "//psi/psi/core/labeled_psi",
+        "//psi/psi/utils:serialize",
+        "//psi/psi/utils:sync",
         "@yacl//yacl/crypto/base/block_cipher:symmetric_crypto",
     ],
 )
@@ -112,7 +104,7 @@ psi_cc_test(
     srcs = ["pir_test.cc"],
     deps = [
         ":pir",
-        "//psi/psi/io",
+        "//psi/psi/utils:io",
         "@yacl//yacl/utils:scope_guard",
     ],
 )

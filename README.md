@@ -26,39 +26,41 @@ receiver.config:
 
 ```json
 {
-    "protocol_config": {
-        "protocol": "PROTOCOL_KKRT",
-        "role": "ROLE_RECEIVER",
-        "broadcast_result": true
+    "psi_config": {
+        "protocol_config": {
+            "protocol": "PROTOCOL_KKRT",
+            "role": "ROLE_RECEIVER",
+            "broadcast_result": true
+        },
+        "input_config": {
+            "type": "IO_TYPE_FILE_CSV",
+            "path": "/root/receiver/receiver_input.csv"
+        },
+        "output_config": {
+            "type": "IO_TYPE_FILE_CSV",
+            "path": "/root/receiver/receiver_output.csv"
+        },
+        "keys": [
+            "id0",
+            "id1"
+        ],
+        "debug_options": {
+            "trace_path": "/root/receiver/receiver.trace"
+        },
+        "link_config": {
+            "parties": [
+                {
+                    "id": "receiver",
+                    "host": "127.0.0.1:5300"
+                },
+                {
+                    "id": "sender",
+                    "host": "127.0.0.1:5400"
+                }
+            ]
+        }
     },
-    "input_config": {
-        "type": "IO_TYPE_FILE_CSV",
-        "path": "/root/receiver/receiver_input.csv"
-    },
-    "output_config": {
-        "type": "IO_TYPE_FILE_CSV",
-        "path": "/root/receiver/receiver_output.csv"
-    },
-    "link_config": {
-        "parties": [
-            {
-                "id": "receiver",
-                "host": "127.0.0.1:5300"
-            },
-            {
-                "id": "sender",
-                "host": "127.0.0.1:5400"
-            }
-        ]
-    },
-    "self_link_party": "receiver",
-    "keys": [
-        "id0",
-        "id1"
-    ],
-    "debug_options": {
-        "trace_path": "/root/receiver/receiver.trace"
-    }
+    "self_link_party": "receiver"
 }
 ```
 
@@ -66,39 +68,41 @@ sender.config:
 
 ```json
 {
-    "protocol_config": {
-        "protocol": "PROTOCOL_KKRT",
-        "role": "ROLE_SENDER",
-        "broadcast_result": true
+    "psi_config": {
+        "protocol_config": {
+            "protocol": "PROTOCOL_KKRT",
+            "role": "ROLE_SENDER",
+            "broadcast_result": true
+        },
+        "input_config": {
+            "type": "IO_TYPE_FILE_CSV",
+            "path": "/root/sender/sender_input.csv"
+        },
+        "output_config": {
+            "type": "IO_TYPE_FILE_CSV",
+            "path": "/root/sender/sender_output.csv"
+        },
+        "keys": [
+            "id0",
+            "id1"
+        ],
+        "debug_options": {
+            "trace_path": "/root/sender/sender.trace"
+        },
+        "link_config": {
+            "parties": [
+                {
+                    "id": "receiver",
+                    "host": "127.0.0.1:5300"
+                },
+                {
+                    "id": "sender",
+                    "host": "127.0.0.1:5400"
+                }
+            ]
+        }
     },
-    "input_config": {
-        "type": "IO_TYPE_FILE_CSV",
-        "path": "/root/sender/sender_input.csv"
-    },
-    "output_config": {
-        "type": "IO_TYPE_FILE_CSV",
-        "path": "/root/sender/sender_output.csv"
-    },
-    "link_config": {
-        "parties": [
-            {
-                "id": "receiver",
-                "host": "127.0.0.1:5300"
-            },
-            {
-                "id": "sender",
-                "host": "127.0.0.1:5400"
-            }
-        ]
-    },
-    "self_link_party": "sender",
-    "keys": [
-        "id0",
-        "id1"
-    ],
-    "debug_options": {
-        "trace_path": "/root/sender/sender.trace"
-    }
+    "self_link_party": "sender"
 }
 ```
 
@@ -115,13 +119,13 @@ sender.config:
 In the first terminal, run the following command
 
 ```bash
-docker run -it  --rm  --network host --mount type=bind,source=/tmp/receiver,target=/root/receiver -w /root  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:0.1.0beta bash -c "./main --config receiver/receiver.config"
+docker run -it  --rm  --network host --mount type=bind,source=/tmp/receiver,target=/root/receiver -w /root  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest bash -c "./main --config receiver/receiver.config"
 ```
 
 In the other terminal, run the following command simultaneously.
 
 ```bash
-docker run -it  --rm  --network host --mount type=bind,source=/tmp/sender,target=/root/sender -w /root  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:0.1.0beta bash -c "./main --config sender/sender.config"
+docker run -it  --rm  --network host --mount type=bind,source=/tmp/sender,target=/root/sender -w /root  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest bash -c "./main --config sender/sender.config"
 ```
 
 ## Building SecretFlow PSI Library
@@ -131,7 +135,7 @@ docker run -it  --rm  --network host --mount type=bind,source=/tmp/sender,target
 
 #### Dev Docker
 
-We use the same dev docker from secretflow/ubuntu-base-ci.
+We use secretflow/ubuntu-base-ci docker image. You may check at [dockerhub](https://hub.docker.com/r/secretflow/ubuntu-base-ci).
 
 ```sh
 # start container
@@ -151,7 +155,7 @@ docker exec -it psi-dev-$(whoami) bash
 #### Linux
 
 ```sh
-Install gcc>=11.2, cmake>=3.26, ninja, nasm>=2.15, python>=3.8, bazel==6.2.1, golang, xxd, lld
+Install gcc>=11.2, cmake>=3.26, ninja, nasm>=2.15, python>=3.8, bazel==6.4.0, golang, xxd, lld
 ```
 
 ### Build & UnitTest

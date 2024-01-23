@@ -20,7 +20,7 @@ syntax = "proto3";
 
 package kuscia;
 
-import "psi/proto/psi_v2.proto";
+import "psi/proto/entry.proto";
 
 option go_package = "github.com/secretflow/kuscia/proto/api/v1alpha1/appconfig";
 option java_package = "com.secretflow.v1alpha1.appconfig";
@@ -76,5 +76,5 @@ message AllocatedPorts {
 }
 
 message TaskInputConfig {
-  map<string, psi.psi.v2.PsiConfig> sf_psi_config_map = 1;
+  map<string, psi.LaunchConfig> sf_psi_config_map = 1;
 }

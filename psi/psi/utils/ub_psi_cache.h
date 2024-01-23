@@ -22,8 +22,8 @@
 
 #include "yacl/base/byte_container_view.h"
 
-#include "psi/psi/io/io.h"
 #include "psi/psi/utils/batch_provider.h"
+#include "psi/psi/utils/io.h"
 
 namespace psi::psi {
 

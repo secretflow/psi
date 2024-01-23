@@ -28,7 +28,7 @@
 #include "yacl/utils/scope_guard.h"
 
 #include "psi/psi/core/labeled_psi/psi_params.h"
-#include "psi/psi/io/io.h"
+#include "psi/psi/utils/io.h"
 
 namespace {
 

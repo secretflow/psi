@@ -17,34 +17,34 @@
 #include "yacl/crypto/base/hash/hash_utils.h"
 #include "yacl/utils/parallel.h"
 
-#include "psi/psi/bucket.h"
 #include "psi/psi/bucket_psi.h"
 #include "psi/psi/core/kkrt_psi.h"
 #include "psi/psi/kkrt/common.h"
 #include "psi/psi/prelude.h"
 #include "psi/psi/trace_categories.h"
+#include "psi/psi/utils/bucket.h"
 #include "psi/psi/utils/serialize.h"
-#include "psi/psi/utils/utils.h"
+#include "psi/psi/utils/sync.h"
 
 namespace psi::psi::kkrt {
 
-KkrtPSIReceiver::KkrtPSIReceiver(const v2::PsiConfig& config,
+KkrtPsiReceiver::KkrtPsiReceiver(const v2::PsiConfig& config,
                                  std::shared_ptr<yacl::link::Context> lctx)
-    : AbstractPSIReceiver(config, std::move(lctx)) {}
+    : AbstractPsiReceiver(config, std::move(lctx)) {}
 
-void KkrtPSIReceiver::Init() {
-  TRACE_EVENT("init", "KkrtPSIReceiver::Init");
-  SPDLOG_INFO("[KkrtPSIReceiver::Init] start");
+void KkrtPsiReceiver::Init() {
+  TRACE_EVENT("init", "KkrtPsiReceiver::Init");
+  SPDLOG_INFO("[KkrtPsiReceiver::Init] start");
 
-  AbstractPSIReceiver::Init();
+  AbstractPsiReceiver::Init();
 
   CommonInit(key_hash_digest_, &config_, recovery_manager_.get());
-  SPDLOG_INFO("[KkrtPSIReceiver::Init] end");
+  SPDLOG_INFO("[KkrtPsiReceiver::Init] end");
 }
 
-void KkrtPSIReceiver::PreProcess() {
-  TRACE_EVENT("pre-process", "KkrtPSIReceiver::PreProcess");
-  SPDLOG_INFO("[KkrtPSIReceiver::PreProcess] start");
+void KkrtPsiReceiver::PreProcess() {
+  TRACE_EVENT("pre-process", "KkrtPsiReceiver::PreProcess");
+  SPDLOG_INFO("[KkrtPsiReceiver::PreProcess] start");
 
   if (digest_equal_) {
     return;
@@ -83,12 +83,12 @@ void KkrtPSIReceiver::PreProcess() {
     recovery_manager_->MarkPreProcessEnd();
   }
 
-  SPDLOG_INFO("[KkrtPSIReceiver::PreProcess] end");
+  SPDLOG_INFO("[KkrtPsiReceiver::PreProcess] end");
 }
 
-void KkrtPSIReceiver::Online() {
-  TRACE_EVENT("online", "KkrtPSIReceiver::Online");
-  SPDLOG_INFO("[KkrtPSIReceiver::Online] start");
+void KkrtPsiReceiver::Online() {
+  TRACE_EVENT("online", "KkrtPsiReceiver::Online");
+  SPDLOG_INFO("[KkrtPsiReceiver::Online] start");
 
   if (digest_equal_) {
     return;
@@ -158,12 +158,12 @@ void KkrtPSIReceiver::Online() {
     }
   }
 
-  SPDLOG_INFO("[KkrtPSIReceiver::Online] end");
+  SPDLOG_INFO("[KkrtPsiReceiver::Online] end");
 }
 
-void KkrtPSIReceiver::PostProcess() {
-  TRACE_EVENT("post-process", "KkrtPSIReceiver::PostProcess");
-  SPDLOG_INFO("[KkrtPSIReceiver::PostProcess] start");
+void KkrtPsiReceiver::PostProcess() {
+  TRACE_EVENT("post-process", "KkrtPsiReceiver::PostProcess");
+  SPDLOG_INFO("[KkrtPsiReceiver::PostProcess] start");
 
   if (digest_equal_) {
     return;
@@ -173,7 +173,7 @@ void KkrtPSIReceiver::PostProcess() {
     recovery_manager_->MarkPostProcessEnd();
   }
 
-  SPDLOG_INFO("[KkrtPSIReceiver::PostProcess] end");
+  SPDLOG_INFO("[KkrtPsiReceiver::PostProcess] end");
 }
 
 }  // namespace psi::psi::kkrt

@@ -12,11 +12,47 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("//bazel:psi.bzl", "psi_cc_library")
+load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library", "psi_cc_test")
 
 package(default_visibility = ["//visibility:public"])
 
 psi_cc_library(
     name = "version",
     hdrs = ["version.h"],
+)
+
+psi_cc_library(
+    name = "kuscia_adapter",
+    srcs = [
+        "kuscia_adapter.cc",
+    ],
+    hdrs = [
+        "kuscia_adapter.h",
+    ],
+    deps = [
+        "//psi/proto:entry_cc_proto",
+        "//psi/proto:kuscia_cc_proto",
+        "@com_github_tencent_rapidjson//:rapidjson",
+        "@yacl//yacl/base:exception",
+    ],
+)
+
+psi_cc_test(
+    name = "kuscia_adapter_test",
+    srcs = ["kuscia_adapter_test.cc"],
+    deps = [
+        ":kuscia_adapter",
+    ],
+)
+
+psi_cc_binary(
+    name = "main",
+    srcs = ["main.cc"],
+    deps = [
+        ":kuscia_adapter",
+        ":version",
+        "//psi/proto:entry_cc_proto",
+        "//psi/psi:launch",
+        "@com_github_gflags_gflags//:gflags",
+    ],
 )

@@ -23,28 +23,26 @@
 #include "yacl/link/algorithm/barrier.h"
 #include "yacl/link/link.h"
 
-#include "psi/psi/recovery.h"
 #include "psi/psi/utils/advanced_join.h"
 #include "psi/psi/utils/index_store.h"
+#include "psi/psi/utils/recovery.h"
 
 #include "psi/proto/psi_v2.pb.h"
 
 namespace psi::psi {
 
-class AbstractPSIParty {
+class AbstractPsiParty {
  public:
-  AbstractPSIParty() = delete;
+  AbstractPsiParty() = delete;
 
-  AbstractPSIParty(const AbstractPSIParty &copy) = delete;
+  AbstractPsiParty(const AbstractPsiParty &copy) = delete;
 
-  AbstractPSIParty(AbstractPSIParty &&source) = delete;
+  AbstractPsiParty(AbstractPsiParty &&source) = delete;
 
-  AbstractPSIParty(const v2::PsiConfig &config, v2::Role role,
-                   std::shared_ptr<yacl::link::Context> lctx = nullptr);
+  AbstractPsiParty(const v2::PsiConfig &config, v2::Role role,
+                   std::shared_ptr<yacl::link::Context> lctx);
 
-  // AbstractPSIParty(const v2::PsiConfig &config, v2::Role role);
-
-  v2::PsiReport Run() {
+  PsiResultReport Run() {
     Init();
 
     if (!digest_equal_) {
@@ -60,7 +58,7 @@ class AbstractPSIParty {
     return Finalize();
   }
 
-  virtual ~AbstractPSIParty() = default;
+  virtual ~AbstractPsiParty() = default;
 
  protected:
   // Including tasks independent to protocol:
@@ -84,13 +82,13 @@ class AbstractPSIParty {
   // - Compose output.
   // - Sort output.
   // - Write output.
-  virtual v2::PsiReport Finalize();
+  virtual PsiResultReport Finalize();
 
   v2::PsiConfig config_;
 
   v2::Role role_;
 
-  v2::PsiReport report_;
+  PsiResultReport report_;
 
   std::vector<std::string> selected_keys_;
 
@@ -114,18 +112,63 @@ class AbstractPSIParty {
   void CheckSelfConfig();
 };
 
-class AbstractPSIReceiver : public AbstractPSIParty {
+class AbstractPsiReceiver : public AbstractPsiParty {
  public:
-  explicit AbstractPSIReceiver(
-      const v2::PsiConfig &config,
-      std::shared_ptr<yacl::link::Context> lctx = nullptr);
+  explicit AbstractPsiReceiver(const v2::PsiConfig &config,
+                               std::shared_ptr<yacl::link::Context> lctx);
 };
 
-class AbstractPSISender : public AbstractPSIParty {
+class AbstractPsiSender : public AbstractPsiParty {
  public:
-  explicit AbstractPSISender(
-      const v2::PsiConfig &config,
-      std::shared_ptr<yacl::link::Context> lctx = nullptr);
+  explicit AbstractPsiSender(const v2::PsiConfig &config,
+                             std::shared_ptr<yacl::link::Context> lctx);
+};
+
+class AbstractUbPsiParty {
+ public:
+  AbstractUbPsiParty() = delete;
+
+  AbstractUbPsiParty(const AbstractUbPsiParty &copy) = delete;
+
+  AbstractUbPsiParty(AbstractUbPsiParty &&source) = delete;
+
+  AbstractUbPsiParty(const v2::UbPsiConfig &config, v2::Role role,
+                     std::shared_ptr<yacl::link::Context> lctx);
+
+  PsiResultReport Run();
+
+  virtual ~AbstractUbPsiParty() = default;
+
+ protected:
+  virtual void Init() = 0;
+
+  virtual void OfflineGenCache() = 0;
+
+  virtual void Offline() = 0;
+
+  virtual void OfflineTransferCache() = 0;
+
+  virtual void Online() = 0;
+
+  v2::UbPsiConfig config_;
+
+  v2::Role role_;
+
+  std::shared_ptr<yacl::link::Context> lctx_;
+
+  PsiResultReport report_;
+};
+
+class AbstractUbPsiServer : public AbstractUbPsiParty {
+ public:
+  explicit AbstractUbPsiServer(const v2::UbPsiConfig &config,
+                               std::shared_ptr<yacl::link::Context> lctx);
+};
+
+class AbstractUbPsiClient : public AbstractUbPsiParty {
+ public:
+  explicit AbstractUbPsiClient(const v2::UbPsiConfig &config,
+                               std::shared_ptr<yacl::link::Context> lctx);
 };
 
 }  // namespace psi::psi

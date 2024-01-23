@@ -128,8 +128,8 @@ PSI_BM_DEFINE_ECDH()
                                                                                \
     WriteCsvFile(server_input_path.string(), items);                           \
     std::vector<std::string> cloumn_ids = {"id"};                              \
-    std::shared_ptr<CachedCsvBatchProvider> item_provider =                    \
-        std::make_shared<CachedCsvBatchProvider>(                              \
+    std::shared_ptr<SimpleShuffledBatchProvider> item_provider =               \
+        std::make_shared<SimpleShuffledBatchProvider>(                         \
             server_input_path.string(), cloumn_ids, kEcdhOprfPsiBatchSize,     \
             100000, true);                                                     \
                                                                                \

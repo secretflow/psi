@@ -15,8 +15,7 @@
 
 syntax = "proto3";
 
-import "yacl/link/link.proto";
-import "psi/psi/psi.proto";
+import "psi/proto/psi.proto";
 
 package psi.psi.v2;
 
@@ -25,12 +24,22 @@ enum Role {
   ROLE_UNSPECIFIED = 0;
 
   // receiver
-  // In 2P symmetric PSI, receiver would always receive the result.
+  // In 2P symmetric PSI, receivers would always receive the result in the
+  // origin protocol.
   ROLE_RECEIVER = 1;
 
   // sender
-  // In 2P symmetric PSI, sender is the other participant apart from receiver.
+  // In 2P symmetric PSI, senders are the other participants apart from
+  // receiver.
   ROLE_SENDER = 2;
+
+  // server
+  // In 2P unbalanced PSI, servers own a much larger dataset.
+  ROLE_SERVER = 3;
+
+  // server
+  // In 2P unbalanced PSI, clients own a much smaller dataset.
+  ROLE_CLIENT = 4;
 }
 
 // PSI protocols.
@@ -107,16 +116,8 @@ enum IoType {
   IO_TYPE_FILE_CSV = 1;
 }
 
-// Input configuration.
-message InputConfig {
-  IoType type = 1;
-
-  // Required for FILE.
-  string path = 2;
-}
-
-// Output configuration.
-message OutputConfig {
+// IO configuration.
+message IoConfig {
   IoType type = 1;
 
   // Required for FILE.
@@ -306,15 +307,14 @@ message PsiConfig {
   ProtocolConfig protocol_config = 1;
 
   // Configs for input.
-  InputConfig input_config = 2;
+  IoConfig input_config = 2;
 
   // Configs for output.
-  OutputConfig output_config = 3;
+  IoConfig output_config = 3;
 
-  // Configs for network.
-  yacl.link.ContextDescProto link_config = 4;
+  reserved 4;
 
-  string self_link_party = 5;
+  reserved 5;
 
   // keys for intersection.
   repeated string keys = 6;
@@ -365,15 +365,6 @@ message PsiConfig {
   bool check_hash_digest = 14;
 }
 
-// Execution Report.
-message PsiReport {
-  // The data count of input.
-  int64 original_count = 1;
-
-  // The count of intersection. Get `-1` when self party can not get result.
-  int64 intersection_count = 2;
-}
-
 // Save some critical information for future recovery.
 message RecoveryCheckpoint {
   enum Stage {
@@ -418,4 +409,68 @@ message InternalRecoveryRecord {
   uint64 ecdh_dual_masked_item_peer_count = 2;
 
   uint64 parsed_bucket_count = 3;
+}
+
+// config for unbalanced psi.
+message UbPsiConfig {
+  enum Mode {
+    MODE_UNSPECIFIED = 0;
+
+    // Servers generate cache only. First part of offline stage.
+    MODE_OFFLINE_GEN_CACHE = 1;
+
+    // Servers send cache to clients only. Second part of offline stage.
+    MODE_OFFLINE_TRANSFER_CACHE = 2;
+
+    // Run offline stage.
+    MODE_OFFLINE = 3;
+
+    // Run online stage.
+    MODE_ONLINE = 4;
+
+    // Run all stages.
+    MODE_FULL = 5;
+  }
+
+  // Required.
+  Mode mode = 1;
+
+  // Required for all modes except MODE_OFFLINE_GEN_CACHE.
+  Role role = 2;
+
+  // Config for origin input.
+  // Servers:
+  // Required for MODE_OFFLINE_GEN_CACHE, MODE_OFFLINE, MODE_FULL.
+  // Clients:
+  // Required for MODE_ONLINE and MODE_FULL.
+  IoConfig input_config = 3;
+
+  // Join keys.
+  // Servers:
+  // Required for MODE_OFFLINE_GEN_CACHE, MODE_OFFLINE, MODE_FULL.
+  // Clients:
+  // Required for MODE_ONLINE and MODE_FULL.
+  repeated string keys = 4;
+
+  // Servers:
+  // Required for MODE_OFFLINE_GEN_CACHE, MODE_OFFLINE, MODE_ONLINE and
+  // MODE_FULL.
+  IoConfig server_secret_key_config = 5;
+
+  // Required.
+  IoConfig cache_config = 6;
+
+  bool server_get_result = 7;
+
+  bool client_get_result = 8;
+
+  // It true, output is not promised to be aligned.
+  // Valid if both server_get_result and client_get_result are true.
+  bool disable_alignment = 9;
+
+  // Required for MODE_ONLINE and MODE_FULL.
+  IoConfig output_config = 10;
+
+  // Logging level.
+  DebugOptions debug_options = 11;
 }

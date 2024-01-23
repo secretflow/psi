@@ -16,7 +16,7 @@
 
 #include "omp.h"
 
-#include "psi/psi/bucket.h"
+#include "psi/psi/utils/bucket.h"
 
 namespace psi::psi::rr22 {
 

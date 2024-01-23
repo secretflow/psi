@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include "openssl/crypto.h"
 #include "openssl/rand.h"
 #include "yacl/base/exception.h"
@@ -32,6 +34,11 @@ class IppEccCryptor : public IEccCryptor {
 
   void EccMask(absl::Span<const char> batch_points,
                absl::Span<char> dest_points) const override;
+};
+
+class IppElligator2Cryptor : public IppEccCryptor {
+  std::vector<uint8_t> HashToCurve(
+      absl::Span<const char> item_data) const override;
 };
 
 }  // namespace psi::psi

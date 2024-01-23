@@ -29,11 +29,12 @@
 #include "yacl/utils/scope_guard.h"
 
 #include "psi/psi/core/ecdh_oprf/ecdh_oprf_selector.h"
+#include "psi/psi/core/labeled_psi/padding.h"
 #include "psi/psi/core/labeled_psi/psi_params.h"
 #include "psi/psi/core/labeled_psi/receiver.h"
 #include "psi/psi/core/labeled_psi/sender.h"
 #include "psi/psi/core/labeled_psi/sender_kvdb.h"
-#include "psi/psi/utils/utils.h"
+#include "psi/psi/utils/sync.h"
 
 namespace psi::psi {
 

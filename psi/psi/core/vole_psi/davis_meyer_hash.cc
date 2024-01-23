@@ -23,7 +23,7 @@ namespace psi::psi {
 namespace {
 
 // vector aes batch size
-constexpr size_t kEncBatch = 8;
+[[maybe_unused]] constexpr size_t kEncBatch = 8;
 
 }  // namespace
 

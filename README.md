@@ -46,7 +46,8 @@ receiver.config:
         ],
         "debug_options": {
             "trace_path": "/root/receiver/receiver.trace"
-        },
+        }
+},
         "link_config": {
             "parties": [
                 {
@@ -58,7 +59,6 @@ receiver.config:
                     "host": "127.0.0.1:5400"
                 }
             ]
-        }
     },
     "self_link_party": "receiver"
 }
@@ -88,7 +88,8 @@ sender.config:
         ],
         "debug_options": {
             "trace_path": "/root/sender/sender.trace"
-        },
+        }
+},
         "link_config": {
             "parties": [
                 {
@@ -100,7 +101,6 @@ sender.config:
                     "host": "127.0.0.1:5400"
                 }
             ]
-        }
     },
     "self_link_party": "sender"
 }

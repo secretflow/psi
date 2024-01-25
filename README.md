@@ -46,21 +46,21 @@ receiver.config:
         ],
         "debug_options": {
             "trace_path": "/root/receiver/receiver.trace"
-        },
-        "link_config": {
-            "parties": [
-                {
-                    "id": "receiver",
-                    "host": "127.0.0.1:5300"
-                },
-                {
-                    "id": "sender",
-                    "host": "127.0.0.1:5400"
-                }
-            ]
         }
     },
-    "self_link_party": "receiver"
+    "self_link_party": "receiver",
+    "link_config": {
+        "parties": [
+            {
+                "id": "receiver",
+                "host": "127.0.0.1:5300"
+            },
+            {
+                "id": "sender",
+                "host": "127.0.0.1:5400"
+            }
+        ]
+    }
 }
 ```
 
@@ -88,21 +88,21 @@ sender.config:
         ],
         "debug_options": {
             "trace_path": "/root/sender/sender.trace"
-        },
-        "link_config": {
-            "parties": [
-                {
-                    "id": "receiver",
-                    "host": "127.0.0.1:5300"
-                },
-                {
-                    "id": "sender",
-                    "host": "127.0.0.1:5400"
-                }
-            ]
         }
     },
-    "self_link_party": "sender"
+    "self_link_party": "sender",
+    "link_config": {
+        "parties": [
+            {
+                "id": "receiver",
+                "host": "127.0.0.1:5300"
+            },
+            {
+                "id": "sender",
+                "host": "127.0.0.1:5400"
+            }
+        ]
+    }
 }
 ```
 

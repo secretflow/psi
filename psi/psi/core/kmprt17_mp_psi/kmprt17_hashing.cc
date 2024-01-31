@@ -18,15 +18,14 @@
 #include <utility>
 
 #include "yacl/base/exception.h"
+#include "yacl/crypto/utils/rand.h"
 
 namespace psi::psi {
 
 void KmprtCuckooHashing::Insert(uint128_t elem) {
-  static std::random_device rd{};
-  static std::uniform_int_distribution<uint8_t> unif_hash_id{0, 5};
   auto insert_into = [this, &elem](uint8_t c) {
     for (uint8_t retry{}; retry != 128 && elem != NONE; ++retry) {
-      uint8_t rand_idx = unif_hash_id(rd) % num_hashes_[c];
+      uint8_t rand_idx = yacl::crypto::FastRandU64() % num_hashes_[c];
       uint8_t idx = (rand_idx + 1) % num_hashes_[c];
       size_t addr;
       do {

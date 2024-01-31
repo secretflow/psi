@@ -76,16 +76,16 @@ std::vector<uint64_t> KmprtOpprfRecv(
   evals.reserve(num_ot);
   size_t ot_idx{}, b{};
   std::array<uint64_t, BATCH_SIZE> batch_evals;
-  // Step 2. For each bin, invoke single-query OPPRF
+  // Step 2. For each bin, invokes single-query OPPRF
   for (uint8_t c{}; c != 2; ++c) {
     size_t ot_begin{c == uint8_t{0} ? 0 : bin_sizes[0]};
     size_t ot_end{c == uint8_t{0} ? bin_sizes[0] : num_ot};
     for (size_t addr{}; addr != hashing.num_bins_[c]; ++addr, ++ot_idx) {
       auto elem = hashing.GetBin(c, addr);
       elem == KmprtCuckooHashing::NONE && (elem = yc::FastRandU128());
-      receiver.Encode(ot_idx, elem,
-                      absl::Span{reinterpret_cast<uint8_t*>(&batch_evals[b++]),
-                                 sizeof(uint64_t)});
+      receiver.Encode(
+          ot_idx, elem,
+          {reinterpret_cast<uint8_t*>(&batch_evals[b++]), sizeof(uint64_t)});
       if (auto batch_size = (ot_idx - ot_begin) % BATCH_SIZE + 1;
           batch_size == BATCH_SIZE || ot_idx + 1 == ot_end) {
         b = 0;
@@ -144,7 +144,7 @@ void KmprtOpprfSend(const std::shared_ptr<yacl::link::Context>& ctx,
   }
   size_t ot_idx{};
   auto evaluator = sender.GetOprf();
-  // Step 2. For each bin, invoke single-query OPPRF
+  // Step 2. For each bin, invokes single-query OPPRF
   for (uint8_t c{}; c != 2; ++c) {
     size_t ot_begin{c == uint8_t{0} ? 0 : bin_sizes[0]};
     size_t ot_end{c == uint8_t{0} ? bin_sizes[0] : num_ot};
@@ -165,8 +165,7 @@ void KmprtOpprfSend(const std::shared_ptr<yacl::link::Context>& ctx,
         for (auto it = bin.cbegin(); it != bin.cend(); ++it) {
           uint64_t eval = evaluator->Eval(ot_idx, it->first);
           auto index =
-              ro.Gen<size_t>(absl::MakeSpan(reinterpret_cast<uint8_t*>(&eval),
-                                            sizeof eval),
+              ro.Gen<size_t>({reinterpret_cast<uint8_t*>(&eval), sizeof eval},
                              nonce) %
               table.size();
           if (table[index] != uint64_t{0}) {

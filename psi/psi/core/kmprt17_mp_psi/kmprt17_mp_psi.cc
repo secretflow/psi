@@ -20,7 +20,7 @@
 
 #include "psi/psi/core/communication.h"
 #include "psi/psi/core/kmprt17_mp_psi/kmprt17_opprf.h"
-#include "psi/psi/utils/utils.h"
+#include "psi/psi/utils/sync.h"
 
 namespace psi::psi {
 
@@ -82,9 +82,9 @@ auto KmprtParty::ZeroSharing(size_t count) const -> std::vector<Share> {
   auto [ctx, wsize, me, leader] = CollectContext();
   std::vector<Share> shares(wsize, Share(count));
   for (size_t k{}; k != count; ++k) {
-    uint128_t sum{};
+    uint64_t sum{};
     for (size_t dst{1}; dst != wsize; ++dst) {
-      sum ^= shares[dst][k] = yacl::crypto::FastRandU128();
+      sum ^= shares[dst][k] = yacl::crypto::FastRandU64();
     }
     shares[0][k] = sum;
   }

@@ -30,7 +30,7 @@ psi_cc_library(
     ],
     deps = [
         "//psi/psi/core:communication",
-        "//psi/psi/utils",
+        "//psi/psi/utils:sync",
         "//psi/psi/utils:test_utils",
         "@com_google_absl//absl/types:span",
         "@yacl//yacl/base:exception",

@@ -12,7 +12,7 @@ Prepare data and config
 
 Please check details of configs at :doc:`/reference/psi_v2_config`.
 
-To launch PSI, please check LuanchConfig at :doc:`/reference/launch_config` and fillin **runtime_config.psi_config**.
+To launch PSI, please check LaunchConfig at :doc:`/reference/launch_config` and fillin **runtime_config.psi_config**.
 
 .. code-block::
    :caption: receiver.config
@@ -163,7 +163,7 @@ Please check more demo configs at https://github.com/secretflow/psi/tree/main/ex
 Ub PSI
 ------
 
-To launch PSI, please check LuanchConfig at :doc:`/reference/launch_config` and fillin **runtime_config.ub_psi_config**.
+To launch PSI, please check LaunchConfig at :doc:`/reference/launch_config` and fillin **runtime_config.ub_psi_config**.
 
 Please read https://github.com/secretflow/psi/tree/main/examples/psi/README.md
 

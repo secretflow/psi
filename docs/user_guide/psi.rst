@@ -57,7 +57,7 @@ Prepare data and config
 
 Please check details of configs at :doc:`/reference/psi_v1_config`.
 
-To launch PSI, please check LuanchConfig at :doc:`/reference/launch_config` and fillin **runtime_config.legacy_psi_config**.
+To launch PSI, please check LaunchConfig at :doc:`/reference/launch_config` and fillin **runtime_config.legacy_psi_config**.
 
 Release Docker
 --------------

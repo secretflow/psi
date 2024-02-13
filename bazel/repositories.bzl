@@ -255,13 +255,13 @@ def _com_github_grpc_grpc():
     maybe(
         http_archive,
         name = "com_github_grpc_grpc",
-        sha256 = "7f42363711eb483a0501239fd5522467b31d8fe98d70d7867c6ca7b52440d828",
-        strip_prefix = "grpc-1.51.0",
+        sha256 = "6dadc0420ad2d4b8ac49f516830f72feae3764bf83decc8d7c3a871eca1a0843",
+        strip_prefix = "grpc-1.61.1",
         type = "tar.gz",
         patch_args = ["-p1"],
         patches = ["@psi//bazel:patches/grpc.patch"],
         urls = [
-            "https://github.com/grpc/grpc/archive/refs/tags/v1.51.0.tar.gz",
+            "https://github.com/grpc/grpc/archive/refs/tags/v1.61.1.tar.gz",
         ],
     )
 

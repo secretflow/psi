@@ -119,13 +119,13 @@ sender.config:
 In the first terminal, run the following command
 
 ```bash
-docker run -it  --rm  --network host --mount type=bind,source=/tmp/receiver,target=/root/receiver -w /root  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest bash -c "./main --config receiver/receiver.config"
+docker run -it  --rm  --network host --mount type=bind,source=/tmp/receiver,target=/root/receiver --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest bash -c "./main --config receiver/receiver.config"
 ```
 
 In the other terminal, run the following command simultaneously.
 
 ```bash
-docker run -it  --rm  --network host --mount type=bind,source=/tmp/sender,target=/root/sender -w /root  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest bash -c "./main --config sender/sender.config"
+docker run -it  --rm  --network host --mount type=bind,source=/tmp/sender,target=/root/sender  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest bash -c "./main --config sender/sender.config"
 ```
 
 ## Building SecretFlow PSI Library
@@ -155,8 +155,11 @@ docker exec -it psi-dev-$(whoami) bash
 #### Linux
 
 ```sh
-Install gcc>=11.2, cmake>=3.26, ninja, nasm>=2.15, python>=3.8, bazel==6.4.0, golang, xxd, lld
+Install gcc>=11.2, cmake>=3.26, ninja, nasm>=2.15, python>=3.8, bazel, golang, xxd, lld
 ```
+
+> **Note**<br>
+Please install bazel with version in .bazelversion or use bazelisk.
 
 ### Build & UnitTest
 

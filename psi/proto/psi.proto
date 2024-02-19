@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package psi.psi;
+package psi;
 
 // The algorithm type of psi.
 enum PsiType {

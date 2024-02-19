@@ -30,4 +30,3 @@ index 72e1b6609e..aded52d0db 100644
  #include <grpc/slice.h>
  #include <grpc/support/alloc.h>
  #include <grpc/support/log.h>
- 

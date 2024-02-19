@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// perfetto usage is adapted from
-// https://github.com/google/perfetto/blob/master/examples/sdk/example.cc
-
 #include <fstream>
 
 #include "gflags/gflags.h"
@@ -22,7 +19,7 @@
 #include "spdlog/spdlog.h"
 
 #include "psi/kuscia_adapter.h"
-#include "psi/psi/launch.h"
+#include "psi/launch.h"
 #include "psi/version.h"
 
 #include "psi/proto/entry.pb.h"
@@ -86,13 +83,13 @@ int main(int argc, char* argv[]) {
     lctx = yacl::link::FactoryBrpc().CreateContext(lctx_desc, rank);
   }
 
-  psi::psi::PsiResultReport report;
+  psi::PsiResultReport report;
   if (launch_config.has_legacy_psi_config()) {
-    report = psi::psi::RunLegacyPsi(launch_config.legacy_psi_config(), lctx);
+    report = psi::RunLegacyPsi(launch_config.legacy_psi_config(), lctx);
   } else if (launch_config.has_psi_config()) {
-    report = psi::psi::RunPsi(launch_config.psi_config(), lctx);
+    report = psi::RunPsi(launch_config.psi_config(), lctx);
   } else if (launch_config.has_ub_psi_config()) {
-    report = psi::psi::RunUbPsi(launch_config.ub_psi_config(), lctx);
+    report = psi::RunUbPsi(launch_config.ub_psi_config(), lctx);
   } else {
     SPDLOG_WARN("No runtime config is provided.");
   }

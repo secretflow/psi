@@ -96,19 +96,19 @@ To launch PSI, please check LaunchConfig at :doc:`/reference/launch_config` and 
                 "check_hash_digest": false,
                 "recovery_config": {
                     "enabled": false
-                },
-                "link_config": {
-                    "parties": [
-                        {
-                            "id": "receiver",
-                            "host": "127.0.0.1:5300"
-                        },
-                        {
-                            "id": "sender",
-                            "host": "127.0.0.1:5400"
-                        }
-                    ]
                 }
+            },
+            "link_config": {
+                "parties": [
+                    {
+                        "id": "receiver",
+                        "host": "127.0.0.1:5300"
+                    },
+                    {
+                        "id": "sender",
+                        "host": "127.0.0.1:5400"
+                    }
+                ]
             },
             "self_link_party": "sender"
         }
@@ -123,7 +123,7 @@ You need to prepare following files:
 +------------------------+------------------------------------------------+-------------------------------------------------------------------------------+
 | sender.config          | /tmp/sender/sender.config                      | Config for sender.                                                            |
 +------------------------+------------------------------------------------+-------------------------------------------------------------------------------+
-| receiver_input.csv     | /tmp/receiver/receiver_input.config            | SupInput for receiver. Make sure the file contains two id keys - id0 and id1. |
+| receiver_input.csv     | /tmp/receiver/receiver_input.config            | Input for receiver. Make sure the file contains two id keys - id0 and id1. |
 +------------------------+------------------------------------------------+-------------------------------------------------------------------------------+
 | sender_input.csv       | /tmp/sender/sender_input.config                | Input for sender. Make sure the file contains two id keys - id0 and id1.      |
 +------------------------+------------------------------------------------+-------------------------------------------------------------------------------+
@@ -134,12 +134,12 @@ Run PSI
 
 In the first terminal, run the following command::
 
-    docker run -it  --rm  --network host --mount type=bind,source=/tmp/receiver,target=/root/receiver -w /root  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:0.1.0beta bash -c "./main --config receiver/receiver.config"
+    docker run -it  --rm  --network host --mount type=bind,source=/tmp/receiver,target=/root/receiver --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:0.1.0beta bash -c "./main --config receiver/receiver.config"
 
 
 In the other terminal, run the following command simultaneously::
 
-    docker run -it  --rm  --network host --mount type=bind,source=/tmp/sender,target=/root/sender -w /root  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:0.1.0beta bash -c "./main --config sender/sender.config"
+    docker run -it  --rm  --network host --mount type=bind,source=/tmp/sender,target=/root/sender --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:0.1.0beta bash -c "./main --config sender/sender.config"
 
 
 Building from source

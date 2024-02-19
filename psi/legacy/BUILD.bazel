@@ -1,0 +1,221 @@
+# Copyright 2022 Ant Group Co., Ltd.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+load("//bazel:psi.bzl", "psi_cc_library", "psi_cc_test")
+
+package(default_visibility = ["//visibility:public"])
+
+psi_cc_library(
+    name = "base_operator",
+    srcs = ["base_operator.cc"],
+    hdrs = ["base_operator.h"],
+    deps = [
+        "//psi/proto:psi_cc_proto",
+        "//psi/utils:sync",
+        "@yacl//yacl/link",
+    ],
+)
+
+psi_cc_library(
+    name = "ecdh_3party_psi",
+    srcs = ["ecdh_3party_psi.cc"],
+    hdrs = ["ecdh_3party_psi.h"],
+    deps = [
+        ":base_operator",
+        ":factory",
+        "//psi/ecdh:ecdh_3pc_psi",
+    ],
+    alwayslink = True,
+)
+
+psi_cc_library(
+    name = "kkrt_2party_psi",
+    srcs = ["kkrt_2party_psi.cc"],
+    hdrs = ["kkrt_2party_psi.h"],
+    deps = [
+        ":base_operator",
+        ":factory",
+        "//psi/kkrt:kkrt_psi",
+        "@yacl//yacl/utils:parallel",
+    ],
+    alwayslink = True,
+)
+
+psi_cc_library(
+    name = "nparty_psi",
+    srcs = ["nparty_psi.cc"],
+    hdrs = ["nparty_psi.h"],
+    deps = [
+        ":base_operator",
+        ":factory",
+        ":kkrt_2party_psi",
+        "//psi/ecdh:ecdh_psi",
+        "@yacl//yacl/utils:parallel",
+    ],
+    alwayslink = True,
+)
+
+psi_cc_test(
+    name = "nparty_psi_test",
+    srcs = ["nparty_psi_test.cc"],
+    deps = [
+        ":nparty_psi",
+        "//psi/utils:test_utils",
+    ],
+)
+
+psi_cc_library(
+    name = "factory",
+    hdrs = ["factory.h"],
+    deps = [
+        ":base_operator",
+        "//psi/proto:psi_cc_proto",
+        "@yacl//yacl/base:exception",
+        "@yacl//yacl/link",
+    ],
+)
+
+psi_cc_library(
+    name = "bc22_2party_psi",
+    srcs = ["bc22_2party_psi.cc"],
+    hdrs = ["bc22_2party_psi.h"],
+    deps = [
+        ":base_operator",
+        ":factory",
+        "//psi/bc22:bc22_psi",
+    ],
+    alwayslink = True,
+)
+
+psi_cc_library(
+    name = "dp_2party_psi",
+    srcs = ["dp_2party_psi.cc"],
+    hdrs = ["dp_2party_psi.h"],
+    deps = [
+        ":base_operator",
+        ":factory",
+        "//psi/legacy/dp_psi",
+    ],
+    alwayslink = True,
+)
+
+psi_cc_library(
+    name = "rr22_2party_psi",
+    srcs = ["rr22_2party_psi.cc"],
+    hdrs = ["rr22_2party_psi.h"],
+    deps = [
+        ":base_operator",
+        ":factory",
+        "//psi/rr22:rr22_psi",
+        "@yacl//yacl/utils:parallel",
+    ],
+    alwayslink = True,
+)
+
+psi_cc_library(
+    name = "operator",
+    deps = [
+        ":bc22_2party_psi",
+        ":dp_2party_psi",
+        ":ecdh_3party_psi",
+        ":kkrt_2party_psi",
+        ":nparty_psi",
+        ":rr22_2party_psi",
+    ],
+)
+
+psi_cc_library(
+    name = "memory_psi",
+    srcs = ["memory_psi.cc"],
+    hdrs = [
+        "memory_psi.h",
+    ],
+    deps = [
+        ":factory",
+        ":operator",
+        "//psi:prelude",
+        "//psi/ecdh:ecdh_psi",
+        "//psi/proto:psi_cc_proto",
+        "//psi/utils:sync",
+    ],
+)
+
+psi_cc_test(
+    name = "memory_psi_test",
+    srcs = ["memory_psi_test.cc"],
+    deps = [
+        ":memory_psi",
+        "//psi/utils:test_utils",
+    ],
+)
+
+psi_cc_library(
+    name = "bucket_ub_psi",
+    srcs = ["bucket_ub_psi.cc"],
+    hdrs = [
+        "bucket_ub_psi.h",
+    ],
+    deps = [
+        "//psi:prelude",
+        "//psi/ecdh:ecdh_oprf_psi",
+        "//psi/proto:psi_cc_proto",
+        "//psi/utils:batch_provider",
+        "//psi/utils:csv_checker",
+        "//psi/utils:csv_header_analyzer",
+        "//psi/utils:ec",
+        "//psi/utils:ec_point_store",
+        "//psi/utils:progress",
+        "//psi/utils:sync",
+        "@com_google_absl//absl/synchronization",
+        "@com_google_absl//absl/time",
+        "@yacl//yacl/utils:scope_guard",
+    ],
+)
+
+psi_cc_library(
+    name = "bucket_psi",
+    srcs = ["bucket_psi.cc"],
+    hdrs = [
+        "bucket_psi.h",
+    ],
+    deps = [
+        ":bucket_ub_psi",
+        ":memory_psi",
+        "//psi:prelude",
+        "//psi/proto:psi_cc_proto",
+        "//psi/utils:batch_provider",
+        "//psi/utils:csv_checker",
+        "//psi/utils:csv_header_analyzer",
+        "//psi/utils:ec_point_store",
+        "@boost//:uuid",
+    ],
+)
+
+psi_cc_test(
+    name = "bucket_psi_test",
+    srcs = ["bucket_psi_test.cc"],
+    deps = [
+        ":bucket_psi",
+        "@yacl//yacl/utils:scope_guard",
+    ],
+)
+
+psi_cc_test(
+    name = "bucket_ub_psi_test",
+    srcs = ["bucket_ub_psi_test.cc"],
+    deps = [
+        ":bucket_psi",
+        "//psi/utils:test_utils",
+    ],
+)

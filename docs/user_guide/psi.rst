@@ -7,9 +7,9 @@ Quick start with Private Set Intersection (PSI) V1 APIs.
 Supported Protocols
 ----------------------
 
-.. The :psi_code_host:`ECDH-PSI </psi/blob/master/psi/psi/core/ecdh_psi.h>` is favorable if the bandwidth is the bottleneck.
-.. If the computing is the bottleneck, you should try the BaRK-OPRF based
-.. PSI :psi_code_host:`KKRT-PSI API </psi/blob/master/psi/psi/core/kkrt_psi.h>`.
+The :psi_code_host:`ECDH-PSI </blob/master/psi/ecdh/ecdh_psi.h>` is favorable if the bandwidth is the bottleneck.
+If the computing is the bottleneck, you should try the BaRK-OPRF based
+PSI :psi_code_host:`KKRT-PSI </blob/master/psi/kkrt/kkrt_psi.h>`.
 
 +---------------+--------------+--------------+--------------+
 | PSI protocols | Threat Model | Party Number |  PsiTypeCode |
@@ -69,12 +69,12 @@ Run PSI
 
 In the first terminal, run the following command::
 
-    docker run -it  --rm  --network host --mount type=bind,source=/tmp/receiver,target=/root/receiver -w /root  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:0.1.0beta bash -c "./main --config receiver/receiver.config"
+    docker run -it  --rm  --network host --mount type=bind,source=/tmp/receiver,target=/root/receiver  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest bash -c "./main --config receiver/receiver.config"
 
 
 In the other terminal, run the following command simultaneously::
 
-    docker run -it  --rm  --network host --mount type=bind,source=/tmp/sender,target=/root/sender -w /root  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:0.1.0beta bash -c "./main --config sender/sender.config"
+    docker run -it  --rm  --network host --mount type=bind,source=/tmp/sender,target=/root/sender  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest bash -c "./main --config sender/sender.config"
 
 
 Building from source
@@ -97,7 +97,7 @@ benchmark result without data load time
 ecdh-psi Benchmark
 >>>>>>>>>>>>>>>>>>
 
-:psi_code_host:`DH-PSI benchmark code </psi/blob/master/psi/psi/core/ecdh_psi_bench.cc>`
+:psi_code_host:`DH-PSI benchmark code </psi/blob/master/psi/psi/ecdh/ecdh_psi_bench.cc>`
 
 cpu limited by docker(--cpu)
 

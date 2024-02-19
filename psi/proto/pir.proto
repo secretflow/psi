@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-package psi.pir;
+package psi;
 
 // The kv-store type of pir.
 enum KvStoreType {

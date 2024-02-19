@@ -30,13 +30,13 @@ message LaunchConfig {
 
   oneof runtime_config {
     // Please check at psi.proto.
-    psi.BucketPsiConfig legacy_psi_config = 3;
+    BucketPsiConfig legacy_psi_config = 3;
 
     // Please check at psi_v2.proto.
-    psi.v2.PsiConfig psi_config = 4;
+    v2.PsiConfig psi_config = 4;
 
     // Please check at psi_v2.proto.
-    psi.v2.UbPsiConfig ub_psi_config = 5;
+    v2.UbPsiConfig ub_psi_config = 5;
 
     // TODO(junfeng): add PIR config here.
   }

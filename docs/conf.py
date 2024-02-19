@@ -39,7 +39,7 @@ gettext_compact = False  # optional.
 # global variables
 extlinks = {
     "psi_doc_host": ("https://www.secretflow.org.cn/docs/psi/en/", "doc "),
-    "psi_code_host": ("https://github.com/secretflow", "code "),
+    "psi_code_host": ("https://github.com/secretflow/psi/", "code "),
 }
 
 html_theme = "pydata_sphinx_theme"

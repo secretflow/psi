@@ -5,6 +5,11 @@
 > - `[API]` prefix for API changes.
 > - `[Improvement]` prefix for implementation improvement.
 
+## v0.2.0.dev240219
+
+- [Feature] add ecdh logger for debug purposes.
+- [API] modify repo structure.
+
 ## v0.2.0.dev240123
 
 - [Feature] add RFC9380 25519 elligator2 hash_to_curve.

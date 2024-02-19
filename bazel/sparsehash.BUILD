@@ -19,6 +19,6 @@ cc_library(
     includes = ["src"],
     visibility = ["//visibility:public"],
     deps = [
-        "@psi//psi/psi/core/vole_psi:sparsehash_config",
+        "@psi//psi/rr22:sparsehash_config",
     ],
 )

@@ -66,7 +66,7 @@ Configs for ECDH protocol.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| curve | [ psi.psi.CurveType](#psipsicurvetype) | none |
+| curve | [ psi.CurveType](#psicurvetype) | none |
  <!-- end Fields -->
  <!-- end HasFields -->
 

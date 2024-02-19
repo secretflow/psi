@@ -17,7 +17,7 @@ syntax = "proto3";
 
 import "psi/proto/psi.proto";
 
-package psi.psi.v2;
+package psi.v2;
 
 // Role of parties.
 enum Role {
@@ -64,7 +64,7 @@ enum Protocol {
 
 // Configs for ECDH protocol.
 message EcdhConfig {
-  .psi.psi.CurveType curve = 1;
+  .psi.CurveType curve = 1;
 }
 
 // Configs for KKRT protocol

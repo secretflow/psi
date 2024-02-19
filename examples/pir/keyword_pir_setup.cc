@@ -30,11 +30,11 @@
 #include "spdlog/spdlog.h"
 #include "yacl/link/test_util.h"
 
-#include "psi/pir/pir.h"
-#include "psi/psi/core/ecdh_oprf/ecdh_oprf_selector.h"
-#include "psi/psi/core/labeled_psi/psi_params.h"
-#include "psi/psi/core/labeled_psi/receiver.h"
-#include "psi/psi/core/labeled_psi/sender.h"
+#include "psi/apsi/pir.h"
+#include "psi/apsi/psi_params.h"
+#include "psi/apsi/receiver.h"
+#include "psi/apsi/sender.h"
+#include "psi/ecdh//ecdh_oprf_selector.h"
 
 #include "psi/proto/pir.pb.h"
 
@@ -74,10 +74,10 @@ int main(int argc, char **argv) {
   SPDLOG_INFO("key columns: {}", FLAGS_key_columns);
   SPDLOG_INFO("label columns: {}", FLAGS_label_columns);
 
-  psi::pir::PirSetupConfig config;
+  psi::PirSetupConfig config;
 
-  config.set_pir_protocol(psi::pir::PirProtocol::KEYWORD_PIR_LABELED_PSI);
-  config.set_store_type(psi::pir::KvStoreType::LEVELDB_KV_STORE);
+  config.set_pir_protocol(psi::PirProtocol::KEYWORD_PIR_LABELED_PSI);
+  config.set_store_type(psi::KvStoreType::LEVELDB_KV_STORE);
   config.set_input_path(FLAGS_in_path);
 
   config.mutable_key_columns()->Add(ids.begin(), ids.end());
@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
   config.set_bucket_size(FLAGS_bucket);
   config.set_max_items_per_bin(FLAGS_max_items_per_bin);
 
-  psi::pir::PirResultReport report = psi::pir::PirSetup(config);
+  psi::PirResultReport report = psi::apsi::PirSetup(config);
 
   SPDLOG_INFO("data count:{}", report.data_count());
 

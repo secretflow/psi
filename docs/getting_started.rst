@@ -7,7 +7,7 @@ Welcome to SecretFlow PSI Library. There are multiple methods to use PSI/PIR.
 * Python packages
 
     * `SPU <https://pypi.org/project/spu/>`_ warps the library as Python bindings. You could call PSI/PIR with spu.
-    * `SecretFlow <https://pypi.org/project/secretflow/>`_ warps SPU further.
+    * `SecretFlow <https://pypi.org/project/secretflow/>`_ warps SPU further with user-friendly APIs.
 
 
 * Applications
@@ -147,10 +147,12 @@ You need to install:
 * ninja
 * nasm>=2.15
 * python>=3.8
-* bazel==6.4.0
+* bazel
 * golang
 * xxd
 * lld
+
+For bazel, please check version in `.bazelversion <https://github.com/secretflow/psi/blob/main/.bazelversion>`_ or use bazelisk instead.
 
 Build & UnitTest
 ^^^^^^^^^^^^^^^^
@@ -172,8 +174,3 @@ Reporting an Issue
 Please create an issue at `Github Issues <https://github.com/secretflow/psi/issues>`_.
 
 We will look into issues and get back to you soon.
-
-Frequently Asked Questions (FAQ)
---------------------------------
-
-We will collect some popular questions from users and update this part promptly.

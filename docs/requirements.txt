@@ -1,4 +1,4 @@
-nbsphinx==0.8.9
+nbsphinx==0.9.3
 sphinx==5.3.0
 myst-parser==0.19.2
 sphinx-intl==2.1.0

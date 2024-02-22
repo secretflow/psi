@@ -187,43 +187,33 @@ TEST_P(PirTest, Works) {
   std::vector<std::string> labels = {label_cloumn_name};
 
   if (params.use_filedb) {
-    ::psi::PirSetupConfig config;
+    ::psi::PirServerConfig config;
 
-    config.set_pir_protocol(::psi::PirProtocol::KEYWORD_PIR_LABELED_PSI);
-    config.set_store_type(::psi::KvStoreType::LEVELDB_KV_STORE);
     config.set_input_path(server_csv_path);
-
     config.mutable_key_columns()->Add(ids.begin(), ids.end());
     config.mutable_label_columns()->Add(labels.begin(), labels.end());
 
-    config.set_num_per_query(params.nr);
+    config.mutable_apsi_server_config()->set_num_per_query(params.nr);
     config.set_label_max_len(params.label_bytes);
-    config.set_oprf_key_path(oprf_key_path);
+    config.mutable_apsi_server_config()->set_oprf_key_path(oprf_key_path);
     config.set_setup_path(setup_path);
-    config.set_compressed(params.compressed);
+    config.mutable_apsi_server_config()->set_compressed(params.compressed);
     config.set_bucket_size(params.bucket_size);
 
-    ::psi::PirResultReport setup_report = PirSetup(config);
+    ::psi::PirResultReport setup_report = PirServerSetup(config);
 
     EXPECT_EQ(setup_report.data_count(), params.ns);
 
     std::future<::psi::PirResultReport> f_server = std::async([&] {
       ::psi::PirServerConfig config;
-
-      config.set_pir_protocol(::psi::PirProtocol::KEYWORD_PIR_LABELED_PSI);
-      config.set_store_type(::psi::KvStoreType::LEVELDB_KV_STORE);
-
-      config.set_oprf_key_path(oprf_key_path);
       config.set_setup_path(setup_path);
 
-      ::psi::PirResultReport report = PirServer(ctxs[0], config);
+      ::psi::PirResultReport report = PirServerOnline(ctxs[0], config);
       return report;
     });
 
     std::future<::psi::PirResultReport> f_client = std::async([&] {
       ::psi::PirClientConfig config;
-
-      config.set_pir_protocol(::psi::PirProtocol::KEYWORD_PIR_LABELED_PSI);
 
       config.set_input_path(client_csv_path);
       config.mutable_key_columns()->Add(ids.begin(), ids.end());
@@ -241,30 +231,23 @@ TEST_P(PirTest, Works) {
 
   } else {
     std::future<::psi::PirResultReport> f_server = std::async([&] {
-      ::psi::PirSetupConfig config;
+      ::psi::PirServerConfig config;
 
-      config.set_pir_protocol(::psi::PirProtocol::KEYWORD_PIR_LABELED_PSI);
-      config.set_store_type(::psi::KvStoreType::LEVELDB_KV_STORE);
       config.set_input_path(server_csv_path);
-
       config.mutable_key_columns()->Add(ids.begin(), ids.end());
       config.mutable_label_columns()->Add(labels.begin(), labels.end());
 
-      config.set_num_per_query(params.nr);
+      config.mutable_apsi_server_config()->set_num_per_query(params.nr);
       config.set_label_max_len(params.label_bytes);
-      config.set_oprf_key_path("");
-      config.set_setup_path("::memory");
-      config.set_compressed(params.compressed);
+      config.mutable_apsi_server_config()->set_compressed(params.compressed);
       config.set_bucket_size(params.bucket_size);
 
-      ::psi::PirResultReport report = PirMemoryServer(ctxs[0], config);
+      ::psi::PirResultReport report = PirServerFull(ctxs[0], config);
       return report;
     });
 
     std::future<::psi::PirResultReport> f_client = std::async([&] {
       ::psi::PirClientConfig config;
-
-      config.set_pir_protocol(::psi::PirProtocol::KEYWORD_PIR_LABELED_PSI);
 
       config.set_input_path(client_csv_path);
       config.mutable_key_columns()->Add(ids.begin(), ids.end());

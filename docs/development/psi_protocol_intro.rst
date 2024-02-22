@@ -9,6 +9,7 @@ SecretFlow SPU implements the following PSI protocols,
 - Semi-honest OT-based two-party PSI protocol (with improved communication efficiency) [BC22]_
 - Differentially Private (DP) PSI Protocol [DP-PSI]_
 - Unbalanced PSI Protocol
+- Semi-honest and Malicious VOLE-based two-party PSI protocol [RS21]_ [RR22]_
 
 ECDH-PSI
 --------
@@ -355,6 +356,44 @@ Labeled PSI Parameters
 |                   | coeff_modulus_bits   | {48} / {48, 30, 30} / {56, 56, 56, 50}                              |
 +-------------------+----------------------+---------------------------------------------------------------------+
 
+RR22 Blazing Fast PSI
+--------------
+
+[RS21]_ introduced an efficient PSI protocol based on OKVS and VOLE. [RR22]_ present significant improvements
+to the OKVS data structure along with new techniquesfor further reducing the communication overhead of [RS]21.
+
+Oblivous Key-Value Stores(OKVS) consists of algorithms Encode and Decode. Encode takes a list of key-value (k,v)
+pairs as input and returns an abstract data structure S. Decode takes such a data structure S and a key k' as
+input, and gives some output v'.
+
+Pseudorandom correlation generators(PCGs) allow for the efficient generation of
+oblivious transfer (OT) and vector oblivious linear evaluations (VOLE)
+with sublinear communication and concretely good computational overhead.
+PCG makes use of a so-called LPN-friendly errorcorrecting code.
+`secretflow/YACL <https://github.com/secretflow/yacl>`_  provides VOLE code implementation.
+LPN-friendly coeds now support [CRR21]_ silver codes(LDPC) and [BCGI+22]_ Expand-Accumulate Codes.
+Silver is Most efficient, but not recommended to use due to its security flaw.
+
+Semi-honest Protocol:
+
+.. figure:: ../_static/rr22_psi.png
+
+1. The Receiver samples :math:`r \leftarrow \{0,1\}^\kappa` and computes
+   :math:`\vec{P} :=  \mathrm{Encode} (L,r)` where
+   :math:`L := \{(H^{n*m}(x,r),H(x))|x \in X\}`.
+
+2. Sender and Receiver Run (sub)VOLE protocol, Sender gets :math:`\Delta` and
+   :math:`\vec{B}`, Receiver gets :math:`\vec{A}` and :math:`\vec{C}`, such that:
+   :math:`\vec{C}=\Delta *\vec{A'}+\vec{B}`.
+
+3. Receiver sends :math:`r, \vec{A}=\vec{A'}+\vec{P}` to Sender. Sender defines
+   :math:`\vec{K}=\vec{B}+\Delta \cdot \vec{A}`.
+
+4. Sender sends :math:`Y'=H^{n*m}(\vec{Y},r)\cdot \vec{K}-\Delta \cdot H(\vec{Y})`
+   to the Receiver.
+
+5. Receiver compares :math:`X'=H^{n*m}(\vec{X},r)\cdot \vec{C}` and :math:`Y'`, outputs
+   intersection result :math:`X \cap Y`.
 
 Reference
 ------------
@@ -375,9 +414,12 @@ Reference
 .. [Ber06] Daniel J. Bernstein. Curve25519: new diffie-hellman speed records. In In Public
    Key Cryptography (PKC), Springer-Verlag LNCS 3958, page 2006, 2006. (Cited on page 4.)
 
+.. [BCGI+22] Elette Boyle, Geoffroy Couteau, Niv Gilboa, Yuval Ishai, Lisa Kohl, Nicolas Resch, Peter Scholl.
+   Correlated Pseudorandomness from Expand-Accumulate Codes. Crypto2022.
+
 .. [BBCD+11] Baldi, P., Baronio, R., Cristofaro, E.D., Gasti, P., Tsudik, G.: Countering GATTACA:
    Efficient and Secure Testing of Fully-sequenced Human Genomes. In: ACM
-   Conference on Computer and Communications Security. pp. 691–702. ACM (2011)
+   Conference on Computer and Communications Security. pp. 691–702. ACM (2011).
 
 .. [CIK+20] G. Couteau, Y. Ishai, L. Kohl, E. Boyle, P. Scholl, and N. Gilboa. Efficient pseudorandom
    correlation generators from ring-lpn. Springer-Verlag, 2020.
@@ -393,6 +435,9 @@ Reference
 .. [CMGD+21] Kelong Cong, Radames Cruz Moreno, Mariana Botelho da Gama, Wei Dai, Ilia Iliashenko, Kim Laine,
    Michael Rosenberg. Labeled PSI from Homomorphic Encryption with Reduced Computation and Communication
    CCS'21: Proceedings of the 2021 ACM SIGSAC Conference on Computer and Communications SecurityNovember 2021
+
+.. [CRR21] Geoffroy Couteau, Peter Rindal, and Srinivasan Raghuraman. Silver: Silent VOLE and Oblivious Transfer
+   from Hardness of Decoding Structured LDPC Codes. Crypto2021.
 
 .. [DP-PSI] Differentially-Private PSI https://arxiv.org/pdf/2208.13249.pdf
 
@@ -421,6 +466,13 @@ Reference
 
 .. [RA18] Resende, A.C.D., Aranha, D.F.: Faster unbalanced private set intersection. In: Meiklejohn, S.,
    Sako, K. (eds.) FC2018. LNCS, vol. 10957, pp. 203{221. Springer, Heidelberg (Feb / Mar 2018)
+
+.. [RR22] Srinivasan Raghuraman and Peter Rindal. Blazing Fast PSI from Improved OKVS and Subfield VOLE. CCS'22.
+
+.. [RRT23] Srinivasan Raghuraman, Peter Rindal, Titouan Tanguy. Expand-Convolute Codes for Pseudorandom
+   Correlation Generators from LPN. Crypto2023.
+
+.. [RS21] Peter Rindal and Phillipp Schoppmann. VOLE-PSI: fast OPRF and circuit-psi from vector-ole. EUROCRYPT2021.
 
 .. [SEAL] Microsoft SEAL (release 4.0). https://github.com/Microsoft/SEAL (Sep 2022),
    microsoft Research, Redmond, WA.

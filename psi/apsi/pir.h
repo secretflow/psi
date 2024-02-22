@@ -24,31 +24,20 @@
 
 namespace psi::apsi {
 
-PirResultReport PirSetup(const PirSetupConfig &config);
+PirResultReport Launch(const PirConfig &config,
+                       const std::shared_ptr<yacl::link::Context> &lctx);
 
-PirResultReport PirServer(const std::shared_ptr<yacl::link::Context> &link_ctx,
-                          const PirServerConfig &config);
+PirResultReport PirServerSetup(const PirServerConfig &config);
+
+PirResultReport PirServerOnline(
+    const std::shared_ptr<yacl::link::Context> &link_ctx,
+    const PirServerConfig &config);
+
+PirResultReport PirServerFull(
+    const std::shared_ptr<yacl::link::Context> &link_ctx,
+    const PirServerConfig &config);
 
 PirResultReport PirClient(const std::shared_ptr<yacl::link::Context> &link_ctx,
                           const PirClientConfig &config);
-
-PirResultReport PirMemoryServer(
-    const std::shared_ptr<yacl::link::Context> &link_ctx,
-    const PirSetupConfig &config);
-
-// pir protocol based on labeled psi
-PirResultReport LabeledPirSetup(const PirSetupConfig &config);
-
-PirResultReport LabeledPirServer(
-    const std::shared_ptr<yacl::link::Context> &link_ctx,
-    const PirServerConfig &config);
-
-PirResultReport LabeledPirMemoryServer(
-    const std::shared_ptr<yacl::link::Context> &link_ctx,
-    const PirServerConfig &config);
-
-PirResultReport LabeledPirClient(
-    const std::shared_ptr<yacl::link::Context> &link_ctx,
-    const PirClientConfig &config);
 
 }  // namespace psi::apsi

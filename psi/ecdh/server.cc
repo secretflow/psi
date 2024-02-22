@@ -32,8 +32,8 @@ void EcdhUbPsiServer::Init() {
       config_.mode() == v2::UbPsiConfig::MODE_FULL) {
     YACL_ENFORCE(!config_.input_config().path().empty());
     YACL_ENFORCE(!config_.keys().empty());
-    YACL_ENFORCE(!config_.server_secret_key_config().path().empty());
-    YACL_ENFORCE(!config_.cache_config().path().empty());
+    YACL_ENFORCE(!config_.server_secret_key_path().empty());
+    YACL_ENFORCE(!config_.cache_path().empty());
   }
 
   if (config_.mode() == v2::UbPsiConfig::MODE_OFFLINE_GEN_CACHE) {
@@ -43,13 +43,13 @@ void EcdhUbPsiServer::Init() {
   if (config_.mode() == v2::UbPsiConfig::MODE_OFFLINE_TRANSFER_CACHE ||
       config_.mode() == v2::UbPsiConfig::MODE_OFFLINE ||
       config_.mode() == v2::UbPsiConfig::MODE_FULL) {
-    YACL_ENFORCE(!config_.cache_config().path().empty());
+    YACL_ENFORCE(!config_.cache_path().empty());
   }
 
   if (config_.mode() == v2::UbPsiConfig::MODE_ONLINE ||
       config_.mode() == v2::UbPsiConfig::MODE_FULL) {
-    YACL_ENFORCE(!config_.server_secret_key_config().path().empty());
-    YACL_ENFORCE(!config_.cache_config().path().empty());
+    YACL_ENFORCE(!config_.server_secret_key_path().empty());
+    YACL_ENFORCE(!config_.cache_path().empty());
   }
 
   if (lctx_) {
@@ -63,7 +63,7 @@ void EcdhUbPsiServer::Init() {
 
 void EcdhUbPsiServer::OfflineGenCache() {
   std::vector<uint8_t> server_private_key =
-      ReadEcSecretKeyFile(config_.server_secret_key_config().path());
+      ReadEcSecretKeyFile(config_.server_secret_key_path());
 
   std::shared_ptr<EcdhOprfPsiServer> dh_oprf_psi_server =
       std::make_shared<EcdhOprfPsiServer>(psi_options_, server_private_key);
@@ -80,7 +80,7 @@ void EcdhUbPsiServer::OfflineGenCache() {
           csv_batch_provider, psi_options_.batch_size, true);
 
   std::shared_ptr<IUbPsiCache> ub_cache = std::make_shared<UbPsiCache>(
-      config_.cache_config().path(), dh_oprf_psi_server->GetCompareLength(),
+      config_.cache_path(), dh_oprf_psi_server->GetCompareLength(),
       selected_keys);
 
   size_t self_items_count =
@@ -96,7 +96,7 @@ void EcdhUbPsiServer::OfflineTransferCache() {
 
   std::shared_ptr<IBasicBatchProvider> batch_provider =
       std::make_shared<UbPsiCacheProvider>(
-          config_.cache_config().path(), psi_options_.batch_size,
+          config_.cache_path(), psi_options_.batch_size,
           ub_psi_server_transfer_cache->GetCompareLength());
 
   size_t self_items_count =
@@ -110,7 +110,7 @@ void EcdhUbPsiServer::OfflineTransferCache() {
 
 void EcdhUbPsiServer::Offline() {
   std::vector<uint8_t> server_private_key =
-      ReadEcSecretKeyFile(config_.server_secret_key_config().path());
+      ReadEcSecretKeyFile(config_.server_secret_key_path());
 
   std::shared_ptr<EcdhOprfPsiServer> dh_oprf_psi_server_offline =
       std::make_shared<EcdhOprfPsiServer>(psi_options_, server_private_key);
@@ -137,7 +137,7 @@ void EcdhUbPsiServer::Offline() {
 
 void EcdhUbPsiServer::Online() {
   std::vector<uint8_t> server_private_key =
-      ReadEcSecretKeyFile(config_.server_secret_key_config().path());
+      ReadEcSecretKeyFile(config_.server_secret_key_path());
 
   std::shared_ptr<EcdhOprfPsiServer> dh_oprf_psi_server_online =
       std::make_shared<EcdhOprfPsiServer>(psi_options_, server_private_key);

@@ -12,9 +12,7 @@
             "id0",
             "id1"
         ],
-        "cache_config": {
-            "path": "/tmp/client_cache"
-        }
+        "cache_path": "/tmp/client_cache"
     },
     "link_config": {
         "parties": [

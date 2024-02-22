@@ -33,12 +33,12 @@ void EcdhUbPsiClient::Init() {
   if (config_.mode() == v2::UbPsiConfig::MODE_OFFLINE_TRANSFER_CACHE ||
       config_.mode() == v2::UbPsiConfig::MODE_OFFLINE ||
       config_.mode() == v2::UbPsiConfig::MODE_FULL) {
-    YACL_ENFORCE(!config_.cache_config().path().empty());
+    YACL_ENFORCE(!config_.cache_path().empty());
   }
 
   if (config_.mode() == v2::UbPsiConfig::MODE_ONLINE ||
       config_.mode() == v2::UbPsiConfig::MODE_FULL) {
-    YACL_ENFORCE(!config_.cache_config().path().empty());
+    YACL_ENFORCE(!config_.cache_path().empty());
   }
 
   if (lctx_) {
@@ -57,7 +57,7 @@ void EcdhUbPsiClient::OfflineTransferCache() {
       std::make_shared<EcdhOprfPsiClient>(psi_options_);
 
   auto peer_ec_point_store = std::make_shared<CachedCsvEcPointStore>(
-      config_.cache_config().path(), false, "peer", false);
+      config_.cache_path(), false, "peer", false);
 
   ub_psi_client_transfer_cache->RecvFinalEvaluatedItems(peer_ec_point_store);
 
@@ -90,10 +90,10 @@ void EcdhUbPsiClient::Online() {
       ec_point_store_path1, true, "self", false);
 
   auto peer_ec_point_store = std::make_shared<CachedCsvEcPointStore>(
-      config_.cache_config().path(), false, "peer", true);
+      config_.cache_path(), false, "peer", true);
 
   SPDLOG_INFO("online protocol CachedCsvCipherStore: {} {}",
-              ec_point_store_path1, config_.cache_config().path());
+              ec_point_store_path1, config_.cache_path());
 
   std::future<size_t> f_client_send_blind = std::async([&] {
     return dh_oprf_psi_client_online->SendBlindedItems(batch_provider);

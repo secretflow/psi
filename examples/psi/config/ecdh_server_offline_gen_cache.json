@@ -9,11 +9,7 @@
             "id0",
             "id1"
         ],
-        "server_secret_key_config": {
-            "path": "/tmp/server_secret_key.key"
-        },
-        "cache_config": {
-            "path": "/tmp/server_cache.sf"
-        }
+        "server_secret_key_path": "/tmp/server_secret_key.key",
+        "cache_path": "/tmp/server_cache.sf"
     }
 }

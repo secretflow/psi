@@ -44,6 +44,7 @@ Please check psi.v2.PsiConfig and psi.v2.UbPsiConfig at **PSI v2 Configuration**
 | [**oneof**](https://developers.google.com/protocol-buffers/docs/proto3#oneof) runtime_config.legacy_psi_config | [ BucketPsiConfig](#bucketpsiconfig) | Please check at psi.proto. |
 | [**oneof**](https://developers.google.com/protocol-buffers/docs/proto3#oneof) runtime_config.psi_config | [ v2.PsiConfig](#v2psiconfig) | Please check at psi_v2.proto. |
 | [**oneof**](https://developers.google.com/protocol-buffers/docs/proto3#oneof) runtime_config.ub_psi_config | [ v2.UbPsiConfig](#v2ubpsiconfig) | Please check at psi_v2.proto. |
+| [**oneof**](https://developers.google.com/protocol-buffers/docs/proto3#oneof) runtime_config.pir_config | [ PirConfig](#pirconfig) | Please check at pir.proto. |
  <!-- end Fields -->
  <!-- end HasFields -->
  <!-- end messages -->

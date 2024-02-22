@@ -33,6 +33,7 @@
 #include "psi/apsi/sender_memdb.h"
 #include "psi/cryptor/ecc_cryptor.h"
 #include "psi/ecdh//ecdh_oprf_selector.h"
+#include "psi/prelude.h"
 #include "psi/utils/batch_provider.h"
 #include "psi/utils/io.h"
 #include "psi/utils/serialize.h"
@@ -88,6 +89,7 @@ constexpr char kPsiParams[] = "psi_params";
 constexpr char kBucketCount[] = "bucket_count";
 constexpr char kBucketSize[] = "bucket_size";
 constexpr char kCompressed[] = "compressed";
+constexpr char kOprfKeyPath[] = "oprf_key_path";
 
 constexpr size_t kNonceByteCount = 16;
 
@@ -95,6 +97,7 @@ void WriteMetaInfo(const std::string &setup_path, size_t server_data_count,
                    size_t count_per_query, size_t label_byte_count,
                    const std::vector<std::string> &label_cloumns,
                    const ::apsi::PSIParams &psi_params, size_t bucket_count,
+                   const std::string &oprf_key_path,
                    size_t bucket_size = 1000000, bool compressed = false) {
   std::string meta_store_name =
       fmt::format("{}/{}", setup_path, kMetaInfoStoreName);
@@ -106,6 +109,7 @@ void WriteMetaInfo(const std::string &setup_path, size_t server_data_count,
   meta_info_store->Put(kCountPerQuery, fmt::format("{}", count_per_query));
   meta_info_store->Put(kLabelByteCount, fmt::format("{}", label_byte_count));
   meta_info_store->Put(kBucketSize, fmt::format("{}", bucket_size));
+  meta_info_store->Put(kOprfKeyPath, oprf_key_path);
   meta_info_store->Put(kCompressed, fmt::format("{}", compressed ? 1 : 0));
 
   ::psi::proto::StrItemsProto proto;
@@ -139,8 +143,8 @@ size_t GetSizeFromStore(
                                size_t *count_per_query,
                                size_t *label_byte_count,
                                std::vector<std::string> *label_cloumns,
-                               size_t *bucket_count, size_t *bucket_size,
-                               bool *compressed) {
+                               size_t *bucket_count, std::string *oprf_key_path,
+                               size_t *bucket_size, bool *compressed) {
   std::string meta_store_name =
       fmt::format("{}/{}", setup_path, kMetaInfoStoreName);
   std::shared_ptr<yacl::io::KVStore> meta_info_store =
@@ -164,6 +168,7 @@ size_t GetSizeFromStore(
   ::apsi::PSIParams psi_params = ParsePsiParamsProto(params_buffer);
 
   *bucket_count = GetSizeFromStore(meta_info_store, kBucketCount);
+  meta_info_store->Get(kOprfKeyPath, oprf_key_path);
   *bucket_size = GetSizeFromStore(meta_info_store, kBucketSize);
   size_t compress_flag = GetSizeFromStore(meta_info_store, kCompressed);
 
@@ -180,7 +185,26 @@ size_t GetSizeFromStore(
 
 }  // namespace
 
-PirResultReport LabeledPirSetup(const PirSetupConfig &config) {
+PirResultReport Launch(const PirConfig &config,
+                       const std::shared_ptr<yacl::link::Context> &lctx) {
+  YACL_ENFORCE_EQ(config.pir_protocol(),
+                  PirProtocol::PIR_PROTOCOL_KEYWORD_PIR_APSI);
+
+  switch (config.mode()) {
+    case PirConfig::MODE_SERVER_SETUP:
+      return PirServerSetup(config.pir_server_config());
+    case PirConfig::MODE_SERVER_ONLINE:
+      return PirServerOnline(lctx, config.pir_server_config());
+    case PirConfig::MODE_SERVER_FULL:
+      return PirServerFull(lctx, config.pir_server_config());
+    case PirConfig::MODE_CLIENT:
+      return PirClient(lctx, config.pir_client_config());
+    default:
+      YACL_THROW("unsupported pir mode.");
+  }
+}
+
+PirResultReport PirServerSetup(const PirServerConfig &config) {
   std::vector<std::string> key_columns;
   key_columns.insert(key_columns.end(), config.key_columns().begin(),
                      config.key_columns().end());
@@ -190,13 +214,14 @@ PirResultReport LabeledPirSetup(const PirSetupConfig &config) {
                        config.label_columns().end());
 
   size_t server_data_count = CsvFileDataCount(config.input_path(), key_columns);
-  size_t count_per_query = config.num_per_query();
+  size_t count_per_query = config.apsi_server_config().num_per_query();
 
   size_t bucket_size = config.bucket_size();
 
   size_t bucket_count = (server_data_count + bucket_size - 1) / bucket_size;
 
-  std::vector<uint8_t> oprf_key = ReadEcSecretKeyFile(config.oprf_key_path());
+  std::vector<uint8_t> oprf_key =
+      ReadEcSecretKeyFile(config.apsi_server_config().oprf_key_path());
 
   size_t label_byte_count = config.label_max_len();
   size_t nonce_byte_count = kNonceByteCount;
@@ -214,7 +239,8 @@ PirResultReport LabeledPirSetup(const PirSetupConfig &config) {
   std::filesystem::create_directory(kv_store_path);
 
   ::apsi::PSIParams psi_params =
-      GetPsiParams(count_per_query, bucket_size, config.max_items_per_bin());
+      GetPsiParams(count_per_query, bucket_size,
+                   config.apsi_server_config().max_items_per_bin());
 
   SPDLOG_INFO("table_params hash_func_count:{}",
               psi_params.table_params().hash_func_count);
@@ -228,7 +254,8 @@ PirResultReport LabeledPirSetup(const PirSetupConfig &config) {
 
   WriteMetaInfo(kv_store_path, server_data_count, count_per_query,
                 label_byte_count, label_columns, psi_params, bucket_count,
-                config.bucket_size(), config.compressed());
+                config.apsi_server_config().oprf_key_path(),
+                config.bucket_size(), config.apsi_server_config().compressed());
 
   std::shared_ptr<::psi::ILabeledBatchProvider> batch_provider =
       std::make_shared<::psi::CsvBatchProvider>(
@@ -252,11 +279,11 @@ PirResultReport LabeledPirSetup(const PirSetupConfig &config) {
 
     ::apsi::PSIParams bucket_psi_params = GetPsiParams(
         count_per_query, std::min<size_t>(bucket_size, batch_ids.size()),
-        config.max_items_per_bin());
+        config.apsi_server_config().max_items_per_bin());
 
     std::shared_ptr<ISenderDB> sender_db = std::make_shared<SenderKvDB>(
         bucket_psi_params, oprf_key, bucket_setup_path, label_byte_count,
-        nonce_byte_count, config.compressed());
+        nonce_byte_count, config.apsi_server_config().compressed());
 
     std::shared_ptr<::psi::IBatchProvider> bucket_batch_provider =
         std::make_shared<::psi::MemoryBatchProvider>(batch_ids, bucket_size,
@@ -272,84 +299,11 @@ PirResultReport LabeledPirSetup(const PirSetupConfig &config) {
   return report;
 }
 
-PirResultReport LabeledPirServer(
-    const std::shared_ptr<yacl::link::Context> &link_ctx,
-    const std::shared_ptr<ISenderDB> &sender_db,
-    const std::vector<uint8_t> &oprf_key, const ::apsi::PSIParams &psi_params,
-    const std::vector<std::string> &label_columns, size_t bucket_count,
-    size_t /*server_data_count*/, size_t count_per_query,
-    size_t /*label_byte_count*/, uint32_t /*bucket_size*/) {
-  // send count_per_query
-  link_ctx->SendAsync(link_ctx->NextRank(),
-                      ::psi::utils::SerializeSize(count_per_query),
-                      fmt::format("count_per_query:{}", count_per_query));
-
-  yacl::Buffer labels_buffer = ::psi::utils::SerializeStrItems(label_columns);
-  // send labels column name
-  link_ctx->SendAsync(link_ctx->NextRank(), labels_buffer,
-                      fmt::format("send label columns name"));
-
-  // send psi params
-  yacl::Buffer params_buffer = PsiParamsToBuffer(psi_params);
-  link_ctx->SendAsync(link_ctx->NextRank(), params_buffer,
-                      fmt::format("send psi params"));
-
-  // bucket_count
-  link_ctx->SendAsync(link_ctx->NextRank(),
-                      ::psi::utils::SerializeSize(bucket_count),
-                      fmt::format("bucket_count:{}", bucket_count));
-
-  // const auto total_query_start = std::chrono::system_clock::now();
-
-  size_t query_count = 0;
-  size_t data_count = 0;
-
-  LabelPsiSender sender(sender_db);
-
-  while (true) {
-    // recv current batch_size
-    size_t batch_data_size = ::psi::utils::DeserializeSize(
-        link_ctx->Recv(link_ctx->NextRank(), fmt::format("batch_data_size")));
-
-    SPDLOG_INFO("client data size: {}", batch_data_size);
-    if (batch_data_size == 0) {
-      break;
-    }
-    data_count += batch_data_size;
-
-    // oprf
-    std::unique_ptr<ecdh::IEcdhOprfServer> oprf_server =
-        ecdh::CreateEcdhOprfServer(oprf_key, ecdh::OprfType::Basic,
-                                   ::psi::CurveType::CURVE_FOURQ);
-
-    // const auto oprf_start = std::chrono::system_clock::now();
-    sender.RunOPRF(std::move(oprf_server), link_ctx);
-
-    // const auto oprf_end = std::chrono::system_clock::now();
-    // const DurationMillis oprf_duration = oprf_end - oprf_start;
-    // SPDLOG_INFO("*** server oprf duration:{}", oprf_duration.count());
-
-    // const auto query_start = std::chrono::system_clock::now();
-
-    sender.RunQuery(link_ctx);
-
-    // const auto query_end = std::chrono::system_clock::now();
-    // const DurationMillis query_duration = query_end - query_start;
-    // SPDLOG_INFO("*** server query duration:{}", query_duration.count());
-
-    query_count++;
-  }
-  SPDLOG_INFO("query_count:{},data_count:{}", query_count, data_count);
-
-  PirResultReport report;
-  report.set_data_count(data_count);
-
-  return report;
-}
-
-PirResultReport LabeledPirServer(
+PirResultReport PirServerOnline(
     const std::shared_ptr<yacl::link::Context> &link_ctx,
     const PirServerConfig &config) {
+  YACL_ENFORCE(link_ctx);
+
   size_t server_data_count;
   size_t count_per_query;
   size_t label_byte_count;
@@ -357,16 +311,17 @@ PirResultReport LabeledPirServer(
   std::vector<std::string> label_columns;
   size_t bucket_count;
   size_t bucket_size;
+  std::string oprf_key_path;
   bool compressed;
 
   ::apsi::PSIParams psi_params =
       ReadMetaInfo(config.setup_path(), &server_data_count, &count_per_query,
                    &label_byte_count, &label_columns, &bucket_count,
-                   &bucket_size, &compressed);
+                   &oprf_key_path, &bucket_size, &compressed);
 
   YACL_ENFORCE(label_columns.size() > 0);
 
-  std::vector<uint8_t> oprf_key = ReadEcSecretKeyFile(config.oprf_key_path());
+  std::vector<uint8_t> oprf_key = ReadEcSecretKeyFile(oprf_key_path);
 
   // server and client sync
   auto run_f = std::async([&] { return 0; });
@@ -465,9 +420,88 @@ PirResultReport LabeledPirServer(
   return report;
 }
 
-PirResultReport LabeledPirMemoryServer(
+PirResultReport LabeledPirServer(
     const std::shared_ptr<yacl::link::Context> &link_ctx,
-    const PirSetupConfig &config) {
+    const std::shared_ptr<ISenderDB> &sender_db,
+    const std::vector<uint8_t> &oprf_key, const ::apsi::PSIParams &psi_params,
+    const std::vector<std::string> &label_columns, size_t bucket_count,
+    size_t /*server_data_count*/, size_t count_per_query,
+    size_t /*label_byte_count*/, uint32_t /*bucket_size*/) {
+  YACL_ENFORCE(link_ctx);
+
+  // send count_per_query
+  link_ctx->SendAsync(link_ctx->NextRank(),
+                      ::psi::utils::SerializeSize(count_per_query),
+                      fmt::format("count_per_query:{}", count_per_query));
+
+  yacl::Buffer labels_buffer = ::psi::utils::SerializeStrItems(label_columns);
+  // send labels column name
+  link_ctx->SendAsync(link_ctx->NextRank(), labels_buffer,
+                      fmt::format("send label columns name"));
+
+  // send psi params
+  yacl::Buffer params_buffer = PsiParamsToBuffer(psi_params);
+  link_ctx->SendAsync(link_ctx->NextRank(), params_buffer,
+                      fmt::format("send psi params"));
+
+  // bucket_count
+  link_ctx->SendAsync(link_ctx->NextRank(),
+                      ::psi::utils::SerializeSize(bucket_count),
+                      fmt::format("bucket_count:{}", bucket_count));
+
+  // const auto total_query_start = std::chrono::system_clock::now();
+
+  size_t query_count = 0;
+  size_t data_count = 0;
+
+  LabelPsiSender sender(sender_db);
+
+  while (true) {
+    // recv current batch_size
+    size_t batch_data_size = ::psi::utils::DeserializeSize(
+        link_ctx->Recv(link_ctx->NextRank(), fmt::format("batch_data_size")));
+
+    SPDLOG_INFO("client data size: {}", batch_data_size);
+    if (batch_data_size == 0) {
+      break;
+    }
+    data_count += batch_data_size;
+
+    // oprf
+    std::unique_ptr<ecdh::IEcdhOprfServer> oprf_server =
+        ecdh::CreateEcdhOprfServer(oprf_key, ecdh::OprfType::Basic,
+                                   ::psi::CurveType::CURVE_FOURQ);
+
+    // const auto oprf_start = std::chrono::system_clock::now();
+    sender.RunOPRF(std::move(oprf_server), link_ctx);
+
+    // const auto oprf_end = std::chrono::system_clock::now();
+    // const DurationMillis oprf_duration = oprf_end - oprf_start;
+    // SPDLOG_INFO("*** server oprf duration:{}", oprf_duration.count());
+
+    // const auto query_start = std::chrono::system_clock::now();
+
+    sender.RunQuery(link_ctx);
+
+    // const auto query_end = std::chrono::system_clock::now();
+    // const DurationMillis query_duration = query_end - query_start;
+    // SPDLOG_INFO("*** server query duration:{}", query_duration.count());
+
+    query_count++;
+  }
+  SPDLOG_INFO("query_count:{},data_count:{}", query_count, data_count);
+
+  PirResultReport report;
+  report.set_data_count(data_count);
+
+  return report;
+}
+
+PirResultReport PirServerFull(
+    const std::shared_ptr<yacl::link::Context> &link_ctx,
+    const PirServerConfig &config) {
+  YACL_ENFORCE(link_ctx);
+
   std::vector<std::string> key_columns;
   key_columns.insert(key_columns.end(), config.key_columns().begin(),
                      config.key_columns().end());
@@ -477,23 +511,24 @@ PirResultReport LabeledPirMemoryServer(
                        config.label_columns().end());
 
   size_t server_data_count = CsvFileDataCount(config.input_path(), key_columns);
-  size_t count_per_query = config.num_per_query();
+  size_t count_per_query = config.apsi_server_config().num_per_query();
   SPDLOG_INFO("server_data_count:{}", server_data_count);
 
   YACL_ENFORCE(server_data_count <= config.bucket_size(),
                "data_count:{} bucket_size:{}", config.bucket_size());
 
-  ::apsi::PSIParams psi_params = GetPsiParams(
-      count_per_query, server_data_count, config.max_items_per_bin());
+  ::apsi::PSIParams psi_params =
+      GetPsiParams(count_per_query, server_data_count,
+                   config.apsi_server_config().max_items_per_bin());
 
   std::vector<uint8_t> oprf_key = yacl::crypto::RandBytes(::psi::kEccKeySize);
 
   size_t label_byte_count = config.label_max_len();
   size_t nonce_byte_count = kNonceByteCount;
 
-  std::shared_ptr<ISenderDB> sender_db =
-      std::make_shared<SenderMemDB>(psi_params, oprf_key, label_byte_count,
-                                    nonce_byte_count, config.compressed());
+  std::shared_ptr<ISenderDB> sender_db = std::make_shared<SenderMemDB>(
+      psi_params, oprf_key, label_byte_count, nonce_byte_count,
+      config.apsi_server_config().compressed());
 
   // server and client sync
   auto run_f = std::async([&] {
@@ -519,9 +554,10 @@ PirResultReport LabeledPirMemoryServer(
   return report;
 }
 
-PirResultReport LabeledPirClient(
-    const std::shared_ptr<yacl::link::Context> &link_ctx,
-    const PirClientConfig &config) {
+PirResultReport PirClient(const std::shared_ptr<yacl::link::Context> &link_ctx,
+                          const PirClientConfig &config) {
+  YACL_ENFORCE(link_ctx);
+
   std::vector<std::string> key_columns;
   key_columns.insert(key_columns.end(), config.key_columns().begin(),
                      config.key_columns().end());
@@ -690,46 +726,6 @@ PirResultReport LabeledPirClient(
   report.set_data_count(data_count);
 
   return report;
-}
-
-PirResultReport PirSetup(const PirSetupConfig &config) {
-  if (config.pir_protocol() != ::psi::KEYWORD_PIR_LABELED_PSI) {
-    YACL_THROW("Unsupported pir protocol {}",
-               PirProtocol_Name(config.pir_protocol()));
-  }
-
-  return LabeledPirSetup(config);
-}
-
-PirResultReport PirServer(const std::shared_ptr<yacl::link::Context> &link_ctx,
-                          const PirServerConfig &config) {
-  if (config.pir_protocol() != ::psi::KEYWORD_PIR_LABELED_PSI) {
-    YACL_THROW("Unsupported pir protocol {}",
-               PirProtocol_Name(config.pir_protocol()));
-  }
-
-  return LabeledPirServer(link_ctx, config);
-}
-
-PirResultReport PirMemoryServer(
-    const std::shared_ptr<yacl::link::Context> &link_ctx,
-    const PirSetupConfig &config) {
-  if (config.pir_protocol() != ::psi::KEYWORD_PIR_LABELED_PSI) {
-    YACL_THROW("Unsupported pir protocol {}",
-               PirProtocol_Name(config.pir_protocol()));
-  }
-
-  return LabeledPirMemoryServer(link_ctx, config);
-}
-
-PirResultReport PirClient(const std::shared_ptr<yacl::link::Context> &link_ctx,
-                          const PirClientConfig &config) {
-  if (config.pir_protocol() != ::psi::KEYWORD_PIR_LABELED_PSI) {
-    YACL_THROW("Unsupported pir protocol {}",
-               PirProtocol_Name(config.pir_protocol()));
-  }
-
-  return LabeledPirClient(link_ctx, config);
 }
 
 }  // namespace psi::apsi

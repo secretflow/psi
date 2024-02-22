@@ -23,8 +23,8 @@
 #include <vector>
 
 #include "absl/strings/escaping.h"
-#include "examples/pir/utils.h"
 #include "fmt/format.h"
+#include "gflags/gflags.h"
 #include "spdlog/spdlog.h"
 #include "yacl/crypto/utils/rand.h"
 
@@ -63,8 +63,7 @@ int main(int argc, char **argv) {
   psi1_out_file.open(FLAGS_server_out_path, std::ios::out);
   psi2_out_file.open(FLAGS_client_out_path, std::ios::out);
 
-  psi1_out_file << "id,id1"
-                << ",label,label1" << '\r' << std::endl;
+  psi1_out_file << "id,id1,label,label1" << '\r' << std::endl;
   psi2_out_file << "id,id1" << '\r' << std::endl;
 
   for (size_t idx = 0; idx < alice_item_size; idx++) {

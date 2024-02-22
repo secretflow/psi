@@ -8,4 +8,5 @@ This page covers all Protocol Buffers message as APIs.
 
    psi_config
    psi_v2_config
+   pir_config
    launch_config

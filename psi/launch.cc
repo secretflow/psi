@@ -27,7 +27,9 @@
 #include "perfetto.h"
 #include "spdlog/spdlog.h"
 
+#include "psi/apsi/pir.h"
 #include "psi/factory.h"
+#include "psi/prelude.h"
 #include "psi/trace_categories.h"
 
 namespace psi {
@@ -163,6 +165,14 @@ PsiResultReport RunLegacyPsi(const BucketPsiConfig& bucket_psi_config,
 
   BucketPsi bucket_psi(bucket_psi_config, lctx);
   return bucket_psi.Run(progress_callbacks, callbacks_interval_ms);
+}
+
+PirResultReport RunPir(const PirConfig& pir_config,
+                       const std::shared_ptr<yacl::link::Context>& lctx) {
+  YACL_ENFORCE_EQ(pir_config.pir_protocol(),
+                  PirProtocol::PIR_PROTOCOL_KEYWORD_PIR_APSI);
+
+  return apsi::Launch(pir_config, lctx);
 }
 
 }  // namespace psi

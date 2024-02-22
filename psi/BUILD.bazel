@@ -22,6 +22,7 @@ psi_cc_library(
         "prelude.h",
     ],
     deps = [
+        "//psi/proto:pir_cc_proto",
         "//psi/proto:psi_cc_proto",
         "//psi/proto:psi_v2_cc_proto",
     ],
@@ -69,6 +70,7 @@ psi_cc_library(
     deps = [
         ":factory",
         ":trace_categories",
+        "//psi/apsi:pir",
         "//psi/legacy:bucket_psi",
         "@boost//:algorithm",
         "@boost//:uuid",

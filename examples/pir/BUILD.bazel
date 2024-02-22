@@ -12,86 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library")
+load("//bazel:psi.bzl", "psi_cc_binary")
 
 package(default_visibility = ["//visibility:public"])
-
-psi_cc_library(
-    name = "utils",
-    srcs = ["utils.cc"],
-    hdrs = ["utils.h"],
-    deps = [
-        "@com_github_gflags_gflags//:gflags",
-        "@com_google_absl//absl/strings",
-        "@yacl//yacl/link:factory",
-    ],
-)
-
-psi_cc_binary(
-    name = "keyword_pir_setup",
-    srcs = ["keyword_pir_setup.cc"],
-    linkopts = [
-        "-lm",
-    ],
-    deps = [
-        ":utils",
-        "//psi/apsi:pir",
-        "@com_google_absl//absl/strings",
-        "@yacl//yacl/crypto/utils:rand",
-    ],
-)
-
-psi_cc_binary(
-    name = "keyword_pir_server",
-    srcs = ["keyword_pir_server.cc"],
-    linkopts = [
-        "-lm",
-    ],
-    deps = [
-        ":utils",
-        "//psi/apsi:pir",
-        "//psi/utils:serialize",
-        "@com_google_absl//absl/strings",
-        "@yacl//yacl/crypto/utils:rand",
-    ],
-)
-
-psi_cc_binary(
-    name = "keyword_pir_mem_server",
-    srcs = ["keyword_pir_mem_server.cc"],
-    linkopts = [
-        "-lm",
-    ],
-    deps = [
-        ":utils",
-        "//psi/apsi:pir",
-        "//psi/utils:serialize",
-        "@com_google_absl//absl/strings",
-        "@yacl//yacl/crypto/utils:rand",
-    ],
-)
-
-psi_cc_binary(
-    name = "keyword_pir_client",
-    srcs = ["keyword_pir_client.cc"],
-    linkopts = [
-        "-lm",
-    ],
-    deps = [
-        ":utils",
-        "//psi/apsi:pir",
-        "//psi/utils:serialize",
-        "@com_google_absl//absl/strings",
-        "@yacl//yacl/crypto/utils:rand",
-        "@yacl//yacl/io/rw:csv_writer",
-    ],
-)
 
 psi_cc_binary(
     name = "generate_pir_data",
     srcs = ["generate_pir_data.cc"],
     deps = [
-        ":utils",
+        "@com_github_gflags_gflags//:gflags",
         "@com_google_absl//absl/strings",
         "@yacl//yacl/crypto/utils:rand",
     ],

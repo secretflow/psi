@@ -53,6 +53,7 @@ proto_library(
     name = "entry_proto",
     srcs = ["entry.proto"],
     deps = [
+        ":pir_proto",
         ":psi_proto",
         ":psi_v2_proto",
         "@yacl//yacl/link:link_proto",

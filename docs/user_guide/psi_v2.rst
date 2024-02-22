@@ -123,7 +123,7 @@ You need to prepare following files:
 +------------------------+------------------------------------------------+-------------------------------------------------------------------------------+
 | sender.config          | /tmp/sender/sender.config                      | Config for sender.                                                            |
 +------------------------+------------------------------------------------+-------------------------------------------------------------------------------+
-| receiver_input.csv     | /tmp/receiver/receiver_input.config            | Input for receiver. Make sure the file contains two id keys - id0 and id1. |
+| receiver_input.csv     | /tmp/receiver/receiver_input.config            | Input for receiver. Make sure the file contains two id keys - id0 and id1.    |
 +------------------------+------------------------------------------------+-------------------------------------------------------------------------------+
 | sender_input.csv       | /tmp/sender/sender_input.config                | Input for sender. Make sure the file contains two id keys - id0 and id1.      |
 +------------------------+------------------------------------------------+-------------------------------------------------------------------------------+

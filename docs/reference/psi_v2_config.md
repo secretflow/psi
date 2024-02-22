@@ -343,8 +343,8 @@ config for unbalanced psi.
 | role | [ Role](#role) | Required for all modes except MODE_OFFLINE_GEN_CACHE. |
 | input_config | [ IoConfig](#ioconfig) | Config for origin input. Servers: Required for MODE_OFFLINE_GEN_CACHE, MODE_OFFLINE, MODE_FULL. Clients: Required for MODE_ONLINE and MODE_FULL. |
 | keys | [repeated string](#string) | Join keys. Servers: Required for MODE_OFFLINE_GEN_CACHE, MODE_OFFLINE, MODE_FULL. Clients: Required for MODE_ONLINE and MODE_FULL. |
-| server_secret_key_config | [ IoConfig](#ioconfig) | Servers: Required for MODE_OFFLINE_GEN_CACHE, MODE_OFFLINE, MODE_ONLINE and MODE_FULL. |
-| cache_config | [ IoConfig](#ioconfig) | Required. |
+| server_secret_key_path | [ string](#string) | Servers: Required for MODE_OFFLINE_GEN_CACHE, MODE_OFFLINE, MODE_ONLINE and MODE_FULL. |
+| cache_path | [ string](#string) | Required. |
 | server_get_result | [ bool](#bool) | none |
 | client_get_result | [ bool](#bool) | none |
 | disable_alignment | [ bool](#bool) | It true, output is not promised to be aligned. Valid if both server_get_result and client_get_result are true. |

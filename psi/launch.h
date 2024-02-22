@@ -21,6 +21,7 @@
 
 #include "psi/legacy/bucket_psi.h"
 
+#include "psi/proto/pir.pb.h"
 #include "psi/proto/psi.pb.h"
 #include "psi/proto/psi_v2.pb.h"
 
@@ -36,5 +37,8 @@ PsiResultReport RunPsi(const v2::PsiConfig& psi_config,
 
 PsiResultReport RunUbPsi(const v2::UbPsiConfig& ub_psi_config,
                          const std::shared_ptr<yacl::link::Context>& lctx);
+
+PirResultReport RunPir(const PirConfig& pir_config,
+                       const std::shared_ptr<yacl::link::Context>& lctx);
 
 }  // namespace psi

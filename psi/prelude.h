@@ -16,6 +16,7 @@
 
 #include "fmt/ostream.h"
 
+#include "psi/proto/pir.pb.h"
 #include "psi/proto/psi.pb.h"
 #include "psi/proto/psi_v2.pb.h"
 
@@ -23,6 +24,9 @@ namespace fmt {
 
 template <>
 struct formatter<psi::CurveType> : ostream_formatter {};
+
+template <>
+struct formatter<psi::PirProtocol> : ostream_formatter {};
 
 template <>
 struct formatter<psi::PsiType> : ostream_formatter {};

@@ -194,6 +194,7 @@ psi_cc_library(
     deps = [
         ":receiver",
         ":sender",
+        "//psi:prelude",
         "//psi/proto:pir_cc_proto",
         "//psi/utils:serialize",
         "//psi/utils:sync",

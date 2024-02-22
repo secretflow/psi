@@ -2,9 +2,7 @@
     "ub_psi_config": {
         "mode": "MODE_OFFLINE",
         "role": "ROLE_CLIENT",
-        "cache_config": {
-            "path": "/tmp/client_cache"
-        }
+        "cache_path": "/tmp/client_cache"
     },
     "link_config": {
         "parties": [

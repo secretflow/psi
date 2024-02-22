@@ -1,0 +1,26 @@
+{
+    "pir_config": {
+        "mode": "MODE_CLIENT",
+        "pir_protocol": "PIR_PROTOCOL_KEYWORD_PIR_APSI",
+        "pir_client_config": {
+            "input_path": "/tmp/pir_client.csv",
+            "key_columns": [
+                "id"
+            ],
+            "output_path": "/tmp/pir_output.csv"
+        }
+    },
+    "link_config": {
+        "parties": [
+            {
+                "id": "server",
+                "host": "127.0.0.1:5300"
+            },
+            {
+                "id": "client",
+                "host": "127.0.0.1:5400"
+            }
+        ]
+    },
+    "self_link_party": "client"
+}

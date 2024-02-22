@@ -2,9 +2,7 @@
     "ub_psi_config": {
         "mode": "MODE_OFFLINE",
         "role": "ROLE_SERVER",
-        "cache_config": {
-            "path": "/tmp/server_cache.sf"
-        },
+        "cache_path": "/tmp/server_cache.sf",
         "input_config": {
             "path": "/tmp/server_input.csv"
         },
@@ -12,9 +10,7 @@
             "id0",
             "id1"
         ],
-        "server_secret_key_config": {
-            "path": "/tmp/server_secret_key.key"
-        }
+        "server_secret_key_path": "/tmp/server_secret_key.key"
     },
     "link_config": {
         "parties": [

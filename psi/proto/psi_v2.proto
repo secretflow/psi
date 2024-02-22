@@ -455,10 +455,10 @@ message UbPsiConfig {
   // Servers:
   // Required for MODE_OFFLINE_GEN_CACHE, MODE_OFFLINE, MODE_ONLINE and
   // MODE_FULL.
-  IoConfig server_secret_key_config = 5;
+  string server_secret_key_path = 5;
 
   // Required.
-  IoConfig cache_config = 6;
+  string cache_path = 6;
 
   bool server_get_result = 7;
 

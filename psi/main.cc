@@ -23,7 +23,9 @@
 #include "psi/version.h"
 
 #include "psi/proto/entry.pb.h"
+#include "psi/proto/pir.pb.h"
 #include "psi/proto/psi.pb.h"
+#include "psi/proto/psi_v2.pb.h"
 
 DEFINE_string(config, "", "file path of launch config in JSON format.");
 DEFINE_string(kuscia, "", "file path of kuscia task config in JSON format.");
@@ -83,25 +85,36 @@ int main(int argc, char* argv[]) {
     lctx = yacl::link::FactoryBrpc().CreateContext(lctx_desc, rank);
   }
 
-  psi::PsiResultReport report;
+  google::protobuf::util::JsonPrintOptions json_print_options;
+  json_print_options.preserve_proto_field_names = true;
+  std::string report_json;
   if (launch_config.has_legacy_psi_config()) {
-    report = psi::RunLegacyPsi(launch_config.legacy_psi_config(), lctx);
+    psi::PsiResultReport report =
+        psi::RunLegacyPsi(launch_config.legacy_psi_config(), lctx);
+    YACL_ENFORCE(google::protobuf::util::MessageToJsonString(
+                     report, &report_json, json_print_options)
+                     .ok());
   } else if (launch_config.has_psi_config()) {
-    report = psi::RunPsi(launch_config.psi_config(), lctx);
+    psi::PsiResultReport report = psi::RunPsi(launch_config.psi_config(), lctx);
+    YACL_ENFORCE(google::protobuf::util::MessageToJsonString(
+                     report, &report_json, json_print_options)
+                     .ok());
   } else if (launch_config.has_ub_psi_config()) {
-    report = psi::RunUbPsi(launch_config.ub_psi_config(), lctx);
+    psi::PsiResultReport report =
+        psi::RunUbPsi(launch_config.ub_psi_config(), lctx);
+    YACL_ENFORCE(google::protobuf::util::MessageToJsonString(
+                     report, &report_json, json_print_options)
+                     .ok());
+  } else if (launch_config.has_pir_config()) {
+    psi::PirResultReport report = psi::RunPir(launch_config.pir_config(), lctx);
+    YACL_ENFORCE(google::protobuf::util::MessageToJsonString(
+                     report, &report_json, json_print_options)
+                     .ok());
   } else {
     SPDLOG_WARN("No runtime config is provided.");
   }
 
-  google::protobuf::util::JsonPrintOptions json_print_options;
-  json_print_options.preserve_proto_field_names = true;
-  std::string report_json;
-  YACL_ENFORCE(google::protobuf::util::MessageToJsonString(report, &report_json,
-                                                           json_print_options)
-                   .ok());
   SPDLOG_INFO("Report: {}", report_json);
-
   SPDLOG_INFO("Thank you for trusting SecretFlow PSI Library.");
   return 0;
 }

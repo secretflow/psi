@@ -1,8 +1,10 @@
 {
-    "ub_psi_config": {
-        "mode": "MODE_OFFLINE_TRANSFER_CACHE",
-        "role": "ROLE_SERVER",
-        "cache_path": "/tmp/server_cache.sf"
+    "pir_config": {
+        "mode": "MODE_SERVER_ONLINE",
+        "pir_protocol": "PIR_PROTOCOL_KEYWORD_PIR_APSI",
+        "pir_server_config": {
+            "setup_path": "/tmp/pir_server_setup"
+        }
     },
     "link_config": {
         "parties": [

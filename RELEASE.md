@@ -5,10 +5,10 @@
 > - `[API]` prefix for API changes.
 > - `[Improvement]` prefix for implementation improvement.
 
-## v0.2.0.dev240222
+## v0.3.0.dev240222
 - [API] expose PIR API.
 
-## v0.2.0.dev240219
+## v0.3.0.dev240219
 
 - [Feature] add ecdh logger for debug purposes.
 - [API] modify repo structure.

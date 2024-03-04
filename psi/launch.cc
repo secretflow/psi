@@ -153,7 +153,7 @@ PsiResultReport RunUbPsi(const v2::UbPsiConfig& ub_psi_config,
 PsiResultReport RunLegacyPsi(const BucketPsiConfig& bucket_psi_config,
                              const std::shared_ptr<yacl::link::Context>& lctx,
                              ProgressCallbacks progress_callbacks,
-                             int64_t callbacks_interval_ms) {
+                             int64_t callbacks_interval_ms, bool ic_mode) {
   google::protobuf::util::JsonPrintOptions json_print_options;
   json_print_options.preserve_proto_field_names = true;
 
@@ -163,7 +163,7 @@ PsiResultReport RunLegacyPsi(const BucketPsiConfig& bucket_psi_config,
                    .ok());
   SPDLOG_INFO("LEGACY PSI config: {}", config_json);
 
-  BucketPsi bucket_psi(bucket_psi_config, lctx);
+  BucketPsi bucket_psi(bucket_psi_config, lctx, ic_mode);
   return bucket_psi.Run(progress_callbacks, callbacks_interval_ms);
 }
 

@@ -16,6 +16,10 @@
 
 #include <filesystem>
 
+#include "boost/uuid/uuid.hpp"
+#include "boost/uuid/uuid_generators.hpp"
+#include "boost/uuid/uuid_io.hpp"
+
 #include "psi/legacy/bucket_psi.h"
 #include "psi/utils/arrow_csv_batch_provider.h"
 #include "psi/utils/sync.h"
@@ -82,9 +86,11 @@ void EcdhUbPsiClient::Online() {
       std::make_shared<ArrowCsvBatchProvider>(config_.input_config().path(),
                                               selected_keys);
 
-  std::string ec_point_store_path1 = fmt::format(
-      "{}/tmp-self-cipher-store-{}.csv",
-      std::filesystem::temp_directory_path().string(), lctx_->Rank());
+  boost::uuids::random_generator uuid_generator;
+  std::string ec_point_store_path1 =
+      fmt::format("{}/{}/tmp-self-cipher-store-{}.csv",
+                  std::filesystem::temp_directory_path().string(),
+                  boost::uuids::to_string(uuid_generator()), lctx_->Rank());
 
   auto self_ec_point_store = std::make_shared<CachedCsvEcPointStore>(
       ec_point_store_path1, true, "self", false);

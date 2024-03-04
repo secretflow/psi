@@ -5,6 +5,9 @@
 > - `[API]` prefix for API changes.
 > - `[Improvement]` prefix for implementation improvement.
 
+## v0.3.0.dev240304
+- [API] expose ic_mode in RunLegacyPsi api
+
 ## v0.3.0.dev240222
 - [API] expose PIR API.
 

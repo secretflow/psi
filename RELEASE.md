@@ -5,6 +5,9 @@
 > - `[API]` prefix for API changes.
 > - `[Improvement]` prefix for implementation improvement.
 
+## v0.2.0.dev240305
+- [Bugfix] fix several FORWARD_NULL and UNINIT issues.
+
 ## v0.2.0.dev240123
 
 - [Feature] add RFC9380 25519 elligator2 hash_to_curve.

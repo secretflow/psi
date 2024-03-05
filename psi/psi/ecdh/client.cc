@@ -44,10 +44,10 @@ void EcdhUbPsiClient::Init() {
   if (lctx_) {
     // Test connection.
     lctx_->ConnectToMesh();
-  }
 
-  psi_options_.link0 = lctx_;
-  psi_options_.link1 = lctx_->Spawn();
+    psi_options_.link0 = lctx_;
+    psi_options_.link1 = lctx_->Spawn();
+  }
 }
 
 void EcdhUbPsiClient::OfflineGenCache() { YACL_THROW("unsupported."); }

@@ -330,9 +330,9 @@ static void BM_DpPsi(benchmark::State& state) {
     size_t alice_rank = 0;
     size_t bob_rank = 1;
 
-    size_t alice_sub_sample_size;
-    size_t alice_up_sample_size;
-    size_t bob_sub_sample_size;
+    size_t alice_sub_sample_size = 0;
+    size_t alice_up_sample_size = 0;
+    size_t bob_sub_sample_size = 0;
 
     std::future<size_t> f_dp_psi_a = std::async([&] {
       return RunDpEcdhPsiAlice(options, ctxs[alice_rank], items_a,

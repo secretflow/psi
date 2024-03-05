@@ -106,6 +106,8 @@ void AbstractPsiParty::Init() {
     auto advanced_join_preprocess_f = std::async(
         [&] { AdvancedJoinPreprocess(advanced_join_config_.get()); });
 
+    YACL_ENFORCE(lctx_);
+
     SyncWait(lctx_, &advanced_join_preprocess_f);
 
     SPDLOG_INFO("[AbstractPsiParty::Init][Advanced join pre-process] end");

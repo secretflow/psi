@@ -34,7 +34,7 @@
 #include "psi/cryptor/ecc_cryptor.h"
 #include "psi/ecdh//ecdh_oprf_selector.h"
 #include "psi/prelude.h"
-#include "psi/utils/batch_provider.h"
+#include "psi/utils/arrow_csv_batch_provider.h"
 #include "psi/utils/io.h"
 #include "psi/utils/serialize.h"
 #include "psi/utils/sync.h"
@@ -67,7 +67,7 @@ size_t CsvFileDataCount(const std::string &file_path,
   size_t data_count = 0;
 
   std::shared_ptr<::psi::IBasicBatchProvider> batch_provider =
-      std::make_shared<::psi::CsvBatchProvider>(file_path, ids, 4096);
+      std::make_shared<::psi::ArrowCsvBatchProvider>(file_path, ids, 4096);
 
   while (true) {
     auto batch = batch_provider->ReadNextBatch();
@@ -258,7 +258,7 @@ PirResultReport PirServerSetup(const PirServerConfig &config) {
                 config.bucket_size(), config.apsi_server_config().compressed());
 
   std::shared_ptr<::psi::ILabeledBatchProvider> batch_provider =
-      std::make_shared<::psi::CsvBatchProvider>(
+      std::make_shared<::psi::ArrowCsvBatchProvider>(
           config.input_path(), key_columns, bucket_size, label_columns);
   for (size_t i = 0; i < bucket_count; i++) {
     std::string bucket_setup_path =
@@ -533,7 +533,7 @@ PirResultReport PirServerFull(
   // server and client sync
   auto run_f = std::async([&] {
     std::shared_ptr<::psi::IBatchProvider> batch_provider =
-        std::make_shared<::psi::CsvBatchProvider>(
+        std::make_shared<::psi::ArrowCsvBatchProvider>(
             config.input_path(), key_columns, 500000, label_columns);
 
     sender_db->SetData(batch_provider);
@@ -634,8 +634,8 @@ PirResultReport PirClient(const std::shared_ptr<yacl::link::Context> &link_ctx,
   SPDLOG_INFO("batch_read_count:{}", batch_read_count);
 
   std::shared_ptr<::psi::IBasicBatchProvider> query_batch_provider =
-      std::make_shared<::psi::CsvBatchProvider>(config.input_path(),
-                                                key_columns, batch_read_count);
+      std::make_shared<::psi::ArrowCsvBatchProvider>(
+          config.input_path(), key_columns, batch_read_count);
 
   while (true) {
     auto query_batch_items = query_batch_provider->ReadNextBatch();

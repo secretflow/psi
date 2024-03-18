@@ -16,7 +16,9 @@
 
 #include <spdlog/spdlog.h>
 
+#include <cassert>
 #include <cstddef>
+#include <filesystem>
 
 #include "absl/time/time.h"
 #include "boost/uuid/uuid.hpp"
@@ -40,24 +42,24 @@ namespace psi {
 
 namespace {
 
-std::string GenerateIndexFileName(v2::Role role) {
-  return fmt::format("psi_index_{}.csv", role);
+std::string GenerateIndexFileName(v2::Role role = v2::ROLE_UNSPECIFIED) {
+  if (role) {
+    return fmt::format("psi_index_{}.csv", role);
+  } else {
+    boost::uuids::random_generator uuid_generator;
+    return fmt::format("psi_index_{}.csv",
+                       boost::uuids::to_string(uuid_generator()));
+  }
 }
 
-std::string GenerateSortedIndexFileName(v2::Role role) {
-  return fmt::format("sorted_psi_index_{}.csv", role);
-}
-
-std::string GenerateIndexFileName() {
-  boost::uuids::random_generator uuid_generator;
-  return fmt::format("psi_index_{}.csv",
-                     boost::uuids::to_string(uuid_generator()));
-}
-
-std::string GenerateSortedIndexFileName() {
-  boost::uuids::random_generator uuid_generator;
-  return fmt::format("sorted_psi_index_{}.csv",
-                     boost::uuids::to_string(uuid_generator()));
+std::string GenerateSortedIndexFileName(v2::Role role = v2::ROLE_UNSPECIFIED) {
+  if (role) {
+    return fmt::format("sorted_psi_index_{}.csv", role);
+  } else {
+    boost::uuids::random_generator uuid_generator;
+    return fmt::format("sorted_psi_index_{}.csv",
+                       boost::uuids::to_string(uuid_generator()));
+  }
 }
 
 }  // namespace
@@ -77,10 +79,10 @@ void AbstractPsiParty::Init() {
 
   CheckSelfConfig();
 
-  if (lctx_) {
-    // Test connection.
-    lctx_->ConnectToMesh();
-  }
+  assert(lctx_);
+
+  // Test connection.
+  lctx_->ConnectToMesh();
 
   CheckPeerConfig();
 
@@ -163,9 +165,7 @@ void AbstractPsiParty::Init() {
       recovery_manager_
           ? std::filesystem::path(config_.recovery_config().folder()) /
                 GenerateIndexFileName(role_)
-          : std::filesystem::path(config_.output_config().path())
-                    .parent_path() /
-                GenerateIndexFileName();
+          : std::filesystem::temp_directory_path() / GenerateIndexFileName();
 
   intersection_indices_writer_ = std::make_shared<IndexWriter>(
       intersection_indices_writer_path, kIndexWriterBatchSize,
@@ -238,6 +238,13 @@ PsiResultReport AbstractPsiParty::Finalize() {
         !config_.protocol_config().broadcast_result()) {
       report_.set_intersection_count(-1);
     }
+  }
+
+  // remove result indices records.
+  if (!recovery_manager_) {
+    std::error_code ec;
+    std::filesystem::remove(sorted_intersection_indices_path, ec);
+    std::filesystem::remove(intersection_indices_writer_->path(), ec);
   }
 
   SPDLOG_INFO("[AbstractPsiParty::Finalize] end");
@@ -327,34 +334,32 @@ void AbstractPsiParty::CheckPeerConfig() {
 
   YACL_ENFORCE_EQ(serialized_list.size(), 2UL);
 
-  if (!(serialized_list[0] == serialized_list[1])) {
-    const std::string rank0_serialized(serialized_list[0].data<char>(),
-                                       serialized_list[0].size());
+  const std::string rank0_serialized(serialized_list[0].data<char>(),
+                                     serialized_list[0].size());
 
-    const std::string rank1_serialized(serialized_list[1].data<char>(),
-                                       serialized_list[1].size());
+  const std::string rank1_serialized(serialized_list[1].data<char>(),
+                                     serialized_list[1].size());
 
-    v2::PsiConfig rank0_config;
-    YACL_ENFORCE(rank0_config.ParseFromString(rank0_serialized));
+  v2::PsiConfig rank0_config;
+  YACL_ENFORCE(rank0_config.ParseFromString(rank0_serialized));
 
-    v2::PsiConfig rank1_config;
-    YACL_ENFORCE(rank1_config.ParseFromString(rank1_serialized));
+  v2::PsiConfig rank1_config;
+  YACL_ENFORCE(rank1_config.ParseFromString(rank1_serialized));
 
-    if (rank0_config.protocol_config().role() ==
-        rank1_config.protocol_config().role()) {
-      YACL_THROW("The role of parties must be different.");
-    }
-
-    rank0_config.mutable_protocol_config()->set_role(v2::ROLE_UNSPECIFIED);
-    rank1_config.mutable_protocol_config()->set_role(v2::ROLE_UNSPECIFIED);
-
-    YACL_ENFORCE(::google::protobuf::util::MessageDifferencer::Equals(
-                     rank0_config, rank1_config),
-                 "PSI configs are not consistent between parties. Rank 0: {} "
-                 "while Rank 1: {}",
-                 rank0_config.ShortDebugString(),
-                 rank1_config.ShortDebugString());
+  if (rank0_config.protocol_config().role() ==
+      rank1_config.protocol_config().role()) {
+    YACL_THROW("The role of parties must be different.");
   }
+
+  rank0_config.mutable_protocol_config()->set_role(v2::ROLE_UNSPECIFIED);
+  rank1_config.mutable_protocol_config()->set_role(v2::ROLE_UNSPECIFIED);
+
+  YACL_ENFORCE(::google::protobuf::util::MessageDifferencer::Equals(
+                   rank0_config, rank1_config),
+               "PSI configs are not consistent between parties. Rank 0: {} "
+               "while Rank 1: {}",
+               rank0_config.ShortDebugString(),
+               rank1_config.ShortDebugString());
 }
 
 PsiResultReport AbstractUbPsiParty::Run() {

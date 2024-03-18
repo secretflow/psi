@@ -28,6 +28,7 @@
 #include "yacl/utils/scope_guard.h"
 
 #include "psi/apsi/psi_params.h"
+#include "psi/utils/arrow_csv_batch_provider.h"
 #include "psi/utils/io.h"
 
 namespace {
@@ -265,7 +266,7 @@ TEST_P(PirTest, Works) {
   }
 
   std::shared_ptr<::psi::ILabeledBatchProvider> pir_result_provider =
-      std::make_shared<::psi::CsvBatchProvider>(
+      std::make_shared<::psi::ArrowCsvBatchProvider>(
           pir_result_path, ids, intersection_idx.size(), labels);
 
   // read pir_result from csv

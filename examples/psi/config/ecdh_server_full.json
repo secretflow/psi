@@ -8,8 +8,8 @@
             "path": "/tmp/server_input.csv"
         },
         "keys": [
-            "id0",
-            "id1"
+            "id_0",
+            "id_1"
         ]
     },
     "link_config": {

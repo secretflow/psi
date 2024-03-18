@@ -13,7 +13,7 @@ $ bazel build //psi:main -c opt
 2. Generate test data
 
 ```bash
-$ python examples/psi/test_data_generator.py --receiver_item_cnt 1e6 \
+$ python examples/psi/generate_psi_data.py --receiver_item_cnt 1e6 \
     --sender_item_cnt 1e6 --intersection_cnt 8e4 --id_cnt 2 \
     --receiver_path /tmp/receiver_input.csv \
     --sender_path /tmp/sender_input.csv \
@@ -56,7 +56,7 @@ $ bazel build //psi:main -c opt
 2. Generate test data
 
 ```bash
-$ python examples/psi/test_data_generator.py --receiver_item_cnt 1e3 \
+$ python examples/psi/generate_psi_data.py --receiver_item_cnt 1e3 \
     --sender_item_cnt 1e6 --intersection_cnt 1e2 --id_cnt 2 \
     --receiver_path /tmp/client_input.csv \
     --sender_path /tmp/server_input.csv \

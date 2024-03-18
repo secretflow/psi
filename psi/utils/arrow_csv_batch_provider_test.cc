@@ -22,10 +22,10 @@
 namespace psi {
 namespace {
 
-constexpr auto content = R"csv(id1,id2,id3
-1,"one","first"
-2,"two","second"
-3,"three","third"
+constexpr auto content = R"csv(id1,id2,id3,label1,label2
+1,"one","first","x","X"
+2,"two","second","y","Y"
+3,"three","third","z","Z"
 )csv";
 
 TEST(ArrowCsvBatchProvider, works) {
@@ -65,6 +65,27 @@ TEST(ArrowCsvBatchProvider, works) {
     ArrowCsvBatchProvider provider(file_path, {"id3"}, 5);
     EXPECT_EQ(provider.ReadNextBatch(),
               std::vector<std::string>({"first", "second", "third"}));
+    EXPECT_EQ(provider.row_cnt(), 3);
+    EXPECT_TRUE(provider.ReadNextBatch().empty());
+    EXPECT_TRUE(provider.ReadNextBatch().empty());
+    EXPECT_EQ(provider.row_cnt(), 3);
+  }
+
+  {
+    ArrowCsvBatchProvider provider(file_path, {"id1", "id2", "id3"}, 1,
+                                   {"label1", "label2"});
+
+    auto key_value_pair = provider.ReadNextLabeledBatch();
+    EXPECT_EQ(key_value_pair.first, std::vector<std::string>({"1,one,first"}));
+    EXPECT_EQ(key_value_pair.second, std::vector<std::string>({"x,X"}));
+
+    EXPECT_EQ(provider.ReadNextBatch(),
+              std::vector<std::string>({"2,two,second"}));
+
+    key_value_pair = provider.ReadNextLabeledBatch();
+    EXPECT_EQ(key_value_pair.first,
+              std::vector<std::string>({"3,three,third"}));
+    EXPECT_EQ(key_value_pair.second, std::vector<std::string>({"z,Z"}));
     EXPECT_EQ(provider.row_cnt(), 3);
     EXPECT_TRUE(provider.ReadNextBatch().empty());
     EXPECT_TRUE(provider.ReadNextBatch().empty());

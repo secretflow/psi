@@ -16,6 +16,8 @@
 
 #include <spdlog/spdlog.h>
 
+#include <filesystem>
+
 #include "absl/time/clock.h"
 #include "absl/time/time.h"
 #include "yacl/base/exception.h"
@@ -83,11 +85,9 @@ void EcdhPsiSender::PreProcess() {
     psi_options_.recovery_manager = recovery_manager_;
   } else {
     self_ec_point_store_ = std::make_shared<HashBucketEcPointStore>(
-        std::filesystem::path(config_.output_config().path()).parent_path(),
-        kDefaultBinNum);
+        std::filesystem::temp_directory_path(), kDefaultBinNum);
     peer_ec_point_store_ = std::make_shared<HashBucketEcPointStore>(
-        std::filesystem::path(config_.output_config().path()).parent_path(),
-        kDefaultBinNum);
+        std::filesystem::temp_directory_path(), kDefaultBinNum);
   }
 
   SPDLOG_INFO("[EcdhPsiSender::PreProcess] end");

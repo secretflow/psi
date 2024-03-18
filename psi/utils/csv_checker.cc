@@ -211,8 +211,10 @@ CheckCsvReport CheckCsv(const std::string& input_file_path,
 
     report.num_rows += batch->num_rows();
 
-    if (!writer->WriteRecordBatch(*batch).ok()) {
-      YACL_THROW("writer WriteRecordBatch failed.");
+    if (check_duplicates || generate_key_hash_digest) {
+      if (!writer->WriteRecordBatch(*batch).ok()) {
+        YACL_THROW("writer WriteRecordBatch failed.");
+      }
     }
   }
 

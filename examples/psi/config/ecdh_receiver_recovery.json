@@ -17,8 +17,8 @@
             "path": "/tmp/ecdh_receiver_recovery_output.csv"
         },
         "keys": [
-            "id0",
-            "id1"
+            "id_0",
+            "id_1"
         ],
         "debug_options": {
             "trace_path": "/tmp/ecdh_receiver_recovery.trace"

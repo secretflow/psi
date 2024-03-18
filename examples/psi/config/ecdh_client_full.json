@@ -9,8 +9,8 @@
             "path": "/tmp/client_output.csv"
         },
         "keys": [
-            "id0",
-            "id1"
+            "id_0",
+            "id_1"
         ],
         "cache_path": "/tmp/client_cache"
     },

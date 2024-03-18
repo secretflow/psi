@@ -76,7 +76,7 @@ psi_cc_library(
     deps = [
         ":serialize",
         "//psi/ecdh:ecdh_oprf_selector",
-        "//psi/utils:batch_provider",
+        "//psi/utils:arrow_csv_batch_provider",
         "@yacl//yacl/base:byte_container_view",
         "@yacl//yacl/base:exception",
         "@yacl//yacl/io/kv:leveldb_kvstore",

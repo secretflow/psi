@@ -24,13 +24,18 @@
 
 namespace psi {
 
-class ArrowCsvBatchProvider : public IBasicBatchProvider {
+class ArrowCsvBatchProvider : public IBasicBatchProvider,
+                              public ILabeledBatchProvider {
  public:
   explicit ArrowCsvBatchProvider(const std::string& file_path,
                                  const std::vector<std::string>& keys,
-                                 size_t batch_size = 1 << 20);
+                                 size_t batch_size = 1 << 20,
+                                 const std::vector<std::string>& labels = {});
 
   std::vector<std::string> ReadNextBatch() override;
+
+  std::pair<std::vector<std::string>, std::vector<std::string>>
+  ReadNextLabeledBatch() override;
 
   [[nodiscard]] size_t row_cnt() const { return row_cnt_; }
 
@@ -39,11 +44,16 @@ class ArrowCsvBatchProvider : public IBasicBatchProvider {
  private:
   void Init();
 
+  void ReadNextBatch(std::vector<std::string>* read_keys,
+                     std::vector<std::string>* read_labels = nullptr);
+
   const size_t batch_size_;
 
   const std::string file_path_;
 
   const std::vector<std::string> keys_;
+
+  const std::vector<std::string> labels_;
 
   size_t row_cnt_ = 0;
 

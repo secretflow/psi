@@ -6,8 +6,8 @@
             "path": "/tmp/server_input.csv"
         },
         "keys": [
-            "id0",
-            "id1"
+            "id_0",
+            "id_1"
         ],
         "server_secret_key_path": "/tmp/server_secret_key.key",
         "cache_path": "/tmp/server_cache.sf"

@@ -14,6 +14,7 @@
 
 #include "psi/utils/arrow_csv_batch_provider.h"
 
+#include <cassert>
 #include <filesystem>
 
 #include "arrow/array.h"
@@ -27,15 +28,38 @@ namespace psi {
 
 ArrowCsvBatchProvider::ArrowCsvBatchProvider(
     const std::string& file_path, const std::vector<std::string>& keys,
-    size_t batch_size)
-    : batch_size_(batch_size), file_path_(file_path), keys_(keys) {
+    size_t batch_size, const std::vector<std::string>& labels)
+    : batch_size_(batch_size),
+      file_path_(file_path),
+      keys_(keys),
+      labels_(labels) {
   Init();
 }
 
 std::vector<std::string> ArrowCsvBatchProvider::ReadNextBatch() {
   std::vector<std::string> res;
 
-  while (res.size() < batch_size_) {
+  ReadNextBatch(&res);
+
+  return res;
+}
+
+std::pair<std::vector<std::string>, std::vector<std::string>>
+ArrowCsvBatchProvider::ReadNextLabeledBatch() {
+  std::vector<std::string> read_keys;
+  std::vector<std::string> read_labels;
+
+  ReadNextBatch(&read_keys, &read_labels);
+
+  return std::make_pair(read_keys, read_labels);
+}
+
+void ArrowCsvBatchProvider::ReadNextBatch(
+    std::vector<std::string>* read_keys,
+    std::vector<std::string>* read_labels) {
+  assert(read_keys);
+
+  while (read_keys->size() < batch_size_) {
     bool new_batch = false;
 
     if (!batch_ || idx_in_batch_ >= batch_->num_rows()) {
@@ -49,7 +73,7 @@ std::vector<std::string> ArrowCsvBatchProvider::ReadNextBatch() {
 
     if (!batch_) {
       SPDLOG_INFO("Reach the end of csv file {}.", file_path_);
-      return res;
+      return;
     }
 
     if (new_batch) {
@@ -63,19 +87,29 @@ std::vector<std::string> ArrowCsvBatchProvider::ReadNextBatch() {
       }
     }
 
-    for (; idx_in_batch_ < batch_->num_rows() && res.size() < batch_size_;
+    for (;
+         idx_in_batch_ < batch_->num_rows() && read_keys->size() < batch_size_;
          idx_in_batch_++) {
-      std::vector<absl::string_view> values;
-      for (const auto& array : arrays_) {
-        values.emplace_back(array->Value(idx_in_batch_));
+      {
+        std::vector<absl::string_view> values;
+        for (size_t i = 0; i < keys_.size(); i++) {
+          values.emplace_back(arrays_[i]->Value(idx_in_batch_));
+        }
+
+        read_keys->emplace_back(KeysJoin(values));
       }
 
-      res.emplace_back(KeysJoin(values));
+      if (read_labels) {
+        std::vector<absl::string_view> values;
+        for (size_t i = keys_.size(); i < arrays_.size(); i++) {
+          values.emplace_back(arrays_[i]->Value(idx_in_batch_));
+        }
+
+        read_labels->emplace_back(KeysJoin(values));
+      }
       row_cnt_++;
     }
   }
-
-  return res;
 }
 
 void ArrowCsvBatchProvider::Init() {
@@ -96,7 +130,12 @@ void ArrowCsvBatchProvider::Init() {
   for (const auto& key : keys_) {
     convert_options.column_types[key] = arrow::utf8();
   }
+  for (const auto& label : labels_) {
+    convert_options.column_types[label] = arrow::utf8();
+  }
   convert_options.include_columns = keys_;
+  convert_options.include_columns.insert(convert_options.include_columns.end(),
+                                         labels_.begin(), labels_.end());
 
   reader_ = arrow::csv::StreamingReader::Make(io_context, infile_, read_options,
                                               parse_options, convert_options)

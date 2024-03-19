@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "psi/psi/operator/kmprt17_mp_psi.h"
+#include "psi/legacy/kmprt17_mp_psi.h"
 
 #include <memory>
 
-#include "psi/psi/operator/factory.h"
+#include "psi/legacy/factory.h"
 
 namespace psi::psi {
 

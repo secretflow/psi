@@ -105,7 +105,7 @@ psi_cc_library(
     deps = [
         ":base_operator",
         ":factory",
-        "//psi/psi/core/kmprt17_mp_psi",
+        "//psi/legacy/kmprt17_mp_psi",
     ],
     alwayslink = True,
 )

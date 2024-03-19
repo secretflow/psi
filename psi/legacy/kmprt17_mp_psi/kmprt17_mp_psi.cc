@@ -12,15 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "psi/psi/core/kmprt17_mp_psi/kmprt17_mp_psi.h"
+#include "psi/legacy/kmprt17_mp_psi/kmprt17_mp_psi.h"
+
+#include <future>
 
 #include "yacl/crypto/base/hash/hash_utils.h"
 #include "yacl/crypto/utils/rand.h"
 #include "yacl/utils/serialize.h"
 
-#include "psi/psi/core/communication.h"
-#include "psi/psi/core/kmprt17_mp_psi/kmprt17_opprf.h"
-#include "psi/psi/utils/sync.h"
+#include "psi/legacy/kmprt17_mp_psi/kmprt17_opprf.h"
+#include "psi/utils/communication.h"
+#include "psi/utils/sync.h"
 
 namespace psi::psi {
 

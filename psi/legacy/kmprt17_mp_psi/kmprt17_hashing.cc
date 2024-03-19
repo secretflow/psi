@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "psi/psi/core/kmprt17_mp_psi/kmprt17_hashing.h"
+#include "psi/legacy/kmprt17_mp_psi/kmprt17_hashing.h"
 
 #include <random>
 #include <utility>

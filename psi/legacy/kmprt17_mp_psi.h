@@ -19,8 +19,8 @@
 
 #include "yacl/link/link.h"
 
-#include "psi/psi/core/kmprt17_mp_psi/kmprt17_mp_psi.h"
-#include "psi/psi/operator/base_operator.h"
+#include "psi/legacy/base_operator.h"
+#include "psi/legacy/kmprt17_mp_psi/kmprt17_mp_psi.h"
 
 namespace psi::psi {
 

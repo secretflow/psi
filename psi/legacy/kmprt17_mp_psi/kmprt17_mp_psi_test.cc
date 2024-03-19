@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "psi/psi/core/kmprt17_mp_psi/kmprt17_mp_psi.h"
+#include "psi/legacy/kmprt17_mp_psi/kmprt17_mp_psi.h"
 
 #include <random>
 #include <set>
@@ -21,7 +21,7 @@
 #include "gtest/gtest.h"
 #include "yacl/link/test_util.h"
 
-#include "psi/psi/utils/test_utils.h"
+#include "psi/utils/test_utils.h"
 
 namespace psi::psi {
 

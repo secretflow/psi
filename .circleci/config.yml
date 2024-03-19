@@ -78,3 +78,7 @@ workflows:
     jobs:
       - continuation/continue:
           configuration_path: .circleci/release.yml
+          # This is mandatory to trigger a pipeline when pushing a tag
+          filters:
+            tags:
+              only: /.*/

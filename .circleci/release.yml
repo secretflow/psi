@@ -65,7 +65,7 @@ jobs:
       - persist_to_workspace:
           root: "/tmp/binary"
           paths:
-            - "main"
+            - "x86/main"
   build_binary_arm:
     # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
@@ -99,7 +99,7 @@ jobs:
       - persist_to_workspace:
           root: "/tmp/binary"
           paths:
-            - "main"
+            - "arm/main"
   docker_image_publish:
     docker:
       - image: cimg/deploy:2023.06.1

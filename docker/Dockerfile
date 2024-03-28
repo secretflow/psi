@@ -1,9 +1,18 @@
-FROM openanolis/anolisos:8.8 as builder
+FROM openanolis/anolisos:8.8
 
 # build nsjail
 RUN yum install -y \
-    wget autoconf bison flex git protobuf-devel libnl3-devel \
-    libtool make pkg-config protobuf-compiler \
+    autoconf \
+    bison \
+    flex \
+    gcc-c++ \
+    git \
+    protobuf-devel \
+    libnl3-devel \
+    libtool \
+    make \
+    pkg-config \
+    protobuf-compiler \
     && yum clean all
 
 RUN cd / && git clone https://github.com/google/nsjail.git \

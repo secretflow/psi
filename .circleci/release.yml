@@ -142,7 +142,7 @@ jobs:
             docker login -u ${ALIYUN_DOCKER_USERNAME} -p ${ALIYUN_DOCKER_PASSWORD} secretflow-registry.cn-hangzhou.cr.aliyuncs.com
 
             docker tag secretflow/psi-anolis8:$TAG secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:$TAG
-            docker push secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:$TAG         
+            docker push secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:$TAG
             docker tag secretflow/psi-anolis8:$TAG secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest
             docker push secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest
 

@@ -132,14 +132,14 @@ jobs:
             # login docker
             docker login -u secretflow -p ${DOCKER_DEPLOY_TOKEN}
             docker buildx create --name psi-image-builder --platform linux/arm64,linux/amd64 --use
-            docker buildx build --platform linux/arm64,linux/amd64 -f Dockerfile -t secretflow/psi-anolis8:$TAG --push .
-            docker buildx build --platform linux/arm64,linux/amd64 -f Dockerfile -t secretflow/psi-anolis8:latest --push .
+            docker buildx build --platform linux/arm64,linux/amd64 -f Dockerfile -t secretflow/psi-anolis8:$TAG --build-arg version=$TAG --build-arg config_templates="$(cat config_templates.yml)" --build-arg deploy_templates="$(cat deploy_templates.yml)" --push .
+            docker buildx build --platform linux/arm64,linux/amd64 -f Dockerfile -t secretflow/psi-anolis8:latest --build-arg version=$TAG --build-arg config_templates="$(cat config_templates.yml)" --build-arg deploy_templates="$(cat deploy_templates.yml)" --push .
 
             # login docker - aliyun
             docker login -u ${ALIYUN_DOCKER_USERNAME} -p ${ALIYUN_DOCKER_PASSWORD} secretflow-registry.cn-hangzhou.cr.aliyuncs.com
 
-            docker buildx build --platform linux/arm64,linux/amd64 -f Dockerfile -t secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:$TAG --push .
-            docker buildx build --platform linux/arm64,linux/amd64 -f Dockerfile -t secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest --push .
+            docker buildx build --platform linux/arm64,linux/amd64 -f Dockerfile -t secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:$TAG --build-arg version=$TAG --build-arg config_templates="$(cat config_templates.yml)" --build-arg deploy_templates="$(cat deploy_templates.yml)" --push .
+            docker buildx build --platform linux/arm64,linux/amd64 -f Dockerfile -t secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest --build-arg version=$TAG --build-arg config_templates="$(cat config_templates.yml)" --build-arg deploy_templates="$(cat deploy_templates.yml)" --push .
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows

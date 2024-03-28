@@ -111,9 +111,6 @@ jobs:
       - run:
           name: Build Docker image
           command: |
-            # login docker
-            docker login -u secretflow -p ${DOCKER_DEPLOY_TOKEN}
-
             # Build image
             cd docker
 
@@ -132,19 +129,17 @@ jobs:
             cp /tmp/binary/x86/main ./linux/amd64
             cp /tmp/binary/arm/main ./linux/arm64
 
+            # login docker
+            docker login -u secretflow -p ${DOCKER_DEPLOY_TOKEN}
             docker buildx create --name psi-image-builder --platform linux/arm64,linux/amd64 --use
             docker buildx build --platform linux/arm64,linux/amd64 -f Dockerfile -t secretflow/psi-anolis8:$TAG --push .
-
-            docker tag secretflow/psi-anolis8:$TAG secretflow/psi-anolis8:latest
-            docker push secretflow/psi-anolis8:latest
+            docker buildx build --platform linux/arm64,linux/amd64 -f Dockerfile -t secretflow/psi-anolis8:latest --push .
 
             # login docker - aliyun
             docker login -u ${ALIYUN_DOCKER_USERNAME} -p ${ALIYUN_DOCKER_PASSWORD} secretflow-registry.cn-hangzhou.cr.aliyuncs.com
 
-            docker tag secretflow/psi-anolis8:$TAG secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:$TAG
-            docker push secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:$TAG
-            docker tag secretflow/psi-anolis8:$TAG secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest
-            docker push secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest
+            docker buildx build --platform linux/arm64,linux/amd64 -f Dockerfile -t secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:$TAG --push .
+            docker buildx build --platform linux/arm64,linux/amd64 -f Dockerfile -t secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest --push .
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows

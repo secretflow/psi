@@ -20,8 +20,8 @@
 #include "absl/strings/escaping.h"
 #include "apsi/fourq/FourQ_api.h"
 #include "apsi/fourq/FourQ_internal.h"
-#include "yacl/crypto/base/hash/blake3.h"
-#include "yacl/crypto/base/hash/hash_utils.h"
+#include "yacl/crypto/hash/blake3.h"
+#include "yacl/crypto/hash/hash_utils.h"
 
 #include "psi/cryptor/ecc_utils.h"
 

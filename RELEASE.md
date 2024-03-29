@@ -5,6 +5,9 @@
 > - `[API]` prefix for API changes.
 > - `[Improvement]` prefix for implementation improvement.
 
+## v0.4.0.dev240329
+- [Improvement] upgrade yacl to 0.4.4b3.
+
 ## v0.3.0beta
 - [Improvement] add uuid in system temp folder.
 - [Improvement] use arrow csv reader in pir.

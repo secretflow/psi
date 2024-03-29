@@ -21,8 +21,8 @@
 #include "absl/strings/str_split.h"
 #include "benchmark/benchmark.h"
 #include "spdlog/spdlog.h"
+#include "yacl/crypto/rand/rand.h"
 #include "yacl/crypto/tools/prg.h"
-#include "yacl/crypto/utils/rand.h"
 #include "yacl/link/context.h"
 #include "yacl/link/test_util.h"
 

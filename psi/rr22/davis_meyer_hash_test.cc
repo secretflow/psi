@@ -16,8 +16,8 @@
 
 #include "gtest/gtest.h"
 #include "spdlog/spdlog.h"
+#include "yacl/crypto/rand/rand.h"
 #include "yacl/crypto/tools/prg.h"
-#include "yacl/crypto/utils/rand.h"
 
 namespace psi::rr22 {
 

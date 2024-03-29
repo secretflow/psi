@@ -23,7 +23,7 @@
 #include "yacl/base/byte_container_view.h"
 #include "yacl/base/exception.h"
 #include "yacl/base/int128.h"
-#include "yacl/crypto/base/hash/hash_utils.h"
+#include "yacl/crypto/hash/hash_utils.h"
 
 #include "psi/utils/cuckoo_index.h"
 

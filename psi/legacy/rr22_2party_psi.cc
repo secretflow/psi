@@ -17,7 +17,7 @@
 #include <chrono>
 
 #include "omp.h"
-#include "yacl/crypto/base/hash/hash_utils.h"
+#include "yacl/crypto/hash/hash_utils.h"
 #include "yacl/utils/parallel.h"
 
 #include "psi/legacy/factory.h"

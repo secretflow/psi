@@ -24,7 +24,7 @@ psi_cc_library(
         "//psi/proto:psi_cc_proto",
         "@com_google_absl//absl/types:span",
         "@yacl//yacl/base:exception",
-        "@yacl//yacl/crypto/base/hash:hash_utils",
+        "@yacl//yacl/crypto/hash:hash_utils",
         "@yacl//yacl/utils:parallel",
     ],
 )
@@ -39,7 +39,7 @@ psi_cc_library(
         "@com_github_libsodium//:libsodium",
         "@com_github_openssl_openssl//:openssl",
         "@yacl//yacl/base:exception",
-        "@yacl//yacl/crypto/base/hash:hash_utils",
+        "@yacl//yacl/crypto/hash:hash_utils",
         "@yacl//yacl/link",
         "@yacl//yacl/utils:parallel",
     ],
@@ -97,8 +97,8 @@ psi_cc_library(
         ":fourq_cryptor",
         ":sm2_cryptor",
         ":sodium_curve25519_cryptor",
-        "//psi/proto:psi_v2_cc_proto",
         "//psi:prelude",
+        "//psi/proto:psi_v2_cc_proto",
         "@yacl//yacl/utils:platform_utils",
     ] + select({
         "@platforms//cpu:x86_64": [
@@ -116,7 +116,7 @@ psi_cc_library(
     deps = [
         "@com_github_openssl_openssl//:openssl",
         "@yacl//yacl/base:exception",
-        "@yacl//yacl/crypto/base/hash:hash_utils",
+        "@yacl//yacl/crypto/hash:hash_utils",
         "@yacl//yacl/utils:parallel",
     ],
 )
@@ -148,7 +148,7 @@ psi_cc_test(
     srcs = ["sm2_cryptor_test.cc"],
     deps = [
         ":sm2_cryptor",
-        "@yacl//yacl/crypto/base/hash:hash_utils",
+        "@yacl//yacl/crypto/hash:hash_utils",
         "@yacl//yacl/crypto/tools:prg",
     ],
 )
@@ -159,7 +159,7 @@ psi_cc_library(
     hdrs = ["hash_to_curve_elligator2.h"],
     deps = [
         "@yacl//yacl/base:byte_container_view",
-        "@yacl//yacl/crypto/base/hash:hash_utils",
+        "@yacl//yacl/crypto/hash:hash_utils",
         "@yacl//yacl/math/mpint",
     ],
 )

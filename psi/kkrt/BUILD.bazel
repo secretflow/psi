@@ -25,11 +25,11 @@ psi_cc_library(
         "//psi/utils:cuckoo_index",
         "//psi/utils:serialize",
         "@com_google_absl//absl/strings",
-        "@yacl//yacl/crypto/base/hash:hash_utils",
-        "@yacl//yacl/crypto/primitives/ot:base_ot",
-        "@yacl//yacl/crypto/primitives/ot:iknp_ote",
-        "@yacl//yacl/crypto/primitives/ot:kkrt_ote",
-        "@yacl//yacl/crypto/utils:rand",
+        "@yacl//yacl/crypto/hash:hash_utils",
+        "@yacl//yacl/crypto/rand",
+        "@yacl//yacl/kernels/algorithms:base_ot",
+        "@yacl//yacl/kernels/algorithms:iknp_ote",
+        "@yacl//yacl/kernels/algorithms:kkrt_ote",
         "@yacl//yacl/link",
     ],
 )
@@ -39,7 +39,7 @@ psi_cc_test(
     srcs = ["kkrt_psi_test.cc"],
     deps = [
         ":kkrt_psi",
-        "@yacl//yacl/crypto/base/hash:hash_utils",
+        "@yacl//yacl/crypto/hash:hash_utils",
     ],
 )
 

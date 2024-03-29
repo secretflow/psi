@@ -67,8 +67,8 @@ psi_cc_library(
         "@com_github_microsoft_apsi//:apsi",
         "@com_google_absl//absl/types:span",
         "@yacl//yacl/base:exception",
-        "@yacl//yacl/crypto/base/hash:blake3",
-        "@yacl//yacl/crypto/base/hash:hash_utils",
+        "@yacl//yacl/crypto/hash:blake3",
+        "@yacl//yacl/crypto/hash:hash_utils",
         "@yacl//yacl/utils:parallel",
     ],
 )
@@ -78,8 +78,8 @@ psi_cc_test(
     srcs = ["basic_ecdh_oprf_test.cc"],
     deps = [
         ":ecdh_oprf_selector",
+        "@yacl//yacl/crypto/rand",
         "@yacl//yacl/crypto/tools:prg",
-        "@yacl//yacl/crypto/utils:rand",
     ],
 )
 
@@ -171,8 +171,8 @@ psi_cc_test(
         "//psi/utils:test_utils",
         "@boost//:uuid",
         "@com_google_absl//absl/time",
+        "@yacl//yacl/crypto/rand",
         "@yacl//yacl/crypto/tools:prg",
-        "@yacl//yacl/crypto/utils:rand",
         "@yacl//yacl/utils:scope_guard",
     ],
 )

@@ -34,7 +34,7 @@
 #include "boost/uuid/uuid_io.hpp"
 #include "spdlog/spdlog.h"
 #include "yacl/base/exception.h"
-#include "yacl/crypto/base/hash/hash_utils.h"
+#include "yacl/crypto/hash/hash_utils.h"
 #include "yacl/utils/scope_guard.h"
 
 #include "psi/utils/io.h"

@@ -36,8 +36,8 @@ psi_cc_test(
     deps = [
         ":baxos",
         "@com_google_absl//absl/strings",
+        "@yacl//yacl/crypto/rand",
         "@yacl//yacl/crypto/tools:prg",
-        "@yacl//yacl/crypto/utils:rand",
     ],
 )
 
@@ -61,8 +61,8 @@ psi_cc_test(
     deps = [
         ":paxos",
         "@com_google_absl//absl/strings",
+        "@yacl//yacl/crypto/rand",
         "@yacl//yacl/crypto/tools:prg",
-        "@yacl//yacl/crypto/utils:rand",
     ],
 )
 
@@ -89,7 +89,7 @@ psi_cc_test(
     srcs = ["paxos_hash_test.cc"],
     deps = [
         ":paxos_hash",
-        "@yacl//yacl/crypto/utils:rand",
+        "@yacl//yacl/crypto/rand",
     ],
 )
 
@@ -109,7 +109,7 @@ psi_cc_library(
     srcs = ["aes_crhash.cc"],
     hdrs = ["aes_crhash.h"],
     deps = [
-        "@yacl//yacl/crypto/base/block_cipher:symmetric_crypto",
+        "@yacl//yacl/crypto/block_cipher:symmetric_crypto",
         "@yacl//yacl/utils:parallel",
     ],
 )
@@ -150,8 +150,8 @@ psi_cc_test(
     deps = [
         ":galois128",
         "@com_google_absl//absl/strings",
+        "@yacl//yacl/crypto/rand",
         "@yacl//yacl/crypto/tools:prg",
-        "@yacl//yacl/crypto/utils:rand",
     ],
 )
 

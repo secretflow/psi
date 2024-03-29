@@ -30,8 +30,8 @@
 #include "absl/synchronization/notification.h"
 #include "spdlog/spdlog.h"
 #include "yacl/base/exception.h"
-#include "yacl/crypto/base/hash/hash_utils.h"
-#include "yacl/crypto/utils/rand.h"
+#include "yacl/crypto/hash/hash_utils.h"
+#include "yacl/crypto/rand/rand.h"
 #include "yacl/utils/serialize.h"
 
 #include "psi/cryptor/cryptor_selector.h"

@@ -22,7 +22,7 @@
 #include "absl/strings/escaping.h"
 #include "gtest/gtest.h"
 #include "spdlog/spdlog.h"
-#include "yacl/crypto/utils/rand.h"
+#include "yacl/crypto/rand/rand.h"
 #include "yacl/link/test_util.h"
 
 #include "psi/utils/serialize.h"

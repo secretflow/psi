@@ -61,7 +61,7 @@ psi_cc_library(
         "@com_google_absl//absl/time",
         "@org_apache_arrow//:arrow",
         "@yacl//yacl/base:exception",
-        "@yacl//yacl/crypto/base/hash:hash_utils",
+        "@yacl//yacl/crypto/hash:hash_utils",
         "@yacl//yacl/utils:scope_guard",
     ],
 )
@@ -126,7 +126,7 @@ psi_cc_library(
         ":key",
         "@com_google_absl//absl/strings",
         "@yacl//yacl/base:exception",
-        "@yacl//yacl/crypto/utils:rand",
+        "@yacl//yacl/crypto/rand",
     ],
 )
 
@@ -148,7 +148,7 @@ psi_cc_library(
     ],
     deps = [
         "//psi/proto:psi_cc_proto",
-        "@yacl//yacl/crypto/base/hash:hash_utils",
+        "@yacl//yacl/crypto/hash:hash_utils",
     ],
 )
 
@@ -202,7 +202,7 @@ psi_cc_test(
         ":ub_psi_cache",
         "@boost//:uuid",
         "@com_google_absl//absl/time",
-        "@yacl//yacl/crypto/utils:rand",
+        "@yacl//yacl/crypto/rand",
         "@yacl//yacl/utils:scope_guard",
     ],
 )
@@ -413,6 +413,6 @@ psi_cc_test(
     srcs = ["cuckoo_index_test.cc"],
     deps = [
         ":cuckoo_index",
-        "@yacl//yacl/crypto/utils:rand",
+        "@yacl//yacl/crypto/rand",
     ],
 )

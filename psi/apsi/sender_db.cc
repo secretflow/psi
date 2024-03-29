@@ -42,7 +42,7 @@
 #include "seal/util/streambuf.h"
 #include "spdlog/spdlog.h"
 #include "yacl/base/exception.h"
-#include "yacl/crypto/utils/rand.h"
+#include "yacl/crypto/rand/rand.h"
 #include "yacl/utils/parallel.h"
 
 #include "psi/apsi/serialize.h"

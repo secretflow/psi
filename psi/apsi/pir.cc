@@ -21,8 +21,8 @@
 #include <utility>
 #include <vector>
 
-#include "yacl/crypto/base/hash/hash_utils.h"
-#include "yacl/crypto/utils/rand.h"
+#include "yacl/crypto/hash/hash_utils.h"
+#include "yacl/crypto/rand/rand.h"
 #include "yacl/io/kv/leveldb_kvstore.h"
 #include "yacl/io/rw/csv_writer.h"
 

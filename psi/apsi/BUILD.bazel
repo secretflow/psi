@@ -198,7 +198,7 @@ psi_cc_library(
         "//psi/proto:pir_cc_proto",
         "//psi/utils:serialize",
         "//psi/utils:sync",
-        "@yacl//yacl/crypto/base/block_cipher:symmetric_crypto",
+        "@yacl//yacl/crypto/block_cipher:symmetric_crypto",
     ],
 )
 

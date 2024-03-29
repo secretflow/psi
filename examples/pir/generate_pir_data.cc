@@ -26,7 +26,7 @@
 #include "fmt/format.h"
 #include "gflags/gflags.h"
 #include "spdlog/spdlog.h"
-#include "yacl/crypto/utils/rand.h"
+#include "yacl/crypto/rand/rand.h"
 
 DEFINE_int32(data_count, 100000, "example data count");
 

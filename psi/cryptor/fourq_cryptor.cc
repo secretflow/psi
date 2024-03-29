@@ -18,7 +18,7 @@
 
 #include "apsi/fourq/FourQ_api.h"
 #include "apsi/fourq/FourQ_internal.h"
-#include "yacl/crypto/base/hash/hash_utils.h"
+#include "yacl/crypto/hash/hash_utils.h"
 #include "yacl/utils/parallel.h"
 
 namespace psi {

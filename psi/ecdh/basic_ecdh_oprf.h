@@ -24,7 +24,7 @@
 #include "openssl/rand.h"
 #include "spdlog/spdlog.h"
 #include "yacl/base/exception.h"
-#include "yacl/crypto/base/hash/hash_interface.h"
+#include "yacl/crypto/hash/hash_interface.h"
 
 #include "psi/cryptor/ecc_cryptor.h"
 #include "psi/cryptor/sm2_cryptor.h"

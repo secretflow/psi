@@ -14,8 +14,8 @@
 
 #include "psi/rr22/receiver.h"
 
-#include "yacl/crypto/base/hash/hash_utils.h"
-#include "yacl/crypto/utils/rand.h"
+#include "yacl/crypto/hash/hash_utils.h"
+#include "yacl/crypto/rand/rand.h"
 #include "yacl/utils/parallel.h"
 
 #include "psi/legacy/bucket_psi.h"

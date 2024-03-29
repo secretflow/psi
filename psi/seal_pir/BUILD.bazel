@@ -53,7 +53,7 @@ psi_cc_library(
     deps = [
         ":seal_pir",
         "//psi/utils:cuckoo_index",
-        "@yacl//yacl/crypto/base/block_cipher:symmetric_crypto",
+        "@yacl//yacl/crypto/block_cipher:symmetric_crypto",
     ],
 )
 

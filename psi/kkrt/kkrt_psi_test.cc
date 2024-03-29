@@ -20,9 +20,9 @@
 
 #include "gtest/gtest.h"
 #include "yacl/base/exception.h"
-#include "yacl/crypto/base/hash/hash_utils.h"
-#include "yacl/crypto/utils/secparam.h"
+#include "yacl/crypto/hash/hash_utils.h"
 #include "yacl/link/test_util.h"
+#include "yacl/secparam.h"
 
 struct TestParams {
   std::vector<uint128_t> items_a;

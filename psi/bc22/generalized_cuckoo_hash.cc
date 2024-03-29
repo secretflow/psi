@@ -20,7 +20,7 @@
 #include "absl/strings/escaping.h"
 #include "spdlog/spdlog.h"
 #include "yacl/base/int128.h"
-#include "yacl/crypto/utils/rand.h"
+#include "yacl/crypto/rand/rand.h"
 #include "yacl/utils/parallel.h"
 
 namespace psi::bc22 {

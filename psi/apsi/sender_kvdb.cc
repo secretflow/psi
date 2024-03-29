@@ -52,7 +52,7 @@
 #include "absl/strings/escaping.h"
 #include "seal/util/common.h"
 #include "seal/util/streambuf.h"
-#include "yacl/crypto/utils/rand.h"
+#include "yacl/crypto/rand/rand.h"
 #include "yacl/utils/parallel.h"
 
 namespace psi::apsi {

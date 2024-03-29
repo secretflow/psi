@@ -55,7 +55,7 @@ psi_cc_library(
         "@com_github_floodyberry_curve25519_donna//:curve25519_donna",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest",
-        "@yacl//yacl/crypto/base/hash:hash_utils",
+        "@yacl//yacl/crypto/hash:hash_utils",
         "@yacl//yacl/crypto/tools:prg",
         "@yacl//yacl/link",
         "@yacl//yacl/utils:parallel",

@@ -371,10 +371,10 @@ def _com_github_google_snappy():
         http_archive,
         name = "com_github_google_snappy",
         urls = [
-            "https://github.com/google/snappy/archive/refs/tags/1.1.9.tar.gz",
+            "https://github.com/google/snappy/archive/refs/tags/1.2.0.tar.gz",
         ],
-        sha256 = "75c1fbb3d618dd3a0483bff0e26d0a92b495bbe5059c8b4f1c962b478b6e06e7",
-        strip_prefix = "snappy-1.1.9",
+        sha256 = "9b8f10fbb5e3bc112f2e5e64f813cb73faea42ec9c533a5023b5ae08aedef42e",
+        strip_prefix = "snappy-1.2.0",
         build_file = "@psi//bazel:snappy.BUILD",
     )
 

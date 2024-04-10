@@ -87,8 +87,7 @@ TEST_P(KMPRTMpPsiTest, Works) {
     f_links[i] = std::async(proc, i);
   }
 
-  std::vector<std::string> intersection =
-      test::GetIntersection(items[params.item_size.size()], items[0]);
+  std::vector<std::string> intersection = items[params.item_size.size()];
   std::sort(intersection.begin(), intersection.end());
 
   std::vector<std::vector<std::string>> results(world_size);

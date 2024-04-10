@@ -16,8 +16,8 @@
 
 #include <future>
 
-#include "yacl/crypto/base/hash/hash_utils.h"
-#include "yacl/crypto/utils/rand.h"
+#include "yacl/crypto/hash/hash_utils.h"
+#include "yacl/crypto/rand/rand.h"
 #include "yacl/utils/serialize.h"
 
 #include "psi/legacy/kmprt17_mp_psi/kmprt17_opprf.h"
@@ -28,7 +28,7 @@ namespace psi::psi {
 
 namespace {
 
-constexpr uint32_t kLinkRecvTimeout = 30 * 60 * 1000;
+constexpr uint32_t kLinkRecvTimeout = 60 * 60 * 1000;
 
 }  // namespace
 

@@ -18,7 +18,7 @@
 #include <utility>
 
 #include "yacl/base/exception.h"
-#include "yacl/crypto/utils/rand.h"
+#include "yacl/crypto/rand/rand.h"
 
 namespace psi::psi {
 

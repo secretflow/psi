@@ -20,7 +20,7 @@
 
 #include "spdlog/spdlog.h"
 #include "yacl/base/exception.h"
-#include "yacl/crypto/base/block_cipher/symmetric_crypto.h"
+#include "yacl/crypto/block_cipher/symmetric_crypto.h"
 #include "yacl/utils/parallel.h"
 
 #include "psi/seal_pir/seal_pir.h"

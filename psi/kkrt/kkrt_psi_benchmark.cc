@@ -17,7 +17,7 @@
 
 #include "benchmark/benchmark.h"
 #include "yacl/base/exception.h"
-#include "yacl/crypto/base/hash/hash_utils.h"
+#include "yacl/crypto/hash/hash_utils.h"
 #include "yacl/link/test_util.h"
 
 #include "psi/kkrt/kkrt_psi.h"

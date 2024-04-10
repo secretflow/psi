@@ -17,7 +17,7 @@
 #include <memory>
 #include <unordered_set>
 
-#include "yacl/crypto/utils/rand.h"
+#include "yacl/crypto/rand/rand.h"
 #include "yacl/utils/scope_guard.h"
 
 #include "psi/prelude.h"

@@ -16,7 +16,7 @@
 
 #include "yacl/base/byte_container_view.h"
 #include "yacl/base/int128.h"
-#include "yacl/crypto/base/block_cipher/symmetric_crypto.h"
+#include "yacl/crypto/block_cipher/symmetric_crypto.h"
 
 // Correlation robust hash function.
 // H(x) = AES(x) + x.

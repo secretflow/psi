@@ -55,7 +55,6 @@ def write_table(
     table = create_table(id_cnt, label_cnt)
 
     with csv.CSVWriter(output_path, table.schema) as table_writer:
-
         cnt = 0
         while cnt < intersection_cnt:
             table_row = min(batch_size, intersection_cnt - cnt)

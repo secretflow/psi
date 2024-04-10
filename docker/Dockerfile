@@ -1,9 +1,18 @@
-FROM secretflow/base-ci:latest as builder
+FROM openanolis/anolisos:8.8 as builder
 
 # build nsjail
 RUN yum install -y \
-    wget autoconf bison flex git protobuf-devel libnl3-devel \
-    libtool make pkg-config protobuf-compiler \
+    autoconf \
+    bison \
+    flex \
+    gcc-c++ \
+    git \
+    protobuf-devel \
+    libnl3-devel \
+    libtool \
+    make \
+    pkg-config \
+    protobuf-compiler \
     && yum clean all
 
 RUN cd / && git clone https://github.com/google/nsjail.git \
@@ -12,6 +21,8 @@ RUN cd / && git clone https://github.com/google/nsjail.git \
 
 FROM openanolis/anolisos:8.8
 
+ARG TARGETPLATFORM
+
 ENV TZ="Asia/Shanghai"
 
 RUN yum install -y libgomp && yum clean all
@@ -19,7 +30,7 @@ RUN yum install -y libgomp && yum clean all
 COPY --from=builder /bin/nsjail /usr/local/bin/
 COPY .nsjail /root/.nsjail
 
-COPY --chown=root:root main /root/main
+COPY --chown=root:root ./$TARGETPLATFORM/main /root/main
 
 LABEL maintainer="secretflow-contact@service.alipay.com"
 

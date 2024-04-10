@@ -24,7 +24,7 @@
 #include "absl/strings/escaping.h"
 #include "openssl/rand.h"
 #include "spdlog/spdlog.h"
-#include "yacl/crypto/utils/rand.h"
+#include "yacl/crypto/rand/rand.h"
 #include "yacl/utils/parallel.h"
 
 #include "psi/bc22/emp_vole.h"

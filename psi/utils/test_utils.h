@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 
-#include "yacl/crypto/base/hash/hash_utils.h"
+#include "yacl/crypto/hash/hash_utils.h"
 
 #include "psi/proto/psi.pb.h"
 

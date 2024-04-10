@@ -44,7 +44,7 @@ psi_cc_library(
         "//psi/utils:serialize",
         "@com_google_absl//absl/strings",
         "@yacl//yacl/base:exception",
-        "@yacl//yacl/crypto/utils:rand",
+        "@yacl//yacl/crypto/rand",
         "@yacl//yacl/link",
         "@yacl//yacl/utils:parallel",
     ],

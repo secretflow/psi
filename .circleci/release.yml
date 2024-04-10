@@ -32,7 +32,7 @@ parameters:
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  build_binary:
+  build_binary_x86:
     # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     docker:
@@ -60,12 +60,46 @@ jobs:
       - run:
           name: "Copy binary"
           command: |
-            mkdir -p /tmp/binary
-            cp bazel-bin/psi/main /tmp/binary/
+            mkdir -p /tmp/binary/x86
+            cp bazel-bin/psi/main /tmp/binary/x86
       - persist_to_workspace:
           root: "/tmp/binary"
           paths:
-            - "main"
+            - "x86/main"
+  build_binary_arm:
+    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
+    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
+    docker:
+      - image: secretflow/release-ci-aarch64:latest
+    resource_class: arm.2xlarge
+    shell: /bin/bash --login -eo pipefail
+    # Add steps to the job
+    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+    steps:
+      # Kill the whole ci after 1hr
+      - run:
+          name: Cancel build after set time
+          background: true
+          command: |
+            sleep 3600
+            echo "Canceling workflow as too much time has elapsed"
+            curl -X POST --header "Content-Type: application/json" "https://circleci.com/api/v2/workflow/${CIRCLE_WORKFLOW_ID}/cancel?circle-token=${BUILD_TIMER_TOKEN}"
+      - checkout
+      - run:
+          name: "Checkout devtools"
+          command: git clone https://github.com/secretflow/devtools.git ../devtools
+      - run:
+          name: "Build"
+          command: bazel build psi:main -c opt --config=linux-release --ui_event_filters=-info,-debug,-warning --jobs 20
+      - run:
+          name: "Copy binary"
+          command: |
+            mkdir -p /tmp/binary/arm
+            cp bazel-bin/psi/main /tmp/binary/arm
+      - persist_to_workspace:
+          root: "/tmp/binary"
+          paths:
+            - "arm/main"
   docker_image_publish:
     docker:
       - image: cimg/deploy:2023.06.1
@@ -77,33 +111,52 @@ jobs:
       - run:
           name: Build Docker image
           command: |
-            # login docker
-            docker login -u secretflow -p ${DOCKER_DEPLOY_TOKEN}
-
             # Build image
             cd docker
-            cp /tmp/binary/main .
-            bash ./build.sh -u -s -l
+
+            source_file="../psi/version.h"
+            PSI_VERSION_MAJOR=$(grep "#define PSI_VERSION_MAJOR" $source_file | cut -d' ' -f3)
+            PSI_VERSION_MINOR=$(grep "#define PSI_VERSION_MINOR" $source_file | cut -d' ' -f3)
+            PSI_VERSION_PATCH=$(grep "#define PSI_VERSION_PATCH" $source_file | cut -d' ' -f3)
+            PSI_DEV_IDENTIFIER=$(grep "#define PSI_DEV_IDENTIFIER" $source_file | cut -d' ' -f3 | sed 's/"//g')
+
+            TAG="${PSI_VERSION_MAJOR}.${PSI_VERSION_MINOR}.${PSI_VERSION_PATCH}${PSI_DEV_IDENTIFIER}"
+            echo $TAG
+
+            mkdir -p linux/amd64
+            mkdir -p linux/arm64
+
+            cp /tmp/binary/x86/main ./linux/amd64
+            cp /tmp/binary/arm/main ./linux/arm64
+
+            # login docker
+            docker login -u secretflow -p ${DOCKER_DEPLOY_TOKEN}
+            docker buildx create --name psi-image-builder --platform linux/arm64,linux/amd64 --use
+            docker buildx build --platform linux/arm64,linux/amd64 -f Dockerfile -t secretflow/psi-anolis8:$TAG \
+                    --build-arg version=$TAG --build-arg config_templates="$(cat config_templates.yml)" \
+                    --build-arg deploy_templates="$(cat deploy_templates.yml)" --push .
+            docker buildx build --platform linux/arm64,linux/amd64 -f Dockerfile -t secretflow/psi-anolis8:latest \
+                    --build-arg version=$TAG --build-arg config_templates="$(cat config_templates.yml)" \
+                    --build-arg deploy_templates="$(cat deploy_templates.yml)" --push .
 
             # login docker - aliyun
             docker login -u ${ALIYUN_DOCKER_USERNAME} -p ${ALIYUN_DOCKER_PASSWORD} secretflow-registry.cn-hangzhou.cr.aliyuncs.com
 
-            VERSION=$(cat version.txt)
-
-            # psi-anolis8:${VERSION}
-            docker tag secretflow/psi-anolis8:${VERSION} secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:${VERSION}
-            docker push secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:${VERSION}
-
-            # psi-anolis8:latest
-            docker tag secretflow/psi-anolis8:${VERSION} secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest
-            docker push secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest
+            docker buildx build --platform linux/arm64,linux/amd64 -f Dockerfile -t secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:$TAG \
+                  --build-arg version=$TAG --build-arg config_templates="$(cat config_templates.yml)" \
+                  --build-arg deploy_templates="$(cat deploy_templates.yml)" --push .
+            docker buildx build --platform linux/arm64,linux/amd64 -f Dockerfile -t secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest \
+                  --build-arg version=$TAG --build-arg config_templates="$(cat config_templates.yml)" \
+                  --build-arg deploy_templates="$(cat deploy_templates.yml)" --push .
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
   publish:
     jobs:
-      - build_binary
+      - build_binary_x86
+      - build_binary_arm
       - docker_image_publish:
           requires:
-            - build_binary
+            - build_binary_x86
+            - build_binary_arm

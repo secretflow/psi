@@ -23,8 +23,8 @@ psi_cc_library(
     hdrs = ["davis_meyer_hash.h"],
     copts = AES_COPT_FLAGS,
     deps = [
-        "@yacl//yacl/crypto/base/aes:aes_opt",
-        "@yacl//yacl/crypto/base/block_cipher:symmetric_crypto",
+        "@yacl//yacl/crypto/aes:aes_opt",
+        "@yacl//yacl/crypto/block_cipher:symmetric_crypto",
         "@yacl//yacl/utils:platform_utils",
     ],
 )
@@ -34,8 +34,8 @@ psi_cc_test(
     srcs = ["davis_meyer_hash_test.cc"],
     deps = [
         ":davis_meyer_hash",
+        "@yacl//yacl/crypto/rand",
         "@yacl//yacl/crypto/tools:prg",
-        "@yacl//yacl/crypto/utils:rand",
     ],
 )
 
@@ -48,10 +48,10 @@ psi_cc_library(
         "//psi/rr22/okvs:aes_crhash",
         "//psi/rr22/okvs:baxos",
         "@yacl//yacl/base:buffer",
-        "@yacl//yacl/crypto/primitives/vole:silent_vole",
+        "@yacl//yacl/crypto/rand",
         "@yacl//yacl/crypto/tools:prg",
         "@yacl//yacl/crypto/tools:ro",
-        "@yacl//yacl/crypto/utils:rand",
+        "@yacl//yacl/kernels/algorithms:silent_vole",
         "@yacl//yacl/link",
         "@yacl//yacl/math/f2k",
         "@yacl//yacl/utils:parallel",
@@ -105,7 +105,7 @@ psi_cc_test(
     srcs = ["rr22_psi_test.cc"],
     deps = [
         ":rr22_psi",
-        "@yacl//yacl/crypto/utils:rand",
+        "@yacl//yacl/crypto/rand",
     ],
 )
 
@@ -116,7 +116,7 @@ psi_cc_binary(
         ":rr22_psi",
         "//psi/utils:test_utils",
         "@com_github_google_benchmark//:benchmark_main",
-        "@yacl//yacl/crypto/utils:rand",
+        "@yacl//yacl/crypto/rand",
     ],
 )
 

@@ -14,8 +14,8 @@
 
 #include "psi/rr22/davis_meyer_hash.h"
 
-#include "yacl/crypto/base/aes/aes_opt.h"
-#include "yacl/crypto/base/block_cipher/symmetric_crypto.h"
+#include "yacl/crypto/aes/aes_opt.h"
+#include "yacl/crypto/block_cipher/symmetric_crypto.h"
 #include "yacl/utils/platform_utils.h"
 
 namespace psi::rr22 {

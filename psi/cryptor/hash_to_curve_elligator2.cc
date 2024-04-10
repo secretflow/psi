@@ -21,7 +21,7 @@
 
 #include "absl/strings/escaping.h"
 #include "spdlog/spdlog.h"
-#include "yacl/crypto/base/hash/ssl_hash.h"
+#include "yacl/crypto/hash/ssl_hash.h"
 #include "yacl/math/mpint/mp_int.h"
 
 namespace psi {

@@ -24,6 +24,7 @@ psi_deps()
 #          Please make sure yacl_deps are called right after psi_deps.
 #
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+SECRETFLOW_GIT = "https://github.com/secretflow"
 YACL_COMMIT_ID = "e6cab04f2bedeb30239ea821d6cabcdaee0a4fa7"
 
 git_repository(

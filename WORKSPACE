@@ -23,6 +23,16 @@ psi_deps()
 # Warning: psi relies on yacl to bring in common 3p libraries.
 #          Please make sure yacl_deps are called right after psi_deps.
 #
+
+YACL_COMMIT_ID = "e6cab04f2bedeb30239ea821d6cabcdaee0a4fa7"
+
+git_repository(
+    name = "yacl",
+    commit = YACL_COMMIT_ID,
+    recursive_init_submodules = True,
+    remote = "{}/yacl.git".format(SECRETFLOW_GIT),
+)
+
 load("@yacl//bazel:repositories.bzl", "yacl_deps")
 
 yacl_deps()

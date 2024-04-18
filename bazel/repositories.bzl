@@ -44,18 +44,18 @@ def psi_deps():
     _com_github_ridiculousfish_libdivide()
     _com_github_sparsehash_sparsehash()
     _com_github_intel_ipp()
-    _yacl()
+    # _yacl()
 
-def _yacl():
-    maybe(
-        http_archive,
-        name = "yacl",
-        urls = [
-            "https://github.com/secretflow/yacl/archive/refs/tags/0.4.4b3.tar.gz",
-        ],
-        strip_prefix = "yacl-0.4.4b3",
-        sha256 = "c6b5f32e92d2e31c1c5d7176792965fcf332d1ae892ab8b049d2e66f6f47e4f2",
-    )
+# def _yacl():
+#     maybe(
+#         http_archive,
+#         name = "yacl",
+#         urls = [
+#             "https://github.com/secretflow/yacl/archive/refs/tags/0.4.4b3.tar.gz",
+#         ],
+#         strip_prefix = "yacl-0.4.4b3",
+#         sha256 = "c6b5f32e92d2e31c1c5d7176792965fcf332d1ae892ab8b049d2e66f6f47e4f2",
+#     )
 
 def _bazel_platform():
     http_archive(

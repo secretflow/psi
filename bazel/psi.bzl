@@ -22,7 +22,7 @@ load("@yacl//bazel:yacl.bzl", "OMP_CFLAGS", "OMP_DEPS", "OMP_LINKFLAGS", "yacl_c
 WARNING_FLAGS = [
     "-Wall",
     "-Wextra",
-    # "-Werror",
+    "-Werror",
 ]
 DEBUG_FLAGS = ["-O0", "-g"]
 RELEASE_FLAGS = ["-O2"]

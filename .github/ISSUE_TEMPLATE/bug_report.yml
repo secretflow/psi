@@ -1,0 +1,57 @@
+name: Bug Report
+description: File a bug report.
+title: "[Bug]: "
+labels: ["bug"]
+assignees:
+  - 6fj
+  - qxzhou1010
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: textarea
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is.
+      placeholder: |
+        Tell us what you see!
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Steps To Reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. In this environment...
+        1. With this config...
+        1. Run '...'
+        1. See error...
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+      placeholder: |
+        I expect the output to be...
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Version
+      placeholder: eg. 0.4.0.dev240424
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Operating system
+      placeholder: eg. CentOS 7 x64
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Hardware Resources
+      placeholder: eg. 8c16g
+    validations:
+      required: true

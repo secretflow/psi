@@ -198,7 +198,7 @@ Setup Phase
 
 .. code-block:: bash
 
-  docker run -it  --rm  --network host --mount type=bind,source=/tmp/server,target=/root/server --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:0.1.0beta bash -c "./main --config server/apsi_server_setup.json"
+  docker run -it  --rm  --network host --mount type=bind,source=/tmp/server,target=/root/server --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:0.1.0beta --config server/apsi_server_setup.json
 
 Online Phase
 >>>>>>>>>>>>
@@ -209,14 +209,14 @@ In the server's terminal.
 
 .. code-block:: bash
 
-  docker run -it  --rm  --network host --mount type=bind,source=/tmp/server,target=/root/server --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:0.1.0beta bash -c "./main --config server/apsi_server_online.json"
+  docker run -it  --rm  --network host --mount type=bind,source=/tmp/server,target=/root/server --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:0.1.0beta --config server/apsi_server_online.json
 
 
 In the client's terminal.
 
 .. code-block:: bash
 
-  docker run -it  --rm  --network host --mount type=bind,source=/tmp/client,target=/root/client --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:0.1.0beta bash -c "./main --config client/apsi_client.json"
+  docker run -it  --rm  --network host --mount type=bind,source=/tmp/client,target=/root/client --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:0.1.0beta --config client/apsi_client.json
 
 
 More examples

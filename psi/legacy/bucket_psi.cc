@@ -399,8 +399,10 @@ void BucketPsi::Init() {
   }
   SPDLOG_INFO("bucket size set to {}", config_.bucket_size());
 
-  // Test connection.
-  lctx_->ConnectToMesh();
+  if (!ic_mode_) {
+    // Test connection.
+    lctx_->ConnectToMesh();
+  }
 
   MemoryPsiConfig config;
   config.set_psi_type(config_.psi_type());

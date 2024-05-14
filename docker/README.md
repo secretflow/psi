@@ -7,7 +7,7 @@ docker run -it  --rm   --mount type=bind,source="$(pwd)/../../psi",target=/home/
 # build psi dev docker
 
 ```bash
-sh build.sh -v <version> -u -l
+bash build.sh -v <version> -u -l
 ```
 - *-u* means upload docker to reg.
 - *-l* means tag docker as *latest* as well.

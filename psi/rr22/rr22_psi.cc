@@ -151,8 +151,11 @@ std::vector<size_t> Rr22PsiReceiverInternal(
 
   YACL_ENFORCE(sender_size <= receiver_size);
 
-  size_t mask_size = ComputeTruncateSize(sender_size, receiver_size,
-                                         options.ssp, options.malicious);
+  size_t mask_size = sizeof(uint128_t);
+  if (options.compress) {
+    mask_size = ComputeTruncateSize(sender_size, receiver_size, options.ssp,
+                                    options.malicious);
+  }
 
   Rr22OprfReceiver oprf_receiver(kRr22OprfBinSize, options.ssp, options.mode,
                                  options.code_type, options.malicious);

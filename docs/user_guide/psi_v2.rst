@@ -134,12 +134,12 @@ Run PSI
 
 In the first terminal, run the following command::
 
-    docker run -it  --rm  --network host --mount type=bind,source=/tmp/receiver,target=/root/receiver --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:0.1.0beta bash -c "./main --config receiver/receiver.config"
+    docker run -it  --rm  --network host --mount type=bind,source=/tmp/receiver,target=/root/receiver --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:0.1.0beta --config receiver/receiver.config
 
 
 In the other terminal, run the following command simultaneously::
 
-    docker run -it  --rm  --network host --mount type=bind,source=/tmp/sender,target=/root/sender --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:0.1.0beta bash -c "./main --config sender/sender.config"
+    docker run -it  --rm  --network host --mount type=bind,source=/tmp/sender,target=/root/sender --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:0.1.0beta --config sender/sender.config
 
 
 Building from source

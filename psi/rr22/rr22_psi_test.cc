@@ -107,6 +107,50 @@ TEST_P(Rr22PsiTest, CorrectTest) {
   EXPECT_EQ(indices_psi, indices);
 }
 
+TEST_P(Rr22PsiTest, CompressParamsFalseTest) {
+  auto params = GetParam();
+
+  auto lctxs = yacl::link::test::SetupWorld("ab", 2);
+
+  uint128_t seed = yacl::MakeUint128(0, 0);
+  yacl::crypto::Prg<uint128_t> prng(seed);
+
+  size_t item_size = params.items_num;
+
+  std::vector<uint128_t> inputs_a;
+  std::vector<uint128_t> inputs_b;
+  std::vector<size_t> indices;
+
+  std::tie(inputs_a, inputs_b, indices) = GenerateTestData(item_size);
+
+  Rr22PsiOptions psi_options(40, 0, false);
+
+  psi_options.mode = params.mode;
+  psi_options.malicious = params.malicious;
+
+  auto psi_sender_proc = std::async(
+      [&] { Rr22PsiSenderInternal(psi_options, lctxs[0], inputs_a); });
+  auto psi_receiver_proc = std::async(
+      [&] { return Rr22PsiReceiverInternal(psi_options, lctxs[1], inputs_b); });
+
+  psi_sender_proc.get();
+  std::vector<size_t> indices_psi = psi_receiver_proc.get();
+  std::sort(indices_psi.begin(), indices_psi.end());
+
+  SPDLOG_INFO("{}?={}", indices.size(), indices_psi.size());
+  EXPECT_EQ(indices.size(), indices_psi.size());
+
+#if 0
+  for (size_t i = 0; i < indices.size(); ++i) {
+    SPDLOG_INFO("i:{} index:{} a:{}, b:{}", i, indices_psi[i],
+                inputs_a[indices_psi[i]], inputs_b[indices_psi[i]]);
+  }
+#endif
+
+  EXPECT_EQ(indices_psi, indices);
+}
+
+
 INSTANTIATE_TEST_SUITE_P(
     CorrectTest_Instances, Rr22PsiTest,
     testing::Values(TestParams{35, Rr22PsiMode::FastMode},

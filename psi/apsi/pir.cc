@@ -514,9 +514,6 @@ PirResultReport PirServerFull(
   size_t count_per_query = config.apsi_server_config().num_per_query();
   SPDLOG_INFO("server_data_count:{}", server_data_count);
 
-  YACL_ENFORCE(server_data_count <= config.bucket_size(),
-               "data_count:{} bucket_size:{}", config.bucket_size());
-
   ::apsi::PSIParams psi_params =
       GetPsiParams(count_per_query, server_data_count,
                    config.apsi_server_config().max_items_per_bin());

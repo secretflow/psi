@@ -222,6 +222,12 @@ class SealPirServer : public SealPir {
                                 seal::Plaintext *plain_ptr, int logt);
   std::vector<seal::Plaintext> DecomposeToPlaintexts(
       const seal::Ciphertext &encrypted);
+
+  // compute encrypted * x^{-2^j}
+  // ref:
+  // https://github.com/microsoft/SealPIR/blob/ee1a5a3922fc9250f9bb4e2416ff5d02bfef7e52/src/pir_server.cpp#L397
+  void multiply_power_of_x(const seal::Ciphertext &encrypted,
+                           seal::Ciphertext &destination, uint32_t index);
 };
 
 class SealPirClient : public SealPir {

@@ -178,9 +178,11 @@ void SealPir::SetPolyModulusDegree(size_t degree) {
 
   if (degree == 8192) {
     seal_params_->set_plain_modulus(seal::PlainModulus::Batching(degree, 17));
-    //} //else if (degree == 4096) {
-    //  seal_params_->set_plain_modulus(seal::PlainModulus::Batching(degree,
-    //  38));
+  } else if (degree == 4096) {
+    // ref:
+    // https://github.com/microsoft/SealPIR/blob/ee1a5a3922fc9250f9bb4e2416ff5d02bfef7e52/src/main.cpp#L22
+    // note that logt = 20
+    seal_params_->set_plain_modulus(seal::PlainModulus::Batching(degree, 20));
   } else {
     YACL_THROW("poly_modulus_degree {} is not support.", degree);
   }
@@ -479,8 +481,6 @@ void SealPirServer::SetDatabase(
 
 std::vector<seal::Ciphertext> SealPirServer::ExpandQuery(
     const seal::Ciphertext &encrypted, std::uint32_t m) {
-  uint64_t plain_mod = seal_params_->plain_modulus().value();
-
   seal::GaloisKeys &galkey = galois_key_;
 
   // Assume that m is a power of 2. If not, round it to the next power of 2.
@@ -502,16 +502,9 @@ std::vector<seal::Ciphertext> SealPirServer::ExpandQuery(
   for (size_t j = 0; j < logm - 1; j++) {
     std::vector<seal::Ciphertext> results2(1 << (j + 1));
     int step = 1 << j;
-    seal::Plaintext pt0(n);
-    seal::Plaintext pt1(n);
-
-    pt0.set_zero();
-    pt0[n - step] = plain_mod - 1;
 
     int index_raw = (n << 1) - (1 << j);
     int index = (index_raw * galois_elts[j]) % (n << 1);
-    pt1.set_zero();
-    pt1[index] = 1;
 
     // int nstep = -step;
     yacl::parallel_for(0, step, [&](int64_t begin, int64_t end) {
@@ -527,8 +520,8 @@ std::vector<seal::Ciphertext> SealPirServer::ExpandQuery(
         evaluator_->apply_galois(c0, galois_elts[j], galkey, t0);
         evaluator_->add(c0, t0, results2[k]);
 
-        evaluator_->multiply_plain(c0, pt0, c1);
-        evaluator_->multiply_plain(t0, pt1, t1);
+        multiply_power_of_x(c0, c1, index_raw);
+        multiply_power_of_x(t0, t1, index);
         evaluator_->add(c1, t1, results2[k + step]);
       }
     });
@@ -539,16 +532,9 @@ std::vector<seal::Ciphertext> SealPirServer::ExpandQuery(
   std::vector<seal::Ciphertext> results2(results.size() << 1);
   seal::Plaintext two("2");
 
-  seal::Plaintext pt0(n);
-  seal::Plaintext pt1(n);
-
-  pt0.set_zero();
-  pt0[n - results.size()] = plain_mod - 1;
 
   int index_raw = (n << 1) - (1 << (logm - 1));
   int index = (index_raw * galois_elts[logm - 1]) % (n << 1);
-  pt1.set_zero();
-  pt1[index] = 1;
 
   for (uint32_t k = 0; k < results.size(); k++) {
     if (k >= (m - (1 << (logm - 1)))) {  // corner case.
@@ -564,8 +550,9 @@ std::vector<seal::Ciphertext> SealPirServer::ExpandQuery(
       evaluator_->apply_galois(c0, galois_elts[logm - 1], galkey, t0);
       evaluator_->add(c0, t0, results2[k]);
 
-      evaluator_->multiply_plain(c0, pt0, c1);
-      evaluator_->multiply_plain(t0, pt1, t1);
+      multiply_power_of_x(c0, c1, index_raw);
+      multiply_power_of_x(t0, t1, index);
+
       evaluator_->add(c1, t1, results2[k + results.size()]);
     }
   }
@@ -574,6 +561,24 @@ std::vector<seal::Ciphertext> SealPirServer::ExpandQuery(
   auto last = results2.begin() + m;
   std::vector<seal::Ciphertext> new_vec(first, last);
   return new_vec;
+}
+
+void SealPirServer::multiply_power_of_x(const seal::Ciphertext &encrypted,
+                                        seal::Ciphertext &destination,
+                                        uint32_t index) {
+  auto coeff_mod_count = seal_params_->coeff_modulus().size() - 1;
+  auto coeff_count = seal_params_->poly_modulus_degree();
+  auto encrypted_count = encrypted.size();
+
+  destination = encrypted;
+  for (size_t i = 0; i < encrypted_count; i++) {
+    for (size_t j = 0; j < coeff_mod_count; j++) {
+      seal::util::negacyclic_shift_poly_coeffmod(
+          encrypted.data(i) + (j * coeff_count), coeff_count, index,
+          seal_params_->coeff_modulus()[j],
+          destination.data(i) + (j * coeff_count));
+    }
+  }
 }
 
 std::vector<seal::Ciphertext> SealPirServer::GenerateReply(
@@ -685,7 +690,7 @@ std::vector<seal::Ciphertext> SealPirServer::GenerateReply(
         seal::Ciphertext temp;
         for (j += 1; j < n_i; j++) {
           if ((*cur)[k + j * product].is_zero()) {
-            SPDLOG_INFO("cur[{}] is zero, k:{}, j:{}", (k + j * product), k, j);
+            // SPDLOG_INFO("cur[{}] is zero, k:{}, j:{}", (k + j * product), k, j);
             continue;
           }
           evaluator_->multiply_plain(expanded_query[j], (*cur)[k + j * product],
@@ -725,7 +730,7 @@ std::vector<seal::Ciphertext> SealPirServer::GenerateReply(
       }
       product *= pir_params_.expansion_ratio;  // multiply by expansion rate.
     }
-    SPDLOG_INFO("Server: {}-th recursion level finished", (i + 1));
+    // SPDLOG_INFO("Server: {}-th recursion level finished", (i + 1));
   }
   SPDLOG_INFO("reply generated!  ");
   // This should never get here
@@ -1041,22 +1046,7 @@ void SealPirClient::ComputeInverseScales() {
           seal_params_->plain_modulus().value() - pow(2, logt - mod);
     }
     // get mod inverse
-    {
-      BN_CTX *bn_ctx = BN_CTX_new();
-      BIGNUM *bn_t = BN_new();
-      BIGNUM *bn_m = BN_new();
-      BIGNUM *ret = BN_new();
-      BN_set_word(bn_t, t);
-      BN_set_word(bn_m, 1 << logm);
-
-      BN_mod_inverse(ret, bn_m, bn_t, bn_ctx);
-      inverse_scale = BN_get_word(ret);
-
-      BN_free(bn_t);
-      BN_free(bn_m);
-      BN_free(ret);
-      BN_CTX_free(bn_ctx);
-    }
+    seal::util::try_invert_uint_mod((1 << logm), t, inverse_scale);
     inverse_scales_.push_back(inverse_scale);
     if ((inverse_scale << logm) % t != 1) {
       YACL_THROW("get inverse wrong");

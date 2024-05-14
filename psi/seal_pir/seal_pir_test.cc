@@ -25,6 +25,7 @@
 namespace psi::seal_pir {
 namespace {
 struct TestParams {
+  size_t N = 4096;
   size_t element_number;
   size_t element_size = 288;
   size_t query_size = 0;
@@ -52,9 +53,14 @@ using DurationMillis = std::chrono::duration<double, std::milli>;
 class SealPirTest : public testing::TestWithParam<TestParams> {};
 
 TEST_P(SealPirTest, Works) {
-  size_t n = 8192;
   auto params = GetParam();
+  size_t n = params.N;
   auto ctxs = yacl::link::test::SetupWorld(2);
+
+  SPDLOG_INFO(
+      "N(poly degree): {}, element_size: {} bytes, element_number: 2^{} = {}",
+      n, params.element_size, std::log2(params.element_number),
+      params.element_number);
 
   std::vector<uint8_t> db_data = GenerateDbData(params);
 
@@ -121,17 +127,37 @@ TEST_P(SealPirTest, Works) {
 
 INSTANTIATE_TEST_SUITE_P(
     Works_Instances, SealPirTest,
-    testing::Values(TestParams{1000},       // element size default 288B
-                    TestParams{1000, 10},   //
-                    TestParams{1000, 20},   //
-                    TestParams{1000, 400},  //
-                    TestParams{3000},       // element size default 288B
-                    TestParams{3000, 10},   //
-                    TestParams{3000, 20},   //
-                    TestParams{3000, 400},  //
-                    //
-                    TestParams{203, 288, 100},    //
-                    TestParams{3000, 288, 1000})  //
-);
+    testing::Values(TestParams{4096, 1000},       // element size default 288B
+                    TestParams{4096, 1000, 10},   //
+                    TestParams{4096, 1000, 20},   //
+                    TestParams{4096, 1000, 400},  //
+                    TestParams{4096, 3000},       // element size default 288B
+                    TestParams{4096, 3000, 10},   //
+                    TestParams{4096, 3000, 20},   //
+                    TestParams{4096, 3000, 400},  //
+                    TestParams{4096, 203, 288, 100},  //
+                    TestParams{4096, 3000, 288, 1000},
+                    // N = 8192
+                    TestParams{8192, 1000},       // element size default 288B
+                    TestParams{8192, 1000, 10},   //
+                    TestParams{8192, 1000, 20},   //
+                    TestParams{8192, 1000, 400},  //
+                    TestParams{8192, 3000},       // element size default 288B
+                    TestParams{8192, 3000, 10},   //
+                    TestParams{8192, 3000, 20},   //
+                    TestParams{8192, 3000, 400},  //
+                    TestParams{8192, 203, 288, 100},    //
+                    TestParams{8192, 3000, 288, 1000},  //
+                    // larger data num
+                    TestParams{4096, 1 << 12}, TestParams{4096, 1 << 13},
+                    TestParams{4096, 1 << 14}, TestParams{4096, 1 << 15},
+                    TestParams{4096, 1 << 16}, TestParams{4096, 1 << 17},
+                    TestParams{4096, 1 << 18}, TestParams{4096, 1 << 19},
+                    // small element_size to avoid out of memory
+                    TestParams{4096, 1 << 20, 10},
+                    TestParams{4096, 1 << 21, 10},
+                    TestParams{4096, 1 << 22, 10},
+                    TestParams{4096, 1 << 23, 10},
+                    TestParams{4096, 1 << 24, 10}));
 
 }  // namespace psi::seal_pir

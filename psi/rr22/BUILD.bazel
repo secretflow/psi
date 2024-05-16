@@ -51,7 +51,7 @@ psi_cc_library(
         "@yacl//yacl/crypto/rand",
         "@yacl//yacl/crypto/tools:prg",
         "@yacl//yacl/crypto/tools:ro",
-        "@yacl//yacl/kernels/algorithms:silent_vole",
+        "@yacl//yacl/kernel/algorithms:silent_vole",
         "@yacl//yacl/link",
         "@yacl//yacl/math/f2k",
         "@yacl//yacl/utils:parallel",

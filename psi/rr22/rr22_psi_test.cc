@@ -150,7 +150,6 @@ TEST_P(Rr22PsiTest, CompressParamsFalseTest) {
   EXPECT_EQ(indices_psi, indices);
 }
 
-
 INSTANTIATE_TEST_SUITE_P(
     CorrectTest_Instances, Rr22PsiTest,
     testing::Values(TestParams{35, Rr22PsiMode::FastMode},

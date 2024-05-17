@@ -195,12 +195,10 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{64, 10000},  // element size default 288B
                     TestParams{64, 10000, 288, 8192},
 
-                    TestParams{64, 10000, 20},
-                    TestParams{64, 10000, 20, 8192},
+                    TestParams{64, 10000, 20}, TestParams{64, 10000, 20, 8192},
 
                     // large data num
-                    TestParams{64, 1 << 20, 20},
-                    TestParams{64, 1 << 21, 20},
+                    TestParams{64, 1 << 20, 20}, TestParams{64, 1 << 21, 20},
                     TestParams{64, 1 << 22, 20})  //
 );
 

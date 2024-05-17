@@ -532,7 +532,6 @@ std::vector<seal::Ciphertext> SealPirServer::ExpandQuery(
   std::vector<seal::Ciphertext> results2(results.size() << 1);
   seal::Plaintext two("2");
 
-
   int index_raw = (n << 1) - (1 << (logm - 1));
   int index = (index_raw * galois_elts[logm - 1]) % (n << 1);
 
@@ -690,7 +689,8 @@ std::vector<seal::Ciphertext> SealPirServer::GenerateReply(
         seal::Ciphertext temp;
         for (j += 1; j < n_i; j++) {
           if ((*cur)[k + j * product].is_zero()) {
-            // SPDLOG_INFO("cur[{}] is zero, k:{}, j:{}", (k + j * product), k, j);
+            // SPDLOG_INFO("cur[{}] is zero, k:{}, j:{}", (k + j * product), k,
+            // j);
             continue;
           }
           evaluator_->multiply_plain(expanded_query[j], (*cur)[k + j * product],

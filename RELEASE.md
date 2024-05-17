@@ -5,6 +5,9 @@
 > - `[API]` prefix for API changes.
 > - `[Improvement]` prefix for implementation improvement.
 
+## v0.4.0.dev240517
+- [Improvement] upgrade yacl to 0.4.5b0.
+
 ## v0.4.0.dev240514
 - [API] add entrypoint for docker file.
 - [API] allow passing config JSON directly to main.

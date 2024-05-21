@@ -258,20 +258,6 @@ INSTANTIATE_TEST_SUITE_P(
             3,
         },
         TestParams{
-            {5, 6},
-            {"id,value\nc测试,c\nb测试,b\na测试,a\nn测试,n\nj测试,j\n",
-             "id,value\nb测试,b\nc测试,c\nj测试,t\na测试,a\nk测试,k\nq测试,"
-             "q\n"},
-            {"id,value\na测试,a\nb测试,b\nc测试,c\nj测试,j\n",
-             "id,value\na测试,a\nb测试,b\nc测试,c\nj测试,t\n"},
-            {{"id"}, {"id"}},
-            PsiType::BC22_PSI_2PC,
-            64,
-            true,
-            false,
-            4,
-        },
-        TestParams{
             {3, 3, 3},
             {"id,value\nc测试,c\nb测试,b\na测试,a\n",
              "id,value\nb测试,b\nc测试,c\na测试,a\n",
@@ -481,7 +467,6 @@ INSTANTIATE_TEST_SUITE_P(FailedWorks_Instances, BucketTaskPsiTestFailedTest,
                              // invalid link world size
                              FailedTestParams{3, 0, PsiType::KKRT_PSI_2PC},
                              FailedTestParams{4, 0, PsiType::ECDH_PSI_2PC},
-                             FailedTestParams{1, 0, PsiType::BC22_PSI_2PC},
                              FailedTestParams{2, 0, PsiType::ECDH_PSI_3PC},
                              // invalid receiver_rank
                              FailedTestParams{3, 4, PsiType::ECDH_PSI_3PC},

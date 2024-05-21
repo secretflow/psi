@@ -6,7 +6,6 @@ SecretFlow SPU implements the following PSI protocols,
 - Semi-honest ECDH-based two-party PSI protocol [HFH99]_
 - Semi-honest ECDH-based three-party PSI protocol
 - Semi-honest OT-based two-party PSI protocol [KKRT16]_
-- Semi-honest OT-based two-party PSI protocol (with improved communication efficiency) [BC22]_
 - Differentially Private (DP) PSI Protocol [DP-PSI]_
 - Unbalanced PSI Protocol
 - Semi-honest and Malicious VOLE-based two-party PSI protocol [RS21]_ [RR22]_
@@ -120,42 +119,6 @@ We use 3-way stash-less CuckooHash proposed in [PSZ18]_.
 6. Receiver compares two BaRK-OPRFs set and obtains the intersection.
 
 
-BC22 PCG-PSI
-------------
-
-Pseudorandom Correlation Generator (PCG), is a primitive introduced in the work of Boyle et
-al. [BCG+19b]_, [BCGI18]_, [SGRR19]_, [BCG+19a]_, [CIK+20]_. The goal of PCG is to compress long sources
-of correlated randomness without violating security.
-
-Boyle et al. have designed multiple concretely efficient PCGs
-for specific correlations, such as vector oblivious linear evaluation (VOLE) or batch oblivious linear
-evaluation (BOLE). These primitives are at the heart of modern secure computation protocols with low
-communication overhead.The VOLE functionality allows a receiver to learn a secret linear combination
-of two vectors held by a sender and constructed (with sublinear communication) under variants
-of the syndrome decoding assumption.
-
-[BC22]_ uses PCG to speed up private set intersection protocols, minimizing computation and communication.
-We implement semi-honest version psi in [BC22]_ and use PCG/VOLE from [WYKW21]_ . [BC22]_ PSI protocol
-requires only 30 seconds for the case of larger sets ( :math:`2^{24}` items each) of long strings (128 bits),
-and reduces 1/3 communication than [KKRT16]_.
-
-.. figure:: ../_static/pcg_psi.png
-
-1. Sender and Receiver agree on :math:`(3,2)`-Generalized CuckooHash :math:`h_1,h_2: {\{0,1\}}^{*} \rightarrow [m]`
-
-2. Receiver inserts each x into bin :math:`h_1(x)` or :math:`h_2(x)`
-
-3. Sender inserts each y into bin :math:`h_1(y)` and :math:`h_2(y)`
-
-4. Run PCG/VOLE from [WYKW21]_, :math:`w_i = \Delta * u_i + v_i`,  Receiver gets :math:`w_i` and :math:`\Delta`,
-   Sender gets :math:`u_i` and :math:`v_i`, for each :math:`bin_i`
-
-5. Receiver sends Masked Bin Polynomial Coefficients to Sender, and receives BaRK-OPRF values
-
-6. Sender sends all BaRK-OPRF values for each :math:`{\{y_i\}}_{i=1}^{n_2}` to Receiver
-
-7. Receiver compares two BaRK-OPRFs sets and gets intersection.
-
 Differentially Private PSI
 --------------------------
 
@@ -240,7 +203,7 @@ An Oblivious Pseudorandom Function (OPRF) is a two-party protocol between client
 output of a Pseudorandom Function (PRF). [draft-irtf-cfrg-voprf-10]_ specifies OPRF, VOPRF, and POPRF protocols
 built upon prime-order groups.
 
-.. figure:: ../_static/ecdh_oprf_psi.png
+.. figure:: ../_static/ecdh_oprf_psi.jpg
 
 - Offline Phase
 
@@ -408,8 +371,6 @@ Reference
 .. [BCG+19b] E. Boyle, G. Couteau, N. Gilboa, Y. Ishai, L. Kohl, P. Rindal, and P. Scholl.
    Efficient two-round OT extension and silent non-interactive secure computation. In ACM CCS 2019,
    pages 291–308. ACM Press, November 2019.
-
-.. [BC22] Private Set Intersection from Pseudorandom Correlation Generators
 
 .. [Ber06] Daniel J. Bernstein. Curve25519: new diffie-hellman speed records. In In Public
    Key Cryptography (PKC), Springer-Verlag LNCS 3958, page 2006, 2006. (Cited on page 4.)

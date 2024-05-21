@@ -87,18 +87,6 @@ psi_cc_library(
 )
 
 psi_cc_library(
-    name = "bc22_2party_psi",
-    srcs = ["bc22_2party_psi.cc"],
-    hdrs = ["bc22_2party_psi.h"],
-    deps = [
-        ":base_operator",
-        ":factory",
-        "//psi/bc22:bc22_psi",
-    ],
-    alwayslink = True,
-)
-
-psi_cc_library(
     name = "dp_2party_psi",
     srcs = ["dp_2party_psi.cc"],
     hdrs = ["dp_2party_psi.h"],
@@ -126,7 +114,6 @@ psi_cc_library(
 psi_cc_library(
     name = "operator",
     deps = [
-        ":bc22_2party_psi",
         ":dp_2party_psi",
         ":ecdh_3party_psi",
         ":kkrt_2party_psi",

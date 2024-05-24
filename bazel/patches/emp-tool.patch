@@ -161,3 +161,16 @@ index 23bbf42..5101d7e 100644
  		}
  	}
  
+diff --git a/emp-tool/utils/block.h b/emp-tool/utils/block.h
+index f7d3d34..3c25a73 100644
+--- a/emp-tool/utils/block.h
++++ b/emp-tool/utils/block.h
+@@ -19,6 +19,7 @@ inline __m128i _mm_aesdeclast_si128 (__m128i a, __m128i RoundKey)
+ #include <cstring>
+ #include <iostream>
+ #include <iomanip>
++#include <cstdint>
+
+ namespace emp {
+
+

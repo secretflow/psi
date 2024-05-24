@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library", "psi_cc_test")
-load("@rules_proto//proto:defs.bzl", "proto_library")
 load("@rules_cc//cc:defs.bzl", "cc_proto_library")
+load("@rules_proto//proto:defs.bzl", "proto_library")
+load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library", "psi_cc_test")
 
 package(default_visibility = ["//visibility:public"])
 

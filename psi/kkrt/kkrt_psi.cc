@@ -25,9 +25,9 @@
 #include "yacl/crypto/hash/hash_utils.h"
 #include "yacl/crypto/rand/rand.h"
 #include "yacl/crypto/tools/prg.h"
-#include "yacl/kernels/algorithms/base_ot.h"
-#include "yacl/kernels/algorithms/iknp_ote.h"
-#include "yacl/kernels/algorithms/kkrt_ote.h"
+#include "yacl/kernel/algorithms/base_ot.h"
+#include "yacl/kernel/algorithms/iknp_ote.h"
+#include "yacl/kernel/algorithms/kkrt_ote.h"
 
 #include "psi/utils/communication.h"
 #include "psi/utils/cuckoo_index.h"

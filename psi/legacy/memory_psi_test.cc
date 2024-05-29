@@ -152,19 +152,14 @@ INSTANTIATE_TEST_SUITE_P(
         MemoryTaskTestParams{{0, 3}, 0, PsiType::ECDH_PSI_2PC},        //
         MemoryTaskTestParams{{3, 0}, 0, PsiType::KKRT_PSI_2PC},        //
         MemoryTaskTestParams{{0, 0}, 0, PsiType::KKRT_PSI_2PC},        //
-        MemoryTaskTestParams{{3, 0}, 0, PsiType::BC22_PSI_2PC},        //
-        MemoryTaskTestParams{{0, 0}, 0, PsiType::BC22_PSI_2PC},        //
         MemoryTaskTestParams{{4, 3, 0}, 0, PsiType::ECDH_PSI_3PC},     //
         MemoryTaskTestParams{{4, 3, 0, 6}, 0, PsiType::ECDH_PSI_NPC},  //
 
         //
-        MemoryTaskTestParams{{20, 20}, 10, PsiType::KKRT_PSI_2PC},    //
-        MemoryTaskTestParams{{20, 17}, 10, PsiType::KKRT_PSI_2PC},    //
-        MemoryTaskTestParams{{17, 20}, 10, PsiType::KKRT_PSI_2PC},    //
-        MemoryTaskTestParams{{33, 45}, 20, PsiType::ECDH_PSI_2PC},    //
-        MemoryTaskTestParams{{100, 100}, 30, PsiType::BC22_PSI_2PC},  //
-        MemoryTaskTestParams{{200, 100}, 60, PsiType::BC22_PSI_2PC},  //
-        MemoryTaskTestParams{{100, 200}, 50, PsiType::BC22_PSI_2PC},  //
+        MemoryTaskTestParams{{20, 20}, 10, PsiType::KKRT_PSI_2PC},  //
+        MemoryTaskTestParams{{20, 17}, 10, PsiType::KKRT_PSI_2PC},  //
+        MemoryTaskTestParams{{17, 20}, 10, PsiType::KKRT_PSI_2PC},  //
+        MemoryTaskTestParams{{33, 45}, 20, PsiType::ECDH_PSI_2PC},  //
 
         MemoryTaskTestParams{{20, 17, 14}, 10, PsiType::ECDH_PSI_3PC},      //
         MemoryTaskTestParams{{20, 17, 14, 30}, 10, PsiType::ECDH_PSI_NPC},  //
@@ -197,7 +192,6 @@ INSTANTIATE_TEST_SUITE_P(FailedWorks_Instances, MemoryTaskPsiTestFailedTest,
                              // invalid link world size
                              FailedTestParams{3, 0, PsiType::KKRT_PSI_2PC},
                              FailedTestParams{4, 0, PsiType::ECDH_PSI_2PC},
-                             FailedTestParams{1, 0, PsiType::BC22_PSI_2PC},
                              FailedTestParams{2, 0, PsiType::ECDH_PSI_3PC},
                              // invalid receiver_rank
                              FailedTestParams{3, 4, PsiType::ECDH_PSI_3PC},

@@ -31,7 +31,7 @@ struct TestParams {
   size_t batch_number;
   size_t element_number;
   size_t element_size = 288;
-  size_t poly_degree = 8192;  // now only support 8192
+  size_t poly_degree = 4096;  // now we support 4096 and 8192
 };
 
 std::vector<uint8_t> GenerateDbData(TestParams params) {
@@ -80,6 +80,13 @@ TEST_P(SealMultiPirTest, Works) {
   size_t element_number = params.element_number;
   size_t element_size = params.element_size;
   size_t batch_number = params.batch_number;
+
+  SPDLOG_INFO(
+      "N (poly degree): {}, batch_number: {}, element_size: {} bytes, "
+      "element_number: 2^{} = {}",
+      params.poly_degree, batch_number, params.element_size,
+      std::log2(params.element_number), params.element_number);
+
   // size_t batch_number = 256;
   double factor = 1.5;
   size_t hash_num = 3;
@@ -109,8 +116,6 @@ TEST_P(SealMultiPirTest, Works) {
   ::psi::seal_pir::MultiQueryOptions options{
       {params.poly_degree, element_number, element_size}, batch_number};
 
-  SPDLOG_INFO("element_number:{}", options.seal_options.element_number);
-
   ::psi::seal_pir::MultiQueryServer mpir_server(options, cuckoo_params,
                                                 seed_server);
 
@@ -136,6 +141,8 @@ TEST_P(SealMultiPirTest, Works) {
   mpir_server.SetGaloisKeys(galkey);
 
   // do pir query/answer
+  const auto pir_start_time = std::chrono::system_clock::now();
+
   std::future<void> pir_service_func =
       std::async([&] { return mpir_server.DoMultiPirAnswer(ctxs[0]); });
   std::future<std::vector<std::vector<uint8_t>>> pir_client_func = std::async(
@@ -143,6 +150,11 @@ TEST_P(SealMultiPirTest, Works) {
 
   pir_service_func.get();
   std::vector<std::vector<uint8_t>> query_reply_bytes = pir_client_func.get();
+
+  const auto pir_end_time = std::chrono::system_clock::now();
+  const DurationMillis pir_time = pir_end_time - pir_start_time;
+
+  SPDLOG_INFO("pir time(online) : {} ms", pir_time.count());
 
   EXPECT_EQ(query_reply_bytes.size(), query_index.size());
 
@@ -171,11 +183,23 @@ TEST_P(SealMultiPirTest, Works) {
 
 INSTANTIATE_TEST_SUITE_P(
     Works_Instances, SealMultiPirTest,
-    testing::Values(TestParams{32, 1000},       // element size default 288B
-                    TestParams{32, 1000, 10},   //
-                    TestParams{32, 1000, 400},  //
-                    TestParams{64, 10000},      // element size default 288B
-                    TestParams{64, 10000, 20})  //
+    testing::Values(TestParams{32, 1000},  // element size default 288B
+                    TestParams{32, 1000, 288, 8192},
+
+                    TestParams{32, 1000, 10},        //
+                    TestParams{32, 1000, 10, 8192},  //
+
+                    TestParams{32, 1000, 400},        //
+                    TestParams{32, 1000, 400, 8192},  //
+
+                    TestParams{64, 10000},  // element size default 288B
+                    TestParams{64, 10000, 288, 8192},
+
+                    TestParams{64, 10000, 20}, TestParams{64, 10000, 20, 8192},
+
+                    // large data num
+                    TestParams{64, 1 << 20, 20}, TestParams{64, 1 << 21, 20},
+                    TestParams{64, 1 << 22, 20})  //
 );
 
 }  // namespace psi::seal_pir

@@ -162,7 +162,6 @@ The algorithm type of psi.
 | INVALID_PSI_TYPE | 0 | none |
 | ECDH_PSI_2PC | 1 | DDH based PSI |
 | KKRT_PSI_2PC | 2 | Efficient Batched Oblivious PRF with Applications to Private Set Intersection https://eprint.iacr.org/2016/799.pdf |
-| BC22_PSI_2PC | 3 | PSI from Pseudorandom Correlation Generators https://eprint.iacr.org/2022/334 |
 | ECDH_PSI_3PC | 4 | Multi-party PSI based on ECDH (Say A, B, C (receiver)) notice: two-party intersection cardinarlity leak (|A intersect B|) |
 | ECDH_PSI_NPC | 5 | Iterative running 2-party ecdh psi to get n-party PSI. Notice: two-party intersection leak |
 | KKRT_PSI_NPC | 6 | Iterative running 2-party kkrt psi to get n-party PSI. Notice: two-party intersection leak |

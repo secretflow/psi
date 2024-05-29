@@ -119,13 +119,20 @@ sender.config:
 In the first terminal, run the following command
 
 ```bash
-docker run -it  --rm  --network host --mount type=bind,source=/tmp/receiver,target=/root/receiver --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest bash -c "./main --config receiver/receiver.config"
+docker run -it  --rm  --network host --mount type=bind,source=/tmp/receiver,target=/root/receiver --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest --config receiver/receiver.config
 ```
 
 In the other terminal, run the following command simultaneously.
 
 ```bash
-docker run -it  --rm  --network host --mount type=bind,source=/tmp/sender,target=/root/sender  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest bash -c "./main --config sender/sender.config"
+docker run -it  --rm  --network host --mount type=bind,source=/tmp/sender,target=/root/sender  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest --config sender/sender.config
+```
+
+You could also pass a minified JSON config directly. A minified JSON is a compact one without white space and line breaks.
+
+e.g.
+```
+docker run -it  --rm  --network host --mount type=bind,source=/tmp/sender,target=/root/sender  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest --json '{"psi_config":{"protocol_config":{"protocol":"PROTOCOL_KKRT","role":"ROLE_RECEIVER","broadcast_result":true},"input_config":{"type":"IO_TYPE_FILE_CSV","path":"/root/receiver/receiver_input.csv"},"output_config":{"type":"IO_TYPE_FILE_CSV","path":"/root/receiver/receiver_output.csv"},"keys":["id0","id1"],"debug_options":{"trace_path":"/root/receiver/receiver.trace"}},"self_link_party":"receiver","link_config":{"parties":[{"id":"receiver","host":"127.0.0.1:5300"},{"id":"sender","host":"127.0.0.1:5400"}]}}'
 ```
 
 ## Building SecretFlow PSI Library

@@ -28,6 +28,7 @@
 #include "psi/proto/psi_v2.pb.h"
 
 DEFINE_string(config, "", "file path of launch config in JSON format.");
+DEFINE_string(json, "", "config in JSON format.");
 DEFINE_string(kuscia, "", "file path of kuscia task config in JSON format.");
 
 std::string GenerateVersion() {
@@ -54,6 +55,15 @@ int main(int argc, char* argv[]) {
 
     SPDLOG_INFO("Kuscia task id: {}", kuscia_config.task_id);
     launch_config = kuscia_config.launch_config;
+  } else if (!FLAGS_json.empty()) {
+    google::protobuf::util::JsonParseOptions json_parse_options;
+    json_parse_options.ignore_unknown_fields = false;  // optional
+    auto status = google::protobuf::util::JsonStringToMessage(
+        FLAGS_json, &launch_config, json_parse_options);
+
+    YACL_ENFORCE(status.ok(),
+                 "Launch config JSON string couldn't be parsed: {}",
+                 FLAGS_json);
   } else {
     YACL_ENFORCE(std::filesystem::exists(FLAGS_config),
                  "Config file[{}] doesn't exist.", FLAGS_config);

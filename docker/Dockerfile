@@ -46,4 +46,4 @@ LABEL kuscia.secretflow.deploy-templates=$deploy_templates
 # run as root for now
 WORKDIR /root
 
-CMD ["/bin/bash"]
+ENTRYPOINT ["./main"]

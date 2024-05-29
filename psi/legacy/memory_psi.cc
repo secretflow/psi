@@ -41,8 +41,7 @@ void MemoryPsi::CheckOptions() const {
 
   // check world size
   if (config_.psi_type() == PsiType::ECDH_PSI_2PC ||
-      config_.psi_type() == PsiType::KKRT_PSI_2PC ||
-      config_.psi_type() == PsiType::BC22_PSI_2PC) {
+      config_.psi_type() == PsiType::KKRT_PSI_2PC) {
     YACL_ENFORCE(lctx_->WorldSize() == 2,
                  "psi_type:{}, only two parties supported, got "
                  "{}",

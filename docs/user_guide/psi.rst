@@ -69,12 +69,12 @@ Run PSI
 
 In the first terminal, run the following command::
 
-    docker run -it  --rm  --network host --mount type=bind,source=/tmp/receiver,target=/root/receiver  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest bash -c "./main --config receiver/receiver.config"
+    docker run -it  --rm  --network host --mount type=bind,source=/tmp/receiver,target=/root/receiver  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest --config receiver/receiver.config
 
 
 In the other terminal, run the following command simultaneously::
 
-    docker run -it  --rm  --network host --mount type=bind,source=/tmp/sender,target=/root/sender  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest bash -c "./main --config sender/sender.config"
+    docker run -it  --rm  --network host --mount type=bind,source=/tmp/sender,target=/root/sender  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest --config sender/sender.config
 
 
 Building from source
@@ -157,26 +157,10 @@ Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
 |           | online  | 25.434s | 100.68s | 415.94s | 1672.21s |
 +-----------+---------+---------+---------+---------+----------+
 
-bc22 pcg-psi Benchmark
->>>>>>>>>>>>>>>>>>>>>>
-
-Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
-
-+-----------+---------+---------+---------+----------+---------+---------+
-| bandwidth |   2^18  |   2^20  |   2^21  |   2^22   |   2^23  |   2^24  |
-+===========+=========+=========+=========+==========+=========+=========+
-|    LAN    | 1.261s  | 2.191s  | 3.503s  | 6.51s    | 13.012s | 26.71s  |
-+-----------+---------+---------+---------+----------+---------+---------+
-|  100Mbps  | 2.417s  | 6.054s  | 11.314s | 21.864s  | 43.778s | 88.29s  |
-+-----------+---------+---------+---------+----------+---------+---------+
-|   10Mbps  | 18.826s | 50.038s | 96.516s | 186.097s | 369.84s | 737.71s |
-+-----------+---------+---------+---------+----------+---------+---------+
-
 
 Security Tips
 -------------
 
-Warning:  `KKRT16 <https://eprint.iacr.org/2016/799.pdf>`_ and
-`BC22 PCG <https://eprint.iacr.org/2022/334.pdf>`_ are semi-honest PSI protocols,
+Warning:  `KKRT16 <https://eprint.iacr.org/2016/799.pdf>`_ is semi-honest PSI protocols,
 and may be attacked in malicious model.
-We recommend using KKRT16 and BC22_PCG PSI protocol as one-way PSI, i.e., one party gets the final intersection result.
+We recommend using KKRT16 PSI protocol as one-way PSI, i.e., one party gets the final intersection result.

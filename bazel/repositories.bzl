@@ -44,7 +44,7 @@ def psi_deps():
     _com_github_ridiculousfish_libdivide()
     _com_github_sparsehash_sparsehash()
     _com_github_intel_ipp()
-#   _yacl()
+    _yacl()
 
 def _yacl():
     maybe(

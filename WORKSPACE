@@ -24,8 +24,6 @@ psi_deps()
 #          Please make sure yacl_deps are called right after psi_deps.
 #
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
-
-
 load("@yacl//bazel:repositories.bzl", "yacl_deps")
 
 yacl_deps()

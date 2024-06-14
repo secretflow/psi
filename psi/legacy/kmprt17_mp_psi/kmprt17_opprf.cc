@@ -20,9 +20,9 @@
 
 #include "yacl/crypto/rand/rand.h"
 #include "yacl/crypto/tools/ro.h"
-#include "yacl/kernels/algorithms/base_ot.h"
-#include "yacl/kernels/algorithms/iknp_ote.h"
-#include "yacl/kernels/algorithms/kkrt_ote.h"
+#include "yacl/kernel/algorithms/base_ot.h"
+#include "yacl/kernel/algorithms/iknp_ote.h"
+#include "yacl/kernel/algorithms/kkrt_ote.h"
 #include "yacl/link/link.h"
 #include "yacl/utils/serialize.h"
 

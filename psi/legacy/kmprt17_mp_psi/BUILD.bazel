@@ -37,9 +37,9 @@ psi_cc_library(
         "@yacl//yacl/base:int128",
         "@yacl//yacl/crypto/hash:hash_utils",
         "@yacl//yacl/crypto/rand",
-        "@yacl//yacl/kernels/algorithms:base_ot",
-        "@yacl//yacl/kernels/algorithms:iknp_ote",
-        "@yacl//yacl/kernels/algorithms:kkrt_ote",
+        "@yacl//yacl/kernel/algorithms:base_ot",
+        "@yacl//yacl/kernel/algorithms:iknp_ote",
+        "@yacl//yacl/kernel/algorithms:kkrt_ote",
         "@yacl//yacl/link",
     ],
 )

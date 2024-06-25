@@ -23,6 +23,7 @@ psi_deps()
 # Warning: psi relies on yacl to bring in common 3p libraries.
 #          Please make sure yacl_deps are called right after psi_deps.
 #
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 load("@yacl//bazel:repositories.bzl", "yacl_deps")
 
 yacl_deps()

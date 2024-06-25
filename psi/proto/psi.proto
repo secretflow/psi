@@ -68,6 +68,9 @@ enum PsiType {
   RR22_FAST_PSI_2PC = 13;
   RR22_LOWCOMM_PSI_2PC = 14;
   RR22_MALICIOUS_PSI_2PC = 15;
+
+  // KMPRT17 PSI https://eprint.iacr.org/2017/799.pdf
+  KMPRT17_MP_PSI = 16;
 }
 
 // The specified elliptic curve cryptography used in psi.

@@ -5,23 +5,14 @@
 > - `[API]` prefix for API changes.
 > - `[Improvement]` prefix for implementation improvement.
 
-## v0.4.0.dev240521
+## v0.4.0beta
 - [API] remove BC22 protocol
-
-## v0.4.0.dev240517
-- [Improvement] upgrade yacl to 0.4.5b0.
-
-## v0.4.0.dev240514
 - [API] add entrypoint for docker file.
 - [API] allow passing config JSON directly to main.
 - [Bugfix] fix ic mode.
 - [Bugfix] fix RR22, SealPIR and APSI.
-
-## v0.4.0.dev240401
+- [Improvement] upgrade yacl to 0.4.5b1.
 - [Improvement] upgrade download uri of xz.
-
-## v0.4.0.dev240329
-- [Improvement] upgrade yacl to 0.4.4b3.
 
 ## v0.3.0beta
 - [Improvement] add uuid in system temp folder.

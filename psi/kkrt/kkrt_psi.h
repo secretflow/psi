@@ -21,7 +21,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "yacl/kernel/algorithms/ot_store.h"
+#include "yacl/kernel/type/ot_store.h"
 #include "yacl/link/link.h"
 
 //

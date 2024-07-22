@@ -13,7 +13,7 @@
 // limitations under the License.
 #pragma once
 
-#include "yacl/kernel/algorithms/ot_store.h"
+#include "yacl/kernel/type/ot_store.h"
 
 #include "psi/interface.h"
 #include "psi/utils/hash_bucket_cache.h"

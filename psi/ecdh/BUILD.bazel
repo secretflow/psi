@@ -64,7 +64,7 @@ psi_cc_library(
         ":ecdh_oprf",
         "//psi/cryptor:ecc_utils",
         "//psi/cryptor:sm2_cryptor",
-        "@com_github_microsoft_apsi//:apsi",
+        "@com_github_microsoft_FourQlib//:FourQlib",
         "@com_google_absl//absl/types:span",
         "@yacl//yacl/base:exception",
         "@yacl//yacl/crypto/hash:blake3",

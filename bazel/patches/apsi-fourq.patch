@@ -1,16 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 78d54a6..471ab00 100644
+index 78d54a6..166047c 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -257,6 +257,7 @@ target_include_directories(apsi PUBLIC
- target_include_directories(apsi PUBLIC
-     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/sender>
-     $<INSTALL_INTERFACE:${APSI_INCLUDES_INSTALL_DIR}>)
-+
- apsi_set_version(apsi)
- apsi_link_threads(apsi)
- apsi_install_target(apsi APSITargets)
-@@ -273,10 +274,9 @@ if(APSI_USE_ZMQ)
+@@ -273,10 +273,9 @@ if(APSI_USE_ZMQ)
      target_link_libraries(apsi PUBLIC libzmq-static cppzmq-static)
  endif()
  
@@ -24,66 +16,6 @@ index 78d54a6..471ab00 100644
  
  # Set system
  if(MSVC)
-@@ -285,59 +285,6 @@ elseif (UNIX)
-     target_compile_options(apsi PUBLIC -D__LINUX__)
- endif()
- 
--# Detect architecture
--include(DetectArch)
--if(APSI_FOURQ_ARM64)
--    # _ARM64_ needs to be set if the ARM64 optimizations are used
--    # (in UNIX) or the generic implementation is used (Windows)
--    target_compile_options(apsi PUBLIC -D_ARM64_)
--endif()
--if(CMAKE_SYSTEM_PROCESSOR STREQUAL x86)
--    target_compile_options(apsi PUBLIC -D_X86_)
--endif()
--
--if(APSI_FOURQ_AMD64)
--    target_compile_options(apsi PUBLIC -D_AMD64_)
--    message(STATUS "FourQlib optimization: arch=AMD64")
--elseif(APSI_FOURQ_ARM64 AND UNIX)
--    message(STATUS "FourQlib optimization: arch=ARM64")
--else()
--    target_compile_options(apsi PUBLIC -D_GENERIC_)
--    message(STATUS "FourQlib optimization: arch=GENERIC")
--endif()
--
--# Detect AVX instructions
--if(APSI_FOURQ_AMD64 AND (APSI_USE_AVX OR APSI_USE_AVX2))
--    include(FindAVX)
--    check_for_avx(apsi)
--    if(HAVE_AVX2_EXTENSIONS AND APSI_USE_AVX2)
--        target_compile_options(apsi PUBLIC -D_AVX2_)
--        set(APSI_USE_AVX OFF CACHE BOOL ${APSI_USE_AVX_OPTION_STR} FORCE)
--        message(STATUS "FourQlib optimization: simd=AVX2")
--    elseif(HAVE_AVX_EXTENSIONS AND APSI_USE_AVX)
--        target_compile_options(apsi PUBLIC -D_AVX_)
--        set(APSI_USE_AVX2 OFF CACHE BOOL ${APSI_USE_AVX2_OPTION_STR} FORCE)
--        message(STATUS "FourQlib optimization: simd=AVX")
--    endif()
--else()
--    set(APSI_USE_AVX OFF CACHE BOOL ${APSI_USE_AVX_OPTION_STR} FORCE)
--    set(APSI_USE_AVX2 OFF CACHE BOOL ${APSI_USE_AVX2_OPTION_STR} FORCE)
--    message(STATUS "FourQlib optimization: simd=OFF")
--endif()
--
--# Use optimized assembly on UNIX
--if(APSI_USE_ASM AND UNIX AND NOT APPLE AND NOT CYGWIN AND NOT MINGW)
--    check_language(ASM)
--    if(CMAKE_ASM_COMPILER)
--        enable_language(ASM)
--        target_compile_options(apsi PUBLIC -D_ASM_)
--        message(STATUS "FourQlib optimization: asm=ON")
--    endif()
--else()
--    set(APSI_USE_ASM OFF CACHE BOOL ${APSI_USE_ASM_OPTION_STR} FORCE)
--    message(STATUS "FourQlib optimization: asm=OFF")
--endif()
--
- # Add source files to library and header files to install
- # Must follow configurations for FourQlib
- set(APSI_SOURCE_FILES "")
 diff --git a/common/apsi/CMakeLists.txt b/common/apsi/CMakeLists.txt
 index a65bbfe..60e246e 100644
 --- a/common/apsi/CMakeLists.txt

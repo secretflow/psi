@@ -25,6 +25,7 @@ psi_cmake_external(
     name = "ZeroMQ",
     cache_entries = {
         "ZMQ_BUILD_TESTS": "OFF",
+        "CMAKE_INSTALL_LIBDIR": "lib",
     },
     lib_source = "@com_github_zeromq_libzmq//:all",
     out_static_libs = ["libzmq.a"],

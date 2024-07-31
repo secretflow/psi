@@ -25,9 +25,11 @@ psi_cmake_external(
     name = "log4cplus",
     cache_entries = {
         "LOG4CPLUS_BUILD_TESTING": "OFF",
+        "LOG4CPLUS_BUILD_LOGGINGSERVER": "OFF",
         "WITH_UNIT_TESTS": "OFF",
         "BUILD_SHARED_LIBS": "False",
         "LOG4CPLUS_ENABLE_DECORATED_LIBRARY_NAME": "OFF",
+        "CMAKE_INSTALL_LIBDIR": "lib",
     },
     lib_source = "@com_github_log4cplus_log4cplus//:all",
     out_static_libs = ["liblog4cplus.a"],

@@ -24,26 +24,23 @@ filegroup(
 psi_cmake_external(
     name = "apsi",
     cache_entries = {
-        "APSI_USE_LOG4CPLUS": "OFF",
-        "APSI_USE_ZMQ": "OFF",
+        "APSI_USE_LOG4CPLUS": "ON",
+        "APSI_USE_ZMQ": "ON",
         "CMAKE_INSTALL_LIBDIR": "lib",
-        "CpuFeatures_DIR": "$EXT_BUILD_DEPS/cpu_features/lib/cmake/CpuFeatures/",
         "EXT_BUILD_DEPS": "$EXT_BUILD_DEPS",
     },
-    copts = [
-        "-DAPSI_DISABLE_JSON",
-        "-I$EXT_BUILD_DEPS/gsl/include",
-        "-I$EXT_BUILD_ROOT/external/com_google_flatbuffers/include",
-    ],
     lib_source = "@com_github_microsoft_apsi//:all",
     out_include_dir = "include/APSI-0.11",
     out_static_libs = ["libapsi-0.11.a"],
     deps = [
         "@com_github_facebook_zstd//:zstd",
-        "@com_github_microsoft_gsl//:gsl",
+        "@com_github_log4cplus_log4cplus//:log4cplus",
+        "@com_github_microsoft_gsl//:Microsoft.GSL",
         "@com_github_microsoft_kuku//:kuku",
         "@com_github_microsoft_seal//:seal",
-        "@com_google_flatbuffers//:flatbuffers",
+        "@com_github_open_source_parsers_jsoncpp//:jsoncpp",
+        "@com_github_zeromq_cppzmq//:cppzmq",
+        "@com_google_flatbuffers//:FlatBuffers",
         "@zlib",
     ],
 )

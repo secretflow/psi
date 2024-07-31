@@ -8,7 +8,7 @@ The repo of Private Set Intersection(PSI) and Private Information Retrieval(PIR)
 This repo is formerly psi/pir part from secretflow/spu repo.
 
 > **Note**<br>
-We invite you to try [Easy PSI](https://www.secretflow.org.cn/docs/quickstart/easy-psi), a standalone PSI product powered by this library.
+We invite you to try [Easy PSI](https://www.secretflow.org.cn/zh-CN/docs/easy-psi/), a standalone PSI product powered by this library.
 
 ## PSI Quick Start with v2 API
 

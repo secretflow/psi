@@ -26,25 +26,25 @@ namespace psi {
 class Sm2Cryptor : public IEccCryptor {
  public:
   explicit Sm2Cryptor(CurveType type = CurveType::CURVE_SM2)
-      : curve_type_(type) {}
+      : curve_type_(type) {
+    ec_group_ = yacl::crypto::EcGroupFactory::Instance().Create(
+        "sm2", yacl::ArgLib = "openssl");
+  }
 
   explicit Sm2Cryptor(absl::Span<const uint8_t> key,
                       CurveType type = CurveType::CURVE_SM2)
       : curve_type_(type) {
     YACL_ENFORCE(key.size() == kEccKeySize);
     std::memcpy(private_key_, key.data(), key.size());
+    ec_group_ = yacl::crypto::EcGroupFactory::Instance().Create(
+        "sm2", yacl::ArgLib = "openssl");
   }
 
   ~Sm2Cryptor() override { OPENSSL_cleanse(&private_key_[0], kEccKeySize); }
 
-  void EccMask(absl::Span<const char> batch_points,
-               absl::Span<char> dest_points) const override;
-
   CurveType GetCurveType() const override { return curve_type_; }
 
-  size_t GetMaskLength() const override;
-
-  std::vector<uint8_t> HashToCurve(
+  yacl::crypto::EcPoint HashToCurve(
       absl::Span<const char> item_data) const override;
 
   static int GetEcGroupId(CurveType type) {

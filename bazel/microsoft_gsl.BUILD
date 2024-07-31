@@ -22,7 +22,7 @@ filegroup(
 )
 
 psi_cmake_external(
-    name = "gsl",
+    name = "Microsoft.GSL",
     cache_entries = {
         "GSL_INSTALL": "ON",
         "GSL_STANDALONE_PROJECT": "OFF",

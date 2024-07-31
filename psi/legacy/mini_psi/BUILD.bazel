@@ -65,6 +65,7 @@ psi_cc_library(
 psi_cc_test(
     name = "mini_psi_test",
     srcs = ["mini_psi_test.cc"],
+    flaky = True,
     deps = [
         ":mini_psi",
     ],

@@ -1,0 +1,11 @@
+{
+    "apsi_sender_config": {
+        "db_file": "/tmp/db.csv",
+        "params_file": "/tmp/100K-1-16.json",
+        "sdb_out_file": "/tmp/sdb",
+        "save_db_only": true,
+        "experimental_enable_bucketize": true,
+        "experimental_bucket_cnt": 10,
+        "experimental_bucket_folder": "/tmp/apsi_sender_bucket/"
+    }
+}

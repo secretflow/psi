@@ -48,7 +48,7 @@ TEST(Elligator2Test, HashToCurve) {
       "68ca1ea5a6acf4e9956daa101709b1eee6c1bb0df1de3b90d4602382a104c036"};
 
   for (size_t i = 0; i < rfc_9380_test_msgs.size(); ++i) {
-    std::vector<uint8_t> px =
+    yacl::crypto::Array32 px =
         HashToCurveElligator2(rfc_9380_test_msgs[i], kRFC9380Curve25519RoDst);
 
     EXPECT_EQ(rfc_9380_test_px[i],

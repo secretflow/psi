@@ -1,74 +1,3 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 78d54a6..51ec679 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -140,25 +140,6 @@ else()
-     message(STATUS "Microsoft Kuku: found")
- endif()
- 
--# Flatbuffers
--find_package(Flatbuffers REQUIRED)
--if(NOT Flatbuffers_FOUND)
--    message(FATAL_ERROR "Flatbuffers: not found")
--else()
--    message(STATUS "Flatbuffers: found")
--    get_target_property(FLATBUFFERS_FLATC_PATH flatbuffers::flatc IMPORTED_LOCATION_RELEASE)
--    message(STATUS "flatc path: ${FLATBUFFERS_FLATC_PATH}")
--    include(CompileSchemaCXX)
--endif()
--
--# jsoncpp: for parameter configuration
--find_package(jsoncpp REQUIRED)
--if (NOT jsoncpp_FOUND)
--    message(FATAL_ERROR "jsoncpp: not found")
--else()
--    message(STATUS "jsoncpp: found")
--endif()
--
- # [Option] APSI_USE_LOG4CPLUS (default: ON)
- set(APSI_USE_LOG4CPLUS_OPTION_STR "Use Log4cplus for logging")
- option(APSI_USE_LOG4CPLUS ${APSI_USE_LOG4CPLUS_OPTION_STR} ON)
-@@ -263,9 +244,7 @@ apsi_install_target(apsi APSITargets)
- 
- target_link_libraries(apsi
-     PUBLIC SEAL::seal
--    PUBLIC Kuku::kuku
--    PUBLIC flatbuffers::flatbuffers
--    PUBLIC jsoncpp_static)
-+    PUBLIC Kuku::kuku)
- if(APSI_USE_LOG4CPLUS)
-     target_link_libraries(apsi PUBLIC log4cplus::log4cplus)
- endif()
-@@ -299,7 +278,7 @@ endif()
- if(APSI_FOURQ_AMD64)
-     target_compile_options(apsi PUBLIC -D_AMD64_)
-     message(STATUS "FourQlib optimization: arch=AMD64")
--elseif(APSI_FOURQ_ARM64 AND UNIX)
-+elseif(APSI_FOURQ_ARM64 AND UNIX AND APPLE)
-     message(STATUS "FourQlib optimization: arch=ARM64")
- else()
-     target_compile_options(apsi PUBLIC -D_GENERIC_)
-@@ -326,7 +305,7 @@ else()
- endif()
- 
- # Use optimized assembly on UNIX
--if(APSI_USE_ASM AND UNIX AND NOT APPLE AND NOT CYGWIN AND NOT MINGW)
-+if(APSI_FOURQ_AMD64 AND APSI_USE_ASM AND UNIX AND NOT APPLE AND NOT CYGWIN AND NOT MINGW)
-     check_language(ASM)
-     if(CMAKE_ASM_COMPILER)
-         enable_language(ASM)
-diff --git a/common/apsi/CMakeLists.txt b/common/apsi/CMakeLists.txt
-index a65bbfe..ee3b975 100644
---- a/common/apsi/CMakeLists.txt
-+++ b/common/apsi/CMakeLists.txt
-@@ -29,7 +29,5 @@ install(
- )
-
- add_subdirectory(fourq)
--add_subdirectory(network)
--add_subdirectory(oprf)
- add_subdirectory(util)
- set(APSI_SOURCE_FILES ${APSI_SOURCE_FILES} PARENT_SCOPE)
 diff --git a/common/apsi/fourq/CMakeLists.txt b/common/apsi/fourq/CMakeLists.txt
 index 3b15780..5085038 100644
 --- a/common/apsi/fourq/CMakeLists.txt
@@ -361,32 +290,24 @@ index 0000000..d59af6d
 +
 +	return Status;
 +}
-diff --git a/common/apsi/util/stopwatch.h b/common/apsi/util/stopwatch.h
-index e09a53b..c5e4bab 100644
---- a/common/apsi/util/stopwatch.h
-+++ b/common/apsi/util/stopwatch.h
-@@ -22,7 +22,7 @@
+diff --git a/receiver/apsi/itt.h b/receiver/apsi/itt.h
+index e683045..067d244 100644
+--- a/receiver/apsi/itt.h
++++ b/receiver/apsi/itt.h
+@@ -30,7 +30,7 @@ namespace apsi {
+                 return item_count_;
+             }
 
- // Measure a block
- #define STOPWATCH(stopwatch, name) \
--    apsi::util::StopwatchScope UNIQUE_STOPWATCH_NAME(stopwatchscope)(stopwatch, name);
-+    ::apsi::util::StopwatchScope UNIQUE_STOPWATCH_NAME(stopwatchscope)(stopwatch, name);
+-        private:
++            // private:
+             IndexTranslationTable() = default;
 
- namespace apsi {
-     namespace util {
+             std::unordered_map<std::size_t, std::size_t> table_idx_to_item_idx_;
 diff --git a/receiver/apsi/CMakeLists.txt b/receiver/apsi/CMakeLists.txt
-index afce298..7757b68 100644
+index afce298..1790b30 100644
 --- a/receiver/apsi/CMakeLists.txt
 +++ b/receiver/apsi/CMakeLists.txt
-@@ -4,7 +4,6 @@
- # Source files in this directory
- set(APSI_SOURCE_FILES ${APSI_SOURCE_FILES}
-     ${CMAKE_CURRENT_LIST_DIR}/plaintext_powers.cpp
--    ${CMAKE_CURRENT_LIST_DIR}/receiver.cpp
- )
-
- # Add header files for installation
-@@ -12,6 +11,7 @@ install(
+@@ -12,6 +12,7 @@ install(
      FILES
          ${CMAKE_CURRENT_LIST_DIR}/itt.h
          ${CMAKE_CURRENT_LIST_DIR}/match_record.h
@@ -394,56 +315,86 @@ index afce298..7757b68 100644
          ${CMAKE_CURRENT_LIST_DIR}/receiver.h
      DESTINATION
          ${APSI_INCLUDES_INSTALL_DIR}/apsi
-diff --git a/receiver/apsi/itt.h b/receiver/apsi/itt.h
-index e683045..105e14c 100644
---- a/receiver/apsi/itt.h
-+++ b/receiver/apsi/itt.h
-@@ -20,7 +20,15 @@ namespace apsi {
-             create this query. If the given table index was not populated, i.e., there is no
-             translation, then this function returns the number of items encoded by this query.
-             */
--            std::size_t find_item_idx(std::size_t table_idx) const noexcept;
-+            std::size_t find_item_idx(std::size_t table_idx) const noexcept
-+            {
-+                auto item_idx = table_idx_to_item_idx_.find(table_idx);
-+                if (item_idx == table_idx_to_item_idx_.cend()) {
-+                    return item_count();
-+                }
-+
-+                return item_idx->second;
-+            }
+diff --git a/common/apsi/network/sender_operation.cpp b/common/apsi/network/sender_operation.cpp
+index 850ac47..aef52a4 100644
+--- a/common/apsi/network/sender_operation.cpp
++++ b/common/apsi/network/sender_operation.cpp
+@@ -135,7 +135,7 @@ namespace apsi {
 
-             /**
-             Returns the number of items encoded by this index translation table.
-@@ -30,7 +38,7 @@ namespace apsi {
-                 return item_count_;
+             auto oprf_data = fbs_builder.CreateVector(
+                 reinterpret_cast<const uint8_t *>(data.data()), data.size());
+-            auto req = fbs::CreateOPRFRequest(fbs_builder, oprf_data);
++            auto req = fbs::CreateOPRFRequest(fbs_builder, oprf_data, bucket_idx);
+
+             fbs::SenderOperationBuilder sop_builder(fbs_builder);
+             sop_builder.add_request_type(fbs::Request_OPRFRequest);
+@@ -180,6 +180,7 @@ namespace apsi {
+             const auto &oprf_data = *sop->request_as_OPRFRequest()->data();
+             data.resize(oprf_data.size());
+             copy_bytes(oprf_data.data(), oprf_data.size(), data.data());
++            bucket_idx = sop->request_as_OPRFRequest()->bucket_idx();
+
+             return in_data.size();
+         }
+@@ -231,7 +232,8 @@ namespace apsi {
+                 fbs_builder,
+                 static_cast<uint8_t>(compr_mode),
+                 relin_keys_data,
+-                query_request_parts);
++                query_request_parts,
++                bucket_idx);
+
+             fbs::SenderOperationBuilder sop_builder(fbs_builder);
+             sop_builder.add_request_type(fbs::Request_QueryRequest);
+@@ -346,6 +348,8 @@ namespace apsi {
+                 data.emplace(exponent, move(cts_vec));
              }
 
--        private:
-+        //private:
-             IndexTranslationTable() = default;
++            bucket_idx = req.bucket_idx();
++
+             return in_data.size();
+         }
+     } // namespace network
+diff --git a/common/apsi/network/sender_operation.h b/common/apsi/network/sender_operation.h
+index a9cc4df..ce3769c 100644
+--- a/common/apsi/network/sender_operation.h
++++ b/common/apsi/network/sender_operation.h
+@@ -115,6 +115,8 @@ namespace apsi {
+             Holds the OPRF query data.
+             */
+             std::vector<unsigned char> data;
++
++            std::uint32_t bucket_idx = 0;
+         }; // class SenderOperationOPRF
 
-             std::unordered_map<std::size_t, std::size_t> table_idx_to_item_idx_;
-diff --git a/sender/apsi/CMakeLists.txt b/sender/apsi/CMakeLists.txt
-index fd245d7..99e4228 100644
---- a/sender/apsi/CMakeLists.txt
-+++ b/sender/apsi/CMakeLists.txt
-@@ -4,18 +4,12 @@
- # Source files in this directory
- set(APSI_SOURCE_FILES ${APSI_SOURCE_FILES}
-     ${CMAKE_CURRENT_LIST_DIR}/bin_bundle.cpp
--    ${CMAKE_CURRENT_LIST_DIR}/query.cpp
--    ${CMAKE_CURRENT_LIST_DIR}/sender.cpp
--    ${CMAKE_CURRENT_LIST_DIR}/sender_db.cpp
- )
+         /**
+@@ -140,6 +142,8 @@ namespace apsi {
+             ciphertext and the vector holds the ciphertext data for different bundle indices.
+             */
+             std::unordered_map<std::uint32_t, std::vector<SEALObject<seal::Ciphertext>>> data;
++
++            std::uint32_t bucket_idx = 0;
+         }; // class SenderOperationQuery
+-    }      // namespace network
++    } // namespace network
+ } // namespace apsi
+diff --git a/common/apsi/network/sop.fbs b/common/apsi/network/sop.fbs
+index 4c4e116..8eb34fc 100644
+--- a/common/apsi/network/sop.fbs
++++ b/common/apsi/network/sop.fbs
+@@ -10,6 +10,7 @@ table ParmsRequest {
 
- # Add header files for installation
- install(
-     FILES
-         ${CMAKE_CURRENT_LIST_DIR}/bin_bundle.h
--        ${CMAKE_CURRENT_LIST_DIR}/query.h
--        ${CMAKE_CURRENT_LIST_DIR}/sender.h
--        ${CMAKE_CURRENT_LIST_DIR}/sender_db.h
-     DESTINATION
-         ${APSI_INCLUDES_INSTALL_DIR}/apsi
- )
+ table OPRFRequest {
+     data:[ubyte] (required);
++    bucket_idx:uint32;
+ }
+
+ table QueryRequestPart {
+@@ -21,6 +22,7 @@ table QueryRequest {
+     compression_type:ubyte;
+     relin_keys:[ubyte];
+     query:[QueryRequestPart] (required);
++    bucket_idx:uint32;
+ }
+
+ union Request { ParmsRequest, OPRFRequest, QueryRequest }

@@ -115,8 +115,15 @@ int main(int argc, char* argv[]) {
     YACL_ENFORCE(google::protobuf::util::MessageToJsonString(
                      report, &report_json, json_print_options)
                      .ok());
-  } else if (launch_config.has_pir_config()) {
-    psi::PirResultReport report = psi::RunPir(launch_config.pir_config(), lctx);
+  } else if (launch_config.has_apsi_sender_config()) {
+    psi::PirResultReport report =
+        psi::RunPir(launch_config.apsi_sender_config(), lctx);
+    YACL_ENFORCE(google::protobuf::util::MessageToJsonString(
+                     report, &report_json, json_print_options)
+                     .ok());
+  } else if (launch_config.has_apsi_receiver_config()) {
+    psi::PirResultReport report =
+        psi::RunPir(launch_config.apsi_receiver_config(), lctx);
     YACL_ENFORCE(google::protobuf::util::MessageToJsonString(
                      report, &report_json, json_print_options)
                      .ok());

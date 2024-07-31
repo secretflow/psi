@@ -14,7 +14,7 @@ Welcome to SecretFlow PSI Library. There are multiple methods to use PSI/PIR.
 
     * `SCQL <https://www.secretflow.org.cn/docs/scql/latest/zh-Hans>`_ integrates this library to do JOIN operations.
     * `SecretPad <https://www.secretflow.org.cn/docs/quickstart/mvp-platform>`_ provides PSI component.
-    * `Easy PSI <https://www.secretflow.org.cn/docs/quickstart/easy-psi>`_ provides most functionality of this library with User Interface.
+    * `Easy PSI <https://www.secretflow.org.cn/zh-CN/docs/easy-psi/>`_ provides most functionality of this library with User Interface.
 
 
 For PSI, we have a developing v2 PSI.
@@ -22,7 +22,7 @@ For PSI, we have a developing v2 PSI.
 +------------------------+------------------------------------------------+---------------------------------------------+
 |                        | PSI v1 APIs                                    | PSI v2 APIs                                 |
 +========================+================================================+=============================================+
-| Supported Protocols    | ECDH, BC22, KKRT, ECDH_OPRF_UB, DP_PSI, RR22   | ECDH, KKRT, RR22, ECDH_OPRF_UB              |
+| Supported Protocols    | ECDH, KKRT, ECDH_OPRF_UB, DP_PSI, RR22         | ECDH, KKRT, RR22, ECDH_OPRF_UB              |
 +------------------------+------------------------------------------------+---------------------------------------------+
 | CSV parser             | Support a subset of csv files.                 | Apache Arrow, support all legal csv files.  |
 +------------------------+------------------------------------------------+---------------------------------------------+

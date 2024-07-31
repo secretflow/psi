@@ -17,10 +17,9 @@
 #include <memory>
 #include <vector>
 
-#include "openssl/crypto.h"
-#include "openssl/rand.h"
 #include "yacl/base/exception.h"
 #include "yacl/link/link.h"
+#include "yacl/utils/spi/spi_factory.h"
 
 #include "psi/cryptor/ecc_cryptor.h"
 
@@ -50,21 +49,24 @@ class SodiumCurve25519Cryptor : public IEccCryptor {
     private_key_[0] &= 248;
     private_key_[31] &= 127;
     private_key_[31] |= 64;
+
+    ec_group_ = yacl::crypto::EcGroupFactory::Instance().Create(
+        "Curve25519", yacl::ArgLib = "libsodium");
   }
 
   ~SodiumCurve25519Cryptor() override = default;
 
   CurveType GetCurveType() const override { return CurveType::CURVE_25519; }
 
-  void EccMask(absl::Span<const char> batch_points,
-               absl::Span<char> dest_points) const override;
+  yacl::crypto::EcPoint HashToCurve(
+      absl::Span<const char> item_data) const override;
 
   std::vector<uint8_t> KeyExchange(
       const std::shared_ptr<yacl::link::Context> &link_ctx);
 };
 
 class SodiumElligator2Cryptor : public SodiumCurve25519Cryptor {
-  std::vector<uint8_t> HashToCurve(
+  yacl::crypto::EcPoint HashToCurve(
       absl::Span<const char> item_data) const override;
 };
 

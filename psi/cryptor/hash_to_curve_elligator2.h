@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "yacl/base/byte_container_view.h"
+#include "yacl/crypto/ecc/ec_point.h"
 
 namespace psi {
 
@@ -31,7 +32,7 @@ namespace psi {
 //   <xx> and <yy> are two-digit numbers indicating the version and
 //   ciphersuite, respectively, and <suiteID> is the Suite ID of the
 //  encoding used in ciphersuite <yy>
-std::vector<uint8_t> HashToCurveElligator2(
+yacl::crypto::Array32 HashToCurveElligator2(
     yacl::ByteContainerView buffer,
     const std::string &dst =
         "SECRETFLOW-V01-CS02-with-curve25519_XMD:SHA-512_ELL2_RO_");

@@ -24,7 +24,6 @@ def psi_deps():
     _com_github_emptoolkit_emp_zk()
     _com_github_facebook_zstd()
     _com_github_microsoft_seal()
-    _com_github_eigenteam_eigen()
     _com_github_microsoft_apsi()
     _com_github_microsoft_gsl()
     _com_github_microsoft_kuku()
@@ -45,6 +44,10 @@ def psi_deps():
     _com_github_sparsehash_sparsehash()
     _com_github_intel_ipp()
     _yacl()
+    _com_github_zeromq_cppzmq()
+    _com_github_zeromq_libzmq()
+    _com_github_log4cplus_log4cplus()
+    _com_github_open_source_parsers_jsoncpp()
 
 def _yacl():
     maybe(
@@ -164,24 +167,10 @@ def _com_github_microsoft_seal():
         sha256 = "af9bf0f0daccda2a8b7f344f13a5692e0ee6a45fea88478b2b90c35648bf2672",
         strip_prefix = "SEAL-4.1.1",
         type = "tar.gz",
-        patch_args = ["-p1"],
-        patches = ["@psi//bazel:patches/seal.patch"],
         urls = [
             "https://github.com/microsoft/SEAL/archive/refs/tags/v4.1.1.tar.gz",
         ],
         build_file = "@psi//bazel:seal.BUILD",
-    )
-
-def _com_github_eigenteam_eigen():
-    maybe(
-        http_archive,
-        name = "com_github_eigenteam_eigen",
-        sha256 = "c1b115c153c27c02112a0ecbf1661494295d9dcff6427632113f2e4af9f3174d",
-        build_file = "@psi//bazel:eigen.BUILD",
-        strip_prefix = "eigen-3.4",
-        urls = [
-            "https://gitlab.com/libeigen/eigen/-/archive/3.4/eigen-3.4.tar.gz",
-        ],
     )
 
 def _com_github_microsoft_apsi():
@@ -197,8 +186,6 @@ def _com_github_microsoft_apsi():
         patch_args = ["-p1"],
         patches = [
             "@psi//bazel:patches/apsi.patch",
-            "@psi//bazel:patches/apsi-gen.patch",
-            "@psi//bazel:patches/apsi_bin_bundle.patch",
         ],
     )
 
@@ -232,11 +219,16 @@ def _com_google_flatbuffers():
     maybe(
         http_archive,
         name = "com_google_flatbuffers",
-        sha256 = "8aff985da30aaab37edf8e5b02fda33ed4cbdd962699a8e2af98fdef306f4e4d",
-        strip_prefix = "flatbuffers-23.3.3",
+        sha256 = "4157c5cacdb59737c5d627e47ac26b140e9ee28b1102f812b36068aab728c1ed",
+        strip_prefix = "flatbuffers-24.3.25",
         urls = [
-            "https://github.com/google/flatbuffers/archive/refs/tags/v23.3.3.tar.gz",
+            "https://github.com/google/flatbuffers/archive/refs/tags/v24.3.25.tar.gz",
         ],
+        patches = [
+            "@psi//bazel:patches/flatbuffers.patch",
+        ],
+        patch_args = ["-p1", "-l"],
+        build_file = "@psi//bazel:flatbuffers.BUILD",
     )
 
 def _org_apache_arrow():
@@ -427,4 +419,56 @@ def _com_github_sparsehash_sparsehash():
         sha256 = "8cd1a95827dfd8270927894eb77f62b4087735cbede953884647f16c521c7e58",
         strip_prefix = "sparsehash-sparsehash-2.0.4",
         build_file = "@psi//bazel:sparsehash.BUILD",
+    )
+
+def _com_github_zeromq_cppzmq():
+    maybe(
+        http_archive,
+        name = "com_github_zeromq_cppzmq",
+        build_file = "@psi//bazel:cppzmq.BUILD",
+        strip_prefix = "cppzmq-4.10.0",
+        sha256 = "c81c81bba8a7644c84932225f018b5088743a22999c6d82a2b5f5cd1e6942b74",
+        type = ".tar.gz",
+        urls = [
+            "https://github.com/zeromq/cppzmq/archive/refs/tags/v4.10.0.tar.gz",
+        ],
+    )
+
+def _com_github_zeromq_libzmq():
+    maybe(
+        http_archive,
+        name = "com_github_zeromq_libzmq",
+        build_file = "@psi//bazel:libzmq.BUILD",
+        strip_prefix = "libzmq-4.3.5",
+        sha256 = "6c972d1e6a91a0ecd79c3236f04cf0126f2f4dfbbad407d72b4606a7ba93f9c6",
+        type = ".tar.gz",
+        urls = [
+            "https://github.com/zeromq/libzmq/archive/refs/tags/v4.3.5.tar.gz",
+        ],
+    )
+
+def _com_github_log4cplus_log4cplus():
+    maybe(
+        http_archive,
+        name = "com_github_log4cplus_log4cplus",
+        build_file = "@psi//bazel:log4cplus.BUILD",
+        strip_prefix = "log4cplus-2.1.1",
+        sha256 = "42dc435928917fd2f847046c4a0c6086b2af23664d198c7fc1b982c0bfe600c1",
+        type = ".tar.gz",
+        urls = [
+            "https://github.com/log4cplus/log4cplus/releases/download/REL_2_1_1/log4cplus-2.1.1.tar.gz",
+        ],
+    )
+
+def _com_github_open_source_parsers_jsoncpp():
+    maybe(
+        http_archive,
+        name = "com_github_open_source_parsers_jsoncpp",
+        build_file = "@psi//bazel:jsoncpp.BUILD",
+        strip_prefix = "jsoncpp-1.9.5",
+        sha256 = "f409856e5920c18d0c2fb85276e24ee607d2a09b5e7d5f0a371368903c275da2",
+        type = ".tar.gz",
+        urls = [
+            "https://github.com/open-source-parsers/jsoncpp/archive/refs/tags/1.9.5.tar.gz",
+        ],
     )

@@ -6,11 +6,11 @@
 Welcome to SecretFlow PSI Library's documentation!
 ==================================================
 
-This is the repo of Private Set Intersection(PSI) and Private Information Retrieval(PIR) from SecretFlow team, which provides PSI and PIR functionality for `SecretFlow <https://www.secretflow.org.cn/docs/secretflow>`_ , `SCQL <https://www.secretflow.org.cn/docs/scql/latest/zh-Hans>`_ , `SecretPad <https://www.secretflow.org.cn/docs/quickstart/mvp-platform>`_ and `Easy PSI <https://www.secretflow.org.cn/docs/quickstart/easy-psi>`_.
+This is the repo of Private Set Intersection(PSI) and Private Information Retrieval(PIR) from SecretFlow team, which provides PSI and PIR functionality for `SecretFlow <https://www.secretflow.org.cn/docs/secretflow>`_ , `SCQL <https://www.secretflow.org.cn/docs/scql/latest/zh-Hans>`_ , `SecretPad <https://www.secretflow.org.cn/docs/quickstart/mvp-platform>`_ and `Easy PSI <https://www.secretflow.org.cn/zh-CN/docs/easy-psi/>`_.
 
 This repo is formerly psi/pir part from `secretflow/spu <https://github.com/secretflow/spu>`_ repo.
 
-We invite you to try `Easy PSI <https://www.secretflow.org.cn/docs/quickstart/easy-psi>`_, a standalone PSI product powered by this library.
+We invite you to try `Easy PSI <https://www.secretflow.org.cn/zh-CN/docs/easy-psi/>`_, a standalone PSI product powered by this library.
 
 .. toctree::
    :maxdepth: 2

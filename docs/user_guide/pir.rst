@@ -14,7 +14,7 @@ Supported Protocols
 | APSI          | Keyword PIR   | Single Server |
 +---------------+---------------+---------------+
 
-At this moment, SealPIR is not available in public APIs.
+At this moment, SealPIR is temporaily removed and will come back later.
 
 
 Release Docker
@@ -23,210 +23,179 @@ Release Docker
 Check official release docker image at `dockerhub <https://hub.docker.com/r/secretflow/psi-anolis8>`_. We also have mirrors at Alibaba Cloud: secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8.
 
 
-Run keyword PIR example(APSI)
------------------------------
+Keyword PIR (APSI)
+------------------
 
-Please check details of configs at :doc:`/reference/pir_config`.
+Before Start
+>>>>>>>>>>>>
 
-To launch PIR, please check LaunchConfig at :doc:`/reference/launch_config` and fillin **runtime_config.pir_config**.
+We provide a simple wrapper for famous `APSI <https://github.com/microsoft/APSI>`_ library. Please read the README of the repo carefully.
+We are not going to discuss any content related to APSI further.
+
+
+Please check details of configs at :doc:`/reference/pir_config`. You are supposed to be aware of that we provided the **EXACT** the same API to APSI.
+So you should read `APSI CLI arguments <https://github.com/microsoft/APSI?tab=readme-ov-file#command-line-interface-cli>`_ as well.
+
+The extra features brought are:
+
+1. Use Yacl Link as communication layer.
+2. Experimental bucketized PIR.
+3. Turn server / client running mode to task mode.
+4. Provide APIs for further integration.
+
+If you want to try a similar CLI like APSI, you could compile the source code by
+
+.. code-block::
+
+    bazel build psi/apsi_wrapper/cli:receiver
+
+    bazel build psi/apsi_wrapper/cli:sender
+
+
+And run CLI like
+
+
+.. code-block::
+
+    ./bazel-bin/psi/apsi_wrapper/cli/sender
+
+    ./bazel-bin/psi/apsi_wrapper/cli/receiver
 
 
 Prepare data and config
 >>>>>>>>>>>>>>>>>>>>>>>
 
-
-You need to prepare following files:
-
-+--------------------------+------------------------------------------------+-------------------------------------------------------------------------------+
-| File(Folder) Name        | Location                                       | Description                                                                   |
-+==========================+================================================+===============================================================================+
-| apsi_client.json         | /tmp/client/apsi_client.json                   | Config for PIR client.                                                        |
-+--------------------------+------------------------------------------------+-------------------------------------------------------------------------------+
-| apsi_server_setup.json   | /tmp/server/apsi_server_setup.json             | Config for PIR server setup stage.                                            |
-+--------------------------+------------------------------------------------+-------------------------------------------------------------------------------+
-| apsi_server_online.json  | /tmp/server/apsi_server_online                 | Config for PIR server online stage.                                           |
-+--------------------------+------------------------------------------------+-------------------------------------------------------------------------------+
-| pir_server_setup         | /tmp/server/pir_server_setup                   | Folder for PIR server setup files.                                            |
-+--------------------------+------------------------------------------------+-------------------------------------------------------------------------------+
-| server_secret_key.bin    | /tmp/server/server_secret_key.bin              | Secret key for PIR server.                                                    |
-+--------------------------+------------------------------------------------+-------------------------------------------------------------------------------+
-| pir_server.csv           | /tmp/server/pir_server.csv                     | Input for PIR server.                                                         |
-+--------------------------+------------------------------------------------+-------------------------------------------------------------------------------+
-| pir_client.csv           | /tmp/client/pir_client.csv                     | Input for PIR client.                                                         |
-+--------------------------+------------------------------------------------+-------------------------------------------------------------------------------+
+For Senders (Servers), you must provide a input csv or a sender db file. An input csv file could be turned into a sender db file after setup.
 
 
+CSV File
+""""""""
 
-
-1. pir_server.csv and pir_client.csv
-
-.. code-block:: bash
-
-  bazel run //examples/pir:generate_pir_data -c opt -- -data_count 10000 -label_len 32 -server_out_path /tmp/pir_server.csv -client_out_path /tmp/pir_client.csv
-
-
-The files looks like
+1. The csv file should looks like
 
 .. code-block::
-   :caption: pir_server.csv
 
-    id,id1,label,label1
-    0000000000900000000,111111,cad43884c86ccb2e9236d7bd6bff976e,a508c64755636d08a2d18516ea5d6448
-    0000000001900000001,111111,058f29d20bcf7e85ba641e2b62ea4fd2,3ff60253b7e740ff49652836b366dd32
-    0000000002900000002,111111,381776671df03957919a922b9a8b0bae,a249a8608d401ee9998a2d8f1e942595
-    0000000003900000003,111111,85d7befe77ab793e5ec409cd5e808463,7fca0e741c7b4115bb93fc575a1c18fa
-    0000000004900000004,111111,a4fc01b0e0a5c65c2c5b2af9dc1b70bc,934fb0334ab777471bb58009ad0b255b
-    0000000005900000005,111111,abb8da0d4e1cf8b7952cbe321f5f4c63,a0e37158c9f9afe1a50563bfcf84bf4f
-    0000000006900000006,111111,c1016b1bdd0521db256487bbd56d5c2e,14ba1f1624861f68a6eb8e3cbece53a1
-    0000000007900000007,111111,b8453bb94b50c231df4bcfdb7b3be9a6,e6a677b128d8355dafafbe0f0c96d536
-    0000000008900000008,111111,0cc97ec32e5768b67e25608724e7ccd8,3b3aaf41662e764a9baa9487ef20da6c
+    Yb,Ii
+    Kw,uO
+    LA,Oc
+    Fr,RM
+    NG,vT
+    KR,ui
+    jL,oA
+    eV,cX
+    uu,LK
 
+Please make sure:
 
-.. code-block::
-   :caption: pir_client.csv
-
-    id,id1
-    0000000974900000974,111111
-    0000002122900002122,111111
-    0000003839900003839,111111
-    0000004198900004198,111111
-    0000004773900004773,111111
-    0000006269900006269,111111
-    0000006641900006641,111111
-    0000006881900006881,111111
-    0000007237900007237,111111
-
-If source code is not available to you, you may create the file by yourself.
+- No headers are allowed.
+- The first column must be items(keys)
+- The second column must be labels(values), this column is optional.
 
 
-2. server_secret_key.bin
+APSI Params File
+""""""""""""""""
 
-.. code-block:: bash
+We use the original APSI params. For details, please check `APSI PSIParams <https://github.com/microsoft/APSI?tab=readme-ov-file#psiparams>`_.
 
-    dd if=/dev/urandom of=server_secret_key.bin bs=32 count=1
+For senders: An APSI params file must be provided with CSV files. If a sender db file is provided, the APSI params is not required and would be ignored.
+For receivers: The APSI params file is optional. If not provided, receivers will ask for senders. If provided, please make sure receivers and senders share
+the same APSI params file, otherwise error occurred.
+
+It's not easy to find a suitable APSI params file. So APSI provides some examples at `APSI parameters <https://github.com/microsoft/APSI/tree/main/parameters`_.
+We have a copy at `APSI parameters <blob/main/examples/pir/apsi/parameters>` as well.
+
+To launch PIR, please check LaunchConfig at :doc:`/reference/launch_config` and fillin **runtime_config.pir_config**.
 
 
-3. configs
+PIR Config
+""""""""""
+
+1. Sender: Setup Stage. In this stage, sender generates sender db file with csv file. This stage is offline.
 
 .. code-block::
-   :caption: apsi_client.json
+   :caption: apsi_sender_setup.json
 
     {
-        "pir_config": {
-            "mode": "MODE_CLIENT",
-            "pir_protocol": "PIR_PROTOCOL_KEYWORD_PIR_APSI",
-            "pir_client_config": {
-                "input_path": "/root/client/pir_client.csv",
-                "key_columns": [
-                    "id"
-                ],
-                "output_path": "/root/client/pir_output.csv"
-            }
-        },
-        "link_config": {
-            "parties": [
-                {
-                    "id": "server",
-                    "host": "127.0.0.1:5300"
-                },
-                {
-                    "id": "client",
-                    "host": "127.0.0.1:5400"
-                }
-            ]
-        },
-        "self_link_party": "client"
-    }
-
-.. code-block::
-   :caption: apsi_server_setup.json
-
-    {
-        "pir_config": {
-            "mode": "MODE_SERVER_SETUP",
-            "pir_protocol": "PIR_PROTOCOL_KEYWORD_PIR_APSI",
-            "pir_server_config": {
-                "input_path": "/root/server/pir_server.csv",
-                "setup_path": "/root/server/pir_server_setup",
-                "key_columns": [
-                    "id"
-                ],
-                "label_columns": [
-                    "label"
-                ],
-                "label_max_len": 288,
-                "bucket_size": 1000000,
-                "apsi_server_config": {
-                    "oprf_key_path": "/root/server/server_secret_key.bin",
-                    "num_per_query": 1,
-                    "compressed": false
-                }
-            }
+        "apsi_sender_config": {
+            "db_file": "/tmp/db.csv",
+            "params_file": "/tmp/1M-256-288.json",
+            "sdb_out_file": "/tmp/sdb",
+            "save_db_only": true
         }
     }
 
 
+2. Sender: Online stage. In this stage, sender generates responses to receivers' queries. This stage is online.
+
 .. code-block::
-   :caption: apsi_server_online.json
+   :caption: apsi_sender_online.json
 
     {
-        "pir_config": {
-            "mode": "MODE_SERVER_ONLINE",
-            "pir_protocol": "PIR_PROTOCOL_KEYWORD_PIR_APSI",
-            "pir_server_config": {
-                "setup_path": "/root/server/pir_server_setup"
-            }
+        "apsi_sender_config": {
+            "db_file": "/tmp/sdb"
         },
         "link_config": {
             "parties": [
                 {
-                    "id": "server",
+                    "id": "sender",
                     "host": "127.0.0.1:5300"
                 },
                 {
-                    "id": "client",
+                    "id": "receiver",
                     "host": "127.0.0.1:5400"
                 }
             ]
         },
-        "self_link_party": "server"
+        "self_link_party": "sender"
     }
 
+3. Receiver: Online stage.
 
-Setup Phase
->>>>>>>>>>>
+.. code-block::
+   :caption: apsi_receiver.json
 
-.. code-block:: bash
+    {
+        "apsi_receiver_config": {
+            "query_file": "/tmp/query.csv",
+            "output_file": "/tmp/result.csv",
+            "params_file": "/tmp/1M-256-288.json"
+        },
+        "link_config": {
+            "parties": [
+                {
+                    "id": "sender",
+                    "host": "127.0.0.1:5300"
+                },
+                {
+                    "id": "receiver",
+                    "host": "127.0.0.1:5400"
+                }
+            ]
+        },
+        "self_link_party": "receiver"
+    }
 
-  docker run -it  --rm  --network host --mount type=bind,source=/tmp/server,target=/root/server --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:0.1.0beta --config server/apsi_server_setup.json
-
-Online Phase
->>>>>>>>>>>>
-
-Start two terminals.
-
-In the server's terminal.
-
-.. code-block:: bash
-
-  docker run -it  --rm  --network host --mount type=bind,source=/tmp/server,target=/root/server --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:0.1.0beta --config server/apsi_server_online.json
+params_file field is optional. If not provided, receiver will ask sender for params. If provided, please make sure you provide the same one to sender's.
 
 
-In the client's terminal.
-
-.. code-block:: bash
-
-  docker run -it  --rm  --network host --mount type=bind,source=/tmp/client,target=/root/client --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:0.1.0beta --config client/apsi_client.json
-
-
-More examples
--------------
+Full Examples
+>>>>>>>>>>>>>
 
 Please read https://github.com/secretflow/psi/tree/main/examples/pir/README.md
 Please check more demo configs at https://github.com/secretflow/psi/tree/main/examples/pir/config
 
-Run keyword PIR python example
-------------------------------
 
-TODO
+Bucketized Mode
+>>>>>>>>>>>>>>>
+
+Searching in a large sender db is costly. So can we search in a smaller db? A naive idea is:
+
+1. In the setup stage, sender split data into buckets. Each bucket will generate a sender db.\
+
+2. In the online stage, receiver split query into subqueries. Each subquery only contains items residing in the same bucket.
+When receivers sends a subquery to the sender, bucket idx is also provided.
+
+3. For each subquery, sender only search in the corresponding sender db for specific bucket.
+
+Bucketized Mode is experimental and for evaluation purposes only.
 

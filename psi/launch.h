@@ -39,7 +39,10 @@ PsiResultReport RunPsi(const v2::PsiConfig& psi_config,
 PsiResultReport RunUbPsi(const v2::UbPsiConfig& ub_psi_config,
                          const std::shared_ptr<yacl::link::Context>& lctx);
 
-PirResultReport RunPir(const PirConfig& pir_config,
+PirResultReport RunPir(const ApsiReceiverConfig& apsi_receiver_config,
+                       const std::shared_ptr<yacl::link::Context>& lctx);
+
+PirResultReport RunPir(const ApsiSenderConfig& apsi_sender_config,
                        const std::shared_ptr<yacl::link::Context>& lctx);
 
 }  // namespace psi

@@ -25,6 +25,8 @@
 #include "openssl/crypto.h"
 #include "openssl/rand.h"
 #include "yacl/base/exception.h"
+#include "yacl/crypto/ecc/ecc_spi.h"
+#include "yacl/utils/parallel.h"
 
 #include "psi/proto/psi.pb.h"
 
@@ -50,34 +52,44 @@ class IEccCryptor {
   /// Get current curve type
   virtual CurveType GetCurveType() const = 0;
 
-  // Perform the ECC mask for a batch of items.
-  //
-  // The `base_points` contains a series of base point. Each point occupies
-  // 256bit, i.e. 32 bytes.
-  virtual void EccMask(absl::Span<const char> batch_points,
-                       absl::Span<char> dest_points) const = 0;
+  virtual std::vector<yacl::crypto::EcPoint> EccMask(
+      const std::vector<yacl::crypto::EcPoint>& points) const;
 
-  virtual size_t GetMaskLength() const { return kEccKeySize; }
+  yacl::crypto::EcPoint EccMask(const yacl::crypto::EcPoint& point,
+                                const yacl::math::MPInt& sk) const;
+
+  virtual size_t GetMaskLength() const;
 
   // Perform hash on input
-  virtual std::vector<uint8_t> HashToCurve(absl::Span<const char> input) const;
+  virtual yacl::crypto::EcPoint HashToCurve(
+      absl::Span<const char> input) const = 0;
+
+  [[nodiscard]] virtual yacl::Buffer SerializeEcPoint(
+      const yacl::crypto::EcPoint& point) const {
+    YACL_ENFORCE(ec_group_, "not implemented");
+    return ec_group_->SerializePoint(point);
+  }
+
+  virtual yacl::crypto::EcPoint DeserializeEcPoint(
+      yacl::ByteContainerView buf) const {
+    YACL_ENFORCE(ec_group_, "not implemented");
+    return ec_group_->DeserializePoint(buf);
+  }
+
+  std::vector<yacl::crypto::EcPoint> HashInputs(
+      const std::vector<std::string>& items) const;
+
+  std::vector<std::string> SerializeEcPoints(
+      const std::vector<yacl::crypto::EcPoint>& points) const;
+
+  std::vector<yacl::crypto::EcPoint> DeserializeEcPoints(
+      const std::vector<std::string>& items) const;
 
   [[nodiscard]] const uint8_t* GetPrivateKey() const { return private_key_; }
 
  protected:
   uint8_t private_key_[kEccKeySize];
+  std::unique_ptr<yacl::crypto::EcGroup> ec_group_ = nullptr;
 };
-
-std::vector<std::string> Mask(const std::shared_ptr<IEccCryptor>& cryptor,
-                              const std::vector<std::string>& items);
-
-std::vector<std::string> Mask(const std::shared_ptr<IEccCryptor>& cryptor,
-                              const std::vector<absl::string_view>& items);
-
-std::string HashInput(const std::shared_ptr<IEccCryptor>& cryptor,
-                      const std::string& item);
-
-std::vector<std::string> HashInputs(const std::shared_ptr<IEccCryptor>& cryptor,
-                                    const std::vector<std::string>& items);
 
 }  // namespace psi

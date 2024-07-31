@@ -70,7 +70,7 @@ psi_cc_library(
     deps = [
         ":factory",
         ":trace_categories",
-        "//psi/apsi:pir",
+        "//psi/apsi_wrapper/cli:entry",
         "//psi/legacy:bucket_psi",
         "@boost//:algorithm",
         "@boost//:uuid",
@@ -89,6 +89,7 @@ psi_cc_library(
 psi_cc_test(
     name = "psi_test",
     srcs = ["psi_test.cc"],
+    flaky = True,
     deps = [
         ":factory",
         "//psi/utils:arrow_csv_batch_provider",

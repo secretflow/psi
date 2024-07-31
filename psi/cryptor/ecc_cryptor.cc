@@ -21,87 +21,59 @@
 
 namespace psi {
 
-namespace {
-std::string CreateFlattenEccBuffer(const std::vector<std::string>& items,
-                                   size_t item_size,
-                                   size_t chosen_size = kEccKeySize) {
-  std::string ret;
-  ret.reserve(items.size() * item_size);
-  size_t size = std::min<size_t>(chosen_size, item_size);
-  for (const auto& item : items) {
-    YACL_ENFORCE(item.size() == item_size, "item.size:{}, item_size:{}",
-                 item.size(), item_size);
-    ret.append(item.data(), size);
-  }
+std::vector<yacl::crypto::EcPoint> IEccCryptor::EccMask(
+    const std::vector<yacl::crypto::EcPoint>& points) const {
+  yacl::math::MPInt sk(0, kEccKeySize * CHAR_BIT);
+  sk.FromMagBytes(private_key_, yacl::Endian::little);
+
+  std::vector<yacl::crypto::EcPoint> ret(points.size());
+  yacl::parallel_for(0, points.size(), [&](int64_t begin, int64_t end) {
+    for (int64_t idx = begin; idx < end; ++idx) {
+      ret[idx] = this->EccMask(points.at(idx), sk);
+    }
+  });
   return ret;
 }
 
-std::string CreateFlattenEccBuffer(const std::vector<absl::string_view>& items,
-                                   size_t item_size,
-                                   size_t chosen_size = kEccKeySize) {
-  std::string ret;
-  ret.reserve(items.size() * item_size);
-  size_t size = std::min<size_t>(chosen_size, item_size);
-  for (const auto& item : items) {
-    YACL_ENFORCE(item.size() == item_size, "item.size:{}, item_size:{}",
-                 item.size(), item_size);
-    ret.append(item.data(), size);
-  }
-  return ret;
+yacl::crypto::EcPoint IEccCryptor::EccMask(const yacl::crypto::EcPoint& point,
+                                           const yacl::math::MPInt& sk) const {
+  YACL_ENFORCE(ec_group_, "not implemented");
+  return ec_group_->Mul(point, sk);
 }
 
-std::vector<std::string> CreateItemsFromFlattenEccBuffer(
-    std::string_view buf, size_t item_size = kEccKeySize) {
-  YACL_ENFORCE(buf.size() % item_size == 0);
-  size_t num_item = buf.size() / item_size;
-  std::vector<std::string> ret;
-  ret.reserve(num_item);
-  for (size_t i = 0; i < num_item; i++) {
-    ret.emplace_back(buf.data() + i * item_size, item_size);
-  }
-  return ret;
+size_t IEccCryptor::GetMaskLength() const {
+  YACL_ENFORCE(ec_group_, "not implemented");
+  return ec_group_->GetSerializeLength();
 }
 
-}  // namespace
-
-std::vector<uint8_t> IEccCryptor::HashToCurve(
-    absl::Span<const char> input) const {
-  auto d = yacl::crypto::Sha256(input);
-  return {d.begin(), d.end()};
-}
-
-std::vector<std::string> Mask(const std::shared_ptr<IEccCryptor>& cryptor,
-                              const std::vector<std::string>& items) {
-  std::string batch_points = CreateFlattenEccBuffer(
-      items, cryptor->GetMaskLength(), cryptor->GetMaskLength());
-  std::string out_points(batch_points.size(), '\0');
-  cryptor->EccMask(batch_points, absl::MakeSpan(out_points));
-  return CreateItemsFromFlattenEccBuffer(out_points, cryptor->GetMaskLength());
-}
-
-std::vector<std::string> Mask(const std::shared_ptr<IEccCryptor>& cryptor,
-                              const std::vector<absl::string_view>& items) {
-  std::string batch_points = CreateFlattenEccBuffer(
-      items, cryptor->GetMaskLength(), cryptor->GetMaskLength());
-  std::string out_points(batch_points.size(), '\0');
-  cryptor->EccMask(batch_points, absl::MakeSpan(out_points));
-  return CreateItemsFromFlattenEccBuffer(out_points, cryptor->GetMaskLength());
-}
-
-std::string HashInput(const std::shared_ptr<IEccCryptor>& cryptor,
-                      const std::string& item) {
-  auto sha_bytes = cryptor->HashToCurve(item);
-  std::string ret(sha_bytes.size(), '\0');
-  std::memcpy(ret.data(), sha_bytes.data(), sha_bytes.size());
-  return ret;
-}
-
-std::vector<std::string> HashInputs(const std::shared_ptr<IEccCryptor>& cryptor,
-                                    const std::vector<std::string>& items) {
-  std::vector<std::string> ret(items.size());
+std::vector<yacl::crypto::EcPoint> IEccCryptor::HashInputs(
+    const std::vector<std::string>& items) const {
+  std::vector<yacl::crypto::EcPoint> ret(items.size());
   yacl::parallel_for(0, items.size(), [&](int64_t begin, int64_t end) {
     for (int64_t idx = begin; idx < end; ++idx) {
-      ret[idx] = HashInput(cryptor, items[idx]);
+      ret[idx] = HashToCurve(items[idx]);
+    }
+  });
+  return ret;
+}
+
+std::vector<std::string> IEccCryptor::SerializeEcPoints(
+    const std::vector<yacl::crypto::EcPoint>& points) const {
+  std::vector<std::string> ret(points.size());
+  yacl::parallel_for(0, points.size(), [&](int64_t begin, int64_t end) {
+    for (int64_t idx = begin; idx < end; ++idx) {
+      ret[idx] = this->SerializeEcPoint(points[idx]);
+    }
+  });
+  return ret;
+}
+
+std::vector<yacl::crypto::EcPoint> IEccCryptor::DeserializeEcPoints(
+    const std::vector<std::string>& items) const {
+  std::vector<yacl::crypto::EcPoint> ret(items.size());
+  yacl::parallel_for(0, items.size(), [&](int64_t begin, int64_t end) {
+    for (int64_t idx = begin; idx < end; ++idx) {
+      ret[idx] = this->DeserializeEcPoint(items[idx]);
     }
   });
   return ret;

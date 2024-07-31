@@ -18,27 +18,26 @@
 #include <array>
 
 #include "crypto_mb/x25519.h"
+#include "yacl/crypto/hash/hash_utils.h"
 #include "yacl/utils/parallel.h"
 
 #include "psi/cryptor/hash_to_curve_elligator2.h"
 
 namespace psi {
 
-void IppEccCryptor::EccMask(absl::Span<const char> batch_points,
-                            absl::Span<char> dest_points) const {
-  YACL_ENFORCE(batch_points.size() % kEccKeySize == 0);
+using yacl::crypto::Array32;
+using yacl::crypto::EcPoint;
 
-  using Item = std::array<unsigned char, kEccKeySize>;
-  static_assert(sizeof(Item) == kEccKeySize);
-
+std::vector<EcPoint> IppEccCryptor::EccMask(
+    const std::vector<EcPoint> &points) const {
   std::array<const int8u *, 8> ptr_sk;
   std::fill(ptr_sk.begin(), ptr_sk.end(),
             static_cast<const int8u *>(&private_key_[0]));
 
   int8u key_data[8][32];  // Junk buffer
 
-  auto mask_functor = [&ptr_sk, &key_data](absl::Span<const Item> in,
-                                           absl::Span<Item> out) {
+  auto mask_functor = [&ptr_sk, &key_data](absl::Span<const EcPoint> in,
+                                           absl::Span<EcPoint> out) {
     size_t current_batch_size = in.size();
 
     std::array<const int8u *, 8> ptr_pk;
@@ -46,10 +45,10 @@ void IppEccCryptor::EccMask(absl::Span<const char> batch_points,
 
     for (size_t i = 0; i < 8; i++) {
       if (i < current_batch_size) {
-        ptr_pk[i] = static_cast<const int8u *>(in[i].data());
-        ptr_key[i] = static_cast<int8u *>(out[i].data());
+        ptr_pk[i] = static_cast<const int8u *>(std::get<Array32>(in[i]).data());
+        ptr_key[i] = static_cast<int8u *>(std::get<Array32>(out[i]).data());
       } else {
-        ptr_pk[i] = static_cast<const int8u *>(in[0].data());
+        ptr_pk[i] = static_cast<const int8u *>(std::get<Array32>(in[0]).data());
         ptr_key[i] = static_cast<int8u *>(key_data[i]);
       }
     }
@@ -58,23 +57,40 @@ void IppEccCryptor::EccMask(absl::Span<const char> batch_points,
     YACL_ENFORCE(status == 0, "ippc mbx_x25519_mb8 Error: ", status);
   };
 
-  absl::Span<const Item> input(
-      reinterpret_cast<const Item *>(batch_points.data()),
-      batch_points.size() / sizeof(Item));
-  absl::Span<Item> output(reinterpret_cast<Item *>(dest_points.data()),
-                          dest_points.size() / sizeof(Item));
-
-  yacl::parallel_for(0, input.size(), 8, [&](int64_t begin, int64_t end) {
+  std::vector<EcPoint> ret(points.size());
+  yacl::parallel_for(0, points.size(), 8, [&](int64_t begin, int64_t end) {
     for (int64_t idx = begin; idx < end; idx += 8) {
-      int64_t current_batch_size =
-          std::min(static_cast<int64_t>(8), end - begin);
-      mask_functor(input.subspan(idx, current_batch_size),
-                   output.subspan(idx, current_batch_size));
+      int64_t current_batch_size = std::min(static_cast<int64_t>(8), end - idx);
+      mask_functor(absl::MakeSpan(points).subspan(idx, current_batch_size),
+                   absl::MakeSpan(ret).subspan(idx, current_batch_size));
     }
   });
+
+  return ret;
 }
 
-std::vector<uint8_t> IppElligator2Cryptor::HashToCurve(
+yacl::crypto::EcPoint IppEccCryptor::HashToCurve(
+    absl::Span<const char> input) const {
+  return yacl::crypto::Sha256(input);
+}
+
+yacl::Buffer IppEccCryptor::SerializeEcPoint(
+    const yacl::crypto::EcPoint &point) const {
+  yacl::Buffer buf(kEccKeySize);
+  memcpy(buf.data(), std::get<Array32>(point).data(), kEccKeySize);
+  return buf;
+}
+
+yacl::crypto::EcPoint IppEccCryptor::DeserializeEcPoint(
+    yacl::ByteContainerView buf) const {
+  YACL_ENFORCE(buf.size() == kEccKeySize, "buf size {} not equal to {}",
+               buf.size(), kEccKeySize);
+  yacl::crypto::EcPoint p(std::in_place_type<Array32>);
+  memcpy(std::get<Array32>(p).data(), buf.data(), buf.size());
+  return p;
+}
+
+EcPoint IppElligator2Cryptor::HashToCurve(
     absl::Span<const char> item_data) const {
   return HashToCurveElligator2(item_data);
 }

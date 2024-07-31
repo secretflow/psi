@@ -57,9 +57,13 @@ void EcdhP2PExtendCtx::MaskShufflePeer() {
 
   std::vector<std::string> dup_masked_items;
   if (!peer_items.empty()) {
-    for (const auto& masked : Mask(options_.ecc_cryptor, peer_items)) {
-      dup_masked_items.emplace_back(masked.substr(
-          masked.length() - options_.dual_mask_size, options_.dual_mask_size));
+    auto peer_points = options_.ecc_cryptor->DeserializeEcPoints(peer_items);
+    for (const auto& masked_point :
+         options_.ecc_cryptor->EccMask(peer_points)) {
+      const auto masked = options_.ecc_cryptor->SerializeEcPoint(masked_point);
+      dup_masked_items.emplace_back(
+          masked.data<char>() + masked.size() - options_.dual_mask_size,
+          options_.dual_mask_size);
     }
     // shuffle x^a^b
     std::sort(dup_masked_items.begin(), dup_masked_items.end());
@@ -77,10 +81,14 @@ void EcdhP2PExtendCtx::MaskPeerForward(
     std::vector<std::string> dup_masked_items;
     RecvBatch(&peer_items, batch_count);
     if (!peer_items.empty()) {
-      for (auto& masked : Mask(options_.ecc_cryptor, peer_items)) {
+      auto peer_points = options_.ecc_cryptor->DeserializeEcPoints(peer_items);
+      for (auto& masked_point : options_.ecc_cryptor->EccMask(peer_points)) {
+        const auto masked =
+            options_.ecc_cryptor->SerializeEcPoint(masked_point);
         if (truncation_size > 0) {
-          dup_masked_items.emplace_back(masked.substr(
-              masked.length() - truncation_size, truncation_size));
+          dup_masked_items.emplace_back(
+              masked.data<char>() + masked.size() - truncation_size,
+              truncation_size);
         } else {
           dup_masked_items.emplace_back(std::move(masked));
         }
@@ -318,9 +326,12 @@ void ShuffleEcdh3PcPsi::FinalPsi(
     std::vector<std::string>* results) {
   if (IsMaster()) {
     std::vector<std::string> masked_partners_items;
-    for (const auto& masked : Mask(ecc_cryptor_, partners_result)) {
-      masked_partners_items.emplace_back(masked.substr(
-          masked.length() - options_.dual_mask_size, options_.dual_mask_size));
+    auto partners_points = ecc_cryptor_->DeserializeEcPoints(partners_result);
+    for (const auto& masked_point : ecc_cryptor_->EccMask(partners_points)) {
+      const auto masked = ecc_cryptor_->SerializeEcPoint(masked_point);
+      masked_partners_items.emplace_back(
+          masked.data<char>() + masked.size() - options_.dual_mask_size,
+          options_.dual_mask_size);
     }
 
     std::sort(masked_partners_items.begin(), masked_partners_items.end());

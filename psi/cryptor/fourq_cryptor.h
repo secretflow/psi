@@ -14,8 +14,6 @@
 
 #pragma once
 
-#include "openssl/crypto.h"
-#include "openssl/rand.h"
 #include "yacl/base/exception.h"
 
 #include "psi/cryptor/ecc_cryptor.h"
@@ -24,16 +22,17 @@ namespace psi {
 
 class FourQEccCryptor : public IEccCryptor {
  public:
-  FourQEccCryptor() = default;
+  FourQEccCryptor() {
+    ec_group_ = yacl::crypto::EcGroupFactory::Instance().Create(
+        "FourQ", yacl::ArgLib = "FourQlib");
+  };
 
   ~FourQEccCryptor() override = default;
 
   CurveType GetCurveType() const override { return CurveType::CURVE_FOURQ; }
 
-  void EccMask(absl::Span<const char> batch_points,
-               absl::Span<char> dest_points) const override;
-
-  std::vector<uint8_t> HashToCurve(absl::Span<const char> input) const override;
+  yacl::crypto::EcPoint HashToCurve(
+      absl::Span<const char> input) const override;
 };
 
 }  // namespace psi

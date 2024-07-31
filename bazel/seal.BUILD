@@ -30,9 +30,9 @@ config_setting(
 )
 
 default_config = {
-    "SEAL_USE_MSGSL": "OFF",
+    "SEAL_USE_MSGSL": "ON",
     "SEAL_BUILD_DEPS": "OFF",
-    "SEAL_USE_ZLIB": "OFF",
+    "SEAL_USE_ZLIB": "ON",
     "SEAL_USE_INTEL_HEXL": "OFF",
     "SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT": "OFF",  #NOTE(juhou) required by apsi
     "SEAL_USE_ZSTD": "ON",
@@ -40,9 +40,9 @@ default_config = {
 }
 
 x64_hexl_config = {
-    "SEAL_USE_MSGSL": "OFF",
+    "SEAL_USE_MSGSL": "ON",
     "SEAL_BUILD_DEPS": "OFF",
-    "SEAL_USE_ZLIB": "OFF",
+    "SEAL_USE_ZLIB": "ON",
     "SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT": "OFF",  #NOTE(juhou) required by apsi
     "CMAKE_INSTALL_LIBDIR": "lib",
     "CpuFeatures_DIR": "$EXT_BUILD_DEPS/cpu_features/lib/cmake/CpuFeatures/",
@@ -59,5 +59,7 @@ psi_cmake_external(
     out_static_libs = ["libseal-4.1.a"],
     deps = [
         "@com_github_facebook_zstd//:zstd",
+        "@com_github_microsoft_gsl//:Microsoft.GSL",
+        "@zlib",
     ],
 )

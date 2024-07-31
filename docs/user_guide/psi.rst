@@ -55,7 +55,7 @@ Please check :doc:`/development/psi_protocol_intro` for details.
 Prepare data and config
 -----------------------
 
-Please check details of configs at :doc:`/reference/psi_v1_config`.
+Please check details of configs at :doc:`/reference/psi_config`.
 
 To launch PSI, please check LaunchConfig at :doc:`/reference/launch_config` and fillin **runtime_config.legacy_psi_config**.
 
@@ -94,10 +94,10 @@ Benchmark
 
 benchmark result without data load time
 
-ecdh-psi Benchmark
+ECDH PSI Benchmark
 >>>>>>>>>>>>>>>>>>
 
-:psi_code_host:`DH-PSI benchmark code </psi/blob/master/psi/psi/ecdh/ecdh_psi_bench.cc>`
+:psi_code_host:`DH-PSI benchmark code <blob/main/psi/ecdh/ecdh_psi_benchmark.cc>`
 
 cpu limited by docker(--cpu)
 
@@ -124,7 +124,7 @@ cpu limited by docker(--cpu)
 |                           | 16c | 2.921s | 6.081s | 13.186s | 29.614s | 65.186s  |
 +---------------------------+-----+--------+--------+---------+---------+----------+
 
-kkrt-psi Benchmark
+KKRT PSI Benchmark
 >>>>>>>>>>>>>>>>>>>
 
 All of our experiments use a single thread for each party.

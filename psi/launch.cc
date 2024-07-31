@@ -27,7 +27,7 @@
 #include "perfetto.h"
 #include "spdlog/spdlog.h"
 
-#include "psi/apsi/pir.h"
+#include "psi/apsi_wrapper/cli/entry.h"
 #include "psi/factory.h"
 #include "psi/prelude.h"
 #include "psi/trace_categories.h"
@@ -167,12 +167,76 @@ PsiResultReport RunLegacyPsi(const BucketPsiConfig& bucket_psi_config,
   return bucket_psi.Run(progress_callbacks, callbacks_interval_ms);
 }
 
-PirResultReport RunPir(const PirConfig& pir_config,
+PirResultReport RunPir(const ApsiReceiverConfig& apsi_receiver_config,
                        const std::shared_ptr<yacl::link::Context>& lctx) {
-  YACL_ENFORCE_EQ(pir_config.pir_protocol(),
-                  PirProtocol::PIR_PROTOCOL_KEYWORD_PIR_APSI);
+  psi::apsi_wrapper::cli::ReceiverOptions options;
+  options.threads = apsi_receiver_config.threads();
+  if (apsi_receiver_config.log_level() == "all" ||
+      apsi_receiver_config.log_level() == "debug" ||
+      apsi_receiver_config.log_level() == "info" ||
+      apsi_receiver_config.log_level() == "warning" ||
+      apsi_receiver_config.log_level() == "error" ||
+      apsi_receiver_config.log_level() == "off") {
+    options.log_level = apsi_receiver_config.log_level();
+  }
+  options.log_file = apsi_receiver_config.log_file();
+  options.silent = apsi_receiver_config.silent();
+  options.query_file = apsi_receiver_config.query_file();
+  options.output_file = apsi_receiver_config.output_file();
+  options.params_file = apsi_receiver_config.params_file();
+  options.channel = "yacl";
 
-  return apsi::Launch(pir_config, lctx);
+  options.experimental_enable_bucketize =
+      apsi_receiver_config.experimental_enable_bucketize();
+  options.experimental_bucket_cnt =
+      apsi_receiver_config.experimental_bucket_cnt();
+
+  int* match_cnt = new int(0);
+
+  YACL_ENFORCE_EQ(RunReceiver(options, lctx, match_cnt), 0);
+
+  PirResultReport report;
+  report.set_match_cnt(*match_cnt);
+
+  delete match_cnt;
+
+  return report;
+}
+
+PirResultReport RunPir(const ApsiSenderConfig& apsi_sender_config,
+                       const std::shared_ptr<yacl::link::Context>& lctx) {
+  psi::apsi_wrapper::cli::SenderOptions options;
+  options.threads = apsi_sender_config.threads();
+  if (apsi_sender_config.log_level() == "all" ||
+      apsi_sender_config.log_level() == "debug" ||
+      apsi_sender_config.log_level() == "info" ||
+      apsi_sender_config.log_level() == "warning" ||
+      apsi_sender_config.log_level() == "error" ||
+      apsi_sender_config.log_level() == "off") {
+    options.log_level = apsi_sender_config.log_level();
+  }
+  options.log_file = apsi_sender_config.log_file();
+  options.silent = apsi_sender_config.silent();
+  options.db_file = apsi_sender_config.db_file();
+  options.params_file = apsi_sender_config.params_file();
+  options.sdb_out_file = apsi_sender_config.sdb_out_file();
+  options.channel = "yacl";
+  options.compress = apsi_sender_config.compress();
+  options.save_db_only = apsi_sender_config.save_db_only();
+  if (apsi_sender_config.nonce_byte_count() != 0) {
+    options.nonce_byte_count = apsi_sender_config.nonce_byte_count();
+  }
+
+  options.experimental_enable_bucketize =
+      apsi_sender_config.experimental_enable_bucketize();
+  options.experimental_bucket_cnt =
+      apsi_sender_config.experimental_bucket_cnt();
+  options.experimental_bucket_folder =
+      apsi_sender_config.experimental_bucket_folder();
+
+  YACL_ENFORCE_EQ(RunSender(options, lctx), 0);
+
+  return PirResultReport();
 }
 
 }  // namespace psi

@@ -20,7 +20,6 @@
 #include "absl/strings/escaping.h"
 #include "gtest/gtest.h"
 #include "yacl/base/exception.h"
-#include "yacl/crypto/hash/hash_utils.h"
 #include "yacl/crypto/tools/prg.h"
 
 namespace psi {
@@ -44,11 +43,6 @@ TEST_P(Sm2CryptorTest, Works) {
 
   std::string items_a(params.items_size * kEccKeySize, '\0');
   std::string items_b(params.items_size * kEccKeySize, '\0');
-  std::string masked_a(params.items_size * (kEccKeySize + 1), '\0');
-  std::string masked_b(params.items_size * (kEccKeySize + 1), '\0');
-
-  std::string masked_ab(params.items_size * (kEccKeySize + 1), '\0');
-  std::string masked_ba(params.items_size * (kEccKeySize + 1), '\0');
 
   prg.Fill(absl::MakeSpan(items_a.data(), items_a.length()));
 
@@ -56,39 +50,34 @@ TEST_P(Sm2CryptorTest, Works) {
 
   std::string items_a_point(params.items_size * (kEccKeySize + 1), '\0');
   std::string items_b_point(params.items_size * (kEccKeySize + 1), '\0');
+  std::vector<yacl::crypto::EcPoint> points_a;
+  std::vector<yacl::crypto::EcPoint> points_b;
 
   for (size_t idx = 0; idx < params.items_size; ++idx) {
     absl::Span<const char> items_span =
         absl::MakeSpan(&items_a[idx * kEccKeySize], kEccKeySize);
-    std::vector<uint8_t> point_data = sm2_cryptor_a->HashToCurve(items_span);
-    std::memcpy(&items_a_point[idx * (kEccKeySize + 1)], point_data.data(),
-                point_data.size());
+    yacl::crypto::EcPoint point = sm2_cryptor_a->HashToCurve(items_span);
+    points_a.push_back(point);
 
     items_span = absl::MakeSpan(&items_b[idx * kEccKeySize], kEccKeySize);
-    point_data = sm2_cryptor_b->HashToCurve(items_span);
-    std::memcpy(&items_b_point[idx * (kEccKeySize + 1)], point_data.data(),
-                point_data.size());
+    point = sm2_cryptor_b->HashToCurve(items_span);
+    points_b.push_back(point);
   }
 
   // g^a
-  sm2_cryptor_a->EccMask(
-      absl::MakeSpan(items_a_point.data(), items_a_point.length()),
-      absl::MakeSpan(masked_a.data(), masked_a.length()));
+  auto masked_a = sm2_cryptor_a->EccMask(points_a);
 
   // (g^a)^b
-  sm2_cryptor_b->EccMask(absl::MakeSpan(masked_a.data(), masked_a.length()),
-                         absl::MakeSpan(masked_ab.data(), masked_ab.length()));
+  auto masked_ab = sm2_cryptor_b->EccMask(masked_a);
 
   // g^b
-  sm2_cryptor_b->EccMask(
-      absl::MakeSpan(items_b_point.data(), items_b_point.length()),
-      absl::MakeSpan(masked_b.data(), masked_b.length()));
+  auto masked_b = sm2_cryptor_b->EccMask(points_b);
 
   // (g^b)^a
-  sm2_cryptor_a->EccMask(absl::MakeSpan(masked_b.data(), masked_b.length()),
-                         absl::MakeSpan(masked_ba.data(), masked_ba.length()));
+  auto masked_ba = sm2_cryptor_a->EccMask(masked_b);
 
-  EXPECT_EQ(masked_ab, masked_ba);
+  EXPECT_EQ(sm2_cryptor_b->SerializeEcPoints(masked_ab),
+            sm2_cryptor_a->SerializeEcPoints(masked_ba));
 }
 
 INSTANTIATE_TEST_SUITE_P(

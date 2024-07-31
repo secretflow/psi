@@ -14,67 +14,41 @@
 
 #include "psi/cryptor/sodium_curve25519_cryptor.h"
 
-extern "C" {
-#include "sodium.h"
-}
-
 #include <iostream>
 
 #include "yacl/crypto/hash/hash_utils.h"
-#include "yacl/utils/parallel.h"
 
 #include "psi/cryptor/hash_to_curve_elligator2.h"
 
 namespace psi {
 
-void SodiumCurve25519Cryptor::EccMask(absl::Span<const char> batch_points,
-                                      absl::Span<char> dest_points) const {
-  YACL_ENFORCE(batch_points.size() % kEccKeySize == 0);
-
-  using Item = std::array<unsigned char, kEccKeySize>;
-  static_assert(sizeof(Item) == kEccKeySize);
-
-  auto mask_functor = [this](const Item& in, Item& out) {
-    YACL_ENFORCE(out.size() == kEccKeySize);
-    YACL_ENFORCE(in.size() == kEccKeySize);
-
-    YACL_ENFORCE(0 == crypto_scalarmult_curve25519(
-                          out.data(), this->private_key_, in.data()));
-  };
-
-  absl::Span<const Item> input(
-      reinterpret_cast<const Item*>(batch_points.data()),
-      batch_points.size() / sizeof(Item));
-  absl::Span<Item> output(reinterpret_cast<Item*>(dest_points.data()),
-                          dest_points.size() / sizeof(Item));
-
-  yacl::parallel_for(0, input.size(), [&](int64_t begin, int64_t end) {
-    for (int64_t idx = begin; idx < end; ++idx) {
-      mask_functor(input[idx], output[idx]);
-    }
-  });
+yacl::crypto::EcPoint SodiumCurve25519Cryptor::HashToCurve(
+    absl::Span<const char> item_data) const {
+  return yacl::crypto::Sha256(item_data);
+  //  return ec_group_->HashToCurve(
+  //      yacl::crypto::HashToCurveStrategy::HashAsPointX_SHA2,
+  //      std::string_view(item_data.data(), item_data.size()));
 }
 
 std::vector<uint8_t> SodiumCurve25519Cryptor::KeyExchange(
     const std::shared_ptr<yacl::link::Context>& link_ctx) {
-  std::array<uint8_t, kEccKeySize> self_public_key;
-  crypto_scalarmult_curve25519_base(self_public_key.data(), this->private_key_);
-  yacl::Buffer self_pubkey_buf(self_public_key.data(), self_public_key.size());
+  yacl::math::MPInt sk(0, kEccKeySize * CHAR_BIT);
+  sk.FromMagBytes(private_key_, yacl::Endian::little);
+  auto self_public_key = ec_group_->MulBase(sk);
   link_ctx->SendAsyncThrottled(
-      link_ctx->NextRank(), self_pubkey_buf,
+      link_ctx->NextRank(), ec_group_->SerializePoint(self_public_key),
       fmt::format("send rank-{} public key", link_ctx->Rank()));
   yacl::Buffer peer_pubkey_buf = link_ctx->Recv(
       link_ctx->NextRank(),
       fmt::format("recv rank-{} public key", link_ctx->NextRank()));
-  std::vector<uint8_t> dh_key(kEccKeySize);
-  YACL_ENFORCE(0 == crypto_scalarmult_curve25519(
-                        dh_key.data(), this->private_key_,
-                        (const unsigned char*)peer_pubkey_buf.data()));
-  const auto shared_key = yacl::crypto::Blake3(dh_key);
+  auto peer_public_key = ec_group_->DeserializePoint(peer_pubkey_buf);
+  auto dh_key = ec_group_->Mul(peer_public_key, sk);
+  const auto shared_key =
+      yacl::crypto::Blake3(ec_group_->SerializePoint(dh_key));
   return {shared_key.begin(), shared_key.end()};
 }
 
-std::vector<uint8_t> SodiumElligator2Cryptor::HashToCurve(
+yacl::crypto::EcPoint SodiumElligator2Cryptor::HashToCurve(
     absl::Span<const char> item_data) const {
   return HashToCurveElligator2(item_data);
 }

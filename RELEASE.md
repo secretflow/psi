@@ -5,6 +5,11 @@
 > - `[API]` prefix for API changes.
 > - `[Improvement]` prefix for implementation improvement.
 
+## v0.4.0.dev240731
+- [Improvement] Port APSI again.
+- [Feature] Add Bucketized APSI.
+- [API] Remove SealPIR.
+
 ## v0.4.0.dev240521
 - [API] remove BC22 protocol
 

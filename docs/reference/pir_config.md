@@ -5,17 +5,10 @@
 
 
 - Messages
-    - [ApsiServerConfig](#apsiserverconfig)
-    - [PirClientConfig](#pirclientconfig)
-    - [PirConfig](#pirconfig)
+    - [ApsiReceiverConfig](#apsireceiverconfig)
+    - [ApsiSenderConfig](#apsisenderconfig)
     - [PirResultReport](#pirresultreport)
-    - [PirServerConfig](#pirserverconfig)
 
-
-
-- Enums
-    - [PirConfig.Mode](#pirconfigmode)
-    - [PirProtocol](#pirprotocol)
 
 
 
@@ -28,103 +21,63 @@
 ## Messages
 
 
-### ApsiServerConfig
-Server config for APSI protocol.
+### ApsiReceiverConfig
+
 
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| oprf_key_path | [ string](#string) | The path of oprf_key file path. This field is not required for MODE_SERVER_FULL. |
-| num_per_query | [ uint32](#uint32) | The number of per query. |
-| compressed | [ bool](#bool) | compressed Seal ciphertext |
-| max_items_per_bin | [ uint32](#uint32) | max items per bin, i.e. Interpolate polynomial max degree. optional. |
+| threads | [ uint32](#uint32) | Number of threads to use |
+| log_file | [ string](#string) | Log file path. For APSI only. |
+| silent | [ bool](#bool) | Do not write output to console. For APSI only. |
+| log_level | [ string](#string) | One of 'all', 'debug', 'info' (default), 'warning', 'error', 'off'. For APSI only. |
+| query_file | [ string](#string) | Path to a text file containing query data (one per line). Header is not needed. |
+| output_file | [ string](#string) | Path to a file where intersection result will be written. |
+| params_file | [ string](#string) | Path to a JSON file describing the parameters to be used by the sender. If not set, receiver will ask sender, which results in additional communication. |
+| experimental_enable_bucketize | [ bool](#bool) | Must be same as sender config. |
+| experimental_bucket_cnt | [ uint32](#uint32) | Must be same as sender config. |
  <!-- end Fields -->
  <!-- end HasFields -->
 
 
-### PirClientConfig
-Client configs.
+### ApsiSenderConfig
+NOTE(junfeng): We provide a config identical to original APSI CLI.
+Please check
+https://github.com/microsoft/APSI?tab=readme-ov-file#command-line-interface-cli
+for details.
 
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| input_path | [ string](#string) | The input csv file path of pir. |
-| key_columns | [repeated string](#string) | The key columns name of input data. |
-| output_path | [ string](#string) | The path of query output csv file path. |
- <!-- end Fields -->
- <!-- end HasFields -->
-
-
-### PirConfig
-The config for PIR. This is the entrypoint for all PIR tasks.
-
-
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| mode | [ PirConfig.Mode](#pirconfigmode) | none |
-| pir_protocol | [ PirProtocol](#pirprotocol) | The PIR protocol. |
-| pir_server_config | [ PirServerConfig](#pirserverconfig) | Required for MODE_SERVER_SETUP, MODE_SERVER_ONLINE and MODE_SERVER_FULL. |
-| pir_client_config | [ PirClientConfig](#pirclientconfig) | Required for MODE_CLIENT. |
+| threads | [ uint32](#uint32) | Number of threads to use |
+| log_file | [ string](#string) | Log file path. For APSI only. |
+| silent | [ bool](#bool) | Do not write output to console. For APSI only. |
+| log_level | [ string](#string) | One of 'all', 'debug', 'info' (default), 'warning', 'error', 'off'. For APSI only. |
+| db_file | [ string](#string) | Path to a CSV file describing the sender's dataset (an item-label pair on each row) or a file containing a serialized SenderDB; the CLI will first attempt to load the data as a serialized SenderDB, and – upon failure – will proceed to attempt to read it as a CSV file For CSV File: 1. the first col is processed as item while the second col as label. OTHER COLS ARE IGNORED. 2. NO HEADERS ARE ALLOWED. |
+| params_file | [ string](#string) | Path to a JSON file describing the parameters to be used by the sender. Not required if db_file points to a serialized SenderDB. |
+| sdb_out_file | [ string](#string) | Save the SenderDB in the given file. Required if gen_db_only is set true. Use experimental_bucket_folder instead if you turn experimental_enable_bucketize on. |
+| nonce_byte_count | [ uint32](#uint32) | Number of bytes used for the nonce in labeled mode (default is 16) |
+| compress | [ bool](#bool) | Whether to compress the SenderDB in memory; this will make the memory footprint smaller at the cost of increased computation. |
+| save_db_only | [ bool](#bool) | Whether to save sender db only. |
+| experimental_enable_bucketize | [ bool](#bool) | [experimental] Whether to split data in buckets and Each bucket would be a seperate SenderDB. If set, experimental_bucket_folder must be a valid folder. |
+| experimental_bucket_cnt | [ uint32](#uint32) | [experimental] The number of bucket to fit data. |
+| experimental_bucket_folder | [ string](#string) | [experimental] Folder to save bucketized small csv files and db files. |
  <!-- end Fields -->
  <!-- end HasFields -->
 
 
 ### PirResultReport
-The report of pir result.
+The report of pir task.
 
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
-| data_count | [ int64](#int64) | The data count of input/query. |
- <!-- end Fields -->
- <!-- end HasFields -->
-
-
-### PirServerConfig
-Server configs.
-setup_path is only required field for MODE_SERVER_ONLINE.
-setup_path is not required for MODE_SERVER_FULL.
-
-
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| input_path | [ string](#string) | The input csv file path. |
-| setup_path | [ string](#string) | The path of setup output path. |
-| key_columns | [repeated string](#string) | The key columns name of input data. |
-| label_columns | [repeated string](#string) | The label columns name of input data. |
-| label_max_len | [ uint32](#uint32) | The max number bytes of label. |
-| bucket_size | [ uint32](#uint32) | split data bucket to do pir query |
-| apsi_server_config | [ ApsiServerConfig](#apsiserverconfig) | For APSI protocol only |
+| match_cnt | [ int64](#int64) | none |
  <!-- end Fields -->
  <!-- end HasFields -->
  <!-- end messages -->
 
 ## Enums
-
-
-### PirConfig.Mode
-
-
-| Name | Number | Description |
-| ---- | ------ | ----------- |
-| MODE_UNSPECIFIED | 0 | none |
-| MODE_SERVER_SETUP | 1 | Server with setup stage. |
-| MODE_SERVER_ONLINE | 2 | Server with online stage. |
-| MODE_SERVER_FULL | 3 | Server with both online and offline stages. |
-| MODE_CLIENT | 4 | Client |
-
-
-
-
-### PirProtocol
-The algorithm type of pir.
-
-| Name | Number | Description |
-| ---- | ------ | ----------- |
-| PIR_PROTOCOL_UNSPECIFIED | 0 | none |
-| PIR_PROTOCOL_KEYWORD_PIR_APSI | 1 | Keyword PIR APSI Reference: https://github.com/microsoft/APSI |
-
-
  <!-- end Enums -->
  <!-- end Files -->
 

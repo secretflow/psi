@@ -26,9 +26,6 @@ template <>
 struct formatter<psi::CurveType> : ostream_formatter {};
 
 template <>
-struct formatter<psi::PirProtocol> : ostream_formatter {};
-
-template <>
 struct formatter<psi::PsiType> : ostream_formatter {};
 
 template <>

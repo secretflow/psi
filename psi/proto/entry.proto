@@ -40,6 +40,8 @@ message LaunchConfig {
     v2.UbPsiConfig ub_psi_config = 5;
 
     // Please check at pir.proto.
-    PirConfig pir_config = 6;
+    ApsiSenderConfig apsi_sender_config = 6;
+
+    ApsiReceiverConfig apsi_receiver_config = 7;
   }
 }

@@ -14,113 +14,107 @@
 // limitations under the License.
 //
 
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license.
+
 syntax = "proto3";
 
 package psi;
 
-// The algorithm type of pir.
-enum PirProtocol {
-  PIR_PROTOCOL_UNSPECIFIED = 0;
+// NOTE(junfeng): We provide a config identical to original APSI CLI.
+// Please check
+// https://github.com/microsoft/APSI?tab=readme-ov-file#command-line-interface-cli
+// for details.
+message ApsiSenderConfig {
+  // Number of threads to use
+  uint32 threads = 1;
 
-  // Keyword PIR
-  // APSI
-  // Reference: https://github.com/microsoft/APSI
-  PIR_PROTOCOL_KEYWORD_PIR_APSI = 1;
+  // Log file path. For APSI only.
+  string log_file = 2;
 
-  // Index PIR
-  // SealPIR
-  // Reference: https://github.com/microsoft/SealPIR
-  // Unsupported at this moment.
-  // PIR_PROTOCOL_INDEX_PIR_SEALPIR = 10;
+  // Do not write output to console. For APSI only.
+  bool silent = 3;
+
+  // One of 'all', 'debug', 'info' (default), 'warning', 'error', 'off'. For
+  // APSI only.
+  string log_level = 4;
+
+  // Path to a CSV file describing the sender's dataset (an item-label pair on
+  // each row) or a file containing a serialized SenderDB; the CLI will first
+  // attempt to load the data as a serialized SenderDB, and – upon failure –
+  // will proceed to attempt to read it as a CSV file
+  // For CSV File:
+  // 1. the first col is processed as item while the second col as label. OTHER
+  // COLS ARE IGNORED.
+  // 2. NO HEADERS ARE ALLOWED.
+  string db_file = 5;
+
+  // Path to a JSON file describing the parameters to be used by the sender.
+  // Not required if db_file points to a serialized SenderDB.
+  string params_file = 6;
+
+  // Save the SenderDB in the given file.
+  // Required if gen_db_only is set true.
+  // Use experimental_bucket_folder instead if you turn
+  // experimental_enable_bucketize on.
+  string sdb_out_file = 7;
+
+  // Number of bytes used for the nonce in labeled mode (default is 16)
+  uint32 nonce_byte_count = 8;
+
+  // Whether to compress the SenderDB in memory; this will make the memory
+  // footprint smaller at the cost of increased computation.
+  bool compress = 9;
+
+  // Whether to save sender db only.
+  bool save_db_only = 10;
+
+  // [experimental] Whether to split data in buckets and Each bucket would be a
+  // seperate SenderDB. If set, experimental_bucket_folder must be a valid
+  // folder.
+  bool experimental_enable_bucketize = 13;
+
+  // [experimental] The number of bucket to fit data.
+  uint32 experimental_bucket_cnt = 14;
+
+  // [experimental] Folder to save bucketized small csv files and db files.
+  string experimental_bucket_folder = 15;
 }
 
-// The config for PIR. This is the entrypoint for all PIR tasks.
-message PirConfig {
-  enum Mode {
-    MODE_UNSPECIFIED = 0;
+message ApsiReceiverConfig {
+  // Number of threads to use
+  uint32 threads = 1;
 
-    // Server with setup stage.
-    MODE_SERVER_SETUP = 1;
+  // Log file path. For APSI only.
+  string log_file = 2;
 
-    // Server with online stage.
-    MODE_SERVER_ONLINE = 2;
+  // Do not write output to console. For APSI only.
+  bool silent = 3;
 
-    // Server with both online and offline stages.
-    MODE_SERVER_FULL = 3;
+  // One of 'all', 'debug', 'info' (default), 'warning', 'error', 'off'. For
+  // APSI only.
+  string log_level = 4;
 
-    // Client
-    MODE_CLIENT = 4;
-  }
+  // Path to a text file containing query data (one per line).
+  // Header is not needed.
+  string query_file = 5;
 
-  Mode mode = 1;
+  // Path to a file where intersection result will be written.
+  string output_file = 6;
 
-  // The PIR protocol.
-  PirProtocol pir_protocol = 2;
+  // Path to a JSON file describing the parameters to be used by the sender.
+  // If not set, receiver will ask sender, which results in additional
+  // communication.
+  string params_file = 7;
 
-  // Required for MODE_SERVER_SETUP, MODE_SERVER_ONLINE and MODE_SERVER_FULL.
-  PirServerConfig pir_server_config = 3;
+  // Must be same as sender config.
+  bool experimental_enable_bucketize = 8;
 
-  // Required for MODE_CLIENT.
-  PirClientConfig pir_client_config = 4;
+  // Must be same as sender config.
+  uint32 experimental_bucket_cnt = 9;
 }
 
-// Server config for APSI protocol.
-message ApsiServerConfig {
-  // The path of oprf_key file path.
-  // This field is not required for MODE_SERVER_FULL.
-  string oprf_key_path = 1;
-
-  // The number of per query.
-  uint32 num_per_query = 2;
-
-  // compressed Seal ciphertext
-  bool compressed = 3;
-
-  // max items per bin, i.e. Interpolate polynomial max degree.
-  // optional.
-  uint32 max_items_per_bin = 4;
-}
-
-// Server configs.
-// setup_path is only required field for MODE_SERVER_ONLINE.
-// setup_path is not required for MODE_SERVER_FULL.
-message PirServerConfig {
-  // The input csv file path.
-  string input_path = 1;
-
-  // The path of setup output path.
-  string setup_path = 2;
-
-  // The key columns name of input data.
-  repeated string key_columns = 3;
-
-  // The label columns name of input data.
-  repeated string label_columns = 4;
-
-  // The max number bytes of label.
-  uint32 label_max_len = 5;
-
-  // split data bucket to do pir query
-  uint32 bucket_size = 6;
-
-  // For APSI protocol only
-  ApsiServerConfig apsi_server_config = 10;
-}
-
-// Client configs.
-message PirClientConfig {
-  // The input csv file path of pir.
-  string input_path = 1;
-
-  // The key columns name of input data.
-  repeated string key_columns = 2;
-
-  // The path of query output csv file path.
-  string output_path = 3;
-}
-
-// The report of pir result.
+// The report of pir task.
 message PirResultReport {
-  // The data count of input/query.
-  int64 data_count = 1;
+  int64 match_cnt = 1;
 }

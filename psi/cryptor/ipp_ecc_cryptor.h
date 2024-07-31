@@ -32,12 +32,23 @@ class IppEccCryptor : public IEccCryptor {
 
   CurveType GetCurveType() const override { return CurveType::CURVE_25519; }
 
-  void EccMask(absl::Span<const char> batch_points,
-               absl::Span<char> dest_points) const override;
+  std::vector<yacl::crypto::EcPoint> EccMask(
+      const std::vector<yacl::crypto::EcPoint>& points) const override;
+
+  size_t GetMaskLength() const override { return kEccKeySize; }
+
+  yacl::crypto::EcPoint HashToCurve(
+      absl::Span<const char> item_data) const override;
+
+  [[nodiscard]] yacl::Buffer SerializeEcPoint(
+      const yacl::crypto::EcPoint& point) const override;
+
+  yacl::crypto::EcPoint DeserializeEcPoint(
+      yacl::ByteContainerView buf) const override;
 };
 
 class IppElligator2Cryptor : public IppEccCryptor {
-  std::vector<uint8_t> HashToCurve(
+  yacl::crypto::EcPoint HashToCurve(
       absl::Span<const char> item_data) const override;
 };
 

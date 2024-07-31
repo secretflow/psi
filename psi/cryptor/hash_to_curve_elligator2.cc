@@ -523,10 +523,9 @@ inline yacl::math::MPInt ToMpInt(yacl::ByteContainerView msgx) {
 }
 
 // point add return x coordinate
-[[maybe_unused]] std::vector<uint8_t> PointAddX(yacl::ByteContainerView pxbuf,
-                                                yacl::ByteContainerView pybuf,
-                                                yacl::ByteContainerView qxbuf,
-                                                yacl::ByteContainerView qybuf) {
+[[maybe_unused]] yacl::crypto::Array32 PointAddX(
+    yacl::ByteContainerView pxbuf, yacl::ByteContainerView pybuf,
+    yacl::ByteContainerView qxbuf, yacl::ByteContainerView qybuf) {
   YACL_ENFORCE((std::memcmp(pxbuf.data(), qxbuf.data(), pxbuf.size()) != 0) ||
                (std::memcmp(pybuf.data(), qybuf.data(), pybuf.size()) != 0));
 
@@ -553,9 +552,9 @@ inline yacl::math::MPInt ToMpInt(yacl::ByteContainerView msgx) {
     tx = tx.AddMod(kMp25519, kMp25519);
   }
 
-  std::vector<uint8_t> xbuf(kEccKeySize);
+  yacl::crypto::Array32 xbuf = {0};
 
-  MPIntToBytesWithPad(xbuf.data(), kEccKeySize, tx);
+  MPIntToBytesWithPad(xbuf.data(), xbuf.size(), tx);
 
   return xbuf;
 }
@@ -607,7 +606,7 @@ inline yacl::math::MPInt ToMpInt(yacl::ByteContainerView msgx) {
 // https://martin.kleppmann.com/papers/curve25519.pdf
 // Projective formulas for point doubling
 // 4.4 P23 formulas 25
-[[maybe_unused]] std::vector<uint8_t> PointDblProjective(
+[[maybe_unused]] yacl::crypto::Array32 PointDblProjective(
     yacl::ByteContainerView pxbuf) {
   yacl::math::MPInt px = ToMpInt(pxbuf);
 
@@ -626,21 +625,21 @@ inline yacl::math::MPInt ToMpInt(yacl::ByteContainerView msgx) {
 
   px = px22.MulMod(pz2, kMp25519);
 
-  std::vector<uint8_t> xbuf(kEccKeySize);
+  yacl::crypto::Array32 xbuf = {0};
 
-  MPIntToBytesWithPad(xbuf.data(), kEccKeySize, px);
+  MPIntToBytesWithPad(xbuf.data(), xbuf.size(), px);
 
   return xbuf;
 }
 
-[[maybe_unused]] std::vector<uint8_t> PointClearCofactorProjective(
+[[maybe_unused]] yacl::crypto::Array32 PointClearCofactorProjective(
     yacl::ByteContainerView pxbuf) {
   // [2]P
-  std::vector<uint8_t> x2buf = PointDblProjective(pxbuf);
+  auto x2buf = PointDblProjective(pxbuf);
   // [4]P
-  std::vector<uint8_t> x4buf = PointDblProjective(x2buf);
+  auto x4buf = PointDblProjective(x2buf);
   // [8]P
-  std::vector<uint8_t> x8buf = PointDblProjective(x4buf);
+  auto x8buf = PointDblProjective(x4buf);
 
   return x8buf;
 }
@@ -685,8 +684,8 @@ PointClearCofactor(yacl::ByteContainerView pxbuf,
 
 }  // namespace
 
-std::vector<uint8_t> HashToCurveElligator2(yacl::ByteContainerView buffer,
-                                           const std::string &dst) {
+yacl::crypto::Array32 HashToCurveElligator2(yacl::ByteContainerView buffer,
+                                            const std::string &dst) {
   YACL_ENFORCE((dst.size() >= 16) && (dst.size() <= 255),
                "domain separation tag length: {} not in 16B-255B", dst.size());
 
@@ -700,7 +699,7 @@ std::vector<uint8_t> HashToCurveElligator2(yacl::ByteContainerView buffer,
   std::tie(q0x, q0y) = MapToCurveG2(u[0]);
   std::tie(q1x, q1y) = MapToCurveG2(u[1]);
 
-  std::vector<uint8_t> px1 = PointAddX(q0x, q0y, q1x, q1y);
+  yacl::crypto::Array32 px1 = PointAddX(q0x, q0y, q1x, q1y);
 
   return PointClearCofactorProjective(px1);
 }

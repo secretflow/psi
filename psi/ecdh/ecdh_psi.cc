@@ -95,10 +95,10 @@ void EcdhPsiContext::MaskSelf(
 
     std::vector<std::string> masked_items;
     std::vector<std::string> hashed_masked_items;
-    if (!batch_items.empty()) {
-      hashed_masked_items = HashInputs(options_.ecc_cryptor, batch_items);
-      masked_items = Mask(options_.ecc_cryptor, hashed_masked_items);
-    }
+    auto hashed_points = options_.ecc_cryptor->HashInputs(batch_items);
+    auto masked_points = options_.ecc_cryptor->EccMask(hashed_points);
+    masked_items = options_.ecc_cryptor->SerializeEcPoints(masked_points);
+
     // Send x^a.
     const auto tag = fmt::format("ECDHPSI:X^A:{}", batch_count);
     SendBatch(masked_items, batch_count, tag);
@@ -112,6 +112,8 @@ void EcdhPsiContext::MaskSelf(
     }
 
     if (options_.ecdh_logger) {
+      hashed_masked_items =
+          options_.ecc_cryptor->SerializeEcPoints(hashed_points);
       options_.ecdh_logger->Log(EcdhStage::MaskSelf, options_.private_key,
                                 item_count, hashed_masked_items, masked_items);
     }
@@ -135,15 +137,20 @@ void EcdhPsiContext::MaskPeer(
     std::vector<std::string> dual_masked_peers;
     const auto tag = fmt::format("ECDHPSI:Y^B:{}", batch_count);
     RecvBatch(&peer_items, batch_count, tag);
+    auto peer_points = options_.ecc_cryptor->DeserializeEcPoints(peer_items);
 
     // Compute (y^b)^a.
     if (!peer_items.empty()) {
       // TODO: avoid mem copy
-      for (const auto& masked : Mask(options_.ecc_cryptor, peer_items)) {
+      for (const auto& masked_point :
+           options_.ecc_cryptor->EccMask(peer_points)) {
+        const auto masked =
+            options_.ecc_cryptor->SerializeEcPoint(masked_point);
         // In the final comparison, we only send & compare `kFinalCompareBytes`
         // number of bytes.
-        std::string cipher = masked.substr(
-            masked.length() - options_.dual_mask_size, options_.dual_mask_size);
+        std::string cipher(
+            masked.data<char>() + masked.size() - options_.dual_mask_size,
+            options_.dual_mask_size);
         if (SelfCanTouchResults()) {
           // Store cipher of peer items for later intersection compute.
           peer_ec_point_store->Save(cipher);

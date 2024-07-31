@@ -17,9 +17,9 @@
 #include <string>
 #include <vector>
 
-#include "absl/strings/escaping.h"
 #include "FourQ_api.h"
 #include "FourQ_internal.h"
+#include "absl/strings/escaping.h"
 #include "yacl/crypto/hash/blake3.h"
 #include "yacl/crypto/hash/hash_utils.h"
 

@@ -5,6 +5,9 @@
 > - `[API]` prefix for API changes.
 > - `[Improvement]` prefix for implementation improvement.
 
+## v0.4.0.dev240801
+- [Bugfix] Fix MacOS and arm build.
+
 ## v0.4.0.dev240731
 - [Improvement] Port APSI again.
 - [Feature] Add Bucketized APSI.

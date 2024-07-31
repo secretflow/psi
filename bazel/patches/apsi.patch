@@ -398,3 +398,16 @@ index 4c4e116..8eb34fc 100644
  }
 
  union Request { ParmsRequest, OPRFRequest, QueryRequest }
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 78d54a6..46a452e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -326,7 +326,7 @@ else()
+ endif()
+ 
+ # Use optimized assembly on UNIX
+-if(APSI_USE_ASM AND UNIX AND NOT APPLE AND NOT CYGWIN AND NOT MINGW)
++if(APSI_USE_ASM AND UNIX AND APSI_FOURQ_AMD64 AND NOT APPLE AND NOT CYGWIN AND NOT MINGW)
+     check_language(ASM)
+     if(CMAKE_ASM_COMPILER)
+         enable_language(ASM)

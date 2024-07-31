@@ -57,7 +57,7 @@ def _yacl():
             "https://github.com/secretflow/yacl/archive/refs/tags/0.4.5b4_nightly_20240731.tar.gz",
         ],
         strip_prefix = "yacl-0.4.5b4_nightly_20240731",
-        sha256 = "e92484a9a60aaf86130157d9568b2bf7812bac4096cb108d565538268d74ea7e",
+        sha256 = "952715bd56f6d9386984e9963426a1399bd2bd3702cf3efede9c82591cfab99b",
     )
 
 def _bazel_platform():
@@ -186,6 +186,10 @@ def _com_github_microsoft_apsi():
         patch_args = ["-p1"],
         patches = [
             "@psi//bazel:patches/apsi.patch",
+            "@psi//bazel:patches/apsi-fourq.patch",
+        ],
+        patch_cmds = [
+            "rm -rf common/apsi/fourq",
         ],
     )
 

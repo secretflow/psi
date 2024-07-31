@@ -1,0 +1,75 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 78d54a6..166047c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -273,10 +273,9 @@ if(APSI_USE_ZMQ)
+     target_link_libraries(apsi PUBLIC libzmq-static cppzmq-static)
+ endif()
+ 
+-# Configurations for FourQlib: system, arch, SIMD, and assembler
+-target_compile_options(apsi PUBLIC -DHAVE_CONFIG)
+-target_compile_options(apsi PUBLIC -DUSE_SECURE_SEED)
+-target_compile_options(apsi PUBLIC -DUSE_ENDO=true)
++# Add FourQlib
++target_include_directories(apsi PUBLIC ${EXT_BUILD_DEPS}/FourQlib/include)
++target_link_libraries(apsi PUBLIC FourQ)
+ 
+ # Set system
+ if(MSVC)
+diff --git a/common/apsi/CMakeLists.txt b/common/apsi/CMakeLists.txt
+index a65bbfe..60e246e 100644
+--- a/common/apsi/CMakeLists.txt
++++ b/common/apsi/CMakeLists.txt
+@@ -28,7 +28,6 @@ install(
+         ${APSI_INCLUDES_INSTALL_DIR}/apsi
+ )
+ 
+-add_subdirectory(fourq)
+ add_subdirectory(network)
+ add_subdirectory(oprf)
+ add_subdirectory(util)
+diff --git a/common/apsi/network/zmq/zmq_channel.cpp b/common/apsi/network/zmq/zmq_channel.cpp
+index bcaa013..93e2b4a 100644
+--- a/common/apsi/network/zmq/zmq_channel.cpp
++++ b/common/apsi/network/zmq/zmq_channel.cpp
+@@ -8,7 +8,7 @@
+ #include <stdexcept>
+ 
+ // APSI
+-#include "apsi/fourq/random.h"
++#include "random.h"
+ #include "apsi/log.h"
+ #include "apsi/network/result_package_generated.h"
+ #include "apsi/network/sop_generated.h"
+diff --git a/common/apsi/oprf/ecpoint.cpp b/common/apsi/oprf/ecpoint.cpp
+index d12313f..5fd9be1 100644
+--- a/common/apsi/oprf/ecpoint.cpp
++++ b/common/apsi/oprf/ecpoint.cpp
+@@ -10,10 +10,10 @@
+ #include "apsi/util/utils.h"
+ 
+ // FourQ
+-#include "apsi/fourq/FourQ.h"
+-#include "apsi/fourq/FourQ_api.h"
+-#include "apsi/fourq/FourQ_internal.h"
+-#include "apsi/fourq/random.h"
++#include "FourQ.h"
++#include "FourQ_api.h"
++#include "FourQ_internal.h"
++#include "random.h"
+ 
+ // SEAL
+ #include "seal/randomgen.h"
+diff --git a/common/apsi/util/label_encryptor.cpp b/common/apsi/util/label_encryptor.cpp
+index 3e00b5e..57a5b40 100644
+--- a/common/apsi/util/label_encryptor.cpp
++++ b/common/apsi/util/label_encryptor.cpp
+@@ -9,7 +9,7 @@
+ #include <vector>
+ 
+ // APSI
+-#include "apsi/fourq/random.h"
++#include "random.h"
+ #include "apsi/util/label_encryptor.h"
+ #include "apsi/util/utils.h"
+ 

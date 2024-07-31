@@ -35,6 +35,7 @@ psi_cmake_external(
     deps = [
         "@com_github_facebook_zstd//:zstd",
         "@com_github_log4cplus_log4cplus//:log4cplus",
+        "@com_github_microsoft_FourQlib//:FourQlib",
         "@com_github_microsoft_gsl//:Microsoft.GSL",
         "@com_github_microsoft_kuku//:kuku",
         "@com_github_microsoft_seal//:seal",

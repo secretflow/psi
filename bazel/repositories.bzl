@@ -227,7 +227,11 @@ def _com_google_flatbuffers():
         patches = [
             "@psi//bazel:patches/flatbuffers.patch",
         ],
-        patch_args = ["-p1", "-l"],
+        patch_args = ["-p1"],
+        patch_cmds = [
+            # hack to make sure this file is removed
+            "rm grpc/BUILD.bazel",
+        ],
         build_file = "@psi//bazel:flatbuffers.BUILD",
     )
 

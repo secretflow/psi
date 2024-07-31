@@ -54,7 +54,7 @@ bool has_n_zeros(T *ptr, size_t count) {
 }
 }  // namespace
 
-Receiver::Receiver(::apsi::PSIParams params) : params_(move(params)) {
+Receiver::Receiver(::apsi::PSIParams params) : params_(std::move(params)) {
   initialize();
 }
 
@@ -70,7 +70,7 @@ void Receiver::reset_keys() {
   if (get_seal_context()->using_keyswitching()) {
     ::seal::Serializable<::seal::RelinKeys> relin_keys(
         generator.create_relin_keys());
-    relin_keys_.set(move(relin_keys));
+    relin_keys_.set(std::move(relin_keys));
   }
 }
 
@@ -186,7 +186,7 @@ Receiver::ExtractHashes(const ::apsi::OPRFResponse &oprf_response,
   APSI_LOG_INFO("Extracted OPRF hashes for " << oprf_response_item_count
                                              << " items");
 
-  return make_pair(move(items), move(label_keys));
+  return make_pair(std::move(items), std::move(label_keys));
 }
 
 unique_ptr<::apsi::network::SenderOperation> Receiver::CreateOPRFRequest(
@@ -327,7 +327,7 @@ Receiver::create_query(const vector<::apsi::HashedItem> &items,
       // Now that we have the algebraized items for this bundle index, we create
       // a PlaintextPowers object that computes all necessary powers of the
       // algebraized items.
-      plain_powers.emplace_back(move(alg_items), params_, pd_);
+      plain_powers.emplace_back(std::move(alg_items), params_, pd_);
     }
   }
 
@@ -350,7 +350,7 @@ Receiver::create_query(const vector<::apsi::HashedItem> &items,
 
       // Move the encrypted data to encrypted_powers
       for (auto &e : encrypted_power) {
-        encrypted_powers[e.first].emplace_back(move(e.second));
+        encrypted_powers[e.first].emplace_back(std::move(e.second));
       }
     }
   }
@@ -359,13 +359,13 @@ Receiver::create_query(const vector<::apsi::HashedItem> &items,
   auto sop_query = make_unique<::apsi::network::SenderOperationQuery>();
   sop_query->compr_mode = ::seal::Serialization::compr_mode_default;
   sop_query->relin_keys = relin_keys_;
-  sop_query->data = move(encrypted_powers);
+  sop_query->data = std::move(encrypted_powers);
   sop_query->bucket_idx = bucket_idx;
-  auto sop = ::apsi::to_request(move(sop_query));
+  auto sop = ::apsi::to_request(std::move(sop_query));
 
   APSI_LOG_INFO("Finished creating encrypted query");
 
-  return {move(sop), itt};
+  return {std::move(sop), itt};
 }
 
 vector<::apsi::receiver::MatchRecord> Receiver::request_query(
@@ -377,8 +377,8 @@ vector<::apsi::receiver::MatchRecord> Receiver::request_query(
 
   // Create query and send to Sender
   auto query = create_query(items, bucket_idx);
-  chl.send(move(query.first));
-  auto itt = move(query.second);
+  chl.send(std::move(query.first));
+  auto itt = std::move(query.second);
 
   // Wait for query response
   ::apsi::QueryResponse response;
@@ -608,11 +608,11 @@ vector<::apsi::receiver::MatchRecord> Receiver::process_result_part(
               encrypted_label, label_keys[item_idx], nonce_byte_count);
 
           // Set the label
-          mr.label.set(move(label));
+          mr.label.set(std::move(label));
         }
 
         // We are done with the MatchRecord, so add it to the mrs vector
-        mrs[item_idx] = move(mr);
+        mrs[item_idx] = std::move(mr);
       });
 
   return mrs;
@@ -639,7 +639,7 @@ vector<::apsi::receiver::MatchRecord> Receiver::process_result(
         ::seal::util::iter(mrs, this_mrs, size_t(0)), mrs.size(), [](auto &&I) {
           if (get<1>(I) && !get<0>(I)) {
             // This match needs to be merged into mrs
-            get<0>(I) = move(get<1>(I));
+            get<0>(I) = std::move(get<1>(I));
           } else if (get<1>(I) && get<0>(I)) {
             // If a positive MatchRecord is already present, then something is
             // seriously wrong
@@ -705,7 +705,7 @@ void Receiver::process_result_worker(
         ::seal::util::iter(mrs, this_mrs, size_t(0)), mrs.size(), [](auto &&I) {
           if (get<1>(I) && !get<0>(I)) {
             // This match needs to be merged into mrs
-            get<0>(I) = move(get<1>(I));
+            get<0>(I) = std::move(get<1>(I));
           } else if (get<1>(I) && get<0>(I)) {
             // If a positive MatchRecord is already present, then something is
             // seriously wrong

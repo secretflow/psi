@@ -39,7 +39,7 @@ class BucketSenderDbSwitcher {
  private:
   std::string parent_folder_;
 
-  size_t bucket_cnt_;
+  [[maybe_unused]] size_t bucket_cnt_;
 
   size_t current_bucket_idx_;
 

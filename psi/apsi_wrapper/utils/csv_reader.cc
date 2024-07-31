@@ -146,7 +146,7 @@ auto CSVReader::read() -> pair<DBData, vector<string>> {
     return {UnlabeledData{}, {}};
   } else {
     SPDLOG_INFO("Read csv file {}, row cnt is {}", file_name_, row_cnt);
-    return {move(result), move(orig_items)};
+    return {std::move(result), std::move(orig_items)};
   }
 }
 
@@ -168,7 +168,7 @@ void CSVReader::bucketize(size_t bucket_cnt, const std::string& bucket_folder) {
     return;
   }
 
-  int row_cnt = 0;
+  [[maybe_unused]]int row_cnt = 0;
 
   while (true) {
     // Attempt to read the first RecordBatch

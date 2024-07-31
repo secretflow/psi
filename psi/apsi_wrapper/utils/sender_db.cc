@@ -86,8 +86,8 @@ shared_ptr<::apsi::sender::SenderDB> try_load_csv_db(
     return nullptr;
   }
 
-  return create_sender_db(*db_data, std::move(params), oprf_key, nonce_byte_count,
-                          compress);
+  return create_sender_db(*db_data, std::move(params), oprf_key,
+                          nonce_byte_count, compress);
 }
 
 bool try_save_sender_db(const std::string &sdb_out_file,

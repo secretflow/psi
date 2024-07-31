@@ -168,7 +168,7 @@ void CSVReader::bucketize(size_t bucket_cnt, const std::string& bucket_folder) {
     return;
   }
 
-  [[maybe_unused]]int row_cnt = 0;
+  int row_cnt = 0;
 
   while (true) {
     // Attempt to read the first RecordBatch
@@ -210,6 +210,8 @@ void CSVReader::bucketize(size_t bucket_cnt, const std::string& bucket_folder) {
       }
     }
   }
+
+  (void)row_cnt;
 
   for (const auto& out : bucket_os_vec) {
     out->Flush();

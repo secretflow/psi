@@ -146,7 +146,7 @@ auto CSVReader::read() -> pair<DBData, vector<string>> {
     return {UnlabeledData{}, {}};
   } else {
     SPDLOG_INFO("Read csv file {}, row cnt is {}", file_name_, row_cnt);
-    return {move(result), move(orig_items)};
+    return {std::move(result), std::move(orig_items)};
   }
 }
 
@@ -210,6 +210,8 @@ void CSVReader::bucketize(size_t bucket_cnt, const std::string& bucket_folder) {
       }
     }
   }
+
+  (void)row_cnt;
 
   for (const auto& out : bucket_os_vec) {
     out->Flush();

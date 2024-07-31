@@ -54,10 +54,10 @@ def _yacl():
         http_archive,
         name = "yacl",
         urls = [
-            "https://github.com/secretflow/yacl/archive/refs/tags/0.4.5b3_nightly_20240722.tar.gz",
+            "https://github.com/secretflow/yacl/archive/refs/tags/0.4.5b4_nightly_20240731.tar.gz",
         ],
-        strip_prefix = "yacl-0.4.5b3_nightly_20240722",
-        sha256 = "ccca599e6ded6089c5afbb87c8f5e09383195af256caacd50089f0c7443e8604",
+        strip_prefix = "yacl-0.4.5b4_nightly_20240731",
+        sha256 = "e92484a9a60aaf86130157d9568b2bf7812bac4096cb108d565538268d74ea7e",
     )
 
 def _bazel_platform():
@@ -227,7 +227,11 @@ def _com_google_flatbuffers():
         patches = [
             "@psi//bazel:patches/flatbuffers.patch",
         ],
-        patch_args = ["-p1", "-l"],
+        patch_args = ["-p1"],
+        patch_cmds = [
+            # hack to make sure this file is removed
+            "rm grpc/BUILD.bazel",
+        ],
         build_file = "@psi//bazel:flatbuffers.BUILD",
     )
 

@@ -180,7 +180,7 @@ std::string Sender::RunQuery(const std::string &query_str) {
       for (size_t bundle_idx = 0; bundle_idx < all_powers.size();
            bundle_idx++) {
         // Load input^power to all_powers[bundle_idx][exponent]
-        all_powers[bundle_idx][exponent] = move(q.second[bundle_idx]);
+        all_powers[bundle_idx][exponent] = std::move(q.second[bundle_idx]);
       }
     }
 

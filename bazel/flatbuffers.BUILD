@@ -25,6 +25,8 @@ psi_cmake_external(
     name = "FlatBuffers",
     cache_entries = {
         "FLATBUFFERS_BUILD_TESTS": "OFF",
+        "CMAKE_EXE_LINKER_FLAGS": "-lm",
+        "CMAKE_INSTALL_LIBDIR": "lib",
     },
     lib_source = ":all_srcs",
     out_binaries = ["flatc"],

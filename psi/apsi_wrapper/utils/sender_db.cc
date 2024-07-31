@@ -53,7 +53,7 @@ shared_ptr<::apsi::sender::SenderDB> try_load_sender_db(
           "PSI parameters were loaded with the SenderDB; "
           "ignoring given PSI parameters");
     }
-    result = make_shared<::apsi::sender::SenderDB>(move(data));
+    result = make_shared<::apsi::sender::SenderDB>(std::move(data));
 
     // Load also the OPRF key
     oprf_key.load(fs);
@@ -86,8 +86,8 @@ shared_ptr<::apsi::sender::SenderDB> try_load_csv_db(
     return nullptr;
   }
 
-  return create_sender_db(*db_data, move(params), oprf_key, nonce_byte_count,
-                          compress);
+  return create_sender_db(*db_data, std::move(params), oprf_key,
+                          nonce_byte_count, compress);
 }
 
 bool try_save_sender_db(const std::string &sdb_out_file,
@@ -131,7 +131,7 @@ unique_ptr<psi::apsi_wrapper::DBData> load_db(
     return nullptr;
   }
 
-  return make_unique<psi::apsi_wrapper::DBData>(move(db_data));
+  return make_unique<psi::apsi_wrapper::DBData>(std::move(db_data));
 }
 
 pair<unique_ptr<psi::apsi_wrapper::DBData>, vector<std::string>>
@@ -147,8 +147,8 @@ load_db_with_orig_items(const std::string &db_file) {
     return {nullptr, orig_items};
   }
 
-  return {make_unique<psi::apsi_wrapper::DBData>(move(db_data)),
-          move(orig_items)};
+  return {make_unique<psi::apsi_wrapper::DBData>(std::move(db_data)),
+          std::move(orig_items)};
 }
 
 shared_ptr<::apsi::sender::SenderDB> create_sender_db(

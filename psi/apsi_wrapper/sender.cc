@@ -65,7 +65,7 @@ void Sender::RunParams(
       make_unique<::apsi::PSIParams>(sender_db->get_params());
 
   try {
-    send_fun(chl, move(response_params));
+    send_fun(chl, std::move(response_params));
   } catch (const exception &ex) {
     APSI_LOG_ERROR(
         "Failed to send response to parameter request; function threw an "
@@ -223,7 +223,7 @@ void Sender::RunQuery(
       // Load input^power to all_powers[bundle_idx][exponent]
       APSI_LOG_DEBUG("Extracting query ciphertext power "
                      << exponent << " for bundle index " << bundle_idx);
-      all_powers[bundle_idx][exponent] = move(q.second[bundle_idx]);
+      all_powers[bundle_idx][exponent] = std::move(q.second[bundle_idx]);
     }
   }
 
@@ -319,7 +319,7 @@ void Sender::ComputePowers(
       if (relinearize) {
         evaluator->relinearize_inplace(prod, *relin_keys, pool);
       }
-      powers_at_this_bundle_idx[node.power] = move(prod);
+      powers_at_this_bundle_idx[node.power] = std::move(prod);
     }
   });
 

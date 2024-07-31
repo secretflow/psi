@@ -28,6 +28,7 @@ psi_cmake_external(
         "JSONCPP_WITH_POST_BUILD_UNITTEST": "OFF",
         "BUILD_SHARED_LIBS": "OFF",
         "BUILD_OBJECT_LIBS": "OFF",
+        "CMAKE_INSTALL_LIBDIR": "lib",
     },
     lib_source = "@com_github_open_source_parsers_jsoncpp//:all",
     out_static_libs = ["libjsoncpp.a"],

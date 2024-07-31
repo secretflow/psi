@@ -37,6 +37,7 @@ BucketSenderDbSwitcher::BucketSenderDbSwitcher(const std::string& parent_folder,
                                                size_t init_idx)
     : parent_folder_(parent_folder), bucket_cnt_(bucket_cnt) {
   SetBucketIdx(init_idx, true);
+  (void)bucket_cnt_;
 }
 
 void BucketSenderDbSwitcher::SetBucketIdx(size_t idx, bool forced_to_reload) {

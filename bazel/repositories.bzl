@@ -46,7 +46,7 @@ def psi_deps():
     _yacl()
     _com_github_zeromq_cppzmq()
     _com_github_zeromq_libzmq()
-    _com_github_log4cplus_log4cplus()
+    # _com_github_log4cplus_log4cplus()
     _com_github_open_source_parsers_jsoncpp()
 
 def _yacl():
@@ -167,6 +167,8 @@ def _com_github_microsoft_seal():
         sha256 = "af9bf0f0daccda2a8b7f344f13a5692e0ee6a45fea88478b2b90c35648bf2672",
         strip_prefix = "SEAL-4.1.1",
         type = "tar.gz",
+        patch_args = ["-p1"],
+        patches = ["@psi//bazel:patches/seal.patch"],
         urls = [
             "https://github.com/microsoft/SEAL/archive/refs/tags/v4.1.1.tar.gz",
         ],
@@ -228,13 +230,11 @@ def _com_google_flatbuffers():
         urls = [
             "https://github.com/google/flatbuffers/archive/refs/tags/v24.3.25.tar.gz",
         ],
-        patches = [
-            "@psi//bazel:patches/flatbuffers.patch",
-        ],
-        patch_args = ["-p1"],
         patch_cmds = [
             # hack to make sure this file is removed
             "rm grpc/BUILD.bazel",
+            "rm grpc/src/compiler/BUILD.bazel",
+            "rm src/BUILD.bazel",
         ],
         build_file = "@psi//bazel:flatbuffers.BUILD",
     )
@@ -455,18 +455,18 @@ def _com_github_zeromq_libzmq():
         ],
     )
 
-def _com_github_log4cplus_log4cplus():
-    maybe(
-        http_archive,
-        name = "com_github_log4cplus_log4cplus",
-        build_file = "@psi//bazel:log4cplus.BUILD",
-        strip_prefix = "log4cplus-2.1.1",
-        sha256 = "42dc435928917fd2f847046c4a0c6086b2af23664d198c7fc1b982c0bfe600c1",
-        type = ".tar.gz",
-        urls = [
-            "https://github.com/log4cplus/log4cplus/releases/download/REL_2_1_1/log4cplus-2.1.1.tar.gz",
-        ],
-    )
+# def _com_github_log4cplus_log4cplus():
+#     maybe(
+#         http_archive,
+#         name = "com_github_log4cplus_log4cplus",
+#         build_file = "@psi//bazel:log4cplus.BUILD",
+#         strip_prefix = "log4cplus-2.1.1",
+#         sha256 = "42dc435928917fd2f847046c4a0c6086b2af23664d198c7fc1b982c0bfe600c1",
+#         type = ".tar.gz",
+#         urls = [
+#             "https://github.com/log4cplus/log4cplus/releases/download/REL_2_1_1/log4cplus-2.1.1.tar.gz",
+#         ],
+#     )
 
 def _com_github_open_source_parsers_jsoncpp():
     maybe(

@@ -21,39 +21,22 @@ filegroup(
     srcs = glob(["**"]),
 )
 
-config_setting(
-    name = "can_use_hexl",
-    constraint_values = [
-        "@platforms//cpu:x86_64",
-    ],
-    values = {"compilation_mode": "opt"},
-)
-
-default_config = {
-    "SEAL_USE_MSGSL": "ON",
-    "SEAL_BUILD_DEPS": "OFF",
-    "SEAL_USE_ZLIB": "ON",
-    "SEAL_USE_INTEL_HEXL": "OFF",
-    "SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT": "OFF",  #NOTE(juhou) required by apsi
-    "SEAL_USE_ZSTD": "ON",
-    "CMAKE_INSTALL_LIBDIR": "lib",
-}
-
-x64_hexl_config = {
-    "SEAL_USE_MSGSL": "ON",
-    "SEAL_BUILD_DEPS": "OFF",
-    "SEAL_USE_ZLIB": "ON",
-    "SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT": "OFF",  #NOTE(juhou) required by apsi
-    "CMAKE_INSTALL_LIBDIR": "lib",
-    "CpuFeatures_DIR": "$EXT_BUILD_DEPS/cpu_features/lib/cmake/CpuFeatures/",
-    "EXT_BUILD_DEPS": "$EXT_BUILD_DEPS",
-    "SEAL_USE_ZSTD": "ON",
-    "SEAL_USE_INTEL_HEXL": "ON",
-}
-
 psi_cmake_external(
     name = "seal",
-    cache_entries = default_config,
+    cache_entries = {
+        "SEAL_USE_MSGSL": "ON",
+        "SEAL_BUILD_DEPS": "OFF",
+        "SEAL_USE_ZLIB": "ON",
+        "SEAL_USE_INTEL_HEXL": "OFF",
+        "SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT": "OFF",  #NOTE(juhou) required by apsi
+        "SEAL_USE_ZSTD": "ON",
+        "CMAKE_INSTALL_LIBDIR": "lib",
+        # Uncomment to use hexl
+        # "CpuFeatures_DIR": "$EXT_BUILD_DEPS/cpu_features/lib/cmake/CpuFeatures/",
+        # "EXT_BUILD_DEPS": "$EXT_BUILD_DEPS",
+        # "SEAL_USE_INTEL_HEXL": "ON",
+
+    },
     lib_source = "@com_github_microsoft_seal//:all",
     out_include_dir = "include/SEAL-4.1",
     out_static_libs = ["libseal-4.1.a"],
@@ -61,5 +44,7 @@ psi_cmake_external(
         "@com_github_facebook_zstd//:zstd",
         "@com_github_microsoft_gsl//:Microsoft.GSL",
         "@zlib",
+        # Uncomment to use hexl
+        # "@com_intel_hexl//:hexl"
     ],
 )

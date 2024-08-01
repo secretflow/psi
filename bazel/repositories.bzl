@@ -167,6 +167,8 @@ def _com_github_microsoft_seal():
         sha256 = "af9bf0f0daccda2a8b7f344f13a5692e0ee6a45fea88478b2b90c35648bf2672",
         strip_prefix = "SEAL-4.1.1",
         type = "tar.gz",
+        patch_args = ["-p1"],
+        patches = ["@psi//bazel:patches/seal.patch"],
         urls = [
             "https://github.com/microsoft/SEAL/archive/refs/tags/v4.1.1.tar.gz",
         ],
@@ -228,13 +230,11 @@ def _com_google_flatbuffers():
         urls = [
             "https://github.com/google/flatbuffers/archive/refs/tags/v24.3.25.tar.gz",
         ],
-        patches = [
-            "@psi//bazel:patches/flatbuffers.patch",
-        ],
-        patch_args = ["-p1"],
         patch_cmds = [
             # hack to make sure this file is removed
             "rm grpc/BUILD.bazel",
+            "rm grpc/src/compiler/BUILD.bazel",
+            "rm src/BUILD.bazel",
         ],
         build_file = "@psi//bazel:flatbuffers.BUILD",
     )

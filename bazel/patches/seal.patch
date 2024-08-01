@@ -1,18 +1,16 @@
-diff --git a/native/src/seal/serializable.h b/native/src/seal/serializable.h
-index a940190..e490b30 100644
---- a/native/src/seal/serializable.h
-+++ b/native/src/seal/serializable.h
-@@ -135,6 +135,9 @@ namespace seal
-             return obj_.save(out, size, compr_mode);
-         }
-
-+        const T& obj() const { return obj_; }
-+
-+        T& obj() { return obj_; }
-     private:
-         Serializable(T &&obj) : obj_(std::move(obj))
-         {}
-
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1a7a2bfd..bc4ad9d9 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -223,7 +223,7 @@ if(SEAL_USE_INTEL_HEXL)
+         message(STATUS "Intel HEXL: download ...")
+         seal_fetch_thirdparty_content(ExternalIntelHEXL)
+     else()
+-        find_package(HEXL 1.2.4)
++        find_package(HEXL 1.2.5)
+         if (NOT TARGET HEXL::hexl)
+             message(FATAL_ERROR "Intel HEXL: not found")
+         endif()
 diff --git a/native/src/seal/context.cpp b/native/src/seal/context.cpp
 index 887a1312..932d9774 100644
 --- a/native/src/seal/context.cpp
@@ -28,61 +26,62 @@ index 887a1312..932d9774 100644
              first_parms_id_ = key_parms_id_;
          }
 diff --git a/native/src/seal/encryptionparams.cpp b/native/src/seal/encryptionparams.cpp
-index 31e07441..c34d0a45 100644
+index 31e07441..1aba5a41 100644
 --- a/native/src/seal/encryptionparams.cpp
 +++ b/native/src/seal/encryptionparams.cpp
 @@ -23,8 +23,10 @@ namespace seal
              uint64_t poly_modulus_degree64 = static_cast<uint64_t>(poly_modulus_degree_);
              uint64_t coeff_modulus_size64 = static_cast<uint64_t>(coeff_modulus_.size());
              uint8_t scheme = static_cast<uint8_t>(scheme_);
-+			 uint8_t use_special_prime = static_cast<uint8_t>(use_special_prime);
++            uint8_t use_special_prime = static_cast<uint8_t>(use_special_prime);
  
              stream.write(reinterpret_cast<const char *>(&scheme), sizeof(uint8_t));
 +            stream.write(reinterpret_cast<const char *>(&use_special_prime), sizeof(uint8_t));
              stream.write(reinterpret_cast<const char *>(&poly_modulus_degree64), sizeof(uint64_t));
              stream.write(reinterpret_cast<const char *>(&coeff_modulus_size64), sizeof(uint64_t));
              for (const auto &mod : coeff_modulus_)
-@@ -63,6 +65,10 @@ namespace seal
+@@ -63,6 +65,9 @@ namespace seal
              // This constructor will throw if scheme is invalid
              EncryptionParameters parms(scheme);
  
-+			 uint8_t use_special_prime;
++            uint8_t use_special_prime;
 +            stream.read(reinterpret_cast<char *>(&use_special_prime), sizeof(uint8_t));
-+			 parms.set_use_special_prime(use_special_prime);
 +
              // Read the poly_modulus_degree
              uint64_t poly_modulus_degree64 = 0;
              stream.read(reinterpret_cast<char *>(&poly_modulus_degree64), sizeof(uint64_t));
-@@ -128,7 +134,8 @@ namespace seal
+@@ -98,6 +103,7 @@ namespace seal
+             // Supposedly everything worked so set the values of member variables
+             parms.set_poly_modulus_degree(safe_cast<size_t>(poly_modulus_degree64));
+             parms.set_coeff_modulus(coeff_modulus);
++            parms.set_use_special_prime(use_special_prime);
+ 
+             // Only BFV and BGV uses plain_modulus; set_plain_modulus checks that for
+             // other schemes it is zero
+@@ -128,6 +134,7 @@ namespace seal
          size_t total_uint64_count = add_safe(
              size_t(1), // scheme
              size_t(1), // poly_modulus_degree
--            coeff_modulus_size, plain_modulus_.uint64_count());
-+			 size_t(1), // use_special_prime
-+            coeff_modulus_size);
++            size_t(1), // use_special_prime
+             coeff_modulus_size, plain_modulus_.uint64_count());
  
          auto param_data(allocate_uint(total_uint64_count, pool_));
-         uint64_t *param_data_ptr = param_data.get();
-@@ -139,13 +146,15 @@ namespace seal
+@@ -139,11 +146,13 @@ namespace seal
          // Write the poly_modulus_degree. Note that it will always be positive.
          *param_data_ptr++ = static_cast<uint64_t>(poly_modulus_degree_);
  
-+		 *param_data_ptr++ = static_cast<uint64_t>(use_special_prime_);
++        *param_data_ptr++ = static_cast<uint64_t>(use_special_prime_);
          for (const auto &mod : coeff_modulus_)
          {
              *param_data_ptr++ = mod.value();
          }
  
--        set_uint(plain_modulus_.data(), plain_modulus_.uint64_count(), param_data_ptr);
--        param_data_ptr += plain_modulus_.uint64_count();
 +        // NOTE(juhou): we skip the plain modulus for parms_id
-+        // set_uint(plain_modulus_.data(), plain_modulus_.uint64_count(), param_data_ptr);
-+        // param_data_ptr += plain_modulus_.uint64_count();
- 
-         HashFunction::hash(param_data.get(), total_uint64_count, parms_id_);
+         set_uint(plain_modulus_.data(), plain_modulus_.uint64_count(), param_data_ptr);
+         param_data_ptr += plain_modulus_.uint64_count();
  
 diff --git a/native/src/seal/encryptionparams.h b/native/src/seal/encryptionparams.h
-index 9e1fbe48..eb71c4ac 100644
+index 9e1fbe48..8631fcb4 100644
 --- a/native/src/seal/encryptionparams.h
 +++ b/native/src/seal/encryptionparams.h
 @@ -266,6 +266,11 @@ namespace seal
@@ -109,7 +108,15 @@ index 9e1fbe48..eb71c4ac 100644
          /**
          Returns the degree of the polynomial modulus parameter.
          */
-@@ -501,6 +511,8 @@ namespace seal
+@@ -360,6 +370,7 @@ namespace seal
+             std::size_t members_size = Serialization::ComprSizeEstimate(
+                 util::add_safe(
+                     sizeof(scheme_),
++                    sizeof(std::uint8_t),  // use_special_prime
+                     sizeof(std::uint64_t), // poly_modulus_degree_
+                     sizeof(std::uint64_t), // coeff_modulus_size
+                     coeff_modulus_total_size,
+@@ -501,6 +512,8 @@ namespace seal
  
          Modulus plain_modulus_{};
  
@@ -118,9 +125,8 @@ index 9e1fbe48..eb71c4ac 100644
          parms_id_type parms_id_ = parms_id_zero;
      };
  } // namespace seal
-
 diff --git a/native/src/seal/evaluator.cpp b/native/src/seal/evaluator.cpp
-index dabd3bab..afaa71dc 100644
+index dabd3bab..61a96ae9 100644
 --- a/native/src/seal/evaluator.cpp
 +++ b/native/src/seal/evaluator.cpp
 @@ -2382,6 +2382,7 @@ namespace seal
@@ -128,7 +134,7 @@ index dabd3bab..afaa71dc 100644
          // Use key_context_data where permutation tables exist since previous runs.
          auto galois_tool = context_.key_context_data()->galois_tool();
 +        bool is_ntt_form = encrypted.is_ntt_form();
-
+ 
          // Size check
          if (!product_fits_in(coeff_count, coeff_modulus_size))
 @@ -2412,7 +2413,7 @@ namespace seal
@@ -139,7 +145,7 @@ index dabd3bab..afaa71dc 100644
 +        if (not is_ntt_form)
          {
              // !!! DO NOT CHANGE EXECUTION ORDER!!!
-
+ 
 @@ -2426,7 +2427,7 @@ namespace seal
              // Next transform encrypted.data(1)
              galois_tool->apply_galois(encrypted_iter[1], coeff_modulus_size, galois_elt, coeff_modulus, temp);
@@ -148,7 +154,7 @@ index dabd3bab..afaa71dc 100644
 +        else
          {
              // !!! DO NOT CHANGE EXECUTION ORDER!!!
-
+ 
 @@ -2440,10 +2441,6 @@ namespace seal
              // Next transform encrypted.data(1)
              galois_tool->apply_galois_ntt(encrypted_iter[1], coeff_modulus_size, galois_elt, temp);
@@ -157,7 +163,7 @@ index dabd3bab..afaa71dc 100644
 -        {
 -            throw logic_error("scheme not implemented");
 -        }
-
+ 
          // Wipe encrypted.data(1)
          set_zero_poly(coeff_count, coeff_modulus_size, encrypted.data(1));
 @@ -2530,6 +2527,7 @@ namespace seal
@@ -165,7 +171,7 @@ index dabd3bab..afaa71dc 100644
          auto &key_parms = key_context_data.parms();
          auto scheme = parms.scheme();
 +        bool is_ntt_form = encrypted.is_ntt_form();
-
+ 
          // Verify parameters.
          if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
 @@ -2559,14 +2557,6 @@ namespace seal
@@ -185,7 +191,7 @@ index dabd3bab..afaa71dc 100644
              throw invalid_argument("BGV encrypted must be in NTT form");
 @@ -2605,7 +2595,7 @@ namespace seal
          set_uint(target_iter, decomp_modulus_size * coeff_count, t_target);
-
+ 
          // In CKKS or BGV, t_target is in NTT form; switch back to normal form
 -        if (scheme == scheme_type::ckks || scheme == scheme_type::bgv)
 +        if (is_ntt_form)
@@ -194,7 +200,7 @@ index dabd3bab..afaa71dc 100644
          }
 @@ -2632,7 +2622,7 @@ namespace seal
                  ConstCoeffIter t_operand;
-
+ 
                  // RNS-NTT form exists in input
 -                if ((scheme == scheme_type::ckks || scheme == scheme_type::bgv) && (I == J))
 +                if (is_ntt_form && (I == J))
@@ -203,7 +209,7 @@ index dabd3bab..afaa71dc 100644
                  }
 @@ -2789,7 +2779,7 @@ namespace seal
                      SEAL_ITERATE(t_ntt, coeff_count, [fix](auto &K) { K += fix; });
-
+ 
                      uint64_t qi_lazy = qi << 1; // some multiples of qi
 -                    if (scheme == scheme_type::ckks)
 +                    if (is_ntt_form)
@@ -219,44 +225,43 @@ index dabd3bab..afaa71dc 100644
                      {
                          inverse_ntt_negacyclic_harvey_lazy(get<0, 1>(J), get<2>(J));
                      }
-
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 1a7a2bfd..bc4ad9d9 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -223,7 +223,7 @@ if(SEAL_USE_INTEL_HEXL)
-         message(STATUS "Intel HEXL: download ...")
-         seal_fetch_thirdparty_content(ExternalIntelHEXL)
-     else()
--        find_package(HEXL 1.2.4)
-+        find_package(HEXL 1.2.5)
-         if (NOT TARGET HEXL::hexl)
-             message(FATAL_ERROR "Intel HEXL: not found")
-         endif()
-
 diff --git a/native/src/seal/evaluator.h b/native/src/seal/evaluator.h
-index 33bc3c7d..8a00ebea 100644
+index 9e3dd576..3dd84ab0 100644
 --- a/native/src/seal/evaluator.h
 +++ b/native/src/seal/evaluator.h
-@@ -1199,6 +1199,10 @@ namespace seal
+@@ -1297,6 +1297,10 @@ namespace seal
          */
          struct EvaluatorPrivateHelper;
-
+ 
 +        void switch_key_inplace(
 +            Ciphertext &encrypted, util::ConstRNSIter target_iter, const KSwitchKeys &kswitch_keys,
 +            std::size_t key_index, MemoryPoolHandle pool = MemoryManager::GetPool()) const;
 +
      private:
          Evaluator(const Evaluator &copy) = delete;
-
-@@ -1257,10 +1261,6 @@ namespace seal
+ 
+@@ -1355,10 +1359,6 @@ namespace seal
              apply_galois_inplace(encrypted, galois_tool->get_elt_from_step(0), galois_keys, std::move(pool));
          }
-
+ 
 -        void switch_key_inplace(
 -            Ciphertext &encrypted, util::ConstRNSIter target_iter, const KSwitchKeys &kswitch_keys,
 -            std::size_t key_index, MemoryPoolHandle pool = MemoryManager::GetPool()) const;
 -
          void multiply_plain_normal(Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool) const;
-
+ 
          void multiply_plain_ntt(Ciphertext &encrypted_ntt, const Plaintext &plain_ntt) const;
+diff --git a/native/src/seal/serializable.h b/native/src/seal/serializable.h
+index a940190c..e490b302 100644
+--- a/native/src/seal/serializable.h
++++ b/native/src/seal/serializable.h
+@@ -135,6 +135,9 @@ namespace seal
+             return obj_.save(out, size, compr_mode);
+         }
+ 
++        const T& obj() const { return obj_; }
++
++        T& obj() { return obj_; }
+     private:
+         Serializable(T &&obj) : obj_(std::move(obj))
+         {}

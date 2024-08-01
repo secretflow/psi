@@ -24,7 +24,7 @@ filegroup(
 psi_cmake_external(
     name = "apsi",
     cache_entries = {
-        "APSI_USE_LOG4CPLUS": "OFF",
+        "APSI_USE_LOG4CPLUS": "ON",
         "APSI_USE_ZMQ": "ON",
         "CMAKE_INSTALL_LIBDIR": "lib",
         "EXT_BUILD_DEPS": "$EXT_BUILD_DEPS",
@@ -34,7 +34,7 @@ psi_cmake_external(
     out_static_libs = ["libapsi-0.11.a"],
     deps = [
         "@com_github_facebook_zstd//:zstd",
-        # "@com_github_log4cplus_log4cplus//:log4cplus",
+        "@com_github_log4cplus_log4cplus//:log4cplus",
         "@com_github_microsoft_FourQlib//:FourQlib",
         "@com_github_microsoft_gsl//:Microsoft.GSL",
         "@com_github_microsoft_kuku//:kuku",

@@ -46,7 +46,7 @@ def psi_deps():
     _yacl()
     _com_github_zeromq_cppzmq()
     _com_github_zeromq_libzmq()
-    # _com_github_log4cplus_log4cplus()
+    _com_github_log4cplus_log4cplus()
     _com_github_open_source_parsers_jsoncpp()
 
 def _yacl():
@@ -455,18 +455,18 @@ def _com_github_zeromq_libzmq():
         ],
     )
 
-# def _com_github_log4cplus_log4cplus():
-#     maybe(
-#         http_archive,
-#         name = "com_github_log4cplus_log4cplus",
-#         build_file = "@psi//bazel:log4cplus.BUILD",
-#         strip_prefix = "log4cplus-2.1.1",
-#         sha256 = "42dc435928917fd2f847046c4a0c6086b2af23664d198c7fc1b982c0bfe600c1",
-#         type = ".tar.gz",
-#         urls = [
-#             "https://github.com/log4cplus/log4cplus/releases/download/REL_2_1_1/log4cplus-2.1.1.tar.gz",
-#         ],
-#     )
+def _com_github_log4cplus_log4cplus():
+    maybe(
+        http_archive,
+        name = "com_github_log4cplus_log4cplus",
+        build_file = "@psi//bazel:log4cplus.BUILD",
+        strip_prefix = "log4cplus-2.1.1",
+        sha256 = "42dc435928917fd2f847046c4a0c6086b2af23664d198c7fc1b982c0bfe600c1",
+        type = ".tar.gz",
+        urls = [
+            "https://github.com/log4cplus/log4cplus/releases/download/REL_2_1_1/log4cplus-2.1.1.tar.gz",
+        ],
+    )
 
 def _com_github_open_source_parsers_jsoncpp():
     maybe(

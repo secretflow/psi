@@ -83,12 +83,12 @@ TEST(ApiTest, Works) {
 
     receiver.ProcessResult(query_response_str, receiver_output_file);
 
-    sender.SaveSenderDb(sdb_out_file);
+    ASSERT_TRUE(sender.SaveSenderDb(sdb_out_file));
   }
 
   {
     psi::apsi_wrapper::api::Sender sender;
-    sender.LoadSenderDb(sdb_out_file);
+    ASSERT_TRUE(sender.LoadSenderDb(sdb_out_file));
     std::string params_str = sender.GenerateParams();
 
     psi::apsi_wrapper::api::Receiver receiver;

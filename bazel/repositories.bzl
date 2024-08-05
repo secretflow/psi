@@ -410,10 +410,10 @@ def _com_github_ridiculousfish_libdivide():
         http_archive,
         name = "com_github_ridiculousfish_libdivide",
         urls = [
-            "https://github.com/ridiculousfish/libdivide/archive/refs/tags/5.0.tar.gz",
+            "https://github.com/ridiculousfish/libdivide/archive/refs/tags/v5.1.tar.gz",
         ],
-        sha256 = "01ffdf90bc475e42170741d381eb9cfb631d9d7ddac7337368bcd80df8c98356",
-        strip_prefix = "libdivide-5.0",
+        sha256 = "fec2e4141878c58eb92cfcd478accc3b7f34b39491c1e638566f083d378cc7d4",
+        strip_prefix = "libdivide-5.1",
         build_file = "@psi//bazel:libdivide.BUILD",
     )
 

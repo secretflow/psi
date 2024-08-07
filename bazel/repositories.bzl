@@ -383,10 +383,10 @@ def _com_github_google_perfetto():
         http_archive,
         name = "com_github_google_perfetto",
         urls = [
-            "https://github.com/google/perfetto/archive/refs/tags/v41.0.tar.gz",
+            "https://github.com/google/perfetto/archive/refs/tags/v47.0.tar.gz",
         ],
-        sha256 = "4c8fe8a609fcc77ca653ec85f387ab6c3a048fcd8df9275a1aa8087984b89db8",
-        strip_prefix = "perfetto-41.0",
+        sha256 = "9bbd38a0f074038bde6ccbcf5f2ff32587eb60faec254932268ecb6f17f18186",
+        strip_prefix = "perfetto-47.0",
         patch_args = ["-p1"],
         patches = ["@psi//bazel:patches/perfetto.patch"],
         build_file = "@psi//bazel:perfetto.BUILD",

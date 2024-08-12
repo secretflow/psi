@@ -34,98 +34,98 @@ We use the config file to specify different PSI protocols and input data.
 ### sender.config
 ```
 {
-         "psi_config": {
-             "protocol_config": {
-                 "protocol": "PROTOCOL_KKRT",
-                 "role": "ROLE_SENDER",
-                 "broadcast_result": false
-             },
-             "input_config": {
-                 "type": "IO_TYPE_FILE_CSV",
-                 "path": "/home/zuoxian/v2psi/datas/psi_1_1kw.csv"
-             },
-             "output_config": {
-                 "type": "IO_TYPE_FILE_CSV",
-                 "path": "/home/zuoxian/v2psi/sender/sender_output.csv"
-             },
-             "keys": [
-                 "id",
-             ],
-             "debug_options": {
-                 "trace_path": "/home/zuoxian/v2psi/sender/sender.trace"
-             },
-             "skip_duplicates_check": false,
-             "disable_alignment": false,
-             "advanced_join_type": "ADVANCED_JOIN_TYPE_UNSPECIFIED",
-             "left_side": "ROLE_RECEIVER",
-             "check_hash_digest": false,
-             "recovery_config": {
-                 "enabled": false
-             }
-         },
-         "link_config": {
-             "parties": [
-                 {
-                     "id": "receiver",
-                     "host": "127.0.0.1:5300"
-                 },
-                 {
-                     "id": "sender",
-                     "host": "127.0.0.1:5400"
-                 }
-             ]
-         },
-         "self_link_party": "sender"
-     }
+  "psi_config": {
+      "protocol_config": {
+          "protocol": "PROTOCOL_KKRT",
+          "role": "ROLE_SENDER",
+          "broadcast_result": false
+      },
+      "input_config": {
+          "type": "IO_TYPE_FILE_CSV",
+          "path": "/home/zuoxian/v2psi/datas/psi_1_1kw.csv"
+      },
+      "output_config": {
+          "type": "IO_TYPE_FILE_CSV",
+          "path": "/home/zuoxian/v2psi/sender/sender_output.csv"
+      },
+      "keys": [
+          "id",
+      ],
+      "debug_options": {
+          "trace_path": "/home/zuoxian/v2psi/sender/sender.trace"
+      },
+      "skip_duplicates_check": false,
+      "disable_alignment": false,
+      "advanced_join_type": "ADVANCED_JOIN_TYPE_UNSPECIFIED",
+      "left_side": "ROLE_RECEIVER",
+      "check_hash_digest": false,
+      "recovery_config": {
+          "enabled": false
+      }
+  },
+  "link_config": {
+      "parties": [
+          {
+              "id": "receiver",
+              "host": "127.0.0.1:5300"
+          },
+          {
+              "id": "sender",
+              "host": "127.0.0.1:5400"
+          }
+      ]
+  },
+  "self_link_party": "sender"
+}
 ```
 
 
 ### receiver.config
 ```
 {
-         "psi_config": {
-             "protocol_config": {
-                 "protocol": "PROTOCOL_KKRT",
-                 "role": "ROLE_RECEIVER",
-                 "broadcast_result": false
-             },
-             "input_config": {
-                 "type": "IO_TYPE_FILE_CSV",
-                 "path": "/home/zuoxian/v2psi/datas/psi_2_1kw.csv"
-             },
-             "output_config": {
-                 "type": "IO_TYPE_FILE_CSV",
-                 "path": "/home/zuoxian/v2psi/receiver/receiver_output.csv"
-             },
-             "keys": [
-                 "id",
-             ],
-             "debug_options": {
-                 "trace_path": "/home/zuoxian/v2psi/receiver/receiver.trace"
-             },
-             "skip_duplicates_check": false,
-             "disable_alignment": false,
-             "advanced_join_type": "ADVANCED_JOIN_TYPE_UNSPECIFIED",
-             "left_side": "ROLE_RECEIVER",
-             "check_hash_digest": false,
-             "recovery_config": {
-                 "enabled": false
-             }
-         },
-         "link_config": {
-             "parties": [
-                 {
-                     "id": "receiver",
-                     "host": "127.0.0.1:5300"
-                 },
-                 {
-                     "id": "sender",
-                     "host": "127.0.0.1:5400"
-                 }
-             ]
-         },
-         "self_link_party": "receiver"
-     }
+  "psi_config": {
+      "protocol_config": {
+          "protocol": "PROTOCOL_KKRT",
+          "role": "ROLE_RECEIVER",
+          "broadcast_result": false
+      },
+      "input_config": {
+          "type": "IO_TYPE_FILE_CSV",
+          "path": "/home/zuoxian/v2psi/datas/psi_2_1kw.csv"
+      },
+      "output_config": {
+          "type": "IO_TYPE_FILE_CSV",
+          "path": "/home/zuoxian/v2psi/receiver/receiver_output.csv"
+      },
+      "keys": [
+          "id",
+      ],
+      "debug_options": {
+          "trace_path": "/home/zuoxian/v2psi/receiver/receiver.trace"
+      },
+      "skip_duplicates_check": false,
+      "disable_alignment": false,
+      "advanced_join_type": "ADVANCED_JOIN_TYPE_UNSPECIFIED",
+      "left_side": "ROLE_RECEIVER",
+      "check_hash_digest": false,
+      "recovery_config": {
+          "enabled": false
+      }
+  },
+  "link_config": {
+      "parties": [
+          {
+              "id": "receiver",
+              "host": "127.0.0.1:5300"
+          },
+          {
+              "id": "sender",
+              "host": "127.0.0.1:5400"
+          }
+      ]
+  },
+  "self_link_party": "receiver"
+}
 ```
 
 

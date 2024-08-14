@@ -1,8 +1,21 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 78d54a6..166047c 100644
+index 55e2d77..80d0afc 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -273,10 +273,9 @@ if(APSI_USE_ZMQ)
+@@ -146,7 +146,11 @@ if(NOT Flatbuffers_FOUND)
+     message(FATAL_ERROR "Flatbuffers: not found")
+ else()
+     message(STATUS "Flatbuffers: found")
+-    get_target_property(FLATBUFFERS_FLATC_PATH flatbuffers::flatc IMPORTED_LOCATION_RELEASE)
++    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
++        get_target_property(FLATBUFFERS_FLATC_PATH flatbuffers::flatc IMPORTED_LOCATION_DEBUG)
++    else()
++        get_target_property(FLATBUFFERS_FLATC_PATH flatbuffers::flatc IMPORTED_LOCATION_RELEASE)
++    endif()
+     message(STATUS "flatc path: ${FLATBUFFERS_FLATC_PATH}")
+     include(CompileSchemaCXX)
+ endif()
+@@ -273,10 +277,9 @@ if(APSI_USE_ZMQ)
      target_link_libraries(apsi PUBLIC libzmq-static cppzmq-static)
  endif()
  

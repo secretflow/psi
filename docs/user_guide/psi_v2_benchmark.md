@@ -270,11 +270,6 @@ Here we show the PSI V2 Benchmark measured as above.
     <td>388</td>
     <td>1.21 h</td>
   </tr>
-
-
-
-
-
   <tr>
     <td rowspan="10">16C32G</td>
     <td rowspan="2">receiver='alice',<br>protocol='ECDH_PSI_2PC',<br>curve_type='CURVE_FOURQ',<br>precheck_input=False,<br>sort=False,<br>broadcast_result=False,</td>
@@ -346,7 +341,6 @@ Here we show the PSI V2 Benchmark measured as above.
     <td>384</td>
     <td>1.52 h</td>
   </tr>
-
   <tr>
     <td rowspan="10">8C16G</td>
     <td rowspan="2">receiver='alice',<br>protocol='ECDH_PSI_2PC',<br>curve_type='CURVE_FOURQ',<br>precheck_input=False,<br>sort=False,<br>broadcast_result=False,</td>

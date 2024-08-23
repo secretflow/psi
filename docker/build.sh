@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 show_help() {
     echo "Usage: bash build.sh [OPTION]... -v {the_version}"
@@ -69,13 +69,17 @@ LATEST_TAG=${DOCKER_REG}/psi-anolis8:latest
 
 echo -e "Build psi binary ${GREEN}PSI ${PSI_VERSION}${NO_COLOR}..."
 
+SCRIPT_DIR="$(realpath $(dirname $0))"
+
 if [[ SKIP -eq 0 ]]; then
-    docker run -it  --rm   --mount type=bind,source="$(pwd)/../../psi",target=/home/admin/dev/src -w /home/admin/dev  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow/release-ci:1.4 /home/admin/dev/src/docker/entry.sh
+    docker run -it  --rm   --mount type=bind,source="${SCRIPT_DIR}/../",target=/home/admin/dev/src -w /home/admin/dev  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow/release-ci:latest /home/admin/dev/src/docker/entry.sh
     echo -e "Finish building psi binary ${GREEN}${IMAGE_LITE_TAG}${NO_COLOR}"
 fi
 
+cd $SCRIPT_DIR
+
 echo -e "Building docker image ${GREEN}${IMAGE_TAG}${NO_COLOR}..."
-docker build . -f Dockerfile -t ${IMAGE_TAG} --build-arg version=${VERSION} --build-arg config_templates="$(cat config_templates.yml)" --build-arg deploy_templates="$(cat deploy_templates.yml)"
+docker buildx build --platform linux/amd64 -f Dockerfile -t ${IMAGE_TAG} --build-arg version=${VERSION} --build-arg config_templates="$(cat config_templates.yml)" --build-arg deploy_templates="$(cat deploy_templates.yml)" .
 echo -e "Finish building docker image ${GREEN}${IMAGE_LITE_TAG}${NO_COLOR}"
 
 if [[ UPLOAD -eq 1 ]]; then
@@ -92,3 +96,5 @@ if [[ LATEST -eq 1 ]]; then
 fi
 
 echo ${VERSION} > version.txt
+
+cd -

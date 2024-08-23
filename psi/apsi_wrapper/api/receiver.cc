@@ -37,7 +37,7 @@ void Receiver::SetThreadCount(size_t threads) {
 }
 
 void Receiver::LoadParamsConfig(const std::string& params_file) {
-  params_ = psi::apsi_wrapper::build_psi_params(params_file);
+  params_ = psi::apsi_wrapper::BuildPsiParams(params_file);
 }
 
 void Receiver::LoadSenderParams(const std::string& params_response_str) {

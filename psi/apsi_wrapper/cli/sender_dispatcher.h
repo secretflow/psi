@@ -30,6 +30,7 @@
 #include "apsi/sender_db.h"
 
 #include "psi/apsi_wrapper/utils/bucket.h"
+#include "psi/apsi_wrapper/utils/group_db.h"
 #include "psi/apsi_wrapper/yacl_channel.h"
 
 namespace psi::apsi_wrapper::cli {
@@ -61,6 +62,8 @@ class SenderDispatcher {
 
   SenderDispatcher(std::shared_ptr<BucketSenderDbSwitcher> bucket_db_switcher);
 
+  SenderDispatcher(GroupDB &group_db);
+
   /**
   Run the dispatcher on the given port.
   */
@@ -71,6 +74,8 @@ class SenderDispatcher {
            bool streaming_result = true);
 
  private:
+  GroupDB *group_db_ = nullptr;
+
   std::shared_ptr<::apsi::sender::SenderDB> sender_db_;
 
   ::apsi::oprf::OPRFKey oprf_key_;

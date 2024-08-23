@@ -34,7 +34,7 @@ index 31e07441..6f8e6b2a 100644
              uint64_t coeff_modulus_size64 = static_cast<uint64_t>(coeff_modulus_.size());
              uint8_t scheme = static_cast<uint8_t>(scheme_);
 +            uint8_t use_special_prime_size8 = static_cast<uint8_t>(use_special_prime_);
- 
+
              stream.write(reinterpret_cast<const char *>(&scheme), sizeof(uint8_t));
 +            stream.write(reinterpret_cast<const char *>(&use_special_prime_size8), sizeof(uint8_t));
              stream.write(reinterpret_cast<const char *>(&poly_modulus_degree64), sizeof(uint64_t));
@@ -43,7 +43,7 @@ index 31e07441..6f8e6b2a 100644
 @@ -63,6 +65,9 @@ namespace seal
              // This constructor will throw if scheme is invalid
              EncryptionParameters parms(scheme);
- 
+
 +            uint8_t use_special_prime_size8;
 +            stream.read(reinterpret_cast<char *>(&use_special_prime_size8), sizeof(uint8_t));
 +
@@ -55,7 +55,7 @@ index 31e07441..6f8e6b2a 100644
              parms.set_poly_modulus_degree(safe_cast<size_t>(poly_modulus_degree64));
              parms.set_coeff_modulus(coeff_modulus);
 +            parms.set_use_special_prime(use_special_prime_size8);
- 
+
              // Only BFV and BGV uses plain_modulus; set_plain_modulus checks that for
              // other schemes it is zero
 @@ -128,6 +134,7 @@ namespace seal
@@ -64,12 +64,12 @@ index 31e07441..6f8e6b2a 100644
              size_t(1), // poly_modulus_degree
 +            size_t(1), // use_special_prime
              coeff_modulus_size, plain_modulus_.uint64_count());
- 
+
          auto param_data(allocate_uint(total_uint64_count, pool_));
 @@ -139,6 +146,7 @@ namespace seal
          // Write the poly_modulus_degree. Note that it will always be positive.
          *param_data_ptr++ = static_cast<uint64_t>(poly_modulus_degree_);
- 
+
 +        *param_data_ptr++ = static_cast<uint64_t>(use_special_prime_);
          for (const auto &mod : coeff_modulus_)
          {
@@ -81,7 +81,7 @@ index 9e1fbe48..8530eeeb 100644
 @@ -266,6 +266,11 @@ namespace seal
              random_generator_ = std::move(random_generator);
          }
- 
+
 +        inline void set_use_special_prime(bool flag)
 +        {
 +            use_special_prime_ = flag;
@@ -93,7 +93,7 @@ index 9e1fbe48..8530eeeb 100644
 @@ -274,6 +279,11 @@ namespace seal
              return scheme_;
          }
- 
+
 +        bool use_special_prime() const noexcept
 +        {
 +            return use_special_prime_;
@@ -111,9 +111,9 @@ index 9e1fbe48..8530eeeb 100644
                      sizeof(std::uint64_t), // coeff_modulus_size
                      coeff_modulus_total_size,
 @@ -501,6 +512,8 @@ namespace seal
- 
+
          Modulus plain_modulus_{};
- 
+
 +        bool use_special_prime_ = true;
 +
          parms_id_type parms_id_ = parms_id_zero;
@@ -128,7 +128,7 @@ index dabd3bab..61a96ae9 100644
          // Use key_context_data where permutation tables exist since previous runs.
          auto galois_tool = context_.key_context_data()->galois_tool();
 +        bool is_ntt_form = encrypted.is_ntt_form();
- 
+
          // Size check
          if (!product_fits_in(coeff_count, coeff_modulus_size))
 @@ -2412,7 +2413,7 @@ namespace seal
@@ -139,7 +139,7 @@ index dabd3bab..61a96ae9 100644
 +        if (not is_ntt_form)
          {
              // !!! DO NOT CHANGE EXECUTION ORDER!!!
- 
+
 @@ -2426,7 +2427,7 @@ namespace seal
              // Next transform encrypted.data(1)
              galois_tool->apply_galois(encrypted_iter[1], coeff_modulus_size, galois_elt, coeff_modulus, temp);
@@ -148,7 +148,7 @@ index dabd3bab..61a96ae9 100644
 +        else
          {
              // !!! DO NOT CHANGE EXECUTION ORDER!!!
- 
+
 @@ -2440,10 +2441,6 @@ namespace seal
              // Next transform encrypted.data(1)
              galois_tool->apply_galois_ntt(encrypted_iter[1], coeff_modulus_size, galois_elt, temp);
@@ -157,7 +157,7 @@ index dabd3bab..61a96ae9 100644
 -        {
 -            throw logic_error("scheme not implemented");
 -        }
- 
+
          // Wipe encrypted.data(1)
          set_zero_poly(coeff_count, coeff_modulus_size, encrypted.data(1));
 @@ -2530,6 +2527,7 @@ namespace seal
@@ -165,7 +165,7 @@ index dabd3bab..61a96ae9 100644
          auto &key_parms = key_context_data.parms();
          auto scheme = parms.scheme();
 +        bool is_ntt_form = encrypted.is_ntt_form();
- 
+
          // Verify parameters.
          if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
 @@ -2559,14 +2557,6 @@ namespace seal
@@ -185,7 +185,7 @@ index dabd3bab..61a96ae9 100644
              throw invalid_argument("BGV encrypted must be in NTT form");
 @@ -2605,7 +2595,7 @@ namespace seal
          set_uint(target_iter, decomp_modulus_size * coeff_count, t_target);
- 
+
          // In CKKS or BGV, t_target is in NTT form; switch back to normal form
 -        if (scheme == scheme_type::ckks || scheme == scheme_type::bgv)
 +        if (is_ntt_form)
@@ -194,7 +194,7 @@ index dabd3bab..61a96ae9 100644
          }
 @@ -2632,7 +2622,7 @@ namespace seal
                  ConstCoeffIter t_operand;
- 
+
                  // RNS-NTT form exists in input
 -                if ((scheme == scheme_type::ckks || scheme == scheme_type::bgv) && (I == J))
 +                if (is_ntt_form && (I == J))
@@ -203,7 +203,7 @@ index dabd3bab..61a96ae9 100644
                  }
 @@ -2789,7 +2779,7 @@ namespace seal
                      SEAL_ITERATE(t_ntt, coeff_count, [fix](auto &K) { K += fix; });
- 
+
                      uint64_t qi_lazy = qi << 1; // some multiples of qi
 -                    if (scheme == scheme_type::ckks)
 +                    if (is_ntt_form)
@@ -226,15 +226,15 @@ index 9e3dd576..bb598ddf 100644
 @@ -1355,10 +1355,12 @@ namespace seal
              apply_galois_inplace(encrypted, galois_tool->get_elt_from_step(0), galois_keys, std::move(pool));
          }
- 
+
 +    public:
          void switch_key_inplace(
              Ciphertext &encrypted, util::ConstRNSIter target_iter, const KSwitchKeys &kswitch_keys,
              std::size_t key_index, MemoryPoolHandle pool = MemoryManager::GetPool()) const;
- 
+
 +    private:
          void multiply_plain_normal(Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool) const;
- 
+
          void multiply_plain_ntt(Ciphertext &encrypted_ntt, const Plaintext &plain_ntt) const;
 diff --git a/native/src/seal/serializable.h b/native/src/seal/serializable.h
 index a940190c..e490b302 100644
@@ -243,7 +243,7 @@ index a940190c..e490b302 100644
 @@ -135,6 +135,9 @@ namespace seal
              return obj_.save(out, size, compr_mode);
          }
- 
+
 +        const T& obj() const { return obj_; }
 +
 +        T& obj() { return obj_; }

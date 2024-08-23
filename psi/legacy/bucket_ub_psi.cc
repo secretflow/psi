@@ -433,7 +433,7 @@ std::pair<std::vector<uint64_t>, size_t> UbPsiServerOnline(
         lctx->NextRank(), fmt::format("EC-OPRF:PSI:INTERSECTION_SIZE")));
 
     SPDLOG_INFO("rank:{} begin recv broadcast {} intersection results",
-                lctx->Rank(), results.size(), intersection_size);
+                lctx->Rank(), intersection_size);
 
     if (intersection_size > 0) {
       std::vector<std::string> result_items;

@@ -166,12 +166,22 @@ void EcdhPsiContext::MaskPeer(
         }
       }
     }
+
     // Should send out the dual masked items to peer.
     if (PeerCanTouchResults()) {
+      if (batch_count == 0) {
+        SPDLOG_INFO("SendDualMaskedItems to peer: {} begin...",
+                    options_.target_rank);
+      }
       const auto tag = fmt::format("ECDHPSI:Y^B^A:{}", batch_count);
       // call non-block to avoid blocking each other with MaskSelf
       SendDualMaskedBatchNonBlock(dual_masked_peers, batch_count, tag);
+      if (dual_masked_peers.empty()) {
+        SPDLOG_INFO("SendDualMaskedItems to peer: {} finished, batch_count={}",
+                    options_.target_rank, batch_count);
+      }
     }
+
     if (peer_items.empty()) {
       SPDLOG_INFO("MaskPeer:{} --finished, batch_count={}, peer_item_count={}",
                   Id(), batch_count, item_count);
@@ -368,14 +378,17 @@ void RunEcdhPsi(const EcdhPsiOptions& options,
   }
 
   std::future<void> f_mask_self = std::async([&] {
+    SPDLOG_INFO("ID {}: MaskSelf begin...", handler.Id());
     handler.MaskSelf(batch_provider, processed_item_cnt);
     SPDLOG_INFO("ID {}: MaskSelf finished.", handler.Id());
   });
   std::future<void> f_mask_peer = std::async([&] {
+    SPDLOG_INFO("ID {}: MaskPeer begin...", handler.Id());
     handler.MaskPeer(peer_ec_point_store);
     SPDLOG_INFO("ID {}: MaskPeer finished.", handler.Id());
   });
   std::future<void> f_recv_peer = std::async([&] {
+    SPDLOG_INFO("ID {}: RecvDualMaskedSelf begin...", handler.Id());
     handler.RecvDualMaskedSelf(self_ec_point_store);
     SPDLOG_INFO("ID {}: RecvDualMaskedSelf finished.", handler.Id());
   });

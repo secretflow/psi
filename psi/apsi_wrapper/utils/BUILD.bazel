@@ -22,6 +22,7 @@ psi_cc_library(
     hdrs = ["common.h"],
     deps = [
         "@com_github_microsoft_apsi//:apsi",
+        "@org_apache_arrow//:arrow",
     ],
 )
 
@@ -42,6 +43,16 @@ psi_cc_library(
     hdrs = ["sender_db.h"],
     deps = [
         ":csv_reader",
+    ],
+)
+
+psi_cc_library(
+    name = "group_db",
+    srcs = ["group_db.cc"],
+    hdrs = ["group_db.h"],
+    deps = [
+        ":csv_reader",
+        ":sender_db",
     ],
 )
 

@@ -39,6 +39,7 @@
 using namespace std::chrono_literals;
 
 namespace psi::apsi_wrapper::cli {
+
 SenderDispatcher::SenderDispatcher(
     std::shared_ptr<::apsi::sender::SenderDB> sender_db,
     ::apsi::oprf::OPRFKey oprf_key)
@@ -78,7 +79,28 @@ SenderDispatcher::SenderDispatcher(
   LoadBucket();
 }
 
+SenderDispatcher::SenderDispatcher(GroupDB &group_db) : group_db_(&group_db) {
+  auto bucket_num = group_db_->GetBucketNum();
+  for (size_t i = 0; i != bucket_num; ++i) {
+    SetBucketIdx(i);
+    if (sender_db_ != nullptr) {
+      break;
+    }
+  }
+
+  YACL_ENFORCE(sender_db_ != nullptr,
+               "Can not found a valid bucket, terminated.");
+}
+
 void SenderDispatcher::SetBucketIdx(size_t idx) {
+  if (group_db_ != nullptr) {
+    auto item = group_db_->GetBucketDB(idx);
+
+    sender_db_ = item.sender_db;
+    oprf_key_ = item.oprf_key;
+    return;
+  }
+
   if (!bucket_db_switcher_) {
     return;
   }
@@ -333,6 +355,35 @@ void SenderDispatcher::dispatch_query(
 
     SetBucketIdx(query_request->bucket_idx);
 
+    auto send_func = [&sop](::apsi::network::Channel &c,
+                            ::apsi::Response response) {
+      auto nsop_response =
+          std::make_unique<::apsi::network::ZMQSenderOperationResponse>();
+      nsop_response->sop_response = std::move(response);
+      nsop_response->client_id = sop->client_id;
+
+      // We know for sure that the channel is a SenderChannel so use
+      // static_cast
+      static_cast<::apsi::network::ZMQSenderChannel &>(c).send(
+          std::move(nsop_response));
+    };
+
+    if (sender_db_ == nullptr) {
+      ::apsi::QueryResponse response_query =
+          std::make_unique<::apsi::QueryResponse::element_type>();
+      response_query->package_count = 0;
+      try {
+        send_func(chl, std::move(response_query));
+      } catch (const std::exception &ex) {
+        APSI_LOG_ERROR(
+            "Failed to send response to query request; function threw an "
+            "exception: "
+            << ex.what());
+        throw;
+      }
+      return;
+    }
+
     // Create the Query object
     apsi::sender::Query query(std::move(query_request), sender_db_);
 
@@ -341,17 +392,7 @@ void SenderDispatcher::dispatch_query(
     Sender::RunQuery(
         query, chl, streaming_result,
         // Lambda function for sending the query response
-        [&sop](::apsi::network::Channel &c, ::apsi::Response response) {
-          auto nsop_response =
-              std::make_unique<::apsi::network::ZMQSenderOperationResponse>();
-          nsop_response->sop_response = std::move(response);
-          nsop_response->client_id = sop->client_id;
-
-          // We know for sure that the channel is a SenderChannel so use
-          // static_cast
-          static_cast<::apsi::network::ZMQSenderChannel &>(c).send(
-              std::move(nsop_response));
-        },
+        send_func,
         // Lambda function for sending the result parts
         [&sop](::apsi::network::Channel &c, ::apsi::ResultPart rp) {
           auto nrp = std::make_unique<apsi::network::ZMQResultPackage>();
@@ -379,6 +420,24 @@ void SenderDispatcher::dispatch_query(
     auto query_request = ::apsi::to_query_request(std::move(sop));
 
     SetBucketIdx(query_request->bucket_idx);
+
+    auto send_func = Sender::BasicSend<::apsi::Response::element_type>;
+
+    if (sender_db_ == nullptr) {
+      ::apsi::QueryResponse response_query =
+          std::make_unique<::apsi::QueryResponse::element_type>();
+      response_query->package_count = 0;
+      try {
+        send_func(chl, std::move(response_query));
+      } catch (const std::exception &ex) {
+        APSI_LOG_ERROR(
+            "Failed to send response to query request; function threw an "
+            "exception: "
+            << ex.what());
+        throw;
+      }
+      return;
+    }
 
     // Create the Query object
     apsi::sender::Query query(std::move(query_request), sender_db_);

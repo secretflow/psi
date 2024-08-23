@@ -1,22 +1,22 @@
 {
-    "apsi_receiver_config": {
-        "query_file": "/tmp/query.csv",
-        "output_file": "/tmp/result.csv",
-        "params_file": "/tmp/100K-1-16.json",
-        "experimental_enable_bucketize": true,
-        "experimental_bucket_cnt": 10
-    },
-    "link_config": {
-        "parties": [
-            {
-                "id": "sender",
-                "host": "127.0.0.1:5300"
-            },
-            {
-                "id": "receiver",
-                "host": "127.0.0.1:5400"
-            }
-        ]
-    },
-    "self_link_party": "receiver"
+  "apsi_receiver_config": {
+    "query_file": "/tmp/query.csv",
+    "output_file": "/tmp/result.csv",
+    "params_file": "/tmp/100K-1-16.json",
+    "experimental_enable_bucketize": true,
+    "experimental_bucket_cnt": 10000
+  },
+  "link_config": {
+    "parties": [
+      {
+        "id": "sender",
+        "host": "127.0.0.1:5300"
+      },
+      {
+        "id": "receiver",
+        "host": "127.0.0.1:5400"
+      }
+    ]
+  },
+  "self_link_party": "receiver"
 }

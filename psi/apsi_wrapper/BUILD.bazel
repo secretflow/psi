@@ -45,21 +45,6 @@ psi_cc_library(
     ],
 )
 
-psi_cc_test(
-    name = "integration_test",
-    timeout = "long",
-    srcs = [
-        "integration_test.cc",
-    ],
-    tags = ["manual"],
-    deps = [
-        ":receiver",
-        ":sender",
-        ":test_utils",
-        "@com_github_microsoft_apsi//:apsi",
-    ],
-)
-
 psi_cc_library(
     name = "yacl_channel",
     srcs = ["yacl_channel.cc"],

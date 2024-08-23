@@ -79,6 +79,17 @@ message ApsiSenderConfig {
 
   // [experimental] Folder to save bucketized small csv files and db files.
   string experimental_bucket_folder = 15;
+
+  // [experimental] The number of processes to use for generating db.
+  int32 experimental_db_generating_process_num = 16;
+
+  // Source file used to genenerate sender db.
+  // Currently only support csv file.
+  string source_file = 17;
+
+  // [experimental] The number of group of bucket, each group has a db_file,
+  // default 1024.
+  int32 experimental_bucket_group_cnt = 18;
 }
 
 message ApsiReceiverConfig {

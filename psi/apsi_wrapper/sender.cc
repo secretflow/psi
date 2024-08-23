@@ -40,6 +40,7 @@
 using namespace std;
 
 namespace psi::apsi_wrapper {
+
 void Sender::RunParams(
     const ::apsi::ParamsRequest &params_request,
     shared_ptr<::apsi::sender::SenderDB> sender_db,
@@ -150,8 +151,26 @@ void Sender::RunQuery(
 
   ::apsi::ThreadPoolMgr tpm;
 
+  auto send_func = BasicSend<::apsi::Response::element_type>;
+
   // Acquire read lock on ::apsi::sender::SenderDB
   auto sender_db = query.sender_db();
+  if (sender_db == nullptr) {
+    ::apsi::QueryResponse response_query =
+        make_unique<::apsi::QueryResponse::element_type>();
+    response_query->package_count = 0;
+    try {
+      send_func(chl, std::move(response_query));
+    } catch (const exception &ex) {
+      APSI_LOG_ERROR(
+          "Failed to send response to query request; function threw an "
+          "exception: "
+          << ex.what());
+      throw;
+    }
+    return;
+  }
+
   auto sender_db_lock = sender_db->get_reader_lock();
 
   STOPWATCH(::apsi::util::sender_stopwatch, "Sender::RunQuery");

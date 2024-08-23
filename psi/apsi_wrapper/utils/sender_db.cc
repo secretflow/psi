@@ -38,7 +38,56 @@ namespace fs = std::filesystem;
 #endif
 
 namespace psi::apsi_wrapper {
-shared_ptr<::apsi::sender::SenderDB> try_load_sender_db(
+
+shared_ptr<::apsi::sender::SenderDB> TryLoadSenderDB(
+    std::istream &in_stream, ::apsi::oprf::OPRFKey &oprf_key) {
+  shared_ptr<::apsi::sender::SenderDB> result = nullptr;
+
+  in_stream.exceptions(ios_base::badbit | ios_base::failbit);
+  try {
+    auto [data, size] = ::apsi::sender::SenderDB::Load(in_stream);
+    APSI_LOG_INFO("Loaded SenderDB (" << size << " bytes) ");
+
+    result = make_shared<::apsi::sender::SenderDB>(std::move(data));
+
+    // Load also the OPRF key
+    oprf_key.load(in_stream);
+    APSI_LOG_INFO("Loaded OPRF key (" << ::apsi::oprf::oprf_key_size
+                                      << " bytes)");
+  } catch (const exception &e) {
+    // Failed to load SenderDB
+    APSI_LOG_DEBUG("Failed to load SenderDB: " << e.what());
+  }
+
+  return result;
+}
+
+bool TrySaveSenderDB(std::ostream &os,
+                     shared_ptr<::apsi::sender::SenderDB> sender_db,
+                     const ::apsi::oprf::OPRFKey &oprf_key) {
+  if (!sender_db) {
+    return false;
+  }
+
+  os.exceptions(ios_base::badbit | ios_base::failbit);
+  try {
+    size_t size = sender_db->save(os);
+    APSI_LOG_INFO("Saved SenderDB (" << size << " bytes)");
+
+    // Save also the OPRF key (fixed size: oprf_key_size bytes)
+    oprf_key.save(os);
+    APSI_LOG_INFO("Saved OPRF key (" << ::apsi::oprf::oprf_key_size
+                                     << " bytes)");
+
+  } catch (const exception &e) {
+    APSI_LOG_WARNING("Failed to save SenderDB: " << e.what());
+    return false;
+  }
+
+  return true;
+}
+
+shared_ptr<::apsi::sender::SenderDB> TryLoadSenderDB(
     const std::string &db_file, const std::string &params_file,
     ::apsi::oprf::OPRFKey &oprf_key) {
   shared_ptr<::apsi::sender::SenderDB> result = nullptr;
@@ -67,12 +116,12 @@ shared_ptr<::apsi::sender::SenderDB> try_load_sender_db(
   return result;
 }
 
-shared_ptr<::apsi::sender::SenderDB> try_load_csv_db(
+shared_ptr<::apsi::sender::SenderDB> GenerateSenderDB(
     const std::string &db_file, const std::string &params_file,
     size_t nonce_byte_count, bool compress, ::apsi::oprf::OPRFKey &oprf_key,
     const std::vector<std::string> &keys,
     const std::vector<std::string> &labels) {
-  unique_ptr<::apsi::PSIParams> params = build_psi_params(params_file);
+  unique_ptr<::apsi::PSIParams> params = BuildPsiParams(params_file);
   if (!params) {
     // We must have valid parameters given
     APSI_LOG_ERROR("Failed to set PSI parameters");
@@ -90,9 +139,9 @@ shared_ptr<::apsi::sender::SenderDB> try_load_csv_db(
                           nonce_byte_count, compress);
 }
 
-bool try_save_sender_db(const std::string &sdb_out_file,
-                        shared_ptr<::apsi::sender::SenderDB> sender_db,
-                        const ::apsi::oprf::OPRFKey &oprf_key) {
+bool TrySaveSenderDB(const std::string &sdb_out_file,
+                     shared_ptr<::apsi::sender::SenderDB> sender_db,
+                     const ::apsi::oprf::OPRFKey &oprf_key) {
   if (!sender_db) {
     return false;
   }
@@ -122,7 +171,7 @@ unique_ptr<psi::apsi_wrapper::DBData> load_db(
   psi::apsi_wrapper::DBData db_data;
   try {
     if (keys.empty() && labels.empty()) {
-      psi::apsi_wrapper::CSVReader reader(db_file);
+      psi::apsi_wrapper::ApsiCsvReader reader(db_file);
       tie(db_data, ignore) = reader.read();
     }
   } catch (const exception &ex) {
@@ -139,12 +188,10 @@ load_db_with_orig_items(const std::string &db_file) {
   psi::apsi_wrapper::DBData db_data;
   std::vector<std::string> orig_items;
   try {
-    psi::apsi_wrapper::CSVReader reader(db_file);
+    psi::apsi_wrapper::ApsiCsvReader reader(db_file);
     tie(db_data, orig_items) = reader.read();
   } catch (const exception &ex) {
-    APSI_LOG_WARNING("Could not open or read file `" << db_file
-                                                     << "`: " << ex.what());
-    return {nullptr, orig_items};
+    YACL_THROW("load file: {} failed: {}", db_file, ex.what());
   }
 
   return {make_unique<psi::apsi_wrapper::DBData>(std::move(db_data)),

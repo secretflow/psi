@@ -242,8 +242,9 @@ void Paxos<IdxType>::SetInput(absl::Span<const uint128_t> inputs) {
       "IdxType:{}",
       inputs.size(), num_items_, sparse_size, sizeof(IdxType));
 
-  YACL_ENFORCE(inputs.size() <= num_items_, "inputs size must equal num_items ",
-               inputs.size(), num_items_);
+  YACL_ENFORCE(inputs.size() <= num_items_,
+               "inputs size {} must equal num_items {}", inputs.size(),
+               num_items_);
 
   std::vector<IdxType> col_weights(sparse_size);
 
@@ -647,7 +648,7 @@ void Paxos<IdxType>::BackfillGf128(
 
   SPDLOG_DEBUG("gapRows size:{}", g);
 
-  YACL_ENFORCE(g <= dense_size, "g:{}, dense_size", g, dense_size);
+  YACL_ENFORCE(g <= dense_size, "g:{}, dense_size: {}", g, dense_size);
 
   if (g) {
     auto fcinv = GetFCInv(main_rows, main_cols, gap_rows);
@@ -1056,7 +1057,8 @@ std::vector<uint64_t> Paxos<IdxType>::GetGapCols(
     // TDOD, make the linear time.
     auto gap_cols = ithCombination(ci, dense_size, g);
     ++ci;
-    YACL_ENFORCE(ci <= e, "failed to find invertible matrix. {}");
+    YACL_ENFORCE(ci <= e, "failed to find invertible matrix. ci:{}, e:{}", ci,
+                 e);
 
     EE.resize(g, g);
     for (uint64_t i = 0; i < g; ++i) {
@@ -1101,7 +1103,7 @@ PxVector Paxos<IdxType>::GetX2Prime(const FCInv& fcinv,
 
   // x2' = x2 - D' r - FC^-1 x1
   if (randomized) {
-    YACL_ENFORCE(P.size() == dense_size + sparse_size);
+    YACL_ENFORCE(P.size() == (dense_size + sparse_size));
     auto p2 = P.subspan(sparse_size);
 
     // note that D' only has a dense part because we

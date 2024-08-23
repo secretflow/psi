@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <fmt/format.h>
 #include <gtest/gtest.h>
 
 #include <cstddef>
@@ -31,6 +30,7 @@
 #include "boost/uuid/uuid.hpp"
 #include "boost/uuid/uuid_generators.hpp"
 #include "boost/uuid/uuid_io.hpp"
+#include "fmt/format.h"
 #include "gtest/gtest.h"
 #include "spdlog/spdlog.h"
 #include "yacl/link/test_util.h"

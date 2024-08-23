@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <fmt/format.h>
-
 #include <algorithm>
 #include <filesystem>
 #include <iostream>
@@ -22,6 +20,7 @@
 #include "boost/uuid/uuid.hpp"
 #include "boost/uuid/uuid_generators.hpp"
 #include "boost/uuid/uuid_io.hpp"
+#include "fmt/format.h"
 #include "gtest/gtest.h"
 #include "spdlog/spdlog.h"
 
@@ -33,7 +32,7 @@
 namespace psi::apsi_wrapper::api {
 
 std::vector<std::string> ReadItems(const std::string& file_path) {
-  psi::apsi_wrapper::CSVReader reader(file_path);
+  psi::apsi_wrapper::ApsiCsvReader reader(file_path);
   psi::apsi_wrapper::DBData db_data;
   std::vector<std::string> items;
 
@@ -42,7 +41,7 @@ std::vector<std::string> ReadItems(const std::string& file_path) {
 }
 
 psi::apsi_wrapper::LabeledData ReadLabeledDB(const std::string& file_path) {
-  psi::apsi_wrapper::CSVReader reader(file_path);
+  psi::apsi_wrapper::ApsiCsvReader reader(file_path);
   psi::apsi_wrapper::DBData db_data;
   std::vector<std::string> items;
   tie(db_data, items) = reader.read();

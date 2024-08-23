@@ -65,6 +65,9 @@ enum Protocol {
 // Configs for ECDH protocol.
 message EcdhConfig {
   .psi.CurveType curve = 1;
+
+  // If not set, use default value: 4096.
+  uint64 batch_size = 2;
 }
 
 // Configs for KKRT protocol

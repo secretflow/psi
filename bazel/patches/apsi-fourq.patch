@@ -1,24 +1,11 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 55e2d77..80d0afc 100644
+index 78d54a6..166047c 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -146,7 +146,11 @@ if(NOT Flatbuffers_FOUND)
-     message(FATAL_ERROR "Flatbuffers: not found")
- else()
-     message(STATUS "Flatbuffers: found")
--    get_target_property(FLATBUFFERS_FLATC_PATH flatbuffers::flatc IMPORTED_LOCATION_RELEASE)
-+    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-+        get_target_property(FLATBUFFERS_FLATC_PATH flatbuffers::flatc IMPORTED_LOCATION_DEBUG)
-+    else()
-+        get_target_property(FLATBUFFERS_FLATC_PATH flatbuffers::flatc IMPORTED_LOCATION_RELEASE)
-+    endif()
-     message(STATUS "flatc path: ${FLATBUFFERS_FLATC_PATH}")
-     include(CompileSchemaCXX)
- endif()
-@@ -273,10 +277,9 @@ if(APSI_USE_ZMQ)
+@@ -273,10 +273,9 @@ if(APSI_USE_ZMQ)
      target_link_libraries(apsi PUBLIC libzmq-static cppzmq-static)
  endif()
- 
+
 -# Configurations for FourQlib: system, arch, SIMD, and assembler
 -target_compile_options(apsi PUBLIC -DHAVE_CONFIG)
 -target_compile_options(apsi PUBLIC -DUSE_SECURE_SEED)
@@ -26,7 +13,7 @@ index 55e2d77..80d0afc 100644
 +# Add FourQlib
 +target_include_directories(apsi PUBLIC ${EXT_BUILD_DEPS}/FourQlib/include)
 +target_link_libraries(apsi PUBLIC FourQ)
- 
+
  # Set system
  if(MSVC)
 diff --git a/common/apsi/CMakeLists.txt b/common/apsi/CMakeLists.txt
@@ -36,7 +23,7 @@ index a65bbfe..60e246e 100644
 @@ -28,7 +28,6 @@ install(
          ${APSI_INCLUDES_INSTALL_DIR}/apsi
  )
- 
+
 -add_subdirectory(fourq)
  add_subdirectory(network)
  add_subdirectory(oprf)
@@ -47,7 +34,7 @@ index bcaa013..93e2b4a 100644
 +++ b/common/apsi/network/zmq/zmq_channel.cpp
 @@ -8,7 +8,7 @@
  #include <stdexcept>
- 
+
  // APSI
 -#include "apsi/fourq/random.h"
 +#include "random.h"
@@ -60,7 +47,7 @@ index d12313f..5fd9be1 100644
 +++ b/common/apsi/oprf/ecpoint.cpp
 @@ -10,10 +10,10 @@
  #include "apsi/util/utils.h"
- 
+
  // FourQ
 -#include "apsi/fourq/FourQ.h"
 -#include "apsi/fourq/FourQ_api.h"
@@ -70,7 +57,7 @@ index d12313f..5fd9be1 100644
 +#include "FourQ_api.h"
 +#include "FourQ_internal.h"
 +#include "random.h"
- 
+
  // SEAL
  #include "seal/randomgen.h"
 diff --git a/common/apsi/util/label_encryptor.cpp b/common/apsi/util/label_encryptor.cpp
@@ -79,7 +66,7 @@ index 3e00b5e..57a5b40 100644
 +++ b/common/apsi/util/label_encryptor.cpp
 @@ -9,7 +9,7 @@
  #include <vector>
- 
+
  // APSI
 -#include "apsi/fourq/random.h"
 +#include "random.h"

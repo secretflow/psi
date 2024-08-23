@@ -1,8 +1,8 @@
 {
-    "apsi_sender_config": {
-        "db_file": "/tmp/db.csv",
-        "params_file": "/tmp/100K-1-16.json",
-        "sdb_out_file": "/tmp/sdb",
-        "save_db_only": true
-    }
+  "apsi_sender_config": {
+    "source_file": "/tmp/db.csv",
+    "params_file": "/tmp/100K-1-16.json",
+    "sdb_out_file": "/tmp/sdb",
+    "save_db_only": true
+  }
 }

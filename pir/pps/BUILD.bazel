@@ -73,5 +73,3 @@ psi_cc_binary(
         "@com_github_google_benchmark//:benchmark_main",
     ],
 )
-
-

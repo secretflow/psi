@@ -1,0 +1,77 @@
+# Copyright 2023 Ant Group Co., Ltd.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library", "psi_cc_test")
+
+package(default_visibility = ["//visibility:public"])
+
+psi_cc_library(
+    name = "ggm_pset",
+    srcs = ["ggm_pset.cc"],
+    hdrs = ["ggm_pset.h"],
+    deps = [
+        "@yacl//yacl/base:dynamic_bitset",
+        "@yacl//yacl/crypto/tools:prg",
+        "@yacl//yacl/crypto/rand:rand",
+    ],
+)
+
+psi_cc_library(
+    name = "client",
+    srcs = ["client.cc"],
+    hdrs = ["client.h"],
+    deps = [
+        ":ggm_pset",
+        "@yacl//yacl/base:dynamic_bitset",
+        "@yacl//yacl/crypto/tools:prg",
+        "@yacl//yacl/crypto/rand:rand",
+    ],
+)
+
+psi_cc_library(
+    name = "server",
+    srcs = ["server.cc"],
+    hdrs = ["server.h"],
+    deps = [
+        ":ggm_pset",
+        "@yacl//yacl/base:dynamic_bitset",
+        "@yacl//yacl/crypto/tools:prg",
+        "@yacl//yacl/crypto/rand:rand",
+    ],
+)
+
+
+psi_cc_binary(
+    name = "pps_pir_test",
+    srcs = ["pps_pir_test.cc"],
+    deps = [
+        ":client",
+        ":server",
+        "@yacl//yacl/base:dynamic_bitset",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+psi_cc_binary(
+    name = "pps_pir_benchmark",
+    srcs = ["pps_pir_benchmark.cc"],
+    deps = [
+        ":client",
+        ":server",
+        "@yacl//yacl/base:dynamic_bitset",
+        "@com_github_google_benchmark//:benchmark_main",
+    ],
+)
+
+

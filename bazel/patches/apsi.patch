@@ -1,3 +1,20 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 55e2d77..7d3007b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -146,7 +146,11 @@ if(NOT Flatbuffers_FOUND)
+     message(FATAL_ERROR "Flatbuffers: not found")
+ else()
+     message(STATUS "Flatbuffers: found")
+-    get_target_property(FLATBUFFERS_FLATC_PATH flatbuffers::flatc IMPORTED_LOCATION_RELEASE)
++    if (CMAKE_BUILD_TYPE STREQUAL "Release")
++        get_target_property(FLATBUFFERS_FLATC_PATH flatbuffers::flatc IMPORTED_LOCATION_RELEASE)
++    else()
++        get_target_property(FLATBUFFERS_FLATC_PATH flatbuffers::flatc IMPORTED_LOCATION_DEBUG)
++    endif()
+     message(STATUS "flatc path: ${FLATBUFFERS_FLATC_PATH}")
+     include(CompileSchemaCXX)
+ endif()
 diff --git a/receiver/apsi/itt.h b/receiver/apsi/itt.h
 index e683045..067d244 100644
 --- a/receiver/apsi/itt.h

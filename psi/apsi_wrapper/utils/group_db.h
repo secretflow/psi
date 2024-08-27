@@ -36,7 +36,7 @@ class GroupDBItem {
 
   GroupDBItem(const std::string& source_file, const std::string& db_path,
               size_t group_idx, std::shared_ptr<::apsi::PSIParams> psi_params,
-              bool compress);
+              bool compress, size_t max_bucket_cnt);
 
   GroupDBItem(const GroupDBItem&) = delete;
   GroupDBItem(GroupDBItem&&) = delete;
@@ -57,6 +57,7 @@ class GroupDBItem {
   bool complete_ = false;
   bool compress_ = false;
   int32_t nonce_byte_count_ = 16;
+  size_t max_bucket_cnt_ = 0;
 
   std::unordered_map<size_t, size_t> bucket_offset_map_;
   std::map<size_t, size_t> offset_bucket_map_;

@@ -125,7 +125,7 @@ void RecoveryManager::MarkPreProcessEnd(
       // save private key
       auto private_key_output =
           io::BuildOutputStream(io::FileIoOptions(private_key_file_path_));
-      private_key_output->Write(cryptor->GetPrivateKey(), kEccKeySize);
+      private_key_output->Write(cryptor->GetPrivateKey().data(), kEccKeySize);
       private_key_output->Flush();
 
       // save checkpoint file

@@ -37,20 +37,23 @@
 namespace psi::apsi_wrapper {
 
 namespace {
+
 constexpr const char* kGroupLabel = "value";
 constexpr const char* kGroupKey = "key";
 constexpr const char* kGroupBucketId = "bucket_id";
+
 }  // namespace
 
 GroupDBItem::GroupDBItem(const std::string& source_file,
                          const std::string& db_path, size_t group_idx,
                          std::shared_ptr<::apsi::PSIParams> psi_params,
-                         bool compress)
+                         bool compress, size_t max_bucket_cnt)
     : source_file_(source_file),
       filename_(fmt::format("{}/{}_group.db", db_path, group_idx)),
       meta_filename_(filename_ + ".meta"),
       psi_params_(psi_params),
-      compress_(compress) {}
+      compress_(compress),
+      max_bucket_cnt_(max_bucket_cnt) {}
 
 void GroupDBItem::LoadMeta() {
   if (complete_) {
@@ -67,6 +70,10 @@ void GroupDBItem::LoadMeta() {
 
   size_t bucket_num;
   mete_ifs >> bucket_num;
+
+  YACL_ENFORCE_LE(bucket_num, max_bucket_cnt_,
+                  "bucket_num {} is too large(more than {})", bucket_num,
+                  max_bucket_cnt_);
 
   for (size_t i = 0; i < bucket_num; ++i) {
     size_t bucket_id;
@@ -177,6 +184,10 @@ void GroupDBItem::Generate() {
       }
     }
   }
+
+  YACL_ENFORCE_LE(db_data.size(), max_bucket_cnt_,
+                  "bucket_cnt {} is too large, more than {}", db_data.size(),
+                  max_bucket_cnt_);
 
   std::vector<BucketDBItem> bucket_dbs_;
 
@@ -330,8 +341,11 @@ GroupDB::BucketIndex GroupDB::GetBucketIndexOfGroup(size_t group_idx) {
 }
 
 void GroupDB::GenerateGroup(size_t group_idx) {
+  auto per_group_bucket_num = (num_buckets_ + group_cnt_ - 1) / group_cnt_;
+
   auto group_item_db = std::make_shared<GroupDBItem>(
-      disk_cache_.GetPath(group_idx), db_path_, group_idx, params_, compress_);
+      disk_cache_.GetPath(group_idx), db_path_, group_idx, params_, compress_,
+      per_group_bucket_num);
   group_item_db->Generate();
   group_map_[group_idx] = group_item_db;
 }

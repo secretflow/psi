@@ -114,7 +114,8 @@ void EcdhPsiContext::MaskSelf(
     if (options_.ecdh_logger) {
       hashed_masked_items =
           options_.ecc_cryptor->SerializeEcPoints(hashed_points);
-      options_.ecdh_logger->Log(EcdhStage::MaskSelf, options_.private_key,
+      options_.ecdh_logger->Log(EcdhStage::MaskSelf,
+                                options_.ecc_cryptor->GetPrivateKey(),
                                 item_count, hashed_masked_items, masked_items);
     }
     item_count += batch_items.size();
@@ -191,7 +192,8 @@ void EcdhPsiContext::MaskPeer(
       break;
     }
     if (options_.ecdh_logger) {
-      options_.ecdh_logger->Log(EcdhStage::MaskPeer, options_.private_key,
+      options_.ecdh_logger->Log(EcdhStage::MaskPeer,
+                                options_.ecc_cryptor->GetPrivateKey(),
                                 item_count, peer_items, dual_masked_peers);
     }
     item_count += peer_items.size();
@@ -220,7 +222,8 @@ void EcdhPsiContext::RecvDualMaskedSelf(
     RecvDualMaskedBatch(&masked_items, batch_count, tag);
     if (options_.ecdh_logger) {
       options_.ecdh_logger->Log(EcdhStage::RecvDualMaskedSelf,
-                                options_.private_key, item_count, masked_items);
+                                options_.ecc_cryptor->GetPrivateKey(),
+                                item_count, masked_items);
     }
     for (auto& item : masked_items) {
       self_ec_point_store->Save(std::move(item));
@@ -442,11 +445,6 @@ std::vector<std::string> RunEcdhPsi(
   options.link_ctx = link_ctx;
   options.target_rank = target_rank;
   options.batch_size = batch_size;
-
-  std::array<uint8_t, kEccKeySize> key_array{};
-  std::memcpy(key_array.data(), &options.ecc_cryptor->GetPrivateKey()[0],
-              kEccKeySize);
-  options.private_key = key_array;
 
   auto self_ec_point_store = std::make_shared<MemoryEcPointStore>();
   auto peer_ec_point_store = std::make_shared<MemoryEcPointStore>();

@@ -76,7 +76,6 @@ struct EcdhPsiOptions {
   // Optional RecoveryManager to save checkpoints.
   std::shared_ptr<RecoveryManager> recovery_manager = nullptr;
 
-  std::array<uint8_t, kEccKeySize> private_key;
   std::shared_ptr<EcdhLogger> ecdh_logger = nullptr;
 };
 

@@ -53,6 +53,62 @@ const string Colors::RedBold = "\033[1;31m";
 const string Colors::GreenBold = "\033[1;32m";
 const string Colors::Reset = "\033[0m";
 
+std::shared_ptr<arrow::csv::StreamingReader> MakeArrowCsvReader(
+    const std::string &file_name, std::vector<std::string> column_names) {
+  std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>
+      column_types;
+  for (auto &col : column_names) {
+    column_types[col] = arrow::utf8();
+  }
+  return MakeArrowCsvReader(file_name, std::move(column_types));
+}
+
+bool IsDuplicated(const LabeledData &labeled_data) {
+  std::unordered_set<std::string> labeled_data_set;
+  for (auto &label : labeled_data) {
+    labeled_data_set.insert(label.first.to_string());
+  }
+
+  return labeled_data.size() != labeled_data_set.size();
+}
+
+bool IsDuplicated(const UnlabeledData &unlabeled_data) {
+  std::unordered_set<std::string> data_set;
+  for (auto &data : unlabeled_data) {
+    data_set.insert(data.to_string());
+  }
+
+  return data_set.size() != unlabeled_data.size();
+}
+
+bool IsDuplicated(const DBData &db_data) {
+  if (std::holds_alternative<LabeledData>(db_data)) {
+    return IsDuplicated(std::get<LabeledData>(db_data));
+  } else {
+    return IsDuplicated(std::get<UnlabeledData>(db_data));
+  }
+}
+
+std::shared_ptr<arrow::csv::StreamingReader> MakeArrowCsvReader(
+    const std::string &file_name,
+    std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>
+        column_types) {
+  auto infile =
+      arrow::io::ReadableFile::Open(file_name, arrow::default_memory_pool())
+          .ValueOrDie();
+
+  arrow::io::IOContext io_context = arrow::io::default_io_context();
+  auto read_options = arrow::csv::ReadOptions::Defaults();
+
+  auto parse_options = arrow::csv::ParseOptions::Defaults();
+  auto convert_options = arrow::csv::ConvertOptions::Defaults();
+  convert_options.column_types = std::move(column_types);
+
+  return arrow::csv::StreamingReader::Make(io_context, infile, read_options,
+                                           parse_options, convert_options)
+      .ValueOrDie();
+}
+
 void throw_if_file_invalid(const string &file_name) {
   fs::path file(file_name);
 
@@ -79,7 +135,7 @@ void throw_if_directory_invalid(const std::string &dir_name) {
   }
 }
 
-std::unique_ptr<::apsi::PSIParams> build_psi_params(
+std::unique_ptr<::apsi::PSIParams> BuildPsiParams(
     const std::string &params_file) {
   string params_json;
 
@@ -131,6 +187,7 @@ int print_intersection_results(
   }
 
   std::stringstream csv_output;
+  std::string csv_header = "key";
   int match_cnt = 0;
   for (size_t i = 0; i < orig_items.size(); i++) {
     std::stringstream msg;
@@ -143,6 +200,7 @@ int print_intersection_results(
         msg << Colors::GreenBold << intersection[i].label.to_string()
             << Colors::Reset;
         csv_output << "," << intersection[i].label.to_string();
+        csv_header += ",value";
       }
       csv_output << endl;
       APSI_LOG_INFO(msg.str());
@@ -158,6 +216,7 @@ int print_intersection_results(
       ofs << csv_output.str();
     } else {
       std::ofstream ofs(out_file);
+      ofs << csv_header << endl;
       ofs << csv_output.str();
     }
 

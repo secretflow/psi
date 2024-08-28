@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <random>
 #include <vector>
 
@@ -35,7 +36,7 @@ class Sm2Cryptor : public IEccCryptor {
                       CurveType type = CurveType::CURVE_SM2)
       : curve_type_(type) {
     YACL_ENFORCE(key.size() == kEccKeySize);
-    std::memcpy(private_key_, key.data(), key.size());
+    std::copy(key.begin(), key.end(), private_key_.begin());
     ec_group_ = yacl::crypto::EcGroupFactory::Instance().Create(
         "sm2", yacl::ArgLib = "openssl");
   }

@@ -35,6 +35,7 @@ psi_cc_library(
         "//psi/apsi_wrapper:sender",
         "//psi/apsi_wrapper:yacl_channel",
         "//psi/apsi_wrapper/utils:bucket",
+        "//psi/apsi_wrapper/utils:group_db",
         "@com_github_microsoft_apsi//:apsi",
     ],
 )
@@ -52,8 +53,10 @@ psi_cc_library(
         "//psi/apsi_wrapper/utils:bucket",
         "//psi/apsi_wrapper/utils:common",
         "//psi/apsi_wrapper/utils:csv_reader",
+        "//psi/apsi_wrapper/utils:group_db",
         "//psi/apsi_wrapper/utils:sender_db",
         "//psi/proto:pir_cc_proto",
+        "@yacl//yacl/utils:parallel",
     ],
 )
 

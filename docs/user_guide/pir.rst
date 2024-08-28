@@ -6,13 +6,13 @@ Quick start with SPU Private Information Retrival (PIR).
 Supported Protocols
 -------------------
 
-+---------------+---------------+---------------+
-| PIR protocols | Type          | Server Number |
-+===============+===============+===============+
-| SealPIR       | Index PIR     | Single Server |
-+---------------+---------------+---------------+
-| APSI          | Keyword PIR   | Single Server |
-+---------------+---------------+---------------+
++----------------+-------------+---------------+
+| PIR protocols  |    Type     | Server Number |
++================+=============+===============+
+| SealPIR(later) | Index PIR   | Single Server |
++----------------+-------------+---------------+
+| APSI           | Keyword PIR | Single Server |
++----------------+-------------+---------------+
 
 At this moment, SealPIR is temporaily removed and will come back later.
 
@@ -75,6 +75,7 @@ CSV File
 
 .. code-block::
 
+    key,value
     Yb,Ii
     Kw,uO
     LA,Oc
@@ -87,9 +88,10 @@ CSV File
 
 Please make sure:
 
-- No headers are allowed.
-- The first column must be items(keys)
-- The second column must be labels(values), this column is optional.
+- Since version **0.4.0b0**, headers line is required.
+- The first row must be headers, only **key** and **value**(optional) are allowed.
+- The **key** column must be items(keys)
+- The **value** column must be labels(values), this column is optional.
 
 
 APSI Params File
@@ -111,13 +113,46 @@ PIR Config
 """"""""""
 
 1. Sender: Setup Stage. In this stage, sender generates sender db file with csv file. This stage is offline.
+Since version **0.4.0b0**, the source csv file for db generating should be specified as **source_file**, and **db_file**
+is used to specify db file.
 
 .. code-block::
    :caption: apsi_sender_setup.json
 
     {
         "apsi_sender_config": {
-            "db_file": "/tmp/db.csv",
+            "source_file": "/tmp/db.csv",
+            "params_file": "/tmp/1M-256-288.json",
+            "sdb_out_file": "/tmp/sdb"
+        }
+    }
+
+2. Sender: Online stage. In this stage, sender generates responses to receivers' queries. This stage is online.
+
+.. code-block::
+   :caption: apsi_sender_online.json
+
+    {
+        "apsi_sender_config": {
+            "db_file": "/tmp/sdb"
+        },
+        "link_config": {
+            "parties": [
+                {
+                    "id": "sender",
+                    "host": "127.0.0.1:5300"
+                },
+                {
+                    "id": "receiver",
+                    "host": "127.0.0.1:5400"
+
+
+.. code-block::
+   :caption: apsi_sender_setup.json
+
+    {
+        "apsi_sender_config": {
+            "source_file": "/tmp/db.csv",
             "params_file": "/tmp/1M-256-288.json",
             "sdb_out_file": "/tmp/sdb",
             "save_db_only": true
@@ -190,7 +225,7 @@ Bucketized Mode
 
 Searching in a large sender db is costly. So can we search in a smaller db? A naive idea is:
 
-1. In the setup stage, sender split data into buckets. Each bucket will generate a sender db.\
+1. In the setup stage, sender split data into buckets. Each bucket will generate a sender db.
 
 2. In the online stage, receiver split query into subqueries. Each subquery only contains items residing in the same bucket.
 When receivers sends a subquery to the sender, bucket idx is also provided.
@@ -198,4 +233,3 @@ When receivers sends a subquery to the sender, bucket idx is also provided.
 3. For each subquery, sender only search in the corresponding sender db for specific bucket.
 
 Bucketized Mode is experimental and for evaluation purposes only.
-

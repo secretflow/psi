@@ -14,6 +14,8 @@
 
 #include "psi/rr22/rr22_psi.h"
 
+#include <fmt/format.h>
+
 #include <random>
 #include <tuple>
 
@@ -48,6 +50,10 @@ GenerateTestData(size_t item_size, double p = 0.5) {
       indices.push_back(i);
     }
   }
+
+  SPDLOG_INFO("inputs_a: {}, inputs_b: {}, indices: {}",
+              fmt::join(inputs_a, ", "), fmt::join(inputs_b, ", "),
+              fmt::join(indices, ", "));
 
   return std::make_tuple(inputs_a, inputs_b, indices);
 }
@@ -97,13 +103,6 @@ TEST_P(Rr22PsiTest, CorrectTest) {
   SPDLOG_INFO("{}?={}", indices.size(), indices_psi.size());
   EXPECT_EQ(indices.size(), indices_psi.size());
 
-#if 0
-  for (size_t i = 0; i < indices.size(); ++i) {
-    SPDLOG_INFO("i:{} index:{} a:{}, b:{}", i, indices_psi[i],
-                inputs_a[indices_psi[i]], inputs_b[indices_psi[i]]);
-  }
-#endif
-
   EXPECT_EQ(indices_psi, indices);
 }
 
@@ -139,13 +138,6 @@ TEST_P(Rr22PsiTest, CompressParamsFalseTest) {
 
   SPDLOG_INFO("{}?={}", indices.size(), indices_psi.size());
   EXPECT_EQ(indices.size(), indices_psi.size());
-
-#if 0
-  for (size_t i = 0; i < indices.size(); ++i) {
-    SPDLOG_INFO("i:{} index:{} a:{}, b:{}", i, indices_psi[i],
-                inputs_a[indices_psi[i]], inputs_b[indices_psi[i]]);
-  }
-#endif
 
   EXPECT_EQ(indices_psi, indices);
 }

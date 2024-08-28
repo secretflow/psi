@@ -24,7 +24,6 @@
 
 namespace psi {
 
-// I prefer 4096.
 inline constexpr size_t kEcdhPsiBatchSize = 4096;
 
 // Ecc256 requires 32 bytes.

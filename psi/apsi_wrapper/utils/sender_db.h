@@ -25,11 +25,14 @@
 
 namespace psi::apsi_wrapper {
 
-std::shared_ptr<::apsi::sender::SenderDB> try_load_sender_db(
+std::shared_ptr<::apsi::sender::SenderDB> TryLoadSenderDB(
+    std::istream &in_stream, ::apsi::oprf::OPRFKey &oprf_key);
+
+std::shared_ptr<::apsi::sender::SenderDB> TryLoadSenderDB(
     const std::string &db_file, const std::string &params_file,
     ::apsi::oprf::OPRFKey &oprf_key);
 
-std::shared_ptr<::apsi::sender::SenderDB> try_load_csv_db(
+std::shared_ptr<::apsi::sender::SenderDB> GenerateSenderDB(
     const std::string &db_file, const std::string &params_file,
     size_t nonce_byte_count, bool compress, ::apsi::oprf::OPRFKey &oprf_key,
     const std::vector<std::string> &keys = {},
@@ -42,9 +45,13 @@ std::unique_ptr<psi::apsi_wrapper::DBData> load_db(
 std::pair<std::unique_ptr<psi::apsi_wrapper::DBData>, std::vector<std::string>>
 load_db_with_orig_items(const std::string &db_file);
 
-bool try_save_sender_db(const std::string &sdb_out_file,
-                        std::shared_ptr<::apsi::sender::SenderDB> sender_db,
-                        const ::apsi::oprf::OPRFKey &oprf_key);
+bool TrySaveSenderDB(const std::string &sdb_out_file,
+                     std::shared_ptr<::apsi::sender::SenderDB> sender_db,
+                     const ::apsi::oprf::OPRFKey &oprf_key);
+
+bool TrySaveSenderDB(std::ostream &os,
+                     std::shared_ptr<::apsi::sender::SenderDB> sender_db,
+                     const ::apsi::oprf::OPRFKey &oprf_key);
 
 std::shared_ptr<::apsi::sender::SenderDB> create_sender_db(
     const psi::apsi_wrapper::DBData &db_data,

@@ -48,7 +48,8 @@ class ScopedTempDir {
 class MultiplexDiskCache {
  public:
   explicit MultiplexDiskCache(const std::filesystem::path& path,
-                              bool use_scoped_tmp_dir = true);
+                              bool use_scoped_tmp_dir = true,
+                              std::string prefix = "");
 
   MultiplexDiskCache(const MultiplexDiskCache&) = delete;
   MultiplexDiskCache& operator=(const MultiplexDiskCache&) = delete;
@@ -66,6 +67,7 @@ class MultiplexDiskCache {
  private:
   std::filesystem::path cache_dir_;
   std::unique_ptr<ScopedTempDir> scoped_temp_dir_;
+  std::string prefix_;
 };
 
 }  // namespace psi

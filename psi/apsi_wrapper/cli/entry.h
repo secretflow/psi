@@ -76,6 +76,7 @@ struct SenderOptions {
   int yacl_receiver_port;
 
   std::string db_file;
+  std::string source_file;
   std::string params_file;
   std::string sdb_out_file;
 
@@ -86,6 +87,8 @@ struct SenderOptions {
   bool experimental_enable_bucketize = false;
   size_t experimental_bucket_cnt;
   std::string experimental_bucket_folder;
+  int experimental_db_generating_process_num = 8;
+  int experimental_bucket_group_cnt = 1024;
 };
 
 int RunReceiver(const ReceiverOptions& options,

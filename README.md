@@ -28,7 +28,7 @@ receiver.config:
 {
     "psi_config": {
         "protocol_config": {
-            "protocol": "PROTOCOL_KKRT",
+            "protocol": "PROTOCOL_RR22",
             "role": "ROLE_RECEIVER",
             "broadcast_result": true
         },
@@ -70,7 +70,7 @@ sender.config:
 {
     "psi_config": {
         "protocol_config": {
-            "protocol": "PROTOCOL_KKRT",
+            "protocol": "PROTOCOL_RR22",
             "role": "ROLE_SENDER",
             "broadcast_result": true
         },
@@ -132,7 +132,7 @@ You could also pass a minified JSON config directly. A minified JSON is a compac
 
 e.g.
 ```
-docker run -it  --rm  --network host --mount type=bind,source=/tmp/sender,target=/root/sender  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest --json '{"psi_config":{"protocol_config":{"protocol":"PROTOCOL_KKRT","role":"ROLE_RECEIVER","broadcast_result":true},"input_config":{"type":"IO_TYPE_FILE_CSV","path":"/root/receiver/receiver_input.csv"},"output_config":{"type":"IO_TYPE_FILE_CSV","path":"/root/receiver/receiver_output.csv"},"keys":["id0","id1"],"debug_options":{"trace_path":"/root/receiver/receiver.trace"}},"self_link_party":"receiver","link_config":{"parties":[{"id":"receiver","host":"127.0.0.1:5300"},{"id":"sender","host":"127.0.0.1:5400"}]}}'
+docker run -it  --rm  --network host --mount type=bind,source=/tmp/sender,target=/root/sender  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest --json '{"psi_config":{"protocol_config":{"protocol":"PROTOCOL_RR22","role":"ROLE_RECEIVER","broadcast_result":true},"input_config":{"type":"IO_TYPE_FILE_CSV","path":"/root/receiver/receiver_input.csv"},"output_config":{"type":"IO_TYPE_FILE_CSV","path":"/root/receiver/receiver_output.csv"},"keys":["id0","id1"],"debug_options":{"trace_path":"/root/receiver/receiver.trace"}},"self_link_party":"receiver","link_config":{"parties":[{"id":"receiver","host":"127.0.0.1:5300"},{"id":"sender","host":"127.0.0.1:5400"}]}}'
 ```
 
 ## Building SecretFlow PSI Library
@@ -207,6 +207,4 @@ chmod +x traceconv
 
 
 
-## PSI V2 Benchamrk
 
-Please refer to [PSI V2 Benchmark](docs/user_guide/psi_v2_benchmark.md)

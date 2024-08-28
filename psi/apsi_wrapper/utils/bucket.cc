@@ -14,12 +14,11 @@
 
 #include "psi/apsi_wrapper/utils/bucket.h"
 
-#include <fmt/format.h>
-
 #include <filesystem>
 #include <string>
 
 #include "apsi/log.h"
+#include "fmt/format.h"
 
 #include "psi/apsi_wrapper/utils/sender_db.h"
 
@@ -47,7 +46,7 @@ void BucketSenderDbSwitcher::SetBucketIdx(size_t idx, bool forced_to_reload) {
 
   std::string db_path = GenerateDbPath(parent_folder_, idx);
 
-  sender_db_ = try_load_sender_db(db_path, "", oprf_key_);
+  sender_db_ = TryLoadSenderDB(db_path, "", oprf_key_);
 
   if (!sender_db_) {
     APSI_LOG_ERROR("Failed to create SenderDB in BucketSenderDbSwitcher.");

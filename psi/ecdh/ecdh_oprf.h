@@ -62,16 +62,16 @@ enum class OprfType {
 class IEcdhOprf {
  public:
   IEcdhOprf() {
-    YACL_ENFORCE(RAND_bytes(&private_key_[0], kEccKeySize) == 1,
+    YACL_ENFORCE(RAND_bytes(private_key_.data(), kEccKeySize) == 1,
                  "Cannot create random private key");
   }
 
-  virtual ~IEcdhOprf() { OPENSSL_cleanse(&private_key_[0], kEccKeySize); }
+  virtual ~IEcdhOprf() { OPENSSL_cleanse(private_key_.data(), kEccKeySize); }
 
   virtual OprfType GetOprfType() const = 0;
 
   virtual size_t GetCompareLength() const {
-    if (compare_length_) {
+    if (compare_length_ != 0) {
       return compare_length_;
     }
     return kEccKeySize;
@@ -87,11 +87,11 @@ class IEcdhOprf {
   void SetPrivateKey(yacl::ByteContainerView private_key) {
     YACL_ENFORCE(private_key.size() == kEccKeySize);
 
-    std::memcpy(private_key_, private_key.data(), private_key.size());
+    std::memcpy(private_key_.data(), private_key.data(), private_key.size());
   }
 
  protected:
-  uint8_t private_key_[kEccKeySize];
+  std::array<uint8_t, kEccKeySize> private_key_ = {};
   size_t compare_length_ = 0;
 };
 
@@ -139,9 +139,7 @@ class IEcdhOprfServer : public IEcdhOprf {
       absl::Span<const std::string> input) const;
 
   virtual std::array<uint8_t, kEccKeySize> GetPrivateKey() const {
-    std::array<uint8_t, kEccKeySize> key_array{};
-    std::memcpy(key_array.data(), &private_key_[0], kEccKeySize);
-    return key_array;
+    return private_key_;
   }
 };
 

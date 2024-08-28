@@ -50,7 +50,10 @@ v2::RecoveryCheckpoint LoadRecoveryCheckpointFromFile(
 
 RecoveryManager::RecoveryManager(const std::string& folder_path)
     : folder_path_(folder_path) {
-  YACL_ENFORCE(std::filesystem::exists(folder_path_));
+  if (!std::filesystem::exists(folder_path_)) {
+    SPDLOG_INFO("folder {} doesn't exist, create it.", folder_path_.string());
+    std::filesystem::create_directories(folder_path_);
+  }
 
   checkpoint_file_path_ = folder_path_ / "checkpoint.json";
   private_key_file_path_ = folder_path_ / "private_key";
@@ -122,7 +125,7 @@ void RecoveryManager::MarkPreProcessEnd(
       // save private key
       auto private_key_output =
           io::BuildOutputStream(io::FileIoOptions(private_key_file_path_));
-      private_key_output->Write(cryptor->GetPrivateKey(), kEccKeySize);
+      private_key_output->Write(cryptor->GetPrivateKey().data(), kEccKeySize);
       private_key_output->Flush();
 
       // save checkpoint file

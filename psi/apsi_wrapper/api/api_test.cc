@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <fmt/format.h>
-
 #include <algorithm>
 #include <cstddef>
 #include <filesystem>
@@ -23,6 +21,7 @@
 #include "boost/uuid/uuid.hpp"
 #include "boost/uuid/uuid_generators.hpp"
 #include "boost/uuid/uuid_io.hpp"
+#include "fmt/format.h"
 #include "gtest/gtest.h"
 #include "spdlog/spdlog.h"
 
@@ -34,7 +33,7 @@
 namespace psi::apsi_wrapper::api {
 
 std::vector<std::string> ReadItems(const std::string& file_path) {
-  psi::apsi_wrapper::CSVReader reader(file_path);
+  psi::apsi_wrapper::ApsiCsvReader reader(file_path);
   psi::apsi_wrapper::DBData db_data;
   std::vector<std::string> items;
 
@@ -68,6 +67,7 @@ TEST(ApiTest, Works) {
   EXPECT_TRUE(std::filesystem::create_directory(bucket_senderdb_folder));
 
   {
+    SPDLOG_INFO("test sender db setup");
     psi::apsi_wrapper::api::Sender sender;
     sender.LoadCsv(sender_csv_file, params_file, nonce_byte_count, compress);
 
@@ -87,6 +87,8 @@ TEST(ApiTest, Works) {
   }
 
   {
+    SPDLOG_INFO("test sender db load");
+
     psi::apsi_wrapper::api::Sender sender;
     ASSERT_TRUE(sender.LoadSenderDb(sdb_out_file));
     std::string params_str = sender.GenerateParams();
@@ -105,6 +107,8 @@ TEST(ApiTest, Works) {
   }
 
   {
+    SPDLOG_INFO("test bucketized sender db");
+
     psi::apsi_wrapper::api::Sender::SaveBucketizedSenderDb(
         sender_csv_file, params_file, nonce_byte_count, compress,
         bucket_senderdb_folder, bucket_cnt);

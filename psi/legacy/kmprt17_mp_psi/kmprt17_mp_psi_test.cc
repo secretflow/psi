@@ -64,6 +64,7 @@ std::vector<std::vector<std::string>> CreateNPartyItems(
 
 class KMPRTMpPsiTest : public testing::TestWithParam<KMPRTMpTestParams> {};
 
+// FIXME : this test is not stable in arm env
 TEST_P(KMPRTMpPsiTest, Works) {
   std::vector<std::vector<std::string>> items;
 

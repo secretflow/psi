@@ -1,20 +1,23 @@
 {
-    "apsi_sender_config": {
-        "experimental_enable_bucketize": true,
-        "experimental_bucket_cnt": 10,
-        "experimental_bucket_folder": "/tmp/apsi_sender_bucket/"
-    },
-    "link_config": {
-        "parties": [
-            {
-                "id": "sender",
-                "host": "127.0.0.1:5300"
-            },
-            {
-                "id": "receiver",
-                "host": "127.0.0.1:5400"
-            }
-        ]
-    },
-    "self_link_party": "sender"
+  "apsi_sender_config": {
+    "source_file": "/tmp/db.csv",
+    "params_file": "/tmp/100K-1-16.json",
+    "experimental_enable_bucketize": true,
+    "experimental_bucket_cnt": 10000,
+    "experimental_bucket_folder": "/tmp/apsi_sender_bucket/",
+    "experimental_db_generating_process_num": 16
+  },
+  "link_config": {
+    "parties": [
+      {
+        "id": "sender",
+        "host": "127.0.0.1:5300"
+      },
+      {
+        "id": "receiver",
+        "host": "127.0.0.1:5400"
+      }
+    ]
+  },
+  "self_link_party": "sender"
 }

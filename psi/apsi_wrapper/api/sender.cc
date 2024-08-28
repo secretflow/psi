@@ -35,8 +35,8 @@ bool Sender::LoadCsv(const std::string &csv_file_path,
                      size_t nonce_byte_count, bool compress) {
   throw_if_file_invalid(csv_file_path);
   throw_if_file_invalid(params_file_path);
-  sender_db_ = try_load_csv_db(csv_file_path, params_file_path,
-                               nonce_byte_count, compress, oprf_key_);
+  sender_db_ = GenerateSenderDB(csv_file_path, params_file_path,
+                                nonce_byte_count, compress, oprf_key_);
   return sender_db_ != nullptr;
 }
 
@@ -46,13 +46,13 @@ void Sender::SetThreadCount(size_t threads) {
 
 bool Sender::LoadSenderDb(const std::string &sdb_file_path) {
   throw_if_file_invalid(sdb_file_path);
-  sender_db_ = try_load_sender_db(sdb_file_path, "", oprf_key_);
+  sender_db_ = TryLoadSenderDB(sdb_file_path, "", oprf_key_);
   return sender_db_ != nullptr;
 }
 
 bool Sender::SaveSenderDb(const std::string &sdb_file_path) {
-  return psi::apsi_wrapper::try_save_sender_db(sdb_file_path, sender_db_,
-                                               oprf_key_);
+  return psi::apsi_wrapper::TrySaveSenderDB(sdb_file_path, sender_db_,
+                                            oprf_key_);
 }
 
 std::string Sender::GenerateParams() {
@@ -101,6 +101,8 @@ std::string Sender::RunOPRF(const std::string &oprf_request_str) {
 }
 
 std::string Sender::RunQuery(const std::string &query_str) {
+  YACL_ENFORCE(sender_db_ != nullptr, "sender_db is null");
+
   stringstream ss;
   ss << query_str;
   ::apsi::network::SenderOperationHeader sop_header;
@@ -247,7 +249,7 @@ bool Sender::SaveBucketizedSenderDb(const std::string &csv_file_path,
     return false;
   }
 
-  CSVReader reader(csv_file_path);
+  ApsiCsvReader reader(csv_file_path);
   reader.bucketize(bucket_cnt, parent_path);
 
   MultiplexDiskCache disk_cache(parent_path, false);
@@ -255,7 +257,7 @@ bool Sender::SaveBucketizedSenderDb(const std::string &csv_file_path,
   for (size_t i = 0; i < bucket_cnt; i++) {
     std::string db_path = GenerateDbPath(parent_path, i);
     ::apsi::oprf::OPRFKey oprf_key;
-    auto sender_db = psi::apsi_wrapper::try_load_csv_db(
+    auto sender_db = psi::apsi_wrapper::GenerateSenderDB(
         disk_cache.GetPath(i), params_file_path, nonce_byte_count, compress,
         oprf_key);
 
@@ -265,7 +267,7 @@ bool Sender::SaveBucketizedSenderDb(const std::string &csv_file_path,
       return false;
     }
 
-    if (!psi::apsi_wrapper::try_save_sender_db(db_path, sender_db, oprf_key)) {
+    if (!psi::apsi_wrapper::TrySaveSenderDB(db_path, sender_db, oprf_key)) {
       APSI_LOG_ERROR("Failed to save SenderDB: " << db_path << " terminating");
       return false;
     }

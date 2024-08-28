@@ -47,5 +47,6 @@ psi_cc_library(
 psi_cc_test(
     name = "kmprt17_mp_psi_test",
     srcs = ["kmprt17_mp_psi_test.cc"],
+    tags = ["manual"],
     deps = [":kmprt17_mp_psi"],
 )

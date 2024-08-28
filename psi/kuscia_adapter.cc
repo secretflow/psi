@@ -14,13 +14,12 @@
 
 #include "psi/kuscia_adapter.h"
 
-#include <fmt/format.h>
-
 #include <cstddef>
 #include <cstdint>
 #include <fstream>
 #include <map>
 
+#include "fmt/format.h"
 #include "google/protobuf/util/json_util.h"
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"

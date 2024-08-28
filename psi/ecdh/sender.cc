@@ -59,6 +59,11 @@ void EcdhPsiSender::PreProcess() {
     return;
   }
 
+  if (config_.protocol_config().ecdh_config().batch_size() != 0) {
+    psi_options_.batch_size =
+        config_.protocol_config().ecdh_config().batch_size();
+  }
+
   psi_options_.ecc_cryptor =
       CreateEccCryptor(config_.protocol_config().ecdh_config().curve());
   psi_options_.link_ctx = lctx_;
@@ -72,7 +77,7 @@ void EcdhPsiSender::PreProcess() {
   psi_options_.ic_mode = false;
 
   batch_provider_ = std::make_shared<ArrowCsvBatchProvider>(
-      config_.input_config().path(), selected_keys_);
+      config_.input_config().path(), selected_keys_, psi_options_.batch_size);
 
   if (recovery_manager_) {
     self_ec_point_store_ = std::make_shared<HashBucketEcPointStore>(

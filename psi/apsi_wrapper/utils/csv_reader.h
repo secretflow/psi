@@ -35,32 +35,35 @@
 #include "arrow/io/api.h"
 
 #include "psi/apsi_wrapper/utils/common.h"
+#include "psi/utils/multiplex_disk_cache.h"
 
 namespace psi::apsi_wrapper {
 
 /**
 Simple CSV file parser
 */
-class CSVReader {
+class ApsiCsvReader {
  public:
-  explicit CSVReader(const std::string& file_name);
+  explicit ApsiCsvReader(const std::string& file_name);
 
   std::pair<DBData, std::vector<std::string>> read();
 
   void bucketize(size_t bucket_cnt, const std::string& bucket_folder);
 
+  void GroupBucketize(size_t bucket_cnt, const std::string& bucket_folder,
+                      size_t group_cnt, MultiplexDiskCache& disk_cache);
+
+  std::shared_ptr<arrow::Schema> schema() const;
+
  private:
   std::string file_name_;
 
-  std::shared_ptr<arrow::io::ReadableFile> infile_;
-
   std::shared_ptr<arrow::csv::StreamingReader> reader_;
-
-  std::shared_ptr<arrow::RecordBatch> batch_;
 
   std::vector<std::shared_ptr<arrow::StringArray>> arrays_;
 
-  bool empty_file_ = false;
-};  // class CSVReader
+  std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>
+      column_types_;
+};  // class ApsiCsvReader
 
 }  // namespace psi::apsi_wrapper

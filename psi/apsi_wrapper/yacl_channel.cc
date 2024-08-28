@@ -257,13 +257,6 @@ void YaclChannel::send(unique_ptr<::apsi::network::ResultPackage> rp) {
     throw invalid_argument("result package data is missing");
   }
 
-  APSI_LOG_DEBUG(
-      "Sending result package ("
-      << "has matching data: " << (rp->psi_result ? "yes" : "no") << "; "
-      << "label byte count: " << rp->label_byte_count << "; "
-      << "nonce byte count: " << rp->nonce_byte_count << "; "
-      << "has label data: " << (rp->label_result.size() ? "yes" : "no") << ")");
-
   stringstream ss;
   size_t old_bytes_sent = bytes_sent_;
 

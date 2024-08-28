@@ -58,25 +58,23 @@ std::unique_ptr<perfetto::TracingSession> StartTracing() {
 }
 
 void SetLogLevel(const std::string& level) {
-  std::string normalized_level = boost::algorithm::to_lower_copy(level);
+  static const std::map<std::string, spdlog::level::level_enum> kLogLevelMap = {
+      {"trace", spdlog::level::trace}, {"debug", spdlog::level::debug},
+      {"info", spdlog::level::info},   {"warn", spdlog::level::warn},
+      {"err", spdlog::level::err},     {"critical", spdlog::level::critical},
+      {"off", spdlog::level::off}};
+  static const std::string kDefaultLogLevel = "info";
 
-  if (normalized_level == "trace") {
-    spdlog::set_level(spdlog::level::trace);
-  } else if (normalized_level == "debug") {
-    spdlog::set_level(spdlog::level::debug);
-  } else if (normalized_level == "info" || normalized_level.empty()) {
-    spdlog::set_level(spdlog::level::info);
-  } else if (normalized_level == "warn") {
-    spdlog::set_level(spdlog::level::warn);
-  } else if (normalized_level == "err") {
-    spdlog::set_level(spdlog::level::err);
-  } else if (normalized_level == "critical") {
-    spdlog::set_level(spdlog::level::critical);
-  } else if (normalized_level == "off") {
-    spdlog::set_level(spdlog::level::off);
-  } else {
-    YACL_THROW("unsupported logging level: {}", level);
+  std::string normalized_level = boost::algorithm::to_lower_copy(level);
+  if (normalized_level.empty()) {
+    normalized_level = kDefaultLogLevel;
   }
+
+  auto level_iter = kLogLevelMap.find(normalized_level);
+  YACL_ENFORCE(level_iter != kLogLevelMap.end(),
+               "unsupported logging level: {}", level);
+  spdlog::set_level(level_iter->second);
+  spdlog::flush_on(level_iter->second);
 }
 
 void StopTracing(std::unique_ptr<perfetto::TracingSession> tracing_session,
@@ -218,6 +216,7 @@ PirResultReport RunPir(const ApsiSenderConfig& apsi_sender_config,
   options.log_file = apsi_sender_config.log_file();
   options.silent = apsi_sender_config.silent();
   options.db_file = apsi_sender_config.db_file();
+  options.source_file = apsi_sender_config.source_file();
   options.params_file = apsi_sender_config.params_file();
   options.sdb_out_file = apsi_sender_config.sdb_out_file();
   options.channel = "yacl";
@@ -233,7 +232,14 @@ PirResultReport RunPir(const ApsiSenderConfig& apsi_sender_config,
       apsi_sender_config.experimental_bucket_cnt();
   options.experimental_bucket_folder =
       apsi_sender_config.experimental_bucket_folder();
-
+  if (apsi_sender_config.experimental_db_generating_process_num()) {
+    options.experimental_db_generating_process_num =
+        apsi_sender_config.experimental_db_generating_process_num();
+  }
+  if (apsi_sender_config.experimental_bucket_group_cnt()) {
+    options.experimental_bucket_group_cnt =
+        apsi_sender_config.experimental_bucket_group_cnt();
+  }
   YACL_ENFORCE_EQ(RunSender(options, lctx), 0);
 
   return PirResultReport();

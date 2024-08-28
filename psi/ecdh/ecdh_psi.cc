@@ -114,7 +114,8 @@ void EcdhPsiContext::MaskSelf(
     if (options_.ecdh_logger) {
       hashed_masked_items =
           options_.ecc_cryptor->SerializeEcPoints(hashed_points);
-      options_.ecdh_logger->Log(EcdhStage::MaskSelf, options_.private_key,
+      options_.ecdh_logger->Log(EcdhStage::MaskSelf,
+                                options_.ecc_cryptor->GetPrivateKey(),
                                 item_count, hashed_masked_items, masked_items);
     }
     item_count += batch_items.size();
@@ -166,12 +167,22 @@ void EcdhPsiContext::MaskPeer(
         }
       }
     }
+
     // Should send out the dual masked items to peer.
     if (PeerCanTouchResults()) {
+      if (batch_count == 0) {
+        SPDLOG_INFO("SendDualMaskedItems to peer: {} begin...",
+                    options_.target_rank);
+      }
       const auto tag = fmt::format("ECDHPSI:Y^B^A:{}", batch_count);
       // call non-block to avoid blocking each other with MaskSelf
       SendDualMaskedBatchNonBlock(dual_masked_peers, batch_count, tag);
+      if (dual_masked_peers.empty()) {
+        SPDLOG_INFO("SendDualMaskedItems to peer: {} finished, batch_count={}",
+                    options_.target_rank, batch_count);
+      }
     }
+
     if (peer_items.empty()) {
       SPDLOG_INFO("MaskPeer:{} --finished, batch_count={}, peer_item_count={}",
                   Id(), batch_count, item_count);
@@ -181,7 +192,8 @@ void EcdhPsiContext::MaskPeer(
       break;
     }
     if (options_.ecdh_logger) {
-      options_.ecdh_logger->Log(EcdhStage::MaskPeer, options_.private_key,
+      options_.ecdh_logger->Log(EcdhStage::MaskPeer,
+                                options_.ecc_cryptor->GetPrivateKey(),
                                 item_count, peer_items, dual_masked_peers);
     }
     item_count += peer_items.size();
@@ -210,7 +222,8 @@ void EcdhPsiContext::RecvDualMaskedSelf(
     RecvDualMaskedBatch(&masked_items, batch_count, tag);
     if (options_.ecdh_logger) {
       options_.ecdh_logger->Log(EcdhStage::RecvDualMaskedSelf,
-                                options_.private_key, item_count, masked_items);
+                                options_.ecc_cryptor->GetPrivateKey(),
+                                item_count, masked_items);
     }
     for (auto& item : masked_items) {
       self_ec_point_store->Save(std::move(item));
@@ -368,14 +381,17 @@ void RunEcdhPsi(const EcdhPsiOptions& options,
   }
 
   std::future<void> f_mask_self = std::async([&] {
+    SPDLOG_INFO("ID {}: MaskSelf begin...", handler.Id());
     handler.MaskSelf(batch_provider, processed_item_cnt);
     SPDLOG_INFO("ID {}: MaskSelf finished.", handler.Id());
   });
   std::future<void> f_mask_peer = std::async([&] {
+    SPDLOG_INFO("ID {}: MaskPeer begin...", handler.Id());
     handler.MaskPeer(peer_ec_point_store);
     SPDLOG_INFO("ID {}: MaskPeer finished.", handler.Id());
   });
   std::future<void> f_recv_peer = std::async([&] {
+    SPDLOG_INFO("ID {}: RecvDualMaskedSelf begin...", handler.Id());
     handler.RecvDualMaskedSelf(self_ec_point_store);
     SPDLOG_INFO("ID {}: RecvDualMaskedSelf finished.", handler.Id());
   });
@@ -429,11 +445,6 @@ std::vector<std::string> RunEcdhPsi(
   options.link_ctx = link_ctx;
   options.target_rank = target_rank;
   options.batch_size = batch_size;
-
-  std::array<uint8_t, kEccKeySize> key_array{};
-  std::memcpy(key_array.data(), &options.ecc_cryptor->GetPrivateKey()[0],
-              kEccKeySize);
-  options.private_key = key_array;
 
   auto self_ec_point_store = std::make_shared<MemoryEcPointStore>();
   auto peer_ec_point_store = std::make_shared<MemoryEcPointStore>();

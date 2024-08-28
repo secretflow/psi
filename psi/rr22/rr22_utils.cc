@@ -50,7 +50,7 @@ std::vector<size_t> GetIntersection(
     num_threads = self_oprfs.size();
   }
 
-  int128_t truncate_mask = yacl::MakeUint128(0, 0);
+  auto truncate_mask = yacl::MakeUint128(0, 0);
   for (size_t i = 0; i < mask_size; ++i) {
     truncate_mask = 0xff | (truncate_mask << 8);
     SPDLOG_DEBUG(

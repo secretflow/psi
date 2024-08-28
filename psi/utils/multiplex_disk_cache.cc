@@ -19,6 +19,7 @@
 #include <chrono>
 #include <ctime>
 #include <memory>
+#include <utility>
 
 #include "boost/uuid/uuid.hpp"
 #include "boost/uuid/uuid_generators.hpp"
@@ -49,7 +50,9 @@ bool ScopedTempDir::CreateUniqueTempDirUnderPath(
 }
 
 MultiplexDiskCache::MultiplexDiskCache(const std::filesystem::path& path,
-                                       bool use_scoped_tmp_dir) {
+                                       bool use_scoped_tmp_dir,
+                                       std::string prefix)
+    : prefix_(std::move(prefix)) {
   if (use_scoped_tmp_dir) {
     scoped_temp_dir_ = std::make_unique<ScopedTempDir>();
     YACL_ENFORCE(scoped_temp_dir_->CreateUniqueTempDirUnderPath(path));
@@ -60,7 +63,7 @@ MultiplexDiskCache::MultiplexDiskCache(const std::filesystem::path& path,
 }
 
 std::string MultiplexDiskCache::GetPath(size_t index) const {
-  std::filesystem::path path = cache_dir_ / std::to_string(index);
+  std::filesystem::path path = cache_dir_ / (prefix_ + std::to_string(index));
 
   return path.string();
 }

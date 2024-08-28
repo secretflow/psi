@@ -38,15 +38,15 @@ inline constexpr int kEccKeySize = 32;
 class IEccCryptor {
  public:
   IEccCryptor() {
-    YACL_ENFORCE(RAND_bytes(&private_key_[0], kEccKeySize) == 1,
+    YACL_ENFORCE(RAND_bytes(private_key_.data(), kEccKeySize) == 1,
                  "Cannot create random private key");
   }
 
-  virtual ~IEccCryptor() { OPENSSL_cleanse(&private_key_[0], kEccKeySize); }
+  virtual ~IEccCryptor() { OPENSSL_cleanse(private_key_.data(), kEccKeySize); }
 
   virtual void SetPrivateKey(absl::Span<const uint8_t> key) {
     YACL_ENFORCE(key.size() == kEccKeySize);
-    std::memcpy(private_key_, key.data(), key.size());
+    std::memcpy(private_key_.data(), key.data(), key.size());
   }
 
   /// Get current curve type
@@ -85,10 +85,12 @@ class IEccCryptor {
   std::vector<yacl::crypto::EcPoint> DeserializeEcPoints(
       const std::vector<std::string>& items) const;
 
-  [[nodiscard]] const uint8_t* GetPrivateKey() const { return private_key_; }
+  [[nodiscard]] std::array<uint8_t, kEccKeySize> GetPrivateKey() const {
+    return private_key_;
+  }
 
  protected:
-  uint8_t private_key_[kEccKeySize];
+  std::array<uint8_t, kEccKeySize> private_key_ = {};
   std::unique_ptr<yacl::crypto::EcGroup> ec_group_ = nullptr;
 };
 

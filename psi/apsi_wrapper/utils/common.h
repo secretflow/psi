@@ -21,6 +21,9 @@
 
 #include "apsi/match_record.h"
 #include "apsi/psi_params.h"
+#include "arrow/csv/api.h"
+#include "arrow/datum.h"
+#include "arrow/io/api.h"
 
 namespace psi::apsi_wrapper {
 
@@ -30,6 +33,8 @@ using LabeledData = std::vector<std::pair<::apsi::Item, ::apsi::Label>>;
 
 using DBData = std::variant<UnlabeledData, LabeledData>;
 
+bool IsDuplicated(const DBData &db_data);
+
 /**
 Throw an exception if the given file is invalid.
 */
@@ -37,7 +42,7 @@ void throw_if_file_invalid(const std::string &file_name);
 
 void throw_if_directory_invalid(const std::string &dir_name);
 
-std::unique_ptr<::apsi::PSIParams> build_psi_params(
+std::unique_ptr<::apsi::PSIParams> BuildPsiParams(
     const std::string &params_file);
 
 int print_intersection_results(
@@ -45,5 +50,13 @@ int print_intersection_results(
     const std::vector<::apsi::Item> &items,
     const std::vector<::apsi::receiver::MatchRecord> &intersection,
     const std::string &out_file, bool append_to_outfile = false);
+
+std::shared_ptr<arrow::csv::StreamingReader> MakeArrowCsvReader(
+    const std::string &file_name, std::vector<std::string> column_names);
+
+std::shared_ptr<arrow::csv::StreamingReader> MakeArrowCsvReader(
+    const std::string &file_name,
+    std::unordered_map<std::string, std::shared_ptr<arrow::DataType>>
+        column_types);
 
 }  // namespace psi::apsi_wrapper

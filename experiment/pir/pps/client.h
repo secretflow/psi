@@ -13,7 +13,7 @@ struct PIRQueryParam {
 
 class PpsPirClient {
  public:
-  PpsPirClient() {}
+  PpsPirClient() : universe_size_(0), set_size_(0) {}
   PpsPirClient(uint64_t universe_size, uint64_t set_size)
       : universe_size_(universe_size), set_size_(set_size) {}
 

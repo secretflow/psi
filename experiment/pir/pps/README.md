@@ -22,7 +22,7 @@ This project only implements the dual-server model described in the paper. The i
 * **Answer**$(q) \to a$,  a deterministic algorithm that takes as input a query $q$ and gets access to an oracle that:
     * takes as input an index $j \in [n]$, and
     * returns the $j$-th bit of the database $x_j ∈ \{0, 1\}$
-  
+
     outputs an answer string $a$, and
 
 * **Reconstruct**$(h, a) \to x_i$,  , a deterministic algorithm that takes as a hint $h$ and an answer $a$, and outputs a bit $x_i$.
@@ -41,6 +41,3 @@ Construction 16 (Two-server PIR with sublinear online time).
 **Multi-Bits PIR**
 
 Construction 44 (Multi-query offline/online PIR).
-
-
-

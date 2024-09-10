@@ -8,9 +8,12 @@ namespace pir::pps {
 
 class PpsPirServer {
  public:
-  PpsPirServer() {}
+  PpsPirServer() : pps_(), universe_size_(0), set_size_(0) {}
+
   PpsPirServer(uint64_t universe_size, uint64_t set_size)
-      : universe_size_(universe_size), set_size_(set_size) {}
+      : pps_(universe_size, set_size),
+        universe_size_(universe_size),
+        set_size_(set_size) {}
 
   void Hint(PIRKey k, std::set<uint64_t>& deltas, yacl::dynamic_bitset<>& bits,
             yacl::dynamic_bitset<>& h);
@@ -24,6 +27,7 @@ class PpsPirServer {
                    bool& a_right, yacl::dynamic_bitset<>& bits);
 
  private:
+  PPS pps_;
   uint64_t universe_size_;
   uint64_t set_size_;
 };

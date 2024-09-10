@@ -52,14 +52,13 @@ psi_cc_library(
 )
 
 
-psi_cc_binary(
+psi_cc_test(
     name = "pps_pir_test",
     srcs = ["pps_pir_test.cc"],
     deps = [
         ":client",
         ":server",
         "@yacl//yacl/base:dynamic_bitset",
-        "@com_google_googletest//:gtest_main",
     ],
 )
 

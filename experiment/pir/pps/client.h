@@ -13,9 +13,13 @@ struct PIRQueryParam {
 
 class PpsPirClient {
  public:
-  PpsPirClient() : universe_size_(0), set_size_(0) {}
-  PpsPirClient(uint64_t universe_size, uint64_t set_size)
-      : universe_size_(universe_size), set_size_(set_size) {}
+  PpsPirClient() : pps_(), lambda_(0), universe_size_(0), set_size_(0) {}
+
+  PpsPirClient(uint32_t lambda, uint64_t universe_size, uint64_t set_size)
+      : pps_(universe_size, set_size),
+        lambda_(lambda),
+        universe_size_(universe_size),
+        set_size_(set_size) {}
 
   // Get m = (n / s(n)) * log(n)
   uint64_t M() {
@@ -34,12 +38,11 @@ class PpsPirClient {
   uint64_t UniformUint64();
 
   // Setup(1^\lambda, universe_size_) -> ck, q_h
-  void Setup(PIRKey& sk, PIREvalMap& map, std::set<uint64_t>& deltas);
+  void Setup(PIRKey& sk, std::set<uint64_t>& deltas);
 
   // Query(ck, i \in [n]) -> q \in K_p
-  void Query(uint64_t i, PIRKey& sk, PIREvalMap& map,
-             std::set<uint64_t>& deltas, PIRQueryParam& param,
-             PIRPuncKey& sk_punc);
+  void Query(uint64_t i, PIRKey& sk, std::set<uint64_t>& deltas,
+             PIRQueryParam& param, PIRPuncKey& sk_punc);
 
   // Reconstruct(h ∈ {0, 1}^m, a ∈ {0, 1}) → x_i
   int Reconstruct(PIRQueryParam& param, yacl::dynamic_bitset<>& h, bool a,
@@ -70,6 +73,8 @@ class PpsPirClient {
                   bool a_right, bool& r);
 
  private:
+  PPS pps_;
+  uint32_t lambda_;
   uint64_t universe_size_;
   uint64_t set_size_;
 };

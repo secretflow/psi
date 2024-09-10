@@ -8,6 +8,8 @@
 
 namespace {
 
+#define LAMBDA 1000
+
 inline void GenerateRandomBitString(yacl::dynamic_bitset<>& bits,
                                     uint64_t len) {
   uint64_t blocks = (len + 127) / 128;
@@ -21,13 +23,12 @@ static void BM_PpsSingleBitPir(benchmark::State& state) {
     state.PauseTiming();
 
     size_t n = state.range(0);
-    pir::pps::PpsPirClient pirClient(n * n * 2, n);
+    pir::pps::PpsPirClient pirClient(LAMBDA, n * n * 2, n);
     pir::pps::PpsPirServer pirServer(n * n * 2, n);
 
     pir::pps::PIRKey pirKey;
     pir::pps::PIRQueryParam pirQueryParam;
     pir::pps::PIRPuncKey pirPuncKey;
-    pir::pps::PIREvalMap pirMap;
     std::set<uint64_t> deltas;
     yacl::dynamic_bitset<> bits;
     GenerateRandomBitString(bits, n * n * 2);
@@ -37,10 +38,9 @@ static void BM_PpsSingleBitPir(benchmark::State& state) {
 
     state.ResumeTiming();
 
-    pirClient.Setup(pirKey, pirMap, deltas);
+    pirClient.Setup(pirKey, deltas);
     pirServer.Hint(pirKey, deltas, bits, h);
-    pirClient.Query(query_index, pirKey, pirMap, deltas, pirQueryParam,
-                    pirPuncKey);
+    pirClient.Query(query_index, pirKey, deltas, pirQueryParam, pirPuncKey);
     bool a = pirServer.Answer(pirPuncKey, bits);
     pirClient.Reconstruct(pirQueryParam, h, a, query_result);
   }
@@ -51,7 +51,7 @@ static void BM_PpsMultiBitsPir(benchmark::State& state) {
     state.PauseTiming();
 
     size_t n = state.range(0);
-    pir::pps::PpsPirClient pirClient(n * n, n);
+    pir::pps::PpsPirClient pirClient(LAMBDA, n * n, n);
     pir::pps::PpsPirServer pirServer(n * n, n);
 
     std::vector<pir::pps::PIRKeyUnion> pirKey;

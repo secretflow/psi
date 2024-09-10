@@ -43,21 +43,19 @@ struct PIRKeyUnion {
 };
 
 // For the Node PRG value m, get the random number \in [m]
-inline uint64_t LemireTrick(uint128_t value, uint64_t m) {
-  return static_cast<uint64_t>(
-      ((value >> 64) * static_cast<uint128_t>(m)) >> 64);
+inline uint64_t LemireTrick(uint128_t v, uint64_t m) {
+  return static_cast<uint64_t>(((v >> 64) * static_cast<uint128_t>(m)) >> 64);
 }
 
-inline uint64_t LemireTrick(uint64_t value, uint64_t m) {
+inline uint64_t LemireTrick(uint64_t v, uint64_t m) {
   return static_cast<uint64_t>(
-      (static_cast<uint128_t>(value) * static_cast<uint128_t>(m)) >> 64);
+      (static_cast<uint128_t>(v) * static_cast<uint128_t>(m)) >> 64);
 }
 
-class AESRandomGenerator {
+class GGMTree {
  public:
-  AESRandomGenerator() {}
-  AESRandomGenerator(uint128_t root, uint64_t height)
-      : root_(root), height_(height) {}
+  GGMTree() {}
+  GGMTree(uint128_t root, uint64_t height) : root_(root), height_(height) {}
 
   uint128_t GetRoot() { return root_; }
   /***************************************************************
@@ -88,16 +86,18 @@ inline uint32_t Depth(uint64_t size) {
 
 class PPS {
  public:
+  PPS() : universe_size_(0), set_size_(0) {}
+
   PPS(uint64_t universe_size, uint64_t set_size)
       : universe_size_(universe_size), set_size_(set_size) {}
 
   // Generate a uint128_t k.
-  PIRKey Gen(PIREvalMap& map);
+  PIRKey Gen(uint32_t lambda);
 
   // Find l that PRFEval(k, l) = i
-  int Punc(uint64_t i, PIRKey k, PIREvalMap& map, PIRPuncKey& sk_punc);
+  void Punc(uint64_t i, PIRKey k, PIRPuncKey& sk_punc);
 
-  void EvalMap(PIRKey k, PIREvalMap& pirMap);
+  void EvalMap(PIRKey k);
 
   void Eval(PIRKey k, std::set<uint64_t>& set);
 
@@ -105,9 +105,12 @@ class PPS {
 
   void Eval(const PIRPuncKey& sk_punc, std::set<uint64_t>& set);
 
+  PIREvalMap& getMap() { return map_; }
+
  private:
+  PIREvalMap map_;
   uint64_t universe_size_;
   uint64_t set_size_;
 };
 
-}  // namespace pir
+}  // namespace pir::pps

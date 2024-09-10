@@ -14,6 +14,8 @@ namespace {
 #define M_UNIVERSE_SIZE (1ULL << 12)
 #define M_SET_SIZE (1ULL << 6)
 
+#define LAMBDA 1000
+
 inline void GenerateRandomBitString(yacl::dynamic_bitset<>& bits,
                                     uint64_t len) {
   uint64_t blocks = (len + 127) / 128;
@@ -23,13 +25,12 @@ inline void GenerateRandomBitString(yacl::dynamic_bitset<>& bits,
 }
 
 TEST(PIRTest, SingleBitQueryTest) {
-  pir::pps::PpsPirClient pirClient(UNIVERSE_SIZE, SET_SIZE);
+  pir::pps::PpsPirClient pirClient(LAMBDA, UNIVERSE_SIZE, SET_SIZE);
   pir::pps::PpsPirServer pirServer(UNIVERSE_SIZE, SET_SIZE);
 
   pir::pps::PIRKey pirKey;
   pir::pps::PIRQueryParam pirQueryParam;
   pir::pps::PIRPuncKey pirPuncKey;
-  pir::pps::PIREvalMap pirMap;
   std::set<uint64_t> deltas;
   yacl::dynamic_bitset<> bits;
   GenerateRandomBitString(bits, UNIVERSE_SIZE);
@@ -37,10 +38,9 @@ TEST(PIRTest, SingleBitQueryTest) {
   uint64_t query_index = pirClient.UniformUint64();
   bool query_result;
 
-  pirClient.Setup(pirKey, pirMap, deltas);
+  pirClient.Setup(pirKey, deltas);
   pirServer.Hint(pirKey, deltas, bits, h);
-  pirClient.Query(query_index, pirKey, pirMap, deltas, pirQueryParam,
-                  pirPuncKey);
+  pirClient.Query(query_index, pirKey, deltas, pirQueryParam, pirPuncKey);
   bool a = pirServer.Answer(pirPuncKey, bits);
   if (pirClient.Reconstruct(pirQueryParam, h, a, query_result)) {
     ASSERT_EQ(query_result, bits[query_index]);
@@ -48,7 +48,7 @@ TEST(PIRTest, SingleBitQueryTest) {
 }
 
 TEST(PIRTest, MultiBitQueryTest) {
-  pir::pps::PpsPirClient pirClient(M_UNIVERSE_SIZE, M_SET_SIZE);
+  pir::pps::PpsPirClient pirClient(LAMBDA, M_UNIVERSE_SIZE, M_SET_SIZE);
   pir::pps::PpsPirServer pirServer(M_UNIVERSE_SIZE, M_SET_SIZE);
 
   std::vector<pir::pps::PIRKeyUnion> pirKey;

@@ -35,7 +35,6 @@ psi_cmake_external(
         # "CpuFeatures_DIR": "$EXT_BUILD_DEPS/cpu_features/lib/cmake/CpuFeatures/",
         # "EXT_BUILD_DEPS": "$EXT_BUILD_DEPS",
         # "SEAL_USE_INTEL_HEXL": "ON",
-
     },
     lib_source = "@com_github_microsoft_seal//:all",
     out_include_dir = "include/SEAL-4.1",

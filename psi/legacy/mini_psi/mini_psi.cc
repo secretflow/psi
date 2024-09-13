@@ -79,7 +79,7 @@ struct MiniPsiSendCtx {
     aes_ecb = std::make_shared<yacl::crypto::SymmetricCrypto>(
         yacl::crypto::SymmetricCrypto::CryptoType::AES128_ECB, aes_key, 0);
 
-     (void)absl::HexStringToBytes(kPrimeOver256bHexStr, &prime256_str);
+    (void)absl::HexStringToBytes(kPrimeOver256bHexStr, &prime256_str);
   }
 
   void RecvPolynomialCoeff(

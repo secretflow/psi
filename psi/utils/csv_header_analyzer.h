@@ -23,6 +23,7 @@
 #include "absl/strings/ascii.h"
 #include "absl/strings/str_split.h"
 #include "yacl/base/exception.h"
+#include "fmt/ranges.h"
 
 namespace psi {
 

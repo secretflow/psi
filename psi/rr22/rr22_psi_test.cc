@@ -14,7 +14,7 @@
 
 #include "psi/rr22/rr22_psi.h"
 
-#include <fmt/format.h>
+#include "fmt/ranges.h"
 
 #include <random>
 #include <tuple>

@@ -16,6 +16,7 @@
 
 #include <omp.h>
 
+#include "fmt/ranges.h"
 #include "spdlog/spdlog.h"
 #include "yacl/base/exception.h"
 

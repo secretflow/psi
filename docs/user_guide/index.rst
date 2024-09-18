@@ -10,3 +10,4 @@ PSI v2 is recommended to use. We are still working on PIR code refactoring.
    psi_v2
    pir
    faq
+   psi_v2_benchmark

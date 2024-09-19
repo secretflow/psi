@@ -93,6 +93,10 @@ def _upb():
             "https://storage.googleapis.com/grpc-bazel-mirror/github.com/protocolbuffers/upb/archive/e4635f223e7d36dfbea3b722a4ca4807a7e882e2.tar.gz",
             "https://github.com/protocolbuffers/upb/archive/e4635f223e7d36dfbea3b722a4ca4807a7e882e2.tar.gz",
         ],
+        patch_args = ["-p1"],
+        patches = [
+            "@psi//bazel:patches/upb.patch",
+        ],
     )
 
 def _com_github_emptoolkit_emp_tool():

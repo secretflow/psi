@@ -97,9 +97,7 @@ spu_lib_files = [
 
 # These are the directories where automatically generated Python protobuf
 # bindings are created.
-generated_python_directories = [
-    "bazel-bin/psi"
-]
+generated_python_directories = ["bazel-bin/psi"]
 
 files_to_remove = []
 

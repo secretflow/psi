@@ -98,7 +98,7 @@ def gen_cache_for_2pc_ub_psi(config: BucketPsiConfig) -> PsiResultReport:
     Returns:
         PsiResultReport: statistical results
     """
-    config.psi_type = PsiType.Value('ECDH_OPRF_UB_PSI_2PC_GEN_CACHE')
+    config.psi_type = PsiType.Value("ECDH_OPRF_UB_PSI_2PC_GEN_CACHE")
     config.broadcast_result = False
     config.output_params.need_sort = False
     config.receiver_rank = 0

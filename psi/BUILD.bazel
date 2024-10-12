@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@pybind11_bazel//:build_defs.bzl", "pybind_extension")
+load("@rules_proto_grpc//python:defs.bzl", "python_proto_compile")
 load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library", "psi_cc_test")
 
 package(default_visibility = ["//visibility:public"])
@@ -136,5 +138,79 @@ psi_cc_binary(
         "//psi:launch",
         "//psi/proto:entry_cc_proto",
         "@com_github_gflags_gflags//:gflags",
+    ],
+)
+
+exports_files(
+    [
+        "exported_symbols.lds",
+        "version_script.lds",
+    ],
+    visibility = ["//visibility:private"],
+)
+
+pybind_extension(
+    name = "libpsi",
+    srcs = ["libpsi.cc"],
+    linkopts = select({
+        "@bazel_tools//src/conditions:darwin": [
+            "-Wl,-exported_symbols_list,$(location //psi:exported_symbols.lds)",
+        ],
+        "//conditions:default": [
+            "-Wl,--version-script,$(location //psi:version_script.lds)",
+        ],
+    }),
+    deps = [
+        ":exported_symbols.lds",
+        ":version_script.lds",
+        "@psi//psi:launch",
+        "@psi//psi/legacy:memory_psi",
+        "@yacl//yacl/link",
+    ],
+)
+
+python_proto_compile(
+    name = "psi_py_proto",
+    output_mode = "NO_PREFIX_FLAT",
+    protos = ["@psi//psi/proto:psi_proto"],
+)
+
+python_proto_compile(
+    name = "link_py_proto",
+    output_mode = "NO_PREFIX_FLAT",
+    protos = ["@yacl//yacl/link:link_proto"],
+)
+
+python_proto_compile(
+    name = "psi_v2_py_proto",
+    output_mode = "NO_PREFIX",
+    protos = ["@psi//psi/proto:psi_v2_proto"],
+)
+
+python_proto_compile(
+    name = "pir_py_proto",
+    output_mode = "NO_PREFIX_FLAT",
+    protos = ["@psi//psi/proto:pir_proto"],
+)
+
+# Hack generated protobuf due to https://github.com/protocolbuffers/protobuf/issues/1491
+genrule(
+    name = "psi_v2_py_proto_fixed",
+    srcs = [":psi_v2_py_proto"],
+    outs = ["psi_v2_pb2.py"],
+    cmd = "sed 's#from yacl.link import#from . import#g;s#from psi.proto import#from . import#g' $(SRCS) > $(OUTS)",
+)
+
+py_library(
+    name = "psi",
+    srcs = [
+        "psi.py",
+        ":link_py_proto",
+        ":pir_py_proto",
+        ":psi_py_proto",
+        ":psi_v2_py_proto_fixed",
+    ],
+    data = [
+        ":libpsi.so",
     ],
 )

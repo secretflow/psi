@@ -23,7 +23,6 @@ psi_deps()
 # Warning: psi relies on yacl to bring in common 3p libraries.
 #          Please make sure yacl_deps are called right after psi_deps.
 #
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 load("@yacl//bazel:repositories.bzl", "yacl_deps")
 
 yacl_deps()
@@ -51,6 +50,11 @@ grpc_deps()
 load("@com_github_grpc_grpc//bazel:grpc_extra_deps.bzl", "grpc_extra_deps")
 
 grpc_extra_deps()
+
+load("@rules_proto_grpc//:repositories.bzl", "rules_proto_grpc_repos", "rules_proto_grpc_toolchains")
+
+rules_proto_grpc_toolchains()
+rules_proto_grpc_repos()
 
 #
 # boost

@@ -141,7 +141,7 @@ def _com_github_intel_ipp():
         http_archive,
         name = "com_github_intel_ipp",
         sha256 = "d70f42832337775edb022ca8ac1ac418f272e791ec147778ef7942aede414cdc",
-        strip_prefix = "ipp-crypto-ippcp_2021.8",
+        strip_prefix = "cryptography-primitives-ippcp_2021.8",
         build_file = "@psi//bazel:ipp.BUILD",
         patch_args = ["-p1"],
         patches = [

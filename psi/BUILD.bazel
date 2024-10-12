@@ -219,7 +219,6 @@ py_library(
     name = "init",
     srcs = [
         "__init__.py",
-        "version.py",
         ":psi",
     ],
 )

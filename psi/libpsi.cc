@@ -148,6 +148,11 @@ PYBIND11_MODULE(libpsi, m) {
 
   py::module libs_m = m.def_submodule("libs");
   BindLibs(libs_m);
+
+  m.def("_get_version", []() {
+    return fmt::format("v{}.{}.{}{}", PSI_VERSION_MAJOR, PSI_VERSION_MINOR,
+                       PSI_VERSION_PATCH, PSI_DEV_IDENTIFIER);
+  });
 }
 
 }  // namespace psi

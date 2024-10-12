@@ -14,3 +14,6 @@
 
 
 from . import psi
+from . import libpsi  # type: ignore
+
+__version__ = libpsi._get_version()

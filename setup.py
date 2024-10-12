@@ -22,7 +22,6 @@ import re
 import shutil
 import subprocess
 import sys
-from datetime import datetime, timedelta
 
 import setuptools
 import setuptools.command.build_ext
@@ -41,7 +40,6 @@ pyd_suffix = ".so"
 
 
 def find_version(*filepath):
-    version_str = ""
     # Extract version information from filepath
     with open(os.path.join(ROOT_DIR, *filepath)) as fp:
         text = fp.read()
@@ -57,18 +55,8 @@ def find_version(*filepath):
             and version_patch_match
             and version_dev_match
         ):
-            version_str = f"{version_major_match.group(1)}.{version_minor_match.group(1)}.{version_patch_match.group(1)}{version_dev_match.group(1)}"
-        else:
-            raise RuntimeError("Unable to find version string.")
-
-    with open(os.path.join(ROOT_DIR, "psi", "version.py"), "r") as fp:
-        content = fp.read()
-
-    content = content.replace("$$VERSION$$", version_str)
-
-    with open(os.path.join(ROOT_DIR, "psi", "version.py"), "w+") as fp:
-        fp.write(content)
-
+            return f"{version_major_match.group(1)}.{version_minor_match.group(1)}.{version_patch_match.group(1)}{version_dev_match.group(1)}"
+        raise RuntimeError("Unable to find version string.")
 
 
 def read_requirements(*filepath):
@@ -239,8 +227,8 @@ build_dir = os.path.join(ROOT_DIR, "build")
 if os.path.isdir(build_dir):
     shutil.rmtree(build_dir)
 
-if not SKIP_BAZEL_CLEAN:
-    bazel_invoke(subprocess.check_call, ["clean"])
+# if not SKIP_BAZEL_CLEAN:
+#     bazel_invoke(subprocess.check_call, ["clean"])
 
 # Default Linux platform tag
 plat_name = "manylinux2014_x86_64"

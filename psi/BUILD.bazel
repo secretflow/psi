@@ -162,6 +162,7 @@ pybind_extension(
     }),
     deps = [
         ":exported_symbols.lds",
+        ":version",
         ":version_script.lds",
         "@psi//psi:launch",
         "@psi//psi/legacy:memory_psi",

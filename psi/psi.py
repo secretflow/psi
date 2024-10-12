@@ -18,7 +18,7 @@ from typing import List
 
 from . import libpsi  # type: ignore
 from .libpsi.libs import ProgressData
-from .libspu.link import Context  # type: ignore
+from .libpsi.link import Context  # type: ignore
 from .pir_pb2 import (  # type: ignore
     ApsiReceiverConfig,
     ApsiSenderConfig,

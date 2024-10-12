@@ -97,7 +97,9 @@ spu_lib_files = [
 
 # These are the directories where automatically generated Python protobuf
 # bindings are created.
-generated_python_directories = []
+generated_python_directories = [
+    "bazel-bin/psi"
+]
 
 files_to_remove = []
 
@@ -188,10 +190,10 @@ def pip_run(build_ext):
     build(True, True)
 
     # Change __module__ in psi_pb2.py and pir_pb2.py
-    fix_pb("bazel-bin/spu/psi_pb2.py", "psi.psi.psi_pb2", "spu.psi_pb2")
-    fix_pb("bazel-bin/spu/link_pb2.py", "yacl.link.link_pb2", "link.pir_pb2")
-    fix_pb("bazel-bin/spu/psi_v2_pb2.py", "psi.proto.psi_v2_pb2", "spu.psi_pb2")
-    fix_pb("bazel-bin/spu/pir_pb2.py", "psi.pir.pir_pb2", "spu.pir_pb2")
+    fix_pb("bazel-bin/psi/psi_pb2.py", "psi.psi.psi_pb2", "psi.psi_pb2")
+    fix_pb("bazel-bin/psi/link_pb2.py", "yacl.link.link_pb2", "link.pir_pb2")
+    fix_pb("bazel-bin/psi/psi_v2_pb2.py", "psi.proto.psi_v2_pb2", "psi.psi_pb2")
+    fix_pb("bazel-bin/psi/pir_pb2.py", "psi.pir.pir_pb2", "psi.pir_pb2")
 
     setup_spec.files_to_include += spu_lib_files
 

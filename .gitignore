@@ -46,4 +46,8 @@ idir/
 
 ossutil_output/
 
-build/
+/dist
+*.egg-info
+__pycache__
+/build
+_build

@@ -47,6 +47,7 @@ commands:
           command: |
             set +e
             declare -i test_status
+            pip install -r dev-requirements.txt
             bazel test //... -c opt | tee test_result.log; test_status=${PIPESTATUS[0]}
 
             sh ../devtools/rename-junit-xml.sh

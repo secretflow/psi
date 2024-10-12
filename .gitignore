@@ -45,3 +45,5 @@ coverity*/
 idir/
 
 ossutil_output/
+
+build/

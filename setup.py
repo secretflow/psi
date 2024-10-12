@@ -40,29 +40,35 @@ ENABLE_GPU_BUILD = os.getenv("ENABLE_GPU_BUILD")
 pyd_suffix = ".so"
 
 
-def add_date_to_version(*filepath):
-    local_time = datetime.utcnow()
-    chn_time = local_time + timedelta(hours=8)
-    dstr = chn_time.strftime("%Y%m%d")
-    with open(os.path.join(ROOT_DIR, *filepath), "r") as fp:
-        content = fp.read()
-
-    content = content.replace("$$DATE$$", dstr)
-
-    with open(os.path.join(ROOT_DIR, *filepath), "w+") as fp:
-        fp.write(content)
-
-
 def find_version(*filepath):
-    add_date_to_version(*filepath)
+    version_str = ""
     # Extract version information from filepath
     with open(os.path.join(ROOT_DIR, *filepath)) as fp:
-        version_match = re.search(
-            r"^#define SPU_VERSION ['\"]([^'\"]*)['\"]", fp.read(), re.M
+        text = fp.read()
+        version_major_match = re.search(r"^#define PSI_VERSION_MAJOR (\d+)", text, re.M)
+        version_minor_match = re.search(r"^#define PSI_VERSION_MINOR (\d+)", text, re.M)
+        version_patch_match = re.search(r"^#define PSI_VERSION_PATCH (\d+)", text, re.M)
+        version_dev_match = re.search(
+            r"^#define PSI_DEV_IDENTIFIER ['\"]([^'\"]*)['\"]", text, re.M
         )
-        if version_match:
-            return version_match.group(1)
-        raise RuntimeError("Unable to find version string.")
+        if (
+            version_major_match
+            and version_minor_match
+            and version_patch_match
+            and version_dev_match
+        ):
+            version_str = f"{version_major_match.group(1)}.{version_minor_match.group(1)}.{version_patch_match.group(1)}{version_dev_match.group(1)}"
+        else:
+            raise RuntimeError("Unable to find version string.")
+
+    with open(os.path.join(ROOT_DIR, "psi", "version.py"), "r") as fp:
+        content = fp.read()
+
+    content = content.replace("$$VERSION$$", version_str)
+
+    with open(os.path.join(ROOT_DIR, "psi", "version.py"), "w+") as fp:
+        fp.write(content)
+
 
 
 def read_requirements(*filepath):
@@ -107,10 +113,11 @@ generated_python_directories = []
 
 files_to_remove = []
 
+
 # Calls Bazel in PATH
 def bazel_invoke(invoker, cmdline, *args, **kwargs):
     try:
-        result = invoker(['bazel'] + cmdline, *args, **kwargs)
+        result = invoker(["bazel"] + cmdline, *args, **kwargs)
         return result
     except IOError:
         raise
@@ -159,7 +166,7 @@ def remove_prefix(text, prefix):
 
 def copy_file(target_dir, filename, rootdir):
     source = os.path.relpath(filename, rootdir)
-    destination = os.path.join(target_dir, remove_prefix(source, 'bazel-bin/'))
+    destination = os.path.join(target_dir, remove_prefix(source, "bazel-bin/"))
 
     # Create the target directory if it doesn't already exist.
     os.makedirs(os.path.dirname(destination), exist_ok=True)
@@ -181,11 +188,11 @@ def remove_file(target_dir, filename):
 
 def fix_pb(file, old_pattern, new_pattern):
     os.chmod(file, 0o666)
-    with open(file, 'r+') as f:
+    with open(file, "r+") as f:
         content = f.read()
         content = content.replace(old_pattern, new_pattern)
 
-    with open(file, 'w+') as f:
+    with open(file, "w+") as f:
         f.write(content)
 
 
@@ -193,10 +200,10 @@ def pip_run(build_ext):
     build(True, True)
 
     # Change __module__ in psi_pb2.py and pir_pb2.py
-    fix_pb('bazel-bin/spu/psi_pb2.py', 'psi.psi.psi_pb2', 'spu.psi_pb2')
-    fix_pb('bazel-bin/spu/link_pb2.py', 'yacl.link.link_pb2', 'link.pir_pb2')
-    fix_pb('bazel-bin/spu/psi_v2_pb2.py', 'psi.proto.psi_v2_pb2', 'spu.psi_pb2')
-    fix_pb('bazel-bin/spu/pir_pb2.py', 'psi.pir.pir_pb2', 'spu.pir_pb2')
+    fix_pb("bazel-bin/spu/psi_pb2.py", "psi.psi.psi_pb2", "spu.psi_pb2")
+    fix_pb("bazel-bin/spu/link_pb2.py", "yacl.link.link_pb2", "link.pir_pb2")
+    fix_pb("bazel-bin/spu/psi_v2_pb2.py", "psi.proto.psi_v2_pb2", "spu.psi_pb2")
+    fix_pb("bazel-bin/spu/pir_pb2.py", "psi.pir.pir_pb2", "spu.pir_pb2")
 
     setup_spec.files_to_include += spu_lib_files
 
@@ -233,7 +240,7 @@ if os.path.isdir(build_dir):
     shutil.rmtree(build_dir)
 
 if not SKIP_BAZEL_CLEAN:
-    bazel_invoke(subprocess.check_call, ['clean'])
+    bazel_invoke(subprocess.check_call, ["clean"])
 
 # Default Linux platform tag
 plat_name = "manylinux2014_x86_64"
@@ -252,12 +259,12 @@ setuptools.setup(
     name=setup_spec.name,
     version=setup_spec.version,
     author="SecretFlow Team",
-    author_email='secretflow-contact@service.alipay.com',
+    author_email="secretflow-contact@service.alipay.com",
     description=(setup_spec.description),
     long_description=io.open(
         os.path.join(ROOT_DIR, "README.md"), "r", encoding="utf-8"
     ).read(),
-    long_description_content_type='text/markdown',
+    long_description_content_type="text/markdown",
     url="https://github.com/secretflow/psi",
     keywords=("psi pir"),
     classifiers=[
@@ -273,5 +280,5 @@ setuptools.setup(
     setup_requires=["wheel"],
     extras_require=setup_spec.extras,
     license="Apache 2.0",
-    options={'bdist_wheel': {'plat_name': plat_name}},
+    options={"bdist_wheel": {"plat_name": plat_name}},
 )

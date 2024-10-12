@@ -214,3 +214,12 @@ py_library(
         ":libpsi.so",
     ],
 )
+
+py_library(
+    name = "init",
+    srcs = [
+        "__init__.py",
+        "version.py",
+        ":psi",
+    ],
+)

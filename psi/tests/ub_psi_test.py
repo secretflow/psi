@@ -15,6 +15,7 @@
 import json
 import unittest
 from tempfile import TemporaryDirectory
+import os
 
 import multiprocess
 from google.protobuf import json_format
@@ -41,14 +42,14 @@ class UnitTests(unittest.TestCase):
         {{
             "mode": "MODE_OFFLINE",
             "role": "ROLE_SERVER",
-            "cache_path": "{self.tempdir_.name}/spu_test_ub_psi_server_cache",
+            "cache_path": "{os.path.join(self.tempdir_.name, "ub_psi_server_cache")}",
             "input_config": {{
                 "path": "psi/tests/data/alice.csv"
             }},
             "keys": [
                 "id"
             ],
-            "server_secret_key_path": "{self.tempdir_.name}/spu_test_ub_psi_server_secret_key.key"
+            "server_secret_key_path": "{os.path.join(self.tempdir_.name, "ub_psi_server_secret_key.key")}"
         }}
         """
 
@@ -56,12 +57,12 @@ class UnitTests(unittest.TestCase):
         {{
             "mode": "MODE_OFFLINE",
             "role": "ROLE_CLIENT",
-            "cache_path": "{self.tempdir_.name}/spu_test_ub_psi_client_cache"
+            "cache_path": "{os.path.join(self.tempdir_.name, "ub_psi_client_cache")}"
         }}
         """
 
         with open(
-            f"{self.tempdir_.name}/spu_test_ub_psi_server_secret_key.key", "wb"
+            os.path.join(self.tempdir_.name, "ub_psi_server_secret_key.key"), "wb"
         ) as f:
             f.write(
                 bytes.fromhex(
@@ -95,8 +96,8 @@ class UnitTests(unittest.TestCase):
         {{
             "mode": "MODE_ONLINE",
             "role": "ROLE_SERVER",
-            "server_secret_key_path": "{self.tempdir_.name}/spu_test_ub_psi_server_secret_key.key",
-            "cache_path": "{self.tempdir_.name}/spu_test_ub_psi_server_cache"
+            "server_secret_key_path": "{os.path.join(self.tempdir_.name, "ub_psi_server_secret_key.key")}",
+            "cache_path": "{os.path.join(self.tempdir_.name, "ub_psi_server_cache")}"
         }}
         """
 
@@ -108,12 +109,12 @@ class UnitTests(unittest.TestCase):
                 "path": "psi/tests/data/bob.csv"
             }},
             "output_config": {{
-                "path": "{self.tempdir_.name}/spu_test_ubpsi_bob_psi_ouput.csv"
+                "path": "{os.path.join(self.tempdir_.name, "ubpsi_bob_psi_ouput.csv")}"
             }},
             "keys": [
                 "id"
             ],
-            "cache_path": "{self.tempdir_.name}/spu_test_ub_psi_client_cache"
+            "cache_path": "{os.path.join(self.tempdir_.name, "ub_psi_client_cache")}"
         }}
         """
 

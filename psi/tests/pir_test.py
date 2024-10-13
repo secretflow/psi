@@ -15,6 +15,7 @@
 import json
 import tempfile
 import unittest
+import os
 
 import multiprocess
 import psi.libpsi.link as link
@@ -32,7 +33,7 @@ class UnitTests(unittest.TestCase):
             {{
                 "source_file": "psi/tests/data/pir/db.csv",
                 "params_file": "psi/tests/data/pir/100K-1-16.json",
-                "sdb_out_file": "{temp_dir}/sdb",
+                "sdb_out_file": "{os.path.join(temp_dir, "sdb")}",
                 "save_db_only": true
             }}
             """
@@ -45,14 +46,14 @@ class UnitTests(unittest.TestCase):
 
             sender_online_config_json = f"""
             {{
-                "db_file": "{temp_dir}/sdb"
+                "db_file": "{os.path.join(temp_dir, "sdb")}"
             }}
             """
 
             receiver_online_config_json = f"""
             {{
                 "query_file": "psi/tests/data/pir/query.csv",
-                "output_file": "{temp_dir}/result.csv",
+                "output_file": "{os.path.join(temp_dir, "result.csv")}",
                 "params_file": "psi/tests/data/pir/100K-1-16.json"
             }}
             """
@@ -91,7 +92,7 @@ class UnitTests(unittest.TestCase):
 
             import pandas as pd
 
-            df1 = pd.read_csv(f"{temp_dir}/result.csv")
+            df1 = pd.read_csv(os.path.join(temp_dir, "result.csv"))
             df2 = pd.read_csv("psi/tests/data/pir/ground_truth.csv")
 
             self.assertTrue(df1.equals(df2))

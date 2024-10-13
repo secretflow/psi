@@ -15,6 +15,7 @@
 import json
 import unittest
 from tempfile import TemporaryDirectory
+import os
 
 import multiprocess
 from google.protobuf import json_format
@@ -52,7 +53,7 @@ class UnitTests(unittest.TestCase):
             }},
             "output_config": {{
                 "type": "IO_TYPE_FILE_CSV",
-                "path": "{self.tempdir_.name}/spu_test_psi_alice_psi_ouput.csv"
+                "path": "{os.path.join(self.tempdir_.name, "alice_psi_ouput.csv")}"
             }},
             "keys": [
                 "id"
@@ -78,7 +79,7 @@ class UnitTests(unittest.TestCase):
             }},
             "output_config": {{
                 "type": "IO_TYPE_FILE_CSV",
-                "path": "{self.tempdir_.name}/spu_test_psi_bob_psi_ouput.csv"
+                "path": "{os.path.join(self.tempdir_.name, "bob_psi_ouput.csv")}"
             }},
             "keys": [
                 "id"
@@ -110,8 +111,8 @@ class UnitTests(unittest.TestCase):
             self.assertEqual(job.exitcode, 0)
 
         self.assertEqual(
-            wc_count(f"{self.tempdir_.name}/spu_test_psi_alice_psi_ouput.csv"),
-            wc_count(f"{self.tempdir_.name}/spu_test_psi_bob_psi_ouput.csv"),
+            wc_count(os.path.join(self.tempdir_.name, "alice_psi_ouput.csv")),
+            wc_count(os.path.join(self.tempdir_.name, "bob_psi_ouput.csv")),
         )
 
 

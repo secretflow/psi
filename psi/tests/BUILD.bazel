@@ -28,10 +28,6 @@ py_test(
     data = [
         "//psi/tests/data",
     ],
-    flaky = True,
-    tags = [
-        "exclusive-if-local",
-    ],
     deps = [
         ":utils",
         "//psi",
@@ -43,10 +39,6 @@ py_test(
     srcs = ["psi_test.py"],
     data = [
         "//psi/tests/data",
-    ],
-    flaky = True,
-    tags = [
-        "exclusive-if-local",
     ],
     deps = [
         ":utils",
@@ -60,10 +52,6 @@ py_test(
     data = [
         "//psi/tests/data",
     ],
-    flaky = True,
-    tags = [
-        "exclusive-if-local",
-    ],
     deps = [
         ":utils",
         "//psi",
@@ -75,10 +63,6 @@ py_test(
     srcs = ["pir_test.py"],
     data = [
         "//psi/tests/data",
-    ],
-    flaky = True,
-    tags = [
-        "exclusive-if-local",
     ],
     deps = [
         ":utils",

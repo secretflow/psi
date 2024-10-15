@@ -18,7 +18,6 @@
 #include "psi/apsi_wrapper/utils/csv_reader.h"
 
 #include "fmt/format.h"
-#include "fmt/ranges.h"
 
 #include "psi/utils/multiplex_disk_cache.h"
 

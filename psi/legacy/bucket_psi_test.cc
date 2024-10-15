@@ -541,10 +541,8 @@ TEST(UnbalancedPsiTest, EcdhOprfUnbalanced) {
   {
     std::ofstream wf(ecdh_secret_key_path, std::ios::out | std::ios::binary);
 
-    std::string secret_key_binary;
-    (void)absl::HexStringToBytes(
-        "000102030405060708090a0b0c0d0e0ff0e0d0c0b0a090807060504030201000",
-        &secret_key_binary);
+    std::string secret_key_binary = absl::HexStringToBytes(
+        "000102030405060708090a0b0c0d0e0ff0e0d0c0b0a090807060504030201000");
     wf.write(secret_key_binary.data(), secret_key_binary.length());
     wf.close();
   }

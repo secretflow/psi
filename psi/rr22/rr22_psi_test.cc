@@ -14,10 +14,11 @@
 
 #include "psi/rr22/rr22_psi.h"
 
+#include <fmt/format.h>
+
 #include <random>
 #include <tuple>
 
-#include "fmt/ranges.h"
 #include "gtest/gtest.h"
 #include "spdlog/spdlog.h"
 #include "yacl/crypto/rand/rand.h"

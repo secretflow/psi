@@ -14,6 +14,7 @@
 
 #include "psi/utils/csv_checker.h"
 
+#include <fmt/core.h>
 #include <omp.h>
 
 #include <cstddef>
@@ -31,8 +32,6 @@
 #include "boost/uuid/uuid.hpp"
 #include "boost/uuid/uuid_generators.hpp"
 #include "boost/uuid/uuid_io.hpp"
-#include "fmt/core.h"
-#include "fmt/ranges.h"
 #include "spdlog/spdlog.h"
 #include "yacl/base/exception.h"
 #include "yacl/crypto/hash/hash_utils.h"

@@ -53,7 +53,7 @@ psi_cc_library(
         "@yacl//yacl/crypto/tools:ro",
         "@yacl//yacl/kernel/algorithms:silent_vole",
         "@yacl//yacl/link",
-        "@yacl//yacl/math/galois_field:gf_intrinsic",
+        "@yacl//yacl/math/f2k",
         "@yacl//yacl/utils:parallel",
     ],
 )

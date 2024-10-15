@@ -24,7 +24,7 @@
 #include "yacl/crypto/rand/rand.h"
 #include "yacl/crypto/tools/prg.h"
 #include "yacl/crypto/tools/ro.h"
-#include "yacl/math/galois_field/gf_intrinsic.h"
+#include "yacl/math/f2k/f2k.h"
 #include "yacl/utils/parallel.h"
 
 #include "psi/rr22/davis_meyer_hash.h"

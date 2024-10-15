@@ -14,7 +14,6 @@
 
 #include "psi/utils/csv_checker.h"
 
-#include <fmt/core.h>
 #include <omp.h>
 
 #include <cstddef>
@@ -32,6 +31,8 @@
 #include "boost/uuid/uuid.hpp"
 #include "boost/uuid/uuid_generators.hpp"
 #include "boost/uuid/uuid_io.hpp"
+#include "fmt/core.h"
+#include "fmt/ranges.h"
 #include "spdlog/spdlog.h"
 #include "yacl/base/exception.h"
 #include "yacl/crypto/hash/hash_utils.h"
@@ -187,7 +188,7 @@ CheckCsvReport CheckCsv(const std::string& input_file_path,
   const std::shared_ptr<arrow::Schema>& schema = reader->schema();
 
   std::shared_ptr<arrow::io::FileOutputStream> outfile =
-      arrow::io::FileOutputStream::Open(output_file_path).ValueOrDie();
+      io::GetArrowOutputStream(output_file_path);
 
   auto write_options = arrow::csv::WriteOptions::Defaults();
   write_options.include_header = true;

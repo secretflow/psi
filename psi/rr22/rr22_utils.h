@@ -26,5 +26,15 @@ namespace psi::rr22 {
 std::vector<size_t> GetIntersection(
     absl::Span<const uint128_t> self_oprfs, size_t peer_items_num,
     const std::shared_ptr<yacl::link::Context>& lctx, size_t num_threads,
-    bool compress, size_t mask_size, size_t ssp = 40);
-}
+    bool compress, size_t mask_size);
+
+std::vector<uint32_t> GetIntersectionReceiver(
+    const std::vector<uint128_t>& self_oprfs, size_t peer_items_num,
+    const std::shared_ptr<yacl::link::Context>& lctx, size_t num_threads,
+    size_t mask_size, bool broadcast_result);
+
+std::vector<uint32_t> GetIntersectionSender(
+    std::vector<uint128_t> self_oprfs,
+    const std::shared_ptr<yacl::link::Context>& lctx, size_t mask_size,
+    bool broadcast_result);
+}  // namespace psi::rr22

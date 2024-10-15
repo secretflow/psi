@@ -1,13 +1,14 @@
 {
   "apsi_sender_config": {
     "threads": 1,
+    "log_level": "info",
     "source_file": "/tmp/db.csv",
     "params_file": "/tmp/100K-1-16.json",
-    "sdb_out_file": "/tmp/sdb",
     "save_db_only": true,
     "experimental_enable_bucketize": true,
     "experimental_bucket_cnt": 10000,
     "experimental_bucket_folder": "/tmp/apsi_sender_bucket/",
-    "experimental_db_generating_process_num": 16
+    "experimental_db_generating_process_num": 16,
+    "experimental_bucket_group_cnt": 512
   }
 }

@@ -24,6 +24,8 @@
 #include "arrow/csv/options.h"
 #include "spdlog/spdlog.h"
 
+#include "psi/utils/io.h"
+
 namespace psi {
 
 IndexWriter::IndexWriter(const std::filesystem::path& path, size_t cache_size,
@@ -41,7 +43,7 @@ IndexWriter::IndexWriter(const std::filesystem::path& path, size_t cache_size,
       file.close();
     }
   }
-  outfile_ = arrow::io::FileOutputStream::Open(path_, true).ValueOrDie();
+  outfile_ = io::GetArrowOutputStream(path_, true);
 
   schema_ = arrow::schema({arrow::field(kIdx, arrow::uint64())});
   writer_ =

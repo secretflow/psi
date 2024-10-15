@@ -67,100 +67,54 @@ TEST(ApiTest, Works) {
   EXPECT_TRUE(std::filesystem::create_directory(bucket_senderdb_folder));
 
   {
-    SPDLOG_INFO("test sender db setup");
-    psi::apsi_wrapper::api::Sender sender;
-    sender.LoadCsv(sender_csv_file, params_file, nonce_byte_count, compress);
+    psi::apsi_wrapper::api::Sender::Option sender_option;
+    sender_option.source_file = sender_csv_file;
+    sender_option.params_file = params_file;
+    sender_option.nonce_byte_count = nonce_byte_count;
+    sender_option.compress = compress;
+    sender_option.db_path = sdb_out_file;
+    sender_option.num_buckets = bucket_cnt;
+    sender_option.group_cnt = bucket_cnt;
 
-    psi::apsi_wrapper::api::Receiver receiver;
-    receiver.LoadParamsConfig(params_file);
-    receiver.LoadItems(receiver_query_file);
-
-    std::string oprf_request_str = receiver.RequestOPRF();
-    std::string oprf_response_str = sender.RunOPRF(oprf_request_str);
-
-    std::string query_request_str = receiver.RequestQuery(oprf_response_str);
-    std::string query_response_str = sender.RunQuery(query_request_str);
-
-    receiver.ProcessResult(query_response_str, receiver_output_file);
-
-    ASSERT_TRUE(sender.SaveSenderDb(sdb_out_file));
-  }
-
-  {
-    SPDLOG_INFO("test sender db load");
-
-    psi::apsi_wrapper::api::Sender sender;
-    ASSERT_TRUE(sender.LoadSenderDb(sdb_out_file));
-    std::string params_str = sender.GenerateParams();
-
-    psi::apsi_wrapper::api::Receiver receiver;
-    receiver.LoadSenderParams(params_str);
-    receiver.LoadItems(receiver_query_file);
-
-    std::string oprf_request_str = receiver.RequestOPRF();
-    std::string oprf_response_str = sender.RunOPRF(oprf_request_str);
-
-    std::string query_request_str = receiver.RequestQuery(oprf_response_str);
-    std::string query_response_str = sender.RunQuery(query_request_str);
-
-    receiver.ProcessResult(query_response_str, receiver_output_file_2);
-  }
-
-  {
     SPDLOG_INFO("test bucketized sender db");
 
-    psi::apsi_wrapper::api::Sender::SaveBucketizedSenderDb(
-        sender_csv_file, params_file, nonce_byte_count, compress,
-        bucket_senderdb_folder, bucket_cnt);
+    psi::apsi_wrapper::api::Sender sender(sender_option);
+    sender.GenerateSenderDb();
 
-    psi::apsi_wrapper::api::Sender sender;
-    sender.LoadBucketizedSenderDb(bucket_senderdb_folder, bucket_cnt);
     std::string params_str = sender.GenerateParams();
 
-    psi::apsi_wrapper::api::Receiver receiver;
+    psi::apsi_wrapper::api::Receiver receiver(bucket_cnt);
+
     receiver.LoadSenderParams(params_str);
 
-    std::vector<std::pair<size_t, std::vector<std::string>>> buckets =
-        receiver.BucketizeItems(receiver_query_file, bucket_cnt);
+    auto recv_context = receiver.BucketizeItems(receiver_query_file);
 
-    bool append_to_outfile = false;
+    auto oprf_requst = receiver.RequestOPRF(recv_context);
 
-    for (const auto& [k, v] : buckets) {
-      receiver.LoadItems(v);
+    auto oprf_response = sender.RunOPRF(oprf_requst);
 
-      std::string oprf_request_str = receiver.RequestOPRF(k);
-      std::string oprf_response_str = sender.RunOPRF(oprf_request_str);
+    auto query_request = receiver.RequestQuery(recv_context, oprf_response);
 
-      std::string query_request_str =
-          receiver.RequestQuery(oprf_response_str, k);
-      std::string query_response_str = sender.RunQuery(query_request_str);
+    auto query_response = sender.RunQuery(query_request);
 
-      size_t cnt = receiver.ProcessResult(
-          query_response_str, receiver_output_file_2, append_to_outfile);
+    auto cnts = receiver.ProcessResult(recv_context, query_response,
+                                       receiver_output_file);
 
-      if (cnt > 0 && !append_to_outfile) {
-        append_to_outfile = true;
+    std::vector<std::string> query_items = ReadItems(receiver_query_file);
+    std::vector<std::string> output_items_1 = ReadItems(receiver_output_file);
+
+    std::sort(query_items.begin(), query_items.end());
+    std::sort(output_items_1.begin(), output_items_1.end());
+
+    EXPECT_EQ(output_items_1, query_items);
+
+    {
+      std::error_code ec;
+      std::filesystem::remove_all(tmp_folder, ec);
+      if (ec.value() != 0) {
+        SPDLOG_WARN("can not remove temp file folder: {}, msg: {}",
+                    tmp_folder.string(), ec.message());
       }
-    }
-  }
-
-  std::vector<std::string> query_items = ReadItems(receiver_query_file);
-  std::vector<std::string> output_items_1 = ReadItems(receiver_output_file);
-  std::vector<std::string> output_items_2 = ReadItems(receiver_output_file_2);
-
-  std::sort(query_items.begin(), query_items.end());
-  std::sort(output_items_1.begin(), output_items_1.end());
-  std::sort(output_items_2.begin(), output_items_2.end());
-
-  EXPECT_EQ(output_items_1, query_items);
-  EXPECT_EQ(output_items_2, query_items);
-
-  {
-    std::error_code ec;
-    std::filesystem::remove_all(tmp_folder, ec);
-    if (ec.value() != 0) {
-      SPDLOG_WARN("can not remove temp file folder: {}, msg: {}",
-                  tmp_folder.string(), ec.message());
     }
   }
 }

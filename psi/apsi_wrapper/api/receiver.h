@@ -15,6 +15,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+#include <apsi/oprf/oprf_receiver.h>
+
 #include <cstddef>
 #include <memory>
 #include <string>
@@ -28,7 +30,8 @@ namespace psi::apsi_wrapper::api {
 
 class Receiver {
  public:
-  Receiver() = default;
+  Receiver(size_t bucket_cnt,
+           size_t thread_count = std::thread::hardware_concurrency());
 
   void SetThreadCount(size_t threads);
 
@@ -38,47 +41,46 @@ class Receiver {
   // Step 1. - option b
   void LoadSenderParams(const std::string& params_response_str);
 
-  // Step 2.
-  void LoadItems(const std::string& query_file);
+  struct BucketContext {
+    size_t bucket_idx;
+    std::vector<std::string> items;
+    std::vector<::apsi::Item> item_vec;
+    std::shared_ptr<::apsi::oprf::OPRFReceiver> oprf_receiver;
+    std::string oprf_request;
+    std::shared_ptr<psi::apsi_wrapper::Receiver> receiver;
+    std::vector<::apsi::LabelKey> label_keys;
+    ::apsi::receiver::IndexTranslationTable itt;
+  };
 
   // Step 2.
-  void LoadItems(const std::vector<std::string>& queries);
+  std::vector<Receiver::BucketContext> BucketizeItems(
+      const std::vector<std::string>& queries);
+
+  std::vector<Receiver::BucketContext> BucketizeItems(
+      const std::string& query_file);
 
   // Step 3.
-  std::string RequestOPRF(size_t bucket_idx = 0);
+  std::vector<std::string> RequestOPRF(
+      std::vector<Receiver::BucketContext>& contexts);
 
   // Step 4.
-  std::string RequestQuery(const std::string& oprf_response_str,
-                           size_t bucket_idx = 0);
+  std::vector<std::string> RequestQuery(
+      std::vector<Receiver::BucketContext>& bucket_contexts,
+      const std::vector<std::string>& oprf_responses);
 
   // Step 5.
-  size_t ProcessResult(const std::string& query_response_str,
-                       const std::string& output_file,
-                       bool append_to_outfile = false);
+  std::vector<size_t> ProcessResult(
+      std::vector<BucketContext>& bucket_contexts,
+      const std::vector<std::string>& query_responses,
+      const std::string& output_file);
 
-  // Below APIs are experimental at this moment.
-  std::vector<std::pair<size_t, std::vector<std::string>>> BucketizeItems(
-      const std::vector<std::string>& queries, size_t bucket_cnt);
-
-  std::vector<std::pair<size_t, std::vector<std::string>>> BucketizeItems(
-      const std::string& query_file, size_t bucket_cnt);
+  std::pair<std::vector<std::string>, std::vector<std::string>> ProcessResult(
+      std::vector<BucketContext>& bucket_contexts,
+      const std::vector<std::string>& query_responses);
 
  private:
+  size_t bucket_cnt_;
   std::unique_ptr<::apsi::PSIParams> params_;
-
-  std::vector<std::string> orig_items_;
-
-  std::vector<::apsi::Item> items_vec_;
-
-  std::unique_ptr<psi::apsi_wrapper::Receiver> receiver_;
-
-  std::unique_ptr<::apsi::oprf::OPRFReceiver> oprf_receiver_;
-
-  std::vector<::apsi::HashedItem> oprf_items_;
-
-  std::vector<::apsi::LabelKey> label_keys_;
-
-  ::apsi::receiver::IndexTranslationTable itt_;
 };
 
 }  // namespace psi::apsi_wrapper::api

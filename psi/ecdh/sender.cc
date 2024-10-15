@@ -14,12 +14,11 @@
 
 #include "psi/ecdh/sender.h"
 
-#include <spdlog/spdlog.h>
-
 #include <filesystem>
 
 #include "absl/time/clock.h"
 #include "absl/time/time.h"
+#include "spdlog/spdlog.h"
 #include "yacl/base/exception.h"
 #include "yacl/utils/scope_guard.h"
 

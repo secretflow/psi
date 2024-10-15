@@ -5,7 +5,8 @@
     "experimental_enable_bucketize": true,
     "experimental_bucket_cnt": 10000,
     "experimental_bucket_folder": "/tmp/apsi_sender_bucket/",
-    "experimental_db_generating_process_num": 16
+    "experimental_db_generating_process_num": 16,
+    "experimental_bucket_group_cnt": 512
   },
   "link_config": {
     "parties": [

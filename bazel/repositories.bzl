@@ -54,10 +54,10 @@ def _yacl():
         http_archive,
         name = "yacl",
         urls = [
-            "https://github.com/secretflow/yacl/archive/refs/tags/0.4.5b4_nightly_20240731.tar.gz",
+            "https://github.com/secretflow/yacl/archive/refs/tags/0.4.5b5_nightly_20240913.tar.gz",
         ],
-        strip_prefix = "yacl-0.4.5b4_nightly_20240731",
-        sha256 = "952715bd56f6d9386984e9963426a1399bd2bd3702cf3efede9c82591cfab99b",
+        strip_prefix = "yacl-0.4.5b5_nightly_20240913",
+        sha256 = "04b332246e3ccb57b5dd612353ed2e84f894e5537a3e854c020c8172793c07d6",
     )
 
 def _bazel_platform():
@@ -92,6 +92,10 @@ def _upb():
         urls = [
             "https://storage.googleapis.com/grpc-bazel-mirror/github.com/protocolbuffers/upb/archive/e4635f223e7d36dfbea3b722a4ca4807a7e882e2.tar.gz",
             "https://github.com/protocolbuffers/upb/archive/e4635f223e7d36dfbea3b722a4ca4807a7e882e2.tar.gz",
+        ],
+        patch_args = ["-p1"],
+        patches = [
+            "@psi//bazel:patches/upb.patch",
         ],
     )
 
@@ -133,15 +137,15 @@ def _com_github_intel_ipp():
     maybe(
         http_archive,
         name = "com_github_intel_ipp",
-        sha256 = "1ecfa70328221748ceb694debffa0106b92e0f9bf6a484f8e8512c2730c7d730",
-        strip_prefix = "ipp-crypto-ippcp_2021.8",
+        sha256 = "d70f42832337775edb022ca8ac1ac418f272e791ec147778ef7942aede414cdc",
+        strip_prefix = "cryptography-primitives-ippcp_2021.8",
         build_file = "@psi//bazel:ipp.BUILD",
         patch_args = ["-p1"],
         patches = [
             "@psi//bazel:patches/ippcp.patch",
         ],
         urls = [
-            "https://github.com/intel/ipp-crypto/archive/refs/tags/ippcp_2021.8.tar.gz",
+            "https://github.com/intel/cryptography-primitives/archive/refs/tags/ippcp_2021.8.tar.gz",
         ],
     )
 
@@ -335,10 +339,10 @@ def _org_apache_thrift():
         http_archive,
         name = "org_apache_thrift",
         build_file = "@psi//bazel:thrift.BUILD",
-        sha256 = "6428911db505702c51f7d993155a4a4c8afee83fdd021b52f2eccd8d34780629",
-        strip_prefix = "thrift-0.19.0",
+        sha256 = "31e46de96a7b36b8b8a457cecd2ee8266f81a83f8e238a9d324d8c6f42a717bc",
+        strip_prefix = "thrift-0.21.0",
         urls = [
-            "https://github.com/apache/thrift/archive/v0.19.0.tar.gz",
+            "https://github.com/apache/thrift/archive/v0.21.0.tar.gz",
         ],
     )
 
@@ -473,10 +477,10 @@ def _com_github_open_source_parsers_jsoncpp():
         http_archive,
         name = "com_github_open_source_parsers_jsoncpp",
         build_file = "@psi//bazel:jsoncpp.BUILD",
-        strip_prefix = "jsoncpp-1.9.5",
-        sha256 = "f409856e5920c18d0c2fb85276e24ee607d2a09b5e7d5f0a371368903c275da2",
+        strip_prefix = "jsoncpp-1.9.6",
+        sha256 = "f93b6dd7ce796b13d02c108bc9f79812245a82e577581c4c9aabe57075c90ea2",
         type = ".tar.gz",
         urls = [
-            "https://github.com/open-source-parsers/jsoncpp/archive/refs/tags/1.9.5.tar.gz",
+            "https://github.com/open-source-parsers/jsoncpp/archive/refs/tags/1.9.6.tar.gz",
         ],
     )

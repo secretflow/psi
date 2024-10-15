@@ -217,7 +217,7 @@ class DenseMtx {
   // returns a refernce to the given bit.
   BitReference operator()(uint64_t row, uint64_t col) const {
     YACL_ENFORCE(row < rows());
-    YACL_ENFORCE(col < cols());
+    YACL_ENFORCE(col < cols(), "col: {}, cols(): {}", col, cols());
 
     return BitReference((uint8_t*)&data_mtx_(col, 0), row);
   }

@@ -20,13 +20,14 @@
 #include "psi/legacy/bucket_psi.h"
 #include "psi/rr22/common.h"
 #include "psi/rr22/rr22_psi.h"
+#include "psi/rr22/rr22_utils.h"
 #include "psi/trace_categories.h"
 #include "psi/utils/bucket.h"
 #include "psi/utils/sync.h"
 
 namespace psi::rr22 {
 
-Rr22PsiSender::Rr22PsiSender(const v2::PsiConfig &config,
+Rr22PsiSender::Rr22PsiSender(const v2::PsiConfig& config,
                              std::shared_ptr<yacl::link::Context> lctx)
     : AbstractPsiSender(config, std::move(lctx)) {}
 
@@ -115,11 +116,19 @@ void Rr22PsiSender::Online() {
     if (!bucket_items_list.has_value()) {
       continue;
     }
-
-    auto run_f = std::async([&] {
-      [[maybe_unused]] std::vector<size_t> items_size =
-          AllGatherItemsSize(lctx_, bucket_items_list->size());
-
+    std::mt19937 g(yacl::crypto::SecureRandU64());
+    std::shuffle(bucket_items_list->begin(), bucket_items_list->end(), g);
+    size_t mask_size = sizeof(uint128_t);
+    size_t receiver_size;
+    auto run_f = std::async([&]() -> std::vector<uint128_t> {
+      // Gather Items Size and get mask size
+      auto sender_size = bucket_items_list->size();
+      std::tie(mask_size, receiver_size) =
+          ExchangeTruncateSize(lctx_, bucket_items_list->size(), rr22_options);
+      if ((sender_size == 0) || (receiver_size == 0)) {
+        return {};
+      }
+      // cal item hash
       std::vector<uint128_t> items_hash(bucket_items_list->size());
       yacl::parallel_for(0, bucket_items_list->size(),
                          [&](int64_t begin, int64_t end) {
@@ -129,15 +138,25 @@ void Rr22PsiSender::Online() {
                            }
                          });
 
-      Rr22PsiSenderInternal(rr22_options, lctx_, items_hash);
+      auto receiver_hash_size = std::max(sender_size, receiver_size);
+      // oprfs
+      return Rr22PsiSenderOprfs(rr22_options, lctx_, items_hash,
+                                receiver_hash_size);
     });
 
-    SyncWait(lctx_, &run_f);
+    auto self_oprfs = SyncWait(lctx_, &run_f);
 
     auto write_bucket_res_f = std::async([&] {
-      HandleBucketResultBySender(config_.protocol_config().broadcast_result(),
-                                 lctx_, *bucket_items_list,
-                                 intersection_indices_writer_.get());
+      SPDLOG_INFO("get intersection begin");
+      std::vector<uint32_t> indices =
+          GetIntersectionSender(std::move(self_oprfs), lctx_, mask_size,
+                                config_.protocol_config().broadcast_result());
+      SPDLOG_INFO("get intersection end");
+      for (const auto& idx : indices) {
+        intersection_indices_writer_->WriteCache(
+            bucket_items_list->at(idx).index);
+      }
+      intersection_indices_writer_->Commit();
     });
 
     SyncWait(lctx_, &write_bucket_res_f);

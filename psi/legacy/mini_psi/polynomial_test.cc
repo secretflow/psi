@@ -52,7 +52,9 @@ TEST_P(PolynomialBnTest, Works) {
   yacl::crypto::Prg<uint64_t> prg1(rd());
   yacl::crypto::Prg<uint64_t> prg2(rd());
 
-  std::string prime_data = absl::HexStringToBytes(kPrimeOver256bHexStr);
+  std::string prime_data;
+
+  EXPECT_TRUE(absl::HexStringToBytes(kPrimeOver256bHexStr, &prime_data));
 
   for (uint64_t i = 0; i < polynomial_order; ++i) {
     poly_x[i].resize(kBnByteSize);

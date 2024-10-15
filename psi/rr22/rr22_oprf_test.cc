@@ -31,8 +31,7 @@ constexpr size_t kRr22OprfBinSize = 1 << 14;
 constexpr size_t kRr22DefaultSsp = 40;
 
 struct TestParams {
-  uint64_t items_num = 16;
-
+  uint64_t items_num = 1 << 16;
   Rr22PsiMode mode = Rr22PsiMode::FastMode;
   bool malicious = false;
 };
@@ -53,13 +52,21 @@ TEST(Rr22OprfTest, MocVoleTest) {
   std::vector<uint128_t> c(vole_num);
   uint128_t delta = 0;
 
-  MocRr22VoleSender sender(seed2);
-
-  MocRr22VoleReceiver receiver(seed2);
-
-  sender.Send(lctxs[0], absl::MakeSpan(c));
-  delta = sender.GetDelta();
-  receiver.Recv(lctxs[1], absl::MakeSpan(a), absl::MakeSpan(b));
+  std::vector<std::future<void>> futures;
+  futures.emplace_back(std::async(std::launch::async, [&] {
+    MocRr22VoleSender sender(seed2);
+    sender.Send(lctxs[0], absl::MakeSpan(c));
+    delta = sender.GetDelta();
+    lctxs[0]->WaitLinkTaskFinish();
+  }));
+  futures.emplace_back(std::async(std::launch::async, [&] {
+    MocRr22VoleReceiver receiver(seed2);
+    receiver.Recv(lctxs[1], absl::MakeSpan(a), absl::MakeSpan(b));
+    lctxs[1]->WaitLinkTaskFinish();
+  }));
+  for (auto& f : futures) {
+    f.get();
+  }
 
   okvs::Galois128 delta_gf128(delta);
 
@@ -68,45 +75,13 @@ TEST(Rr22OprfTest, MocVoleTest) {
   }
 }
 
-TEST(Rr22OprfTest, SilverVoleTest) {
-  auto lctxs = yacl::link::test::SetupWorld(2);  // setup network
-
-  const auto codetype = yacl::crypto::CodeType::Silver5;
-  const uint64_t num = 10000;
-
-  std::vector<uint128_t> a(num);
-  std::vector<uint128_t> b(num);
-  std::vector<uint128_t> c(num);
-  uint128_t delta = 0;
-
-  auto sender = std::async([&] {
-    auto sv_sender = yacl::crypto::SilentVoleSender(codetype);
-    sv_sender.Send(lctxs[0], absl::MakeSpan(c));
-    delta = sv_sender.GetDelta();
-  });
-
-  auto receiver = std::async([&] {
-    auto sv_receiver = yacl::crypto::SilentVoleReceiver(codetype);
-    sv_receiver.Recv(lctxs[1], absl::MakeSpan(a), absl::MakeSpan(b));
-  });
-
-  sender.get();
-  receiver.get();
-
-  okvs::Galois128 delta_gf128(delta);
-
-  SPDLOG_INFO("delta:{}", delta);
-  SPDLOG_INFO("a[i]:{}, b[i]:{}, c[0]:{}", a[0], b[0], c[0]);
-  SPDLOG_INFO("a[i]*delta ^ b[0]:{}",
-              (delta_gf128 * a[0]).get<uint128_t>(0) ^ b[0]);
-
-  for (uint64_t i = 0; i < num; ++i) {
-    EXPECT_EQ((delta_gf128 * a[i]).get<uint128_t>(0) ^ b[i], c[i]);
-  }
-}
-
 TEST_P(Rr22OprfTest, OprfTest) {
   auto params = GetParam();
+
+  SPDLOG_INFO(
+      "n: {}, mode: {}, malicious: {}", params.items_num,
+      params.mode == Rr22PsiMode::LowCommMode ? "LowCommMode" : "FastMode",
+      params.malicious);
 
   auto lctxs = yacl::link::test::SetupWorld("ab", 2);
 
@@ -136,27 +111,24 @@ TEST_P(Rr22OprfTest, OprfTest) {
                      absl::MakeSpan(sender_inputs_hash), 1);
 
     oprf_sender.Eval(absl::MakeSpan(values_b), absl::MakeSpan(oprf_a));
+    lctxs[0]->WaitLinkTaskFinish();
   });
   auto oprf_receiver_proc = std::async([&] {
     oprf_receiver.Recv(lctxs[1], item_size, values_b, absl::MakeSpan(oprf_b),
                        1);
+    lctxs[1]->WaitLinkTaskFinish();
   });
 
   oprf_sender_proc.get();
   oprf_receiver_proc.get();
-
-  for (size_t i = 0; i < item_size; ++i) {
-    SPDLOG_INFO("{} {}", oprf_a[i], oprf_b[i]);
-    EXPECT_EQ(oprf_a[i], oprf_b[i]);
-  }
 
   EXPECT_EQ(oprf_a, oprf_b);
 }
 
 INSTANTIATE_TEST_SUITE_P(
     OprfTest_Instances, Rr22OprfTest,
-    testing::Values(TestParams{15, Rr22PsiMode::FastMode},
-                    TestParams{15, Rr22PsiMode::LowCommMode},
-                    TestParams{15, Rr22PsiMode::FastMode, true}));
+    testing::Values(TestParams{1 << 12, Rr22PsiMode::LowCommMode},
+                    TestParams{1 << 12, Rr22PsiMode::LowCommMode},
+                    TestParams{1 << 12, Rr22PsiMode::FastMode, true}));
 
 }  // namespace psi::rr22

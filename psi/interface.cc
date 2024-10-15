@@ -14,8 +14,6 @@
 
 #include "psi/interface.h"
 
-#include <spdlog/spdlog.h>
-
 #include <cassert>
 #include <cstddef>
 #include <filesystem>
@@ -25,6 +23,7 @@
 #include "boost/uuid/uuid_generators.hpp"
 #include "boost/uuid/uuid_io.hpp"
 #include "google/protobuf/util/message_differencer.h"
+#include "spdlog/spdlog.h"
 #include "yacl/base/exception.h"
 #include "yacl/link/link.h"
 

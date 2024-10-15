@@ -18,9 +18,11 @@
 #include <memory>
 #include <string>
 
+#include "arrow/api.h"
 #include "yacl/io/rw/reader.h"
 #include "yacl/io/rw/writer.h"
 #include "yacl/io/stream/interface.h"
+
 namespace psi::io {
 
 using Schema = yacl::io::Schema;
@@ -102,5 +104,8 @@ std::unique_ptr<Writer> BuildWriter(const std::any& io_options,
 std::unique_ptr<InputStream> BuildInputStream(const std::any& io_options);
 // !!! PLS manually call Close before release OutputStream !!!
 std::unique_ptr<OutputStream> BuildOutputStream(const std::any& io_options);
+
+std::shared_ptr<arrow::io::FileOutputStream> GetArrowOutputStream(
+    const std::string& filename, bool append = false);
 
 }  // namespace psi::io

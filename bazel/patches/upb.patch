@@ -1,0 +1,29 @@
+diff --git a/bazel/build_defs.bzl b/bazel/build_defs.bzl
+index b5bc64f0..dc30a75f 100644
+--- a/bazel/build_defs.bzl
++++ b/bazel/build_defs.bzl
+@@ -38,7 +38,7 @@ _DEFAULT_CPPOPTS.extend([
+     "-Wno-long-long",
+ ])
+ _DEFAULT_COPTS.extend([
+-    "-std=c99",
++    "-std=c11",
+     "-pedantic",
+     "-Werror=pedantic",
+     "-Wall",
+diff --git a/upb/port_def.inc b/upb/port_def.inc
+index 92e4bf24..e355ace7 100644
+--- a/upb/port_def.inc
++++ b/upb/port_def.inc
+@@ -92,7 +92,11 @@
+ #define UPB_ALIGN_UP(size, align) (((size) + (align) - 1) / (align) * (align))
+ #define UPB_ALIGN_DOWN(size, align) ((size) / (align) * (align))
+ #define UPB_ALIGN_MALLOC(size) UPB_ALIGN_UP(size, UPB_MALLOC_ALIGN)
++#ifdef __clang__
++#define UPB_ALIGN_OF(type) _Alignof(type)
++#else
+ #define UPB_ALIGN_OF(type) offsetof (struct { char c; type member; }, member)
++#endif
+
+ /* Hints to the compiler about likely/unlikely branches. */
+ #if defined (__GNUC__) || defined(__clang__)

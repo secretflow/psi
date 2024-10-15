@@ -17,14 +17,13 @@
 #include <algorithm>
 #include <future>
 
-#include "fmt/format.h"
 #include "spdlog/spdlog.h"
 #include "yacl/base/buffer.h"
 #include "yacl/base/byte_container_view.h"
 #include "yacl/crypto/rand/rand.h"
 #include "yacl/crypto/tools/prg.h"
 #include "yacl/crypto/tools/ro.h"
-#include "yacl/math/f2k/f2k.h"
+#include "yacl/math/galois_field/gf_intrinsic.h"
 #include "yacl/utils/parallel.h"
 
 #include "psi/rr22/davis_meyer_hash.h"
@@ -169,6 +168,7 @@ void Rr22OprfSender::SendFast(const std::shared_ptr<yacl::link::Context>& lctx,
   yacl::crypto::SilentVoleSender vole_sender(code_type_, malicious_);
 
   b_ = yacl::Buffer(std::max<size_t>(256, baxos_.size()) * sizeof(uint128_t));
+  std::memset(b_.data(), 0, b_.size());
   absl::Span<uint128_t> b128_span =
       absl::MakeSpan(reinterpret_cast<uint128_t*>(b_.data()),
                      std::max<size_t>(256, baxos_.size()));
@@ -198,6 +198,7 @@ void Rr22OprfSender::SendFast(const std::shared_ptr<yacl::link::Context>& lctx,
   SPDLOG_INFO("recv paxos solve ...");
 
   yacl::Buffer paxos_solve_buffer(paxos_size_ * sizeof(uint128_t));
+  std::memset(paxos_solve_buffer.data(), 0, paxos_solve_buffer.size());
   absl::Span<uint128_t> paxos_solve_vec =
       absl::MakeSpan((uint128_t*)paxos_solve_buffer.data(), paxos_size_);
 
@@ -251,7 +252,7 @@ void Rr22OprfSender::SendLowComm(
   std::memcpy(&paxos_seed, paxos_seed_buf.data(), paxos_seed_buf.size());
 
   paxos_.Init(paxos_init_size, kPaxosWeight, ssp_,
-              okvs::PaxosParam::DenseType::GF128, paxos_seed);
+              okvs::PaxosParam::DenseType::Binary, paxos_seed);
 
   paxos_size_ = paxos_.size();
 
@@ -260,6 +261,7 @@ void Rr22OprfSender::SendLowComm(
   yacl::crypto::SilentVoleSender vole_sender(code_type_);
 
   b_ = yacl::Buffer(std::max<size_t>(256, paxos_.size()) * sizeof(uint128_t));
+  std::memset(b_.data(), 0, b_.size());
   absl::Span<uint128_t> b128_span =
       absl::MakeSpan(reinterpret_cast<uint128_t*>(b_.data()),
                      std::max<size_t>(256, paxos_.size()));
@@ -289,6 +291,7 @@ void Rr22OprfSender::SendLowComm(
   okvs::Galois128 delta_gf128(delta_);
 
   for (size_t i = 0; i < paxos_solve_u64.size(); ++i) {
+    // Delta * (A - P), note that here is GF64 * GF128 = GF128
     b128_span[i] =
         b128_span[i] ^ (delta_gf128 * paxos_solve_u64[i]).get<uint128_t>(0);
   }
@@ -332,6 +335,7 @@ void Rr22OprfSender::Eval(absl::Span<const uint128_t> inputs,
       for (int64_t idx = begin; idx < end; ++idx) {
         uint64_t h =
             yacl::DecomposeUInt128(aes_crhash.Hash(inputs[idx])).second;
+        // delta_gf128 * h is GF128 * GF64
         outputs[idx] = outputs[idx] ^ (delta_gf128 * h).get<uint128_t>(0);
       }
     });
@@ -461,6 +465,8 @@ void Rr22OprfReceiver::RecvFast(
 
     a = yacl::Buffer(std::max<size_t>(256, paxos.size()) * sizeof(uint128_t));
     c = yacl::Buffer(std::max<size_t>(256, paxos.size()) * sizeof(uint128_t));
+    std::memset(a.data(), 0, a.size());
+    std::memset(c.data(), 0, c.size());
 
     a128_span = absl::MakeSpan(reinterpret_cast<uint128_t*>(a.data()),
                                std::max<size_t>(256, paxos.size()));
@@ -571,9 +577,10 @@ void Rr22OprfReceiver::RecvLowComm(
 
   lctx->SendAsyncThrottled(lctx->NextRank(), paxos_seed_buf,
                            fmt::format("send paxos_seed_buf"));
-
+  // here we must use DenseType::Binary for supporting EncodeU64, which
+  // should used in LowComm
   paxos.Init(paxos_init_size, kPaxosWeight, ssp_,
-             okvs::PaxosParam::DenseType::GF128, paxos_seed);
+             okvs::PaxosParam::DenseType::Binary, paxos_seed);
 
   paxos_size_ = paxos.size();
 
@@ -589,7 +596,9 @@ void Rr22OprfReceiver::RecvLowComm(
     yacl::crypto::SilentVoleReceiver vole_receiver(code_type_);
 
     a = yacl::Buffer(std::max<size_t>(256, paxos.size()) * sizeof(uint64_t));
+    memset(a.data(), 0, a.size());
     c = yacl::Buffer(std::max<size_t>(256, paxos.size()) * sizeof(uint128_t));
+    memset(c.data(), 0, c.size());
 
     a64_span = absl::MakeSpan(reinterpret_cast<uint64_t*>(a.data()),
                               std::max<size_t>(256, paxos.size()));
@@ -606,18 +615,34 @@ void Rr22OprfReceiver::RecvLowComm(
 
   okvs::AesCrHash aes_crhash(kAesHashSeed);
 
-  aes_crhash.Hash(absl::MakeSpan(inputs), outputs);
+  for (size_t i = 0; i < inputs.size(); ++i) {
+    outputs[i] = aes_crhash.Hash(inputs[i]);
+  }
 
-  yacl::Buffer p_buffer(paxos.size() * sizeof(uint128_t));
-  std::memset((uint8_t*)p_buffer.data(), 0, p_buffer.size());
+  // in LowComm version, we need to Hash the inputs to subfield, so we only need
+  // the low 64 bits
+  std::vector<uint64_t> outputs_u64(outputs.size(), 0);
+  for (size_t i = 0; i < outputs.size(); ++i) {
+    outputs_u64[i] = yacl::DecomposeUInt128(outputs[i]).second;
+  }
+  absl::Span<uint64_t> outputs_u64_span(outputs_u64);
 
-  absl::Span<uint128_t> p128_span((uint128_t*)p_buffer.data(), paxos.size());
-  absl::Span<uint64_t> p64_span((uint64_t*)p_buffer.data(), paxos.size());
+  // yacl::Buffer p_buffer(paxos.size() * sizeof(uint128_t));
+  // yacl::Buffer p_buffer(paxos.size() * sizeof(uint64_t));
+  // std::memset(p_buffer.data(), 0, p_buffer.size());
+
+  yacl::Buffer p64_buffer(paxos.size() * sizeof(uint64_t));
+  // yacl::Buffer p_buffer(paxos.size() * sizeof(uint64_t));
+  std::memset(p64_buffer.data(), 0, p64_buffer.size());
+
+  absl::Span<uint64_t> p64_span((uint64_t*)p64_buffer.data(), paxos.size());
+  // absl::Span<uint128_t> p128_span((uint128_t*)p_buffer.data(), paxos.size());
 
   SPDLOG_INFO("solve begin");
   paxos.SetInput(absl::MakeSpan(inputs));
+  SPDLOG_INFO("finished SetInput");
 
-  paxos.Encode(outputs, p128_span, nullptr);
+  paxos.EncodeU64(outputs_u64_span, p64_span, nullptr);
 
   SPDLOG_INFO("solve end");
 
@@ -627,7 +652,7 @@ void Rr22OprfReceiver::RecvLowComm(
     SPDLOG_INFO("begin receiver oprf");
     paxos.Decode(absl::MakeSpan(inputs), outputs,
                  absl::MakeSpan(c128_span.data(), paxos.size()));
-
+    // oprf end output
     aes_crhash.Hash(outputs, outputs);
     SPDLOG_INFO("end receiver oprf");
   });
@@ -635,7 +660,7 @@ void Rr22OprfReceiver::RecvLowComm(
   SPDLOG_INFO("begin p xor a");
 
   for (size_t i = 0; i < p64_span.size(); ++i) {
-    p64_span[i] = a64_span[i] ^ yacl::DecomposeUInt128(p128_span[i]).second;
+    p64_span[i] ^= a64_span[i];
   }
 
   SPDLOG_INFO("end p xor a");

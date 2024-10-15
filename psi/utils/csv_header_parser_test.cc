@@ -51,7 +51,9 @@ TEST(CsvHeaderParserTest, Works) {
                 std::vector<std::string>{"y1", "id2", "id2", "id1"}, 1),
             (std::vector<size_t>{3, 2, 2, 1}));
 
-  { std::filesystem::remove(csv_path); }
+  {
+    std::filesystem::remove(csv_path);
+  }
 }
 
 }  // namespace psi

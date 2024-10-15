@@ -25,60 +25,56 @@
 #include "apsi/responses.h"
 
 #include "psi/apsi_wrapper/utils/bucket.h"
+#include "psi/apsi_wrapper/utils/group_db.h"
 
 namespace psi::apsi_wrapper::api {
 
 class Sender {
  public:
-  Sender() = default;
+  struct Option {
+    std::string source_file;
+    std::string db_path;
+    size_t group_cnt = 1;
+    size_t num_buckets = 1;
+    uint32_t nonce_byte_count = 16;
+    bool compress = true;
+    std::string params_file;
+  };
+
+ public:
+  Sender(std::string db_path,
+         size_t thread_count = std::thread::hardware_concurrency())
+      : group_db_(db_path), thread_count_(thread_count) {}
+  Sender(Option option,
+         size_t thread_count = std::thread::hardware_concurrency())
+      : group_db_(option.source_file, option.db_path, option.group_cnt,
+                  option.num_buckets, option.nonce_byte_count,
+                  option.params_file, option.compress),
+        thread_count_(thread_count) {}
 
   void SetThreadCount(size_t threads);
 
-  // Step 1. - option a
-  bool LoadCsv(const std::string &csv_file_path,
-               const std::string &params_file_path, size_t nonce_byte_count,
-               bool compress);
-
-  // Step 1. - option b
-  bool LoadSenderDb(const std::string &sdb_file_path);
-
   // Save sender db as file.
-  bool SaveSenderDb(const std::string &sdb_file_path);
+  // Step 1
+  bool GenerateSenderDb();
 
   // Provide params to receiver if necessary.
   std::string GenerateParams();
 
   // Step 2.
   std::string RunOPRF(const std::string &oprf_request_str);
+  std::vector<std::string> RunOPRF(
+      const std::vector<std::string> &oprf_request_str);
 
   // Step 3.
   std::string RunQuery(const std::string &query_str);
-
-  // Below APIs are experimental at this moment.
-  // Step 1.
-  static bool SaveBucketizedSenderDb(const std::string &csv_file_path,
-                                     const std::string &params_file_path,
-                                     size_t nonce_byte_count, bool compress,
-                                     const std::string &parent_path,
-                                     size_t bucket_cnt);
-
-  // Step 2.
-  void LoadBucketizedSenderDb(const std::string &parent_path,
-                              size_t bucket_cnt);
-
-  // Step 3. & Step 4.
-  // Reuse LoadSenderDb and SaveSenderDb.
+  std::vector<std::string> RunQuery(const std::vector<std::string> &query_str);
 
  private:
-  void LoadBucket();
+  GroupDBItem::BucketDBItem GetDefaultDB();
 
-  void SetBucketIdx(size_t idx);
-
-  std::shared_ptr<::apsi::sender::SenderDB> sender_db_;
-
-  ::apsi::oprf::OPRFKey oprf_key_;
-
-  std::shared_ptr<BucketSenderDbSwitcher> bucket_switcher_;
+  GroupDB group_db_;
+  size_t thread_count_ = 1;
 };
 
 }  // namespace psi::apsi_wrapper::api

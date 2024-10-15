@@ -12,9 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@rules_proto//proto:defs.bzl", "proto_library")
 load("//bazel:psi.bzl", "psi_cc_library", "psi_cc_test")
 
 package(default_visibility = ["//visibility:public"])
+
+proto_library(
+    name = "group_db_status_proto",
+    srcs = ["group_db_status.proto"],
+)
+
+cc_proto_library(
+    name = "group_db_status_cc_proto",
+    deps = [":group_db_status_proto"],
+)
 
 psi_cc_library(
     name = "common",
@@ -52,6 +63,7 @@ psi_cc_library(
     hdrs = ["group_db.h"],
     deps = [
         ":csv_reader",
+        ":group_db_status_cc_proto",
         ":sender_db",
     ],
 )

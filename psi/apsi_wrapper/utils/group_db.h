@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <sys/types.h>
+
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -23,6 +25,8 @@
 #include <vector>
 
 #include "psi/apsi_wrapper/utils/sender_db.h"
+
+#include "psi/apsi_wrapper/utils/group_db_status.pb.h"
 
 namespace psi::apsi_wrapper {
 
@@ -36,7 +40,7 @@ class GroupDBItem {
 
   GroupDBItem(const std::string& source_file, const std::string& db_path,
               size_t group_idx, std::shared_ptr<::apsi::PSIParams> psi_params,
-              bool compress, size_t max_bucket_cnt);
+              uint32_t nonce_byte_count, bool compress, size_t max_bucket_cnt);
 
   GroupDBItem(const GroupDBItem&) = delete;
   GroupDBItem(GroupDBItem&&) = delete;
@@ -56,7 +60,7 @@ class GroupDBItem {
   std::shared_ptr<::apsi::PSIParams> psi_params_;
   bool complete_ = false;
   bool compress_ = false;
-  int32_t nonce_byte_count_ = 16;
+  int32_t nonce_byte_count_;
   size_t max_bucket_cnt_ = 0;
 
   std::unordered_map<size_t, size_t> bucket_offset_map_;
@@ -65,57 +69,23 @@ class GroupDBItem {
 
 class GroupDB {
  public:
-  static inline const std::string KGroupDBVersion = "sf_pir_group_db_001";
+  static inline const std::string KGroupDBVersion = "sf_pir_group_db.0.0.1";
 
   struct BucketIndex {
     size_t start_index;
     size_t cnt;
   };
 
-  enum class DBState : int32_t {
-    KNotExist = 0,
-    KBucketed = 1,
-    KGenerated = 2,
-  };
-
-  struct GroupDBStatus {
-    std::string version = KGroupDBVersion;
-    size_t group_cnt = 0;
-    size_t num_buckets = 0;
-    std::string params_file_content;
-    DBState status = DBState::KNotExist;
-
-    friend std::ostream& operator<<(std::ostream& os,
-                                    const GroupDBStatus& status) {
-      os << status.params_file_content << "\n";
-      os << static_cast<int>(status.status) << " ";
-      os << status.num_buckets << " ";
-      os << status.group_cnt << " ";
-      os << status.version << " ";
-
-      return os;
-    }
-
-    friend std::istream& operator>>(std::istream& is, GroupDBStatus& status) {
-      std::getline(is, status.params_file_content);
-      int32_t tmp;
-      is >> tmp;
-      status.status = static_cast<DBState>(tmp);
-      is >> status.num_buckets;
-      is >> status.group_cnt;
-      is >> status.version;
-
-      return is;
-    }
-  };
-
   GroupDB(const std::string& source_file, const std::string& db_path,
           std::size_t group_cnt, size_t num_buckets,
-          const std::string& params_file = "", bool compress = false);
+          uint32_t nonce_byte_count = 16, const std::string& params_file = "",
+          bool compress = false);
+
+  explicit GroupDB(const std::string& db_path);
 
   void DivideGroup();
 
-  size_t GetBucketNum() { return num_buckets_; }
+  size_t GetBucketNum() const { return num_buckets_; }
 
   std::string GetGroupSourceFile(size_t group_idx);
 
@@ -144,6 +114,7 @@ class GroupDB {
   std::string db_path_;
   size_t group_cnt_;
   size_t num_buckets_;
+  uint32_t nonce_byte_count_ = 16;
   std::string status_file_path_;
   MultiplexDiskCache disk_cache_;
   std::shared_ptr<::apsi::PSIParams> params_;
@@ -151,5 +122,7 @@ class GroupDB {
   std::unordered_map<size_t, std::shared_ptr<GroupDBItem>> group_map_;
   GroupDBStatus status_;
 };
+
+void GenerateGroupBucketDB(GroupDB& group_db, size_t process_num);
 
 }  // namespace psi::apsi_wrapper

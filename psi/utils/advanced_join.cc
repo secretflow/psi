@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <fstream>
 #include <future>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -34,6 +35,7 @@
 #include "yacl/base/exception.h"
 
 #include "psi/prelude.h"
+#include "psi/utils/io.h"
 #include "psi/utils/key.h"
 
 #include "psi/proto/psi_v2.pb.h"
@@ -44,6 +46,14 @@ constexpr char kAdvancedJoinKeyCount[] = "psi_advanced_join_cnt";
 constexpr char kAdvancedJoinFirstIndex[] = "psi_advanced_join_first_index";
 constexpr char kIntersectionLinkTag[] = "PSI:ADVANCED_JOIN_INTERSECTION_CNT";
 constexpr char kMetaLinkTag[] = "PSI:ADVANCED_JOIN_META";
+
+#define PSI_ARROW_GET_RESULT(value, maker)                                   \
+  do {                                                                       \
+    auto result = maker;                                                     \
+    YACL_ENFORCE(result.ok(), "Arrow result failed: {}, status: {}", #maker, \
+                 result.status().message());                                 \
+    value = std::move(*result);                                              \
+  } while (0)
 
 AdvancedJoinConfig BuildAdvancedJoinConfig(v2::PsiConfig::AdvancedJoinType type,
                                            v2::Role role, v2::Role left_side,
@@ -128,19 +138,23 @@ void AdvancedJoinPreprocess(AdvancedJoinConfig* config) {
 
   arrow::io::IOContext io_context = arrow::io::default_io_context();
   std::shared_ptr<arrow::io::ReadableFile> infile;
-  infile = arrow::io::ReadableFile::Open(config->sorted_input_path,
-                                         arrow::default_memory_pool())
-               .ValueOrDie();
+  PSI_ARROW_GET_RESULT(
+      infile, arrow::io::ReadableFile::Open(config->sorted_input_path,
+                                            arrow::default_memory_pool()));
+
   auto read_options = arrow::csv::ReadOptions::Defaults();
   auto parse_options = arrow::csv::ParseOptions::Defaults();
   auto convert_options = arrow::csv::ConvertOptions::Defaults();
 
   convert_options.include_columns = config->keys;
+  for (auto& key : config->keys) {
+    convert_options.column_types[key] = arrow::utf8();
+  }
 
-  auto reader =
-      arrow::csv::StreamingReader::Make(io_context, infile, read_options,
-                                        parse_options, convert_options)
-          .ValueOrDie();
+  std::shared_ptr<arrow::csv::StreamingReader> reader;
+  PSI_ARROW_GET_RESULT(reader, arrow::csv::StreamingReader::Make(
+                                   io_context, infile, read_options,
+                                   parse_options, convert_options));
 
   const std::shared_ptr<arrow::Schema>& input_schema = reader->schema();
 
@@ -173,14 +187,13 @@ void AdvancedJoinPreprocess(AdvancedJoinConfig* config) {
     file.close();
   }
   std::shared_ptr<arrow::io::FileOutputStream> outfile =
-      arrow::io::FileOutputStream::Open(config->unique_input_keys_cnt_path,
-                                        true)
-          .ValueOrDie();
+      io::GetArrowOutputStream(config->unique_input_keys_cnt_path, true);
   auto write_options = arrow::csv::WriteOptions::Defaults();
   write_options.include_header = false;
 
-  auto writer = arrow::csv::MakeCSVWriter(outfile, output_schema, write_options)
-                    .ValueOrDie();
+  std::shared_ptr<arrow::ipc::RecordBatchWriter> writer;
+  PSI_ARROW_GET_RESULT(
+      writer, arrow::csv::MakeCSVWriter(outfile, output_schema, write_options));
 
   std::shared_ptr<arrow::RecordBatch> batch;
   int64_t self_total_cnt = 0;
@@ -204,8 +217,9 @@ void AdvancedJoinPreprocess(AdvancedJoinConfig* config) {
     output_array_builders.reserve(output_fields.size());
 
     for (auto field : output_fields) {
-      output_array_builders.emplace_back(
-          arrow::MakeBuilder(field->type()).ValueOrDie());
+      std::unique_ptr<arrow::ArrayBuilder> builder;
+      PSI_ARROW_GET_RESULT(builder, arrow::MakeBuilder(field->type()));
+      output_array_builders.emplace_back(std::move(builder));
     }
 
     std::vector<std::shared_ptr<arrow::Array>> input_data = batch->columns();
@@ -216,7 +230,9 @@ void AdvancedJoinPreprocess(AdvancedJoinConfig* config) {
       std::vector<std::shared_ptr<arrow::Scalar>> current_keys;
       current_keys.reserve(input_data.size());
       for (int j = 0; j < num_cols; j++) {
-        current_keys.emplace_back(input_data[j]->GetScalar(i).ValueOrDie());
+        std::shared_ptr<arrow::Scalar> scalar;
+        PSI_ARROW_GET_RESULT(scalar, input_data[j]->GetScalar(i));
+        current_keys.emplace_back(scalar);
       }
 
       if (previous_keys.empty()) {
@@ -259,7 +275,9 @@ void AdvancedJoinPreprocess(AdvancedJoinConfig* config) {
     std::vector<std::shared_ptr<arrow::Array>> output_arrays;
     output_arrays.reserve(output_fields.size());
     for (auto& builder : output_array_builders) {
-      output_arrays.emplace_back(builder->Finish().ValueOrDie());
+      std::shared_ptr<arrow::Array> array;
+      PSI_ARROW_GET_RESULT(array, builder->Finish());
+      output_arrays.emplace_back(array);
     }
 
     if (output_arrays[0]->length() > 0) {
@@ -277,8 +295,9 @@ void AdvancedJoinPreprocess(AdvancedJoinConfig* config) {
   output_array_builders.reserve(output_fields.size());
 
   for (auto field : output_fields) {
-    output_array_builders.emplace_back(
-        arrow::MakeBuilder(field->type()).ValueOrDie());
+    std::unique_ptr<arrow::ArrayBuilder> builder;
+    PSI_ARROW_GET_RESULT(builder, arrow::MakeBuilder(field->type()));
+    output_array_builders.emplace_back(std::move(builder));
   }
   for (int p = 0; p < input_schema->num_fields(); p++) {
     YACL_ENFORCE(
@@ -295,7 +314,9 @@ void AdvancedJoinPreprocess(AdvancedJoinConfig* config) {
   std::vector<std::shared_ptr<arrow::Array>> output_arrays;
   output_arrays.reserve(output_fields.size());
   for (auto& builder : output_array_builders) {
-    output_arrays.emplace_back(builder->Finish().ValueOrDie());
+    std::shared_ptr<arrow::Array> array;
+    PSI_ARROW_GET_RESULT(array, builder->Finish());
+    output_arrays.emplace_back(array);
   }
 
   if (output_arrays[0]->length() > 0) {
@@ -327,9 +348,9 @@ void SendSelfCnt(const std::shared_ptr<yacl::link::Context>& link_ctx,
                config->self_intersection_cnt_path);
 
   std::shared_ptr<arrow::io::ReadableFile> infile;
-  infile = arrow::io::ReadableFile::Open(config->self_intersection_cnt_path,
-                                         arrow::default_memory_pool())
-               .ValueOrDie();
+  PSI_ARROW_GET_RESULT(
+      infile, arrow::io::ReadableFile::Open(config->self_intersection_cnt_path,
+                                            arrow::default_memory_pool()));
 
   auto read_options = arrow::csv::ReadOptions::Defaults();
   auto parse_options = arrow::csv::ParseOptions::Defaults();
@@ -339,10 +360,10 @@ void SendSelfCnt(const std::shared_ptr<yacl::link::Context>& link_ctx,
 
   arrow::io::IOContext io_context = arrow::io::default_io_context();
 
-  auto reader =
-      arrow::csv::StreamingReader::Make(io_context, infile, read_options,
-                                        parse_options, convert_options)
-          .ValueOrDie();
+  std::shared_ptr<arrow::csv::StreamingReader> reader;
+  PSI_ARROW_GET_RESULT(reader, arrow::csv::StreamingReader::Make(
+                                   io_context, infile, read_options,
+                                   parse_options, convert_options));
 
   std::shared_ptr<arrow::RecordBatch> batch;
 
@@ -377,11 +398,9 @@ void SendSelfCnt(const std::shared_ptr<yacl::link::Context>& link_ctx,
     } else {
       auto cnt_array =
           std::static_pointer_cast<arrow::Int64Array>(batch->column(0));
-
-      self_intersection_cnt += arrow::compute::Sum(batch->column(0))
-                                   .ValueOrDie()
-                                   .scalar_as<arrow::Int64Scalar>()
-                                   .value;
+      arrow::Datum sum;
+      PSI_ARROW_GET_RESULT(sum, arrow::compute::Sum(batch->column(0)));
+      self_intersection_cnt += sum.scalar_as<arrow::Int64Scalar>().value;
 
       std::shared_ptr<arrow::Buffer> buffer = cnt_array->values();
       link_ctx->SendAsync(
@@ -401,16 +420,16 @@ void RecvPeerCnt(const std::shared_ptr<yacl::link::Context>& link_ctx,
   YACL_ENFORCE(link_ctx->WorldSize() == 2);
 
   std::shared_ptr<arrow::io::FileOutputStream> outfile =
-      arrow::io::FileOutputStream::Open(config->peer_intersection_cnt_path)
-          .ValueOrDie();
+      io::GetArrowOutputStream(config->peer_intersection_cnt_path);
   auto write_options = arrow::csv::WriteOptions::Defaults();
   write_options.include_header = true;
 
   std::shared_ptr<arrow::Schema> schema =
       arrow::schema({arrow::field(kAdvancedJoinKeyCount, arrow::int64())});
 
-  auto writer =
-      arrow::csv::MakeCSVWriter(outfile, schema, write_options).ValueOrDie();
+  std::shared_ptr<arrow::ipc::RecordBatchWriter> writer;
+  PSI_ARROW_GET_RESULT(
+      writer, arrow::csv::MakeCSVWriter(outfile, schema, write_options));
 
   while (true) {
     yacl::Buffer buffer =
@@ -429,8 +448,8 @@ void RecvPeerCnt(const std::shared_ptr<yacl::link::Context>& link_ctx,
 
     int64_t* buffer_data = buffer.data<int64_t>();
 
-    std::shared_ptr<arrow::ArrayBuilder> builder =
-        arrow::MakeBuilder(arrow::int64()).ValueOrDie();
+    std::shared_ptr<arrow::ArrayBuilder> builder;
+    PSI_ARROW_GET_RESULT(builder, arrow::MakeBuilder(arrow::int64()));
 
     for (size_t i = 0; i < buffer_size / sizeof(int64_t); i++) {
       YACL_ENFORCE(
@@ -438,7 +457,9 @@ void RecvPeerCnt(const std::shared_ptr<yacl::link::Context>& link_ctx,
     }
 
     std::vector<std::shared_ptr<arrow::Array>> output_arrays;
-    output_arrays.emplace_back(builder->Finish().ValueOrDie());
+    std::shared_ptr<arrow::Array> array;
+    PSI_ARROW_GET_RESULT(array, builder->Finish());
+    output_arrays.emplace_back(array);
 
     if (output_arrays[0]->length() > 0) {
       std::shared_ptr<arrow::RecordBatch> output_batch =
@@ -505,10 +526,10 @@ std::vector<std::shared_ptr<arrow::Scalar>> ReadNextRecord(
   *read_batch_index = previous_read_batch_index + 1;
 
   for (const auto& col : cols) {
-    res.emplace_back((*batch)
-                         ->GetColumnByName(col)
-                         ->GetScalar(previous_read_batch_index)
-                         .ValueOrDie());
+    std::shared_ptr<arrow::Scalar> scalar;
+    PSI_ARROW_GET_RESULT(scalar, (*batch)->GetColumnByName(col)->GetScalar(
+                                     previous_read_batch_index));
+    res.emplace_back(scalar);
   }
 
   return res;
@@ -538,9 +559,11 @@ void GenerateOutputForSingleRecord(
   differ_array_builders.reserve(sorted_input_reader->schema()->num_fields());
 
   for (int i = 0; i < sorted_input_reader->schema()->num_fields(); i++) {
-    differ_array_builders.emplace_back(
-        arrow::MakeBuilder(sorted_input_reader->schema()->field(i)->type())
-            .ValueOrDie());
+    auto builder =
+        arrow::MakeBuilder(sorted_input_reader->schema()->field(i)->type());
+    YACL_ENFORCE(builder.ok(), "MakeBuilder: type: {} failed.",
+                 sorted_input_reader->schema()->field(i)->type()->name());
+    differ_array_builders.emplace_back(std::move(*builder));
   }
 
   // found target keys;
@@ -554,8 +577,11 @@ void GenerateOutputForSingleRecord(
       }
 
       if (*sorted_input_batch == NULL) {
-        YACL_THROW("sorted_input_reader reach the end.");
+        YACL_THROW("sorted_input_reader: schema {} reach the end.",
+                   sorted_input_reader->schema()->ToString());
       }
+
+      SPDLOG_INFO("read batch: rows: {}", (*sorted_input_batch)->num_rows());
 
       *read_batch_index = 0;
     }
@@ -565,18 +591,27 @@ void GenerateOutputForSingleRecord(
       std::vector<std::shared_ptr<arrow::Scalar>> current_keys;
       current_keys.reserve(key_col_names.size());
       for (const std::string& col_name : key_col_names) {
-        current_keys.emplace_back((*sorted_input_batch)
+        std::shared_ptr<arrow::Scalar> key;
+        PSI_ARROW_GET_RESULT(key, (*sorted_input_batch)
                                       ->GetColumnByName(col_name)
-                                      ->GetScalar(*read_batch_index)
-                                      .ValueOrDie());
+                                      ->GetScalar(*read_batch_index));
+        current_keys.emplace_back(key);
+        SPDLOG_DEBUG("index: {}, current_key: {}<{}>", *read_batch_index,
+                     key->ToString(), key->type->ToString());
       }
 
       bool equal = true;
       for (size_t i = 0; i < key_col_names.size(); i++) {
         if (!current_keys[i]->Equals(target_keys[i])) {
+          SPDLOG_DEBUG(
+              "index {} : target_keys[{}<{}>] != current_keys[{}<{}>]", i,
+              target_keys[i]->ToString(), target_keys[i]->type->ToString(),
+              current_keys[i]->ToString(), current_keys[i]->type->ToString());
           equal = false;
           break;
         }
+        SPDLOG_DEBUG("index {} : target_keys[{}] == current_keys[{}]", i,
+                     target_keys[i]->ToString(), current_keys[i]->ToString());
       }
 
       if (equal) {
@@ -586,12 +621,11 @@ void GenerateOutputForSingleRecord(
         if (write_difference) {
           for (int i = 0; i < sorted_input_reader->schema()->num_fields();
                i++) {
-            YACL_ENFORCE(differ_array_builders[i]
-                             ->AppendScalar(*((*sorted_input_batch)
-                                                  ->column(i)
-                                                  ->GetScalar(*read_batch_index)
-                                                  .ValueOrDie()))
-                             .ok());
+            std::shared_ptr<arrow::Scalar> scalar;
+            PSI_ARROW_GET_RESULT(
+                scalar,
+                (*sorted_input_batch)->column(i)->GetScalar(*read_batch_index));
+            YACL_ENFORCE(differ_array_builders[i]->AppendScalar(*scalar).ok());
           }
         }
       }
@@ -620,10 +654,11 @@ void GenerateOutputForSingleRecord(
       std::vector<std::shared_ptr<arrow::Scalar>> current_keys;
       current_keys.reserve(key_col_names.size());
       for (const std::string& col_name : key_col_names) {
-        current_keys.emplace_back((*sorted_input_batch)
+        std::shared_ptr<arrow::Scalar> key;
+        PSI_ARROW_GET_RESULT(key, (*sorted_input_batch)
                                       ->GetColumnByName(col_name)
-                                      ->GetScalar(*read_batch_index)
-                                      .ValueOrDie());
+                                      ->GetScalar(*read_batch_index));
+        current_keys.emplace_back(key);
       }
 
       bool equal = true;
@@ -638,10 +673,11 @@ void GenerateOutputForSingleRecord(
         if (write_intersection) {
           for (int i = 0; i < sorted_input_reader->schema()->num_fields();
                i++) {
-            output_scalars[i].emplace_back((*sorted_input_batch)
-                                               ->column(i)
-                                               ->GetScalar(*read_batch_index)
-                                               .ValueOrDie());
+            std::shared_ptr<arrow::Scalar> scalar;
+            PSI_ARROW_GET_RESULT(
+                scalar,
+                (*sorted_input_batch)->column(i)->GetScalar(*read_batch_index));
+            output_scalars[i].emplace_back(scalar);
           }
         }
       } else {
@@ -660,9 +696,14 @@ void GenerateOutputForSingleRecord(
     output_array_builders.reserve(sorted_input_reader->schema()->num_fields());
 
     for (int i = 0; i < sorted_input_reader->schema()->num_fields(); i++) {
-      output_array_builders.emplace_back(
-          arrow::MakeBuilder(sorted_input_reader->schema()->field(i)->type())
-              .ValueOrDie());
+      std::unique_ptr<arrow::ArrayBuilder> builder;
+      PSI_ARROW_GET_RESULT(
+          builder,
+          arrow::MakeBuilder(sorted_input_reader->schema()->field(i)->type()));
+      output_array_builders.emplace_back(std::move(builder));
+      SPDLOG_DEBUG("field: {}, name: {}, type:{}", i,
+                   sorted_input_reader->schema()->field(i)->name(),
+                   sorted_input_reader->schema()->field(i)->type()->ToString());
     }
 
     if (role == v2::ROLE_RECEIVER) {
@@ -683,7 +724,12 @@ void GenerateOutputForSingleRecord(
                k++) {
             YACL_ENFORCE(output_array_builders[k]
                              ->AppendScalar(*(output_scalars[k][j]))
-                             .ok());
+                             .ok(),
+                         "AppendScalar failed. k: {}, j: {}, scalar_type: {}, "
+                         "scalar: {}, builder: {}",
+                         k, j, output_scalars[k][j]->type->ToString(),
+                         output_scalars[k][j]->ToString(),
+                         output_array_builders[k]->type()->ToString());
           }
         }
       }
@@ -693,7 +739,9 @@ void GenerateOutputForSingleRecord(
     output_arrays.reserve(sorted_input_reader->schema()->num_fields());
 
     for (auto& builder : output_array_builders) {
-      output_arrays.emplace_back(builder->Finish().ValueOrDie());
+      std::shared_ptr<arrow::Array> array;
+      PSI_ARROW_GET_RESULT(array, builder->Finish());
+      output_arrays.emplace_back(array);
     }
 
     if (output_arrays[0]->length() > 0) {
@@ -712,7 +760,9 @@ void GenerateOutputForSingleRecord(
     differ_arrays.reserve(sorted_input_reader->schema()->num_fields());
 
     for (auto& builder : differ_array_builders) {
-      differ_arrays.emplace_back(builder->Finish().ValueOrDie());
+      std::shared_ptr<arrow::Array> array;
+      PSI_ARROW_GET_RESULT(array, builder->Finish());
+      differ_arrays.emplace_back(array);
     }
 
     if (differ_arrays[0]->length() > 0) {
@@ -741,17 +791,18 @@ void AppendDifferenceToOutput(
 
   arrow::io::IOContext io_context = arrow::io::default_io_context();
   std::shared_ptr<arrow::io::ReadableFile> infile;
-  infile = arrow::io::ReadableFile::Open(config.difference_output_path,
-                                         arrow::default_memory_pool())
-               .ValueOrDie();
+  PSI_ARROW_GET_RESULT(
+      infile, arrow::io::ReadableFile::Open(config.difference_output_path,
+                                            arrow::default_memory_pool()));
+
   auto read_options = arrow::csv::ReadOptions::Defaults();
   auto parse_options = arrow::csv::ParseOptions::Defaults();
   auto convert_options = arrow::csv::ConvertOptions::Defaults();
 
-  auto reader =
-      arrow::csv::StreamingReader::Make(io_context, infile, read_options,
-                                        parse_options, convert_options)
-          .ValueOrDie();
+  std::shared_ptr<arrow::csv::StreamingReader> reader;
+  PSI_ARROW_GET_RESULT(reader, arrow::csv::StreamingReader::Make(
+                                   io_context, infile, read_options,
+                                   parse_options, convert_options));
 
   std::shared_ptr<arrow::RecordBatch> batch;
   while (true) {
@@ -782,10 +833,12 @@ void AppendAlignedNullToOutput(
   std::vector<std::shared_ptr<arrow::Array>> output_arrays;
   output_arrays.reserve(schema->num_fields());
   for (int i = 0; i < schema->num_fields(); i++) {
-    std::unique_ptr<arrow::ArrayBuilder> builder =
-        arrow::MakeBuilder(schema->field(i)->type()).ValueOrDie();
+    std::unique_ptr<arrow::ArrayBuilder> builder;
+    PSI_ARROW_GET_RESULT(builder, arrow::MakeBuilder(schema->field(i)->type()));
     YACL_ENFORCE(builder->AppendNulls(config.peer_difference_cnt).ok());
-    output_arrays.emplace_back(builder->Finish().ValueOrDie());
+    std::shared_ptr<arrow::Array> array;
+    PSI_ARROW_GET_RESULT(array, builder->Finish());
+    output_arrays.emplace_back(array);
   }
 
   std::shared_ptr<arrow::RecordBatch> output_batch = arrow::RecordBatch::Make(
@@ -815,20 +868,16 @@ void AdvancedJoinGenerateResult(const AdvancedJoinConfig& config) {
   SPDLOG_INFO("config.output_path = {}", config.output_path);
 
   std::shared_ptr<arrow::io::ReadableFile> self_intersection_cnt_infile;
-  self_intersection_cnt_infile =
+  PSI_ARROW_GET_RESULT(
+      self_intersection_cnt_infile,
       arrow::io::ReadableFile::Open(config.self_intersection_cnt_path,
-                                    arrow::default_memory_pool())
-          .ValueOrDie();
+                                    arrow::default_memory_pool()));
+
   std::shared_ptr<arrow::io::ReadableFile> peer_intersection_cnt_infile;
-  peer_intersection_cnt_infile =
+  PSI_ARROW_GET_RESULT(
+      peer_intersection_cnt_infile,
       arrow::io::ReadableFile::Open(config.peer_intersection_cnt_path,
-                                    arrow::default_memory_pool())
-          .ValueOrDie();
-  std::shared_ptr<arrow::io::ReadableFile> sorted_input_infile;
-  sorted_input_infile =
-      arrow::io::ReadableFile::Open(config.sorted_input_path,
-                                    arrow::default_memory_pool())
-          .ValueOrDie();
+                                    arrow::default_memory_pool()));
 
   auto read_options = arrow::csv::ReadOptions::Defaults();
   auto parse_options = arrow::csv::ParseOptions::Defaults();
@@ -837,57 +886,85 @@ void AdvancedJoinGenerateResult(const AdvancedJoinConfig& config) {
 
   std::vector<std::string> keys = config.keys;
   keys.emplace_back(kAdvancedJoinKeyCount);
+  self_intersection_cnt_convert_options.column_types[kAdvancedJoinKeyCount] =
+      arrow::int64();
   self_intersection_cnt_convert_options.include_columns = keys;
+  for (const auto& key : config.keys) {
+    self_intersection_cnt_convert_options.column_types[key] = arrow::utf8();
+  }
+
+  std::shared_ptr<arrow::csv::StreamingReader> self_intersection_cnt_reader;
+  PSI_ARROW_GET_RESULT(
+      self_intersection_cnt_reader,
+      arrow::csv::StreamingReader::Make(
+          arrow::io::default_io_context(), self_intersection_cnt_infile,
+          read_options, parse_options, self_intersection_cnt_convert_options));
+
   auto peer_intersection_cnt_convert_options =
       arrow::csv::ConvertOptions::Defaults();
   peer_intersection_cnt_convert_options.include_columns =
       std::vector<std::string>{kAdvancedJoinKeyCount};
+  peer_intersection_cnt_convert_options.column_types[kAdvancedJoinKeyCount] =
+      arrow::int64();
+  std::shared_ptr<arrow::csv::StreamingReader> peer_intersection_cnt_reader;
+  PSI_ARROW_GET_RESULT(
+      peer_intersection_cnt_reader,
+      arrow::csv::StreamingReader::Make(
+          arrow::io::default_io_context(), peer_intersection_cnt_infile,
+          read_options, parse_options, peer_intersection_cnt_convert_options));
+
   auto sorted_input_convert_options = arrow::csv::ConvertOptions::Defaults();
+  {
+    std::shared_ptr<arrow::io::ReadableFile> sorted_input_infile;
+    PSI_ARROW_GET_RESULT(
+        sorted_input_infile,
+        arrow::io::ReadableFile::Open(config.sorted_input_path,
+                                      arrow::default_memory_pool()));
+    std::shared_ptr<arrow::csv::StreamingReader> sorted_input_reader;
+    PSI_ARROW_GET_RESULT(
+        sorted_input_reader,
+        arrow::csv::StreamingReader::Make(
+            arrow::io::default_io_context(), sorted_input_infile, read_options,
+            parse_options, sorted_input_convert_options));
 
-  arrow::io::IOContext self_intersection_cnt_io_context =
-      arrow::io::default_io_context();
-  arrow::io::IOContext peer_intersection_cnt_io_context =
-      arrow::io::default_io_context();
-  arrow::io::IOContext sorted_input_io_context =
-      arrow::io::default_io_context();
-
-  auto self_intersection_cnt_reader =
+    for (const auto& field : sorted_input_reader->schema()->fields()) {
+      sorted_input_convert_options.column_types[field->name()] = arrow::utf8();
+    }
+  }
+  std::shared_ptr<arrow::io::ReadableFile> sorted_input_infile;
+  PSI_ARROW_GET_RESULT(sorted_input_infile, arrow::io::ReadableFile::Open(
+                                                config.sorted_input_path,
+                                                arrow::default_memory_pool()));
+  std::shared_ptr<arrow::csv::StreamingReader> sorted_input_reader;
+  PSI_ARROW_GET_RESULT(
+      sorted_input_reader,
       arrow::csv::StreamingReader::Make(
-          self_intersection_cnt_io_context, self_intersection_cnt_infile,
-          read_options, parse_options, self_intersection_cnt_convert_options)
-          .ValueOrDie();
-  auto peer_intersection_cnt_reader =
-      arrow::csv::StreamingReader::Make(
-          peer_intersection_cnt_io_context, peer_intersection_cnt_infile,
-          read_options, parse_options, peer_intersection_cnt_convert_options)
-          .ValueOrDie();
-  auto sorted_input_reader =
-      arrow::csv::StreamingReader::Make(
-          sorted_input_io_context, sorted_input_infile, read_options,
-          parse_options, sorted_input_convert_options)
-          .ValueOrDie();
+          arrow::io::default_io_context(), sorted_input_infile, read_options,
+          parse_options, sorted_input_convert_options));
 
   std::shared_ptr<arrow::RecordBatch> self_intersection_cnt_batch;
   std::shared_ptr<arrow::RecordBatch> peer_intersection_cnt_batch;
   std::shared_ptr<arrow::RecordBatch> sorted_input_batch;
 
   std::shared_ptr<arrow::io::FileOutputStream> outfile =
-      arrow::io::FileOutputStream::Open(config.output_path).ValueOrDie();
+      io::GetArrowOutputStream(config.output_path);
   auto write_options = arrow::csv::WriteOptions::Defaults();
   write_options.include_header = true;
+  write_options.quoting_style = arrow::csv::QuotingStyle::None;
   write_options.null_string = "NA";
 
-  auto writer = arrow::csv::MakeCSVWriter(
-                    outfile, sorted_input_reader->schema(), write_options)
-                    .ValueOrDie();
+  std::shared_ptr<arrow::ipc::RecordBatchWriter> writer;
+  PSI_ARROW_GET_RESULT(
+      writer, arrow::csv::MakeCSVWriter(outfile, sorted_input_reader->schema(),
+                                        write_options));
 
   std::shared_ptr<arrow::io::FileOutputStream> diff_outfile =
-      arrow::io::FileOutputStream::Open(config.difference_output_path)
-          .ValueOrDie();
-  auto diff_writer =
+      io::GetArrowOutputStream(config.difference_output_path);
+  std::shared_ptr<arrow::ipc::RecordBatchWriter> diff_writer;
+  PSI_ARROW_GET_RESULT(
+      diff_writer,
       arrow::csv::MakeCSVWriter(diff_outfile, sorted_input_reader->schema(),
-                                write_options)
-          .ValueOrDie();
+                                write_options));
 
   int64_t input_batch_index = 0;
   int64_t peer_cnt_batch_index = 0;
@@ -920,8 +997,10 @@ void AdvancedJoinGenerateResult(const AdvancedJoinConfig& config) {
       std::vector<std::shared_ptr<arrow::Scalar>> current_keys;
       current_keys.reserve(config.keys.size());
       for (size_t j = 0; j < config.keys.size(); j++) {
-        current_keys.emplace_back(
-            self_intersection_cnt_data[j]->GetScalar(i).ValueOrDie());
+        std::shared_ptr<arrow::Scalar> scalar;
+        PSI_ARROW_GET_RESULT(scalar,
+                             self_intersection_cnt_data[j]->GetScalar(i));
+        current_keys.emplace_back(scalar);
       }
 
       int64_t current_self_count = self_count_array->Value(i);

@@ -17,69 +17,91 @@
 #include "absl/strings/escaping.h"
 #include "gtest/gtest.h"
 #include "spdlog/spdlog.h"
+#include "yacl/crypto/rand/rand.h"
 #include "yacl/crypto/tools/prg.h"
 
 namespace psi::rr22::okvs {
 
-TEST(PaxosTest, SolveTest) {
-  for (auto dt :
-       {PaxosParam::DenseType::Binary, PaxosParam::DenseType::GF128}) {
+TEST(PaxosTest, SolveU64Test) {
+  for (auto dt : {PaxosParam::DenseType::Binary}) {
     SPDLOG_INFO("=== dt:{}",
                 dt == PaxosParam::DenseType::Binary ? "binary" : "gf128");
 
-    [[maybe_unused]] uint64_t n = 15;
+    [[maybe_unused]] uint64_t n = 1 << 12;
 
     [[maybe_unused]] uint64_t w = 3;
     [[maybe_unused]] uint64_t s = 0;
     uint64_t t = 1;
 
     for (uint64_t tt = 0; tt < t; ++tt) {
-      SPDLOG_INFO("=== tt:{} t:{}", tt, t);
-      Paxos<uint16_t> paxos;
-      Paxos<uint32_t> px2;
+      // SPDLOG_INFO("=== tt:{} t:{}", tt, t);
+      Paxos<uint32_t> paxos;
 
-      paxos.Init(n, w, 40, dt, yacl::MakeUint128(0, 0));
-      px2.Init(n, w, 40, dt, yacl::MakeUint128(0, 0));
+      [[maybe_unused]] uint128_t paxos_seed = yacl::crypto::SecureRandU128();
+      SPDLOG_INFO("paxos_seed: {}", paxos_seed);
+
+      paxos.Init(n, w, 40, dt, paxos_seed);
+
+      std::vector<uint128_t> items(n);
+      std::vector<uint64_t> values(n);
+      std::vector<uint64_t> values2(n);
+      std::vector<uint64_t> p(paxos.size());
+
+      yacl::crypto::Prg<uint128_t> prng128(yacl::MakeUint128(tt, s));
+      yacl::crypto::Prg<uint64_t> prng64(yacl::MakeUint128(tt, s));
+
+      prng128.Fill(absl::MakeSpan(items.data(), items.size()));
+      prng64.Fill(absl::MakeSpan(values.data(), values.size()));
+
+      paxos.SetInput(absl::MakeSpan(items));
+
+      SPDLOG_INFO("===encode===");
+      paxos.EncodeU64(absl::MakeSpan(values), absl::MakeSpan(p));
+      SPDLOG_INFO("===decode===");
+      paxos.DecodeU64(absl::MakeSpan(items), absl::MakeSpan(values2),
+                      absl::MakeSpan(p));
+      EXPECT_EQ(std::memcmp(values2.data(), values.data(),
+                            sizeof(uint64_t) * values.size()),
+                0);
+    }
+  }
+}
+
+TEST(PaxosTest, SolveTest) {
+  for (auto dt :
+       {PaxosParam::DenseType::Binary, PaxosParam::DenseType::GF128}) {
+    SPDLOG_INFO("=== dt:{}",
+                dt == PaxosParam::DenseType::Binary ? "Binary" : "GF128");
+
+    [[maybe_unused]] uint64_t n = 1 << 12;
+
+    [[maybe_unused]] uint64_t w = 3;
+    [[maybe_unused]] uint64_t s = 0;
+    uint64_t t = 1;
+
+    for (uint64_t tt = 0; tt < t; ++tt) {
+      // SPDLOG_INFO("=== tt:{} t:{}", tt, t);
+      Paxos<uint32_t> paxos;
+      [[maybe_unused]] uint128_t paxos_seed = yacl::crypto::SecureRandU128();
+      SPDLOG_INFO("paxos_seed: {}", paxos_seed);
+
+      paxos.Init(n, w, 40, dt, paxos_seed);
 
       std::vector<uint128_t> items(n);
       std::vector<uint128_t> values(n);
       std::vector<uint128_t> values2(n);
       std::vector<uint128_t> p(paxos.size());
-
-      SPDLOG_INFO("n:{}, paxos.size():{}", n, paxos.size());
-
       yacl::crypto::Prg<uint128_t> prng(yacl::MakeUint128(tt, s));
 
       prng.Fill(absl::MakeSpan(items.data(), items.size()));
       prng.Fill(absl::MakeSpan(values.data(), values.size()));
 
-      for (auto &item : items) {
-        SPDLOG_INFO("{}", (std::ostringstream() << Galois128(item)).str());
-      }
-      for (auto &value : values) {
-        SPDLOG_INFO("{}", (std::ostringstream() << Galois128(value)).str());
-      }
-
       paxos.SetInput(absl::MakeSpan(items));
-      px2.SetInput(absl::MakeSpan(items));
-
       SPDLOG_INFO("===encode===");
       paxos.Encode(absl::MakeSpan(values), absl::MakeSpan(p));
       SPDLOG_INFO("===decode===");
       paxos.Decode(absl::MakeSpan(items), absl::MakeSpan(values2),
                    absl::MakeSpan(p));
-
-      for (size_t i = 0; i < p.size(); ++i) {
-        SPDLOG_INFO("P[{}]:{}", i,
-                    (std::ostringstream() << Galois128(p[i])).str());
-      }
-
-      for (auto &value : values) {
-        SPDLOG_INFO("{}", (std::ostringstream() << Galois128(value)).str());
-      }
-      for (auto &value : values2) {
-        SPDLOG_INFO("{}", (std::ostringstream() << Galois128(value)).str());
-      }
 
       EXPECT_EQ(std::memcmp(values2.data(), values.data(),
                             sizeof(uint128_t) * values.size()),

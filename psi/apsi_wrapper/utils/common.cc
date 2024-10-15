@@ -18,6 +18,7 @@
 #include "psi/apsi_wrapper/utils/common.h"
 
 #include <ios>
+#include <utility>
 
 #if defined(_MSC_VER)
 #include <windows.h>
@@ -176,6 +177,37 @@ std::unique_ptr<::apsi::PSIParams> BuildPsiParams(
                 << params->log2_fpp() << ") per receiver item");
 
   return params;
+}
+
+int stream_intersection_results(
+    const vector<std::string> &orig_items, const vector<::apsi::Item> &items,
+    const vector<::apsi::receiver::MatchRecord> &intersection,
+    std::vector<std::string> &keys, std::vector<std::string> &values) {
+  if (orig_items.size() != items.size()) {
+    throw invalid_argument("orig_items must have same size as items");
+  }
+
+  int match_cnt = 0;
+  for (size_t i = 0; i < orig_items.size(); i++) {
+    std::stringstream msg;
+    if (intersection[i].found) {
+      match_cnt++;
+      msg << Colors::GreenBold << orig_items[i] << Colors::Reset << "(FOUND) ";
+      keys.push_back(orig_items[i]);
+      if (intersection[i].label) {
+        msg << ": ";
+        msg << Colors::GreenBold << intersection[i].label.to_string()
+            << Colors::Reset;
+        values.push_back(intersection[i].label.to_string());
+      }
+      APSI_LOG_INFO(msg.str());
+    } else {
+      // msg << Colors::RedBold << orig_items[i] << Colors::Reset << " (NOT
+      // FOUND)"; APSI_LOG_INFO(msg.str());
+    }
+  }
+
+  return match_cnt;
 }
 
 int print_intersection_results(

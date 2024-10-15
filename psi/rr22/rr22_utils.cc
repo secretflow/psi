@@ -16,12 +16,17 @@
 
 #include <algorithm>
 #include <array>
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
 #include <future>
 #include <utility>
+#include <vector>
 
 #include "absl/types/span.h"
 #include "libdivide.h"
 #include "sparsehash/dense_hash_map"
+#include "yacl/utils/parallel.h"
 
 #include "psi/rr22/okvs/galois128.h"
 #include "psi/rr22/okvs/simple_index.h"
@@ -40,156 +45,164 @@ struct NoHash {
 };
 
 }  // namespace
+
 std::vector<size_t> GetIntersection(
     absl::Span<const uint128_t> self_oprfs, size_t peer_items_num,
     const std::shared_ptr<yacl::link::Context>& lctx, size_t num_threads,
-    bool compress, size_t mask_size, size_t ssp) {
-  num_threads = std::max<size_t>(1, num_threads);
-
-  if (self_oprfs.size() < num_threads) {
-    num_threads = self_oprfs.size();
+    bool compress, size_t mask_size) {
+  if (!compress) {
+    mask_size = sizeof(uint128_t);
   }
-
-  auto truncate_mask = yacl::MakeUint128(0, 0);
-  for (size_t i = 0; i < mask_size; ++i) {
-    truncate_mask = 0xff | (truncate_mask << 8);
-    SPDLOG_DEBUG(
-        "{}, truncate_mask:{}", i,
-        (std::ostringstream() << okvs::Galois128(truncate_mask)).str());
-  }
-
-  auto divider = libdivide::libdivide_u32_gen(num_threads);
-
-  std::vector<std::thread> thrds(num_threads);
-  std::mutex merge_mtx;
-
-  size_t bin_size = okvs::SimpleIndex::GetBinSize(
-      num_threads, std::max(self_oprfs.size(), peer_items_num), ssp);
-
-  SPDLOG_INFO("bin_size:{} {}?={} compress:{} mask_size:{}", bin_size,
-              self_oprfs.size(), peer_items_num, compress, mask_size);
-
-  std::atomic<uint64_t> hash_done = 0;
-  std::promise<void> sync_prom;
-  std::promise<void> hash_done_promise;
-
-  std::shared_future<void> hashing_done_future =
-      hash_done_promise.get_future().share();
-
-  std::shared_future<void> hash_sync_future = sync_prom.get_future().share();
-
-  std::vector<size_t> indices;
-
-  yacl::Buffer peer_buffer(peer_items_num * mask_size);
-  static const size_t batch_size = 128;
-
-  auto proc = [&](size_t thread_idx) -> void {
-    google::dense_hash_map<uint128_t, size_t, NoHash> dense_map(bin_size);
-    dense_map.set_empty_key(yacl::MakeUint128(0, 0));
-
-    std::array<std::pair<uint128_t, size_t>, batch_size> hh;
-
-    for (size_t i = 0; i < self_oprfs.size();) {
-      size_t j = 0;
-      while ((j != batch_size) && i < self_oprfs.size()) {
-        uint32_t v = 0;
-        if (num_threads > 1) {
-          std::memcpy(&v, &self_oprfs[i], sizeof(uint32_t));
-          auto k = libdivide::libdivide_u32_do(v, &divider);
-          v -= k * num_threads;
-        }
-        if (v == thread_idx) {
-          if (compress) {
-            hh[j] = {self_oprfs[i] & truncate_mask, i};
-          } else {
-            hh[j] = {self_oprfs[i], i};
-          }
-          ++j;
-        }
-        ++i;
-      }
-      dense_map.insert(hh.begin(), hh.begin() + j);
-    }
-    if (++hash_done == num_threads) {
-      hash_done_promise.set_value();
-    } else {
-      hashing_done_future.get();
-    }
-
-    hash_sync_future.get();
-
-    SPDLOG_DEBUG("thread_idx map size:{}", dense_map.size());
-    SPDLOG_DEBUG("peer_buffer size:{}", peer_buffer.size());
-
-    if (dense_map.size() == 0) {
-      return;
-    }
-
-    size_t intersection_size = 0;
-    size_t begin = thread_idx * self_oprfs.size() / num_threads;
-    size_t* intersection = (size_t*)(&self_oprfs[begin]);
-
-    uint8_t* peer_data_ptr = (uint8_t*)(peer_buffer.data());
-
-    uint128_t h = yacl::MakeUint128(0, 0);
-
-    for (size_t i = 0; i < peer_items_num; ++i) {
-      std::memcpy(&h, peer_data_ptr, mask_size);
-      peer_data_ptr += mask_size;
-
-      uint32_t v = 0;
-      if (num_threads > 1) {
-        std::memcpy(&v, &h, sizeof(uint32_t));
-        auto k = libdivide::libdivide_u32_do(v, &divider);
-        v -= k * num_threads;
-      }
-
-      if (v == thread_idx) {
-        auto iter = dense_map.find(h);
-        if (iter != dense_map.end()) {
-          intersection[intersection_size] = iter->second;
-
-          ++intersection_size;
-        }
+  google::dense_hash_map<uint128_t, size_t, NoHash> dense_map(
+      self_oprfs.size());
+  dense_map.set_empty_key(yacl::MakeUint128(0, 0));
+  auto map_f = std::async([&]() {
+    auto truncate_mask = yacl::MakeUint128(0, 0);
+    if (compress) {
+      for (size_t i = 0; i < mask_size; ++i) {
+        truncate_mask = 0xff | (truncate_mask << 8);
+        SPDLOG_DEBUG(
+            "{}, truncate_mask:{}", i,
+            (std::ostringstream() << okvs::Galois128(truncate_mask)).str());
       }
     }
-
-    if (intersection_size) {
-      std::lock_guard<std::mutex> lock(merge_mtx);
-      indices.insert(indices.end(), intersection,
-                     intersection + intersection_size);
+    for (size_t i = 0; i < self_oprfs.size(); ++i) {
+      if (compress) {
+        dense_map.insert(std::make_pair(self_oprfs[i] & truncate_mask, i));
+      } else {
+        dense_map.insert(std::make_pair(self_oprfs[i], i));
+      }
     }
-  };
-
-  for (size_t i = 0; i < num_threads; ++i) {
-    thrds[i] = std::thread(proc, i);
-  }
-
+  });
   SPDLOG_INFO("recv rr22 oprf begin");
+  auto peer_buffer =
+      lctx->Recv(lctx->NextRank(), fmt::format("recv paxos_solve"));
+  YACL_ENFORCE(peer_items_num == peer_buffer.size() / mask_size);
+  SPDLOG_INFO("recv rr22 oprf finished: {} vector:{}", peer_buffer.size(),
+              peer_items_num);
+  map_f.get();
+  auto* peer_data_ptr = peer_buffer.data<uint8_t>();
+  std::mutex merge_mtx;
+  std::vector<size_t> indices;
+  size_t grain_size = (peer_items_num + num_threads - 1) / num_threads;
+  yacl::parallel_for(
+      0, peer_items_num, grain_size, [&](int64_t begin, int64_t end) {
+        std::vector<uint32_t> tmp_indexs;
+        uint128_t data = yacl::MakeUint128(0, 0);
+        for (int64_t j = begin; j < end; j++) {
+          std::memcpy(&data, peer_data_ptr + (j * mask_size), mask_size);
+          auto iter = dense_map.find(data);
+          if (iter != dense_map.end()) {
+            tmp_indexs.push_back(iter->second);
+          }
+        }
+        if (!tmp_indexs.empty()) {
+          std::lock_guard<std::mutex> lock(merge_mtx);
+          indices.insert(indices.end(), tmp_indexs.begin(), tmp_indexs.end());
+        }
+      });
+  return indices;
+}
 
-  size_t recv_count = 0;
-  while (true) {
-    auto recv_buffer =
-        lctx->Recv(lctx->NextRank(), fmt::format("recv paxos_solve"));
+std::vector<uint32_t> GetIntersectionReceiver(
+    const std::vector<uint128_t>& self_oprfs, size_t peer_items_num,
+    const std::shared_ptr<yacl::link::Context>& lctx, size_t num_threads,
+    size_t mask_size, bool broadcast_result) {
+  bool compress = mask_size != sizeof(uint128_t);
+  google::dense_hash_map<uint128_t, size_t, NoHash> dense_map(
+      self_oprfs.size());
+  dense_map.set_empty_key(yacl::MakeUint128(0, 0));
+  auto map_f = std::async([&]() {
+    auto truncate_mask = yacl::MakeUint128(0, 0);
+    if (compress) {
+      for (size_t i = 0; i < mask_size; ++i) {
+        truncate_mask = 0xff | (truncate_mask << 8);
+        SPDLOG_DEBUG(
+            "{}, truncate_mask:{}", i,
+            (std::ostringstream() << okvs::Galois128(truncate_mask)).str());
+      }
+    }
+    for (size_t i = 0; i < self_oprfs.size(); ++i) {
+      if (compress) {
+        dense_map.insert(std::make_pair(self_oprfs[i] & truncate_mask, i));
+      } else {
+        dense_map.insert(std::make_pair(self_oprfs[i], i));
+      }
+    }
+  });
+  SPDLOG_INFO("recv rr22 oprf begin");
+  auto peer_buffer =
+      lctx->Recv(lctx->NextRank(), fmt::format("recv paxos_solve"));
+  YACL_ENFORCE(peer_items_num == peer_buffer.size() / mask_size);
+  SPDLOG_INFO("recv rr22 oprf finished: {} vector:{}", peer_buffer.size(),
+              peer_items_num);
+  map_f.get();
+  auto* peer_data_ptr = peer_buffer.data<uint8_t>();
+  std::mutex merge_mtx;
+  std::vector<uint32_t> self_indices;
+  std::vector<uint32_t> peer_indices;
+  size_t grain_size = (peer_items_num + num_threads - 1) / num_threads;
+  yacl::parallel_for(
+      0, peer_items_num, grain_size, [&](int64_t begin, int64_t end) {
+        std::vector<uint32_t> tmp_indexs;
+        std::vector<uint32_t> tmp_peer_indexs;
+        uint128_t data = yacl::MakeUint128(0, 0);
+        for (int64_t j = begin; j < end; j++) {
+          std::memcpy(&data, peer_data_ptr + (j * mask_size), mask_size);
+          auto iter = dense_map.find(data);
+          if (iter != dense_map.end()) {
+            tmp_indexs.push_back(iter->second);
+            if (broadcast_result) {
+              tmp_peer_indexs.push_back(j);
+            }
+          }
+        }
+        if (!tmp_indexs.empty()) {
+          std::lock_guard<std::mutex> lock(merge_mtx);
+          self_indices.insert(self_indices.end(), tmp_indexs.begin(),
+                              tmp_indexs.end());
+          if (broadcast_result) {
+            peer_indices.insert(peer_indices.end(), tmp_peer_indexs.begin(),
+                                tmp_peer_indexs.end());
+          }
+        }
+      });
+  if (broadcast_result) {
+    auto buffer = yacl::Buffer(peer_indices.data(),
+                               peer_indices.size() * sizeof(uint32_t));
+    lctx->SendAsyncThrottled(lctx->NextRank(), buffer, "broadcast_result");
+  }
+  return self_indices;
+}
 
-    std::memcpy((uint8_t*)peer_buffer.data() + (recv_count * mask_size),
-                recv_buffer.data(), recv_buffer.size());
-    recv_count += recv_buffer.size() / mask_size;
-    if (recv_count == peer_items_num) {
-      break;
+std::vector<uint32_t> GetIntersectionSender(
+    std::vector<uint128_t> self_oprfs,
+    const std::shared_ptr<yacl::link::Context>& lctx, size_t mask_size,
+    bool broadcast_result) {
+  std::vector<uint32_t> result;
+  bool compress = mask_size != sizeof(uint128_t);
+  auto truncate_mask = yacl::MakeUint128(0, 0);
+  auto* data_ptr = reinterpret_cast<std::byte*>(self_oprfs.data());
+  if (compress) {
+    for (size_t i = 0; i < mask_size; ++i) {
+      truncate_mask = 0xff | (truncate_mask << 8);
+      SPDLOG_DEBUG(
+          "{}, truncate_mask:{}", i,
+          (std::ostringstream() << okvs::Galois128(truncate_mask)).str());
+    }
+    for (size_t i = 0; i < self_oprfs.size(); ++i) {
+      std::memcpy(data_ptr + (i * mask_size), &self_oprfs[i], mask_size);
     }
   }
-
-  sync_prom.set_value();
-
-  SPDLOG_INFO("recv rr22 oprf finished: {} vector:{}", peer_buffer.size(),
-              peer_buffer.size() / mask_size);
-
-  for (size_t i = 0; i < num_threads; ++i) {
-    thrds[i].join();
+  yacl::ByteContainerView send_buffer(data_ptr, self_oprfs.size() * mask_size);
+  lctx->SendAsyncThrottled(lctx->NextRank(), send_buffer,
+                           fmt::format("send oprf_buf"));
+  if (broadcast_result) {
+    auto buffer = lctx->Recv(lctx->NextRank(), "broadcast_result");
+    result.resize(buffer.size() / sizeof(uint32_t));
+    std::memcpy(result.data(), buffer.data<uint8_t>(), buffer.size());
   }
-
-  return indices;
+  return result;
 }
 
 }  // namespace psi::rr22

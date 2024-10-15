@@ -115,7 +115,9 @@ TEST_F(IndexStoreTest, Works) {
 }
 
 TEST_F(IndexStoreTest, Empty) {
-  { IndexWriter writer(index_store_path_); }
+  {
+    IndexWriter writer(index_store_path_);
+  }
 
   {
     IndexReader reader(index_store_path_);

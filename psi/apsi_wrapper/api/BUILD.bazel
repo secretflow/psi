@@ -119,11 +119,3 @@ psi_cc_test(
         "@boost//:uuid",
     ],
 )
-
-exports_files(
-    [
-        "exported_symbols.lds",
-    ],
-    visibility = ["//visibility:private"],
-)
-

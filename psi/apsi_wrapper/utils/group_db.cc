@@ -14,9 +14,15 @@
 
 #include "psi/apsi_wrapper/utils/group_db.h"
 
-#include <spdlog/spdlog.h>
+#include <apsi/psi_params.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #include <condition_variable>
+#include <csignal>
 #include <cstddef>
 #include <filesystem>
 #include <fstream>
@@ -25,10 +31,13 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <utility>
 
 #include "arrow/array.h"
 #include "fmt/format.h"
+#include "google/protobuf/util/json_util.h"
 #include "sender_db.h"
+#include "spdlog/spdlog.h"
 #include "yacl/base/exception.h"
 
 #include "psi/apsi_wrapper/utils/common.h"
@@ -42,17 +51,120 @@ constexpr const char* kGroupLabel = "value";
 constexpr const char* kGroupKey = "key";
 constexpr const char* kGroupBucketId = "bucket_id";
 
+template <typename F, typename... Args>
+pid_t StartProcess(F&& f, Args&&... args) {
+  auto pid = fork();
+  switch (pid) {
+    case -1:
+      SPDLOG_ERROR("fork failed");
+      exit(1);
+    case 0:
+      try {
+        auto res = f(std::forward<Args&&>(args)...);
+
+        if (res == 0) {
+          exit(0);
+        }
+        exit(1);
+      } catch (const std::exception& ex) {
+        SPDLOG_ERROR("process failed: {}", ex.what());
+        exit(1);
+      }
+    default:
+      return pid;
+  }
+}
+
+std::string PidFileName(pid_t pid) {
+  return fmt::format("/tmp/apsi_process_{}", pid);
+}
+
 }  // namespace
+
+// Based on testing, we found that multi-process processing is more
+// efficient
+void ProcessGroupParallel(size_t process_num, GroupDB& group_db) {
+  auto group_cnt = group_db.GetGroupNum();
+  auto group_cnt_per_process = (group_cnt + process_num - 1) / process_num;
+
+  SPDLOG_INFO("{} process will be started", process_num);
+
+  std::vector<pid_t> pids;
+
+  // TODO: brpc has some issue with fork, the children process will not exit due
+  // to some lock issues, one solution may be IPC, child process tell parent it
+  // finish the job, then parent process just kill the child.
+  for (size_t i = 0; i < process_num; i++) {
+    auto beg = group_cnt_per_process * i;
+    if (beg >= group_cnt) {
+      break;
+    }
+    auto end = std::min(group_cnt_per_process * (i + 1), group_cnt);
+    SPDLOG_INFO("start process {} for group: {}, {}", i, beg, end);
+
+    auto func = [&, beg, end]() -> int {
+      for (size_t i = beg; i != end; ++i) {
+        group_db.GenerateGroup(i);
+      }
+      std::ofstream pid_flag_file(PidFileName(getpid()));
+      if (!pid_flag_file.good()) {
+        return 1;
+      }
+      return 0;
+    };
+
+    pids.push_back(StartProcess(func));
+  }
+
+  int status;
+  bool process_error = false;
+  for (auto& pid : pids) {
+    SPDLOG_INFO("wait for process {}", pid);
+    while (!std::filesystem::exists(PidFileName(pid))) {
+      // check process exists
+      if (kill(pid, 0) == 0) {
+        sleep(1);
+      } else {
+        SPDLOG_INFO("subprocess {} is done.", pid);
+        break;
+      }
+    }
+
+    if (!std::filesystem::exists(PidFileName(pid))) {
+      SPDLOG_ERROR("subprocess {} job is not accomplished.", pid);
+      process_error = true;
+    } else {
+      // normal exit is not necessary
+      kill(pid, SIGKILL);
+      waitpid(pid, &status, 0);
+      SPDLOG_INFO("subprocess {} is reaped.", pid);
+      std::filesystem::remove(PidFileName(pid));
+    }
+  }
+  YACL_ENFORCE(!process_error, "multi_process failed");
+}
+
+void GenerateGroupBucketDB(GroupDB& group_db, size_t process_num) {
+  SPDLOG_INFO("start Bucketize csv file");
+  group_db.DivideGroup();
+  SPDLOG_INFO("end Bucketize csv file");
+
+  ProcessGroupParallel(process_num, group_db);
+
+  group_db.GenerateDone();
+}
 
 GroupDBItem::GroupDBItem(const std::string& source_file,
                          const std::string& db_path, size_t group_idx,
                          std::shared_ptr<::apsi::PSIParams> psi_params,
-                         bool compress, size_t max_bucket_cnt)
+                         uint32_t nonce_byte_count, bool compress,
+                         size_t max_bucket_cnt)
     : source_file_(source_file),
       filename_(fmt::format("{}/{}_group.db", db_path, group_idx)),
       meta_filename_(filename_ + ".meta"),
-      psi_params_(psi_params),
+      psi_params_(std::move(psi_params)),
       compress_(compress),
+      nonce_byte_count_(nonce_byte_count),
       max_bucket_cnt_(max_bucket_cnt) {}
 
 void GroupDBItem::LoadMeta() {
@@ -240,7 +352,7 @@ void GroupDBItem::Generate() {
     }
     bucket_db.oprf_key = bucket_db.sender_db->strip();
 
-    { bucket_dbs_.push_back(bucket_db); }
+    bucket_dbs_.push_back(bucket_db);
   }
 
   // future.get();
@@ -255,61 +367,109 @@ void GroupDBItem::Generate() {
   complete_ = true;
 }
 
-void LoadStatus(const std::string& status_file,
-                GroupDB::GroupDBStatus& status) {
+void LoadStatus(const std::string& status_file, GroupDBStatus& status) {
   std::ifstream ifs(status_file);
-  ifs >> status;
+  std::string json;
+  std::string line;
+  while (std::getline(ifs, line)) {
+    json += line;
+  }
+  auto stat = ::google::protobuf::util::JsonStringToMessage(json, &status);
+  YACL_ENFORCE(stat.ok(), "json file: {}, content: {} to pb failed, status:{}",
+               status_file, json, stat.ToString());
 }
 
-void SaveStatus(const std::string& status_file,
-                const GroupDB::GroupDBStatus& status) {
+void SaveStatus(const std::string& status_file, const GroupDBStatus& status) {
+  std::string json;
+  auto stat = ::google::protobuf::util::MessageToJsonString(status, &json);
+  YACL_ENFORCE(stat.ok(), "pb {} to json failed, status:{}", stat.ToString(),
+               status.ShortDebugString());
+
+  if (!std::filesystem::exists(
+          std::filesystem::path(status_file).parent_path())) {
+    std::filesystem::create_directories(
+        std::filesystem::path(status_file).parent_path());
+  }
   std::ofstream ofs(status_file);
-  ofs << status;
+  ofs << json;
+  YACL_ENFORCE(ofs.good(), "save {} to status file {} failed.", json,
+               status_file);
+}
+
+GroupDB::GroupDB(const std::string& db_path)
+    : db_path_(db_path),
+      status_file_path_(std::filesystem::path(db_path_) / status_file_name),
+      disk_cache_(db_path_, false, "group_") {
+  YACL_ENFORCE(std::filesystem::exists(status_file_path_),
+               "status file {} not exists.", status_file_path_);
+  LoadStatus(status_file_path_, status_);
+  YACL_ENFORCE(status_.version() == KGroupDBVersion,
+               "status file version {} not match {}.", status_.version(),
+               KGroupDBVersion);
+  group_cnt_ = status_.group_cnt();
+  num_buckets_ = status_.num_buckets();
+  nonce_byte_count_ = status_.nonce_byte_count();
+  compress_ = status_.compressed();
+  params_ = std::make_shared<apsi::PSIParams>(
+      apsi::PSIParams::Load(status_.params_file_content()));
 }
 
 GroupDB::GroupDB(const std::string& source_file, const std::string& db_path,
                  std::size_t group_cnt, size_t num_buckets,
-                 const std::string& params_file, bool compress)
+                 uint32_t nonce_byte_count, const std::string& params_file,
+                 bool compress)
     : source_file_(source_file),
       db_path_(db_path),
       group_cnt_(group_cnt),
       num_buckets_(num_buckets),
+      nonce_byte_count_(nonce_byte_count),
       status_file_path_(std::filesystem::path(db_path_) / status_file_name),
       disk_cache_(db_path_, false, "group_"),
       params_(BuildPsiParams(params_file)),
       compress_(compress) {
   if (std::filesystem::exists(status_file_path_)) {
     LoadStatus(status_file_path_, status_);
-    YACL_ENFORCE(status_.version == KGroupDBVersion,
+    YACL_ENFORCE(status_.version() == KGroupDBVersion,
                  "status version {}  not match {}, this dir may have a "
                  "different version of db, please choose a different dir",
-                 status_.version, KGroupDBVersion);
-    YACL_ENFORCE(status_.group_cnt == group_cnt_,
+                 status_.version(), KGroupDBVersion);
+    YACL_ENFORCE(status_.group_cnt() == group_cnt_,
                  "group cnt {}  not match {}, this dir may have a "
                  "different version of db, please choose a different dir",
-                 status_.group_cnt, group_cnt_);
-    YACL_ENFORCE(status_.num_buckets == num_buckets_,
+                 status_.group_cnt(), group_cnt_);
+    YACL_ENFORCE(status_.num_buckets() == num_buckets_,
                  "bucket num {}  not match {}, this dir may have a "
                  "different version of db, please choose a different dir",
-                 status_.num_buckets, num_buckets_);
-    YACL_ENFORCE(status_.params_file_content == params_->to_string(),
+                 status_.num_buckets(), num_buckets_);
+    YACL_ENFORCE(status_.nonce_byte_count() == nonce_byte_count_,
+                 "nonce_byte_count {}  not match {}, this dir may have a "
+                 "different version of db, please choose a different dir",
+                 status_.nonce_byte_count(), nonce_byte_count_);
+    YACL_ENFORCE(status_.params_file_content() == params_->to_string(),
                  "params {}  not match {}, this dir may have a "
                  "different version of db, please choose a different dir",
-                 status_.params_file_content, params_->to_string());
+                 status_.params_file_content(), params_->to_string());
 
   } else {
-    status_ = GroupDBStatus{.version = KGroupDBVersion,
-                            .group_cnt = group_cnt_,
-                            .num_buckets = num_buckets_,
-                            .params_file_content = params_->to_string(),
-                            .status = DBState::KNotExist};
+    status_.set_version(KGroupDBVersion);
+    status_.set_num_buckets(num_buckets_);
+    status_.set_group_cnt(group_cnt_);
+    status_.set_nonce_byte_count(nonce_byte_count_);
+    status_.set_params_file_content(params_->to_string());
+    status_.set_compressed(compress_);
+    status_.set_state(GroupDBState::GROUP_DB_STATE_EMPTY);
     SaveStatus(status_file_path_, status_);
   }
 }
 
-bool GroupDB::IsDivided() { return status_.status >= DBState::KBucketed; }
+bool GroupDB::IsDivided() {
+  return status_.state() == GroupDBState::GROUP_DB_STATE_BUCKETED ||
+         status_.state() == GroupDBState::GROUP_DB_STATE_GENERATED;
+}
 
-bool GroupDB::IsDBGenerated() { return status_.status >= DBState::KGenerated; }
+bool GroupDB::IsDBGenerated() {
+  return status_.state() == GroupDBState::GROUP_DB_STATE_GENERATED;
+}
 
 void GroupDB::DivideGroup() {
   if (IsDivided()) {
@@ -325,7 +485,7 @@ void GroupDB::DivideGroup() {
   ApsiCsvReader reader(source_file_);
   reader.GroupBucketize(num_buckets_, db_path_, group_cnt_, disk_cache_);
 
-  status_.status = DBState::KBucketed;
+  status_.set_state(GroupDBState::GROUP_DB_STATE_BUCKETED);
   SaveStatus(status_file_path_, status_);
 }
 
@@ -344,14 +504,14 @@ void GroupDB::GenerateGroup(size_t group_idx) {
   auto per_group_bucket_num = (num_buckets_ + group_cnt_ - 1) / group_cnt_;
 
   auto group_item_db = std::make_shared<GroupDBItem>(
-      disk_cache_.GetPath(group_idx), db_path_, group_idx, params_, compress_,
-      per_group_bucket_num);
+      disk_cache_.GetPath(group_idx), db_path_, group_idx, params_,
+      nonce_byte_count_, compress_, per_group_bucket_num);
   group_item_db->Generate();
   group_map_[group_idx] = group_item_db;
 }
 
 void GroupDB::GenerateDone() {
-  status_.status = DBState::KGenerated;
+  status_.set_state(GROUP_DB_STATE_GENERATED);
   SaveStatus(status_file_path_, status_);
 }
 

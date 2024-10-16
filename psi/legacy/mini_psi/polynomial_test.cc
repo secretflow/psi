@@ -54,7 +54,7 @@ TEST_P(PolynomialBnTest, Works) {
 
   std::string prime_data;
 
-  (void)absl::HexStringToBytes(kPrimeOver256bHexStr, &prime_data);
+  EXPECT_TRUE(absl::HexStringToBytes(kPrimeOver256bHexStr, &prime_data));
 
   for (uint64_t i = 0; i < polynomial_order; ++i) {
     poly_x[i].resize(kBnByteSize);

@@ -53,6 +53,7 @@ TEST(ApiTest, Works) {
   std::string sender_csv_file = "examples/pir/apsi/data/db_100_300byte.csv";
   std::string params_file = "examples/pir/apsi/parameters/100-1-300.json";
   size_t nonce_byte_count = 16;
+  const size_t bucket_cnt = 10;
   bool compress = false;
   std::string receiver_query_file =
       "examples/pir/apsi/data/query_1_100_300byte.csv";
@@ -69,42 +70,37 @@ TEST(ApiTest, Works) {
   std::string sdb_out_file = tmp_dir / fmt::format("out_sdb_{}.csv", uuid_str);
 
   {
-    psi::apsi_wrapper::api::Sender sender;
-    sender.LoadCsv(sender_csv_file, params_file, nonce_byte_count, compress);
+    psi::apsi_wrapper::api::Sender::Option sender_option;
+    sender_option.source_file = sender_csv_file;
+    sender_option.params_file = params_file;
+    sender_option.nonce_byte_count = nonce_byte_count;
+    sender_option.compress = compress;
+    sender_option.db_path = sdb_out_file;
+    sender_option.num_buckets = bucket_cnt;
+    sender_option.group_cnt = bucket_cnt;
 
-    psi::apsi_wrapper::api::Receiver receiver;
-    receiver.LoadParamsConfig(params_file);
-    receiver.LoadItems(receiver_query_file);
+    psi::apsi_wrapper::api::Sender sender(sender_option);
 
-    std::string oprf_request_str = receiver.RequestOPRF();
-    std::string oprf_response_str = sender.RunOPRF(oprf_request_str);
+    sender.GenerateSenderDb();
 
-    std::string query_request_str = receiver.RequestQuery(oprf_response_str);
-    std::string query_response_str = sender.RunQuery(query_request_str);
-
-    receiver.ProcessResult(query_response_str, receiver_output_file);
-
-    sender.SaveSenderDb(sdb_out_file);
-  }
-
-  {
-    psi::apsi_wrapper::api::Sender sender;
-    sender.LoadSenderDb(sdb_out_file);
     std::string params_str = sender.GenerateParams();
 
-    psi::apsi_wrapper::api::Receiver receiver;
-    receiver.LoadSenderParams(params_str);
-    receiver.LoadItems(receiver_query_file);
+    psi::apsi_wrapper::api::Receiver receiver(bucket_cnt);
 
-    std::string oprf_request_str = receiver.RequestOPRF();
-    std::string oprf_response_str = sender.RunOPRF(oprf_request_str);
+    receiver.LoadParamsConfig(params_file);
+    auto recv_context = receiver.BucketizeItems(receiver_query_file);
 
-    std::string query_request_str = receiver.RequestQuery(oprf_response_str);
-    std::string query_response_str = sender.RunQuery(query_request_str);
+    auto oprf_requst = receiver.RequestOPRF(recv_context);
 
-    receiver.ProcessResult(query_response_str, receiver_output_file_2);
+    auto oprf_response = sender.RunOPRF(oprf_requst);
+
+    auto query_request = receiver.RequestQuery(recv_context, oprf_response);
+
+    auto query_response = sender.RunQuery(query_request);
+
+    auto cnts = receiver.ProcessResult(recv_context, query_response,
+                                       receiver_output_file);
   }
-
   psi::apsi_wrapper::LabeledData sender_labeled_data =
       ReadLabeledDB(sender_csv_file);
 
@@ -112,8 +108,6 @@ TEST(ApiTest, Works) {
 
   psi::apsi_wrapper::LabeledData out_labeled_db_1 =
       ReadLabeledDB(receiver_output_file);
-  psi::apsi_wrapper::LabeledData out_labeled_db_2 =
-      ReadLabeledDB(receiver_output_file_2);
 
   // travrse query_item and get the related label
   for (auto& item_str : query_items) {
@@ -144,16 +138,6 @@ TEST(ApiTest, Works) {
     query_label_1 = it_1->second;
     EXPECT_EQ(real_label, query_label_1);
     //  query result 2
-    auto it_2 = std::find_if(
-        out_labeled_db_2.begin(), out_labeled_db_2.end(),
-        [&item](const std::pair<::apsi::Item, ::apsi::Label>& entry) {
-          return entry.first == item;
-        });
-    if (!(it_2 != out_labeled_db_2.end())) {
-      throw std::runtime_error("Item not found in out_labeled_db_2");
-    }
-    query_label_2 = it_2->second;
-    EXPECT_EQ(real_label, query_label_2);
   }
 
   {
@@ -164,14 +148,7 @@ TEST(ApiTest, Works) {
                   ec.message());
     }
   }
-  {
-    std::error_code ec;
-    std::filesystem::remove(receiver_output_file_2, ec);
-    if (ec.value() != 0) {
-      SPDLOG_WARN("can not remove temp file: {}, msg: {}",
-                  receiver_output_file_2, ec.message());
-    }
-  }
+
   {
     std::error_code ec;
     std::filesystem::remove(sdb_out_file, ec);

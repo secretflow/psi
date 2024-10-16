@@ -17,13 +17,10 @@
 
 #include "psi/apsi_wrapper/cli/entry.h"
 
-#include <spdlog/details/os.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
+#include "spdlog/details/os.h"
+
 // STD
 #include <sched.h>
-#include <spdlog/spdlog.h>
 #include <sys/types.h>
 
 #include <chrono>
@@ -39,6 +36,8 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+
+#include "spdlog/spdlog.h"
 
 // APSI
 #include "apsi/log.h"
@@ -198,9 +197,12 @@ int RunReceiver(const ReceiverOptions &options,
     bool append_to_outfile = false;
     size_t total_matches = 0;
 
+    double total_time = 0;
     for (const auto &pair : bucket_item_map) {
       const size_t bucket_idx = pair.first;
       const vector<::apsi::Item> &items_vec = pair.second.first;
+      auto bucket_start = std::chrono::high_resolution_clock::now();
+      SPDLOG_INFO("Start deal with bucket {}", bucket_idx);
 
       vector<::apsi::HashedItem> oprf_items;
       vector<::apsi::LabelKey> label_keys;
@@ -227,6 +229,14 @@ int RunReceiver(const ReceiverOptions &options,
         return -1;
       }
 
+      auto bucket_time =
+          std::chrono::duration_cast<std::chrono::milliseconds>(
+              std::chrono::high_resolution_clock::now() - bucket_start)
+              .count();
+      total_time += bucket_time;
+      SPDLOG_INFO("End deal with bucket {}, time: {}ms", bucket_idx,
+                  bucket_time);
+
       int cnt = psi::apsi_wrapper::print_intersection_results(
           pair.second.second, items_vec, query_result, options.output_file,
           append_to_outfile);
@@ -237,6 +247,9 @@ int RunReceiver(const ReceiverOptions &options,
 
       total_matches += cnt;
     }
+
+    SPDLOG_INFO("Average bucket time: {}ms/bucket",
+                total_time / bucket_item_map.size());
 
     if (match_cnt != nullptr) {
       *match_cnt = total_matches;
@@ -291,28 +304,6 @@ int RunReceiver(const ReceiverOptions &options,
   }
 
   return 0;
-}
-
-template <typename F, typename... Args>
-pid_t StartProcess(F &&f, Args &&...args) {
-  auto pid = fork();
-  switch (pid) {
-    case -1:
-      SPDLOG_ERROR("fork failed");
-      exit(1);
-    case 0:
-      try {
-        if (f(std::forward<Args &&>(args)...) == 0) {
-          exit(0);
-        }
-        exit(1);
-      } catch (const std::exception &ex) {
-        SPDLOG_ERROR("process failed: {}", ex.what());
-        exit(1);
-      }
-    default:
-      return pid;
-  }
 }
 
 template <typename... Args>
@@ -407,61 +398,6 @@ void DealSingleDB(const SenderOptions &options,
   RunDispatcher(options, lctx, sender_db, oprf_key);
 }
 
-// Based on testing, we found that multi-process processing is more
-// efficient
-void ProcessGroupParallel(size_t process_num, GroupDB &group_db) {
-  auto group_cnt = group_db.GetGroupNum();
-  auto group_cnt_per_process = (group_cnt + process_num - 1) / process_num;
-
-  SPDLOG_INFO("{} process will be started", process_num);
-
-  std::vector<pid_t> pids;
-
-  for (size_t i = 0; i < process_num; i++) {
-    auto beg = group_cnt_per_process * i;
-    if (beg >= group_cnt) {
-      break;
-    }
-    auto end = std::min(group_cnt_per_process * (i + 1), group_cnt);
-    SPDLOG_INFO("start process {} for group: {}, {}", i, beg, end);
-
-    auto func = [&]() -> int {
-      for (size_t i = beg; i != end; ++i) {
-        group_db.GenerateGroup(i);
-      }
-      return 0;
-    };
-
-    pids.push_back(StartProcess(func));
-  }
-
-  int status;
-  bool process_error = false;
-  for (auto &pid : pids) {
-    SPDLOG_INFO("wait for process {}", pid);
-    if (waitpid(pid, &status, 0) != -1) {
-      if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
-        SPDLOG_ERROR("Process {} Failed to save SenderDB", pid);
-        process_error = true;
-      }
-    } else {
-      SPDLOG_ERROR("Wait process {} Failed", pid);
-      process_error = true;
-    }
-  }
-  YACL_ENFORCE(!process_error, "multi_process failed");
-}
-
-void GenerateGroupBucketDB(GroupDB &group_db, size_t process_num) {
-  SPDLOG_INFO("start Bucketize csv file");
-  group_db.DivideGroup();
-  SPDLOG_INFO("end Bucketize csv file");
-
-  ProcessGroupParallel(process_num, group_db);
-
-  group_db.GenerateDone();
-}
-
 void DealGroupBucketDB(const SenderOptions &options,
                        const std::shared_ptr<yacl::link::Context> &lctx) {
   YACL_ENFORCE(!options.experimental_bucket_folder.empty(),
@@ -475,8 +411,8 @@ void DealGroupBucketDB(const SenderOptions &options,
 
   GroupDB group_db(options.source_file, options.experimental_bucket_folder,
                    options.experimental_bucket_group_cnt,
-                   options.experimental_bucket_cnt, options.params_file,
-                   options.compress);
+                   options.experimental_bucket_cnt, options.nonce_byte_count,
+                   options.params_file, options.compress);
 
   if (!group_db.IsDBGenerated()) {
     YACL_ENFORCE(!options.source_file.empty() &&

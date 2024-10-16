@@ -14,9 +14,13 @@
 
 #include "psi/utils/io.h"
 
+#include <filesystem>
 #include <memory>
 #include <utility>
 
+#include "arrow/api.h"
+#include "arrow/io/api.h"
+#include "spdlog/spdlog.h"
 #include "yacl/base/exception.h"
 #include "yacl/io/rw/csv_reader.h"
 #include "yacl/io/rw/csv_writer.h"
@@ -84,6 +88,17 @@ std::unique_ptr<Writer> BuildWriter(const std::any& io_options,
   }
   ret->Init();
   return ret;
+}
+
+std::shared_ptr<arrow::io::FileOutputStream> GetArrowOutputStream(
+    const std::string& filename, bool append) {
+  auto path = std::filesystem::path(filename);
+  if (!std::filesystem::exists(path.parent_path())) {
+    SPDLOG_INFO("path for output file {} doesn't exist, creating path: {}",
+                filename, path.parent_path().string());
+    std::filesystem::create_directories(path.parent_path());
+  }
+  return arrow::io::FileOutputStream::Open(filename, append).ValueOrDie();
 }
 
 }  // namespace psi::io

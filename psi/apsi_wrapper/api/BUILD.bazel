@@ -17,6 +17,21 @@ load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library", "psi_cc_test")
 package(default_visibility = ["//visibility:public"])
 
 psi_cc_library(
+    name = "wrapper_common",
+    hdrs = ["wrapper_common.h"],
+)
+
+psi_cc_library(
+    name = "wrapper_util",
+    srcs = ["wrapper_util.cc"],
+    hdrs = ["wrapper_util.h"],
+    deps = [
+        ":wrapper_common",
+        "@yacl//yacl/base:exception",
+    ],
+)
+
+psi_cc_library(
     name = "sender",
     srcs = ["sender.cc"],
     hdrs = ["sender.h"],
@@ -24,7 +39,18 @@ psi_cc_library(
         "//psi/apsi_wrapper:sender",
         "//psi/apsi_wrapper/utils:bucket",
         "//psi/apsi_wrapper/utils:common",
+        "//psi/apsi_wrapper/utils:group_db",
         "//psi/apsi_wrapper/utils:sender_db",
+    ],
+)
+
+psi_cc_library(
+    name = "sender_c_wrapper",
+    srcs = ["sender_c_wrapper.cc"],
+    hdrs = ["sender_c_wrapper.h"],
+    deps = [
+        ":sender",
+        ":wrapper_util",
     ],
 )
 
@@ -34,7 +60,33 @@ psi_cc_library(
     hdrs = ["receiver.h"],
     deps = [
         "//psi/apsi_wrapper:receiver",
+        "//psi/apsi_wrapper/utils:group_db",
         "//psi/apsi_wrapper/utils:sender_db",
+    ],
+)
+
+psi_cc_library(
+    name = "receiver_c_wrapper",
+    srcs = ["receiver_c_wrapper.cc"],
+    hdrs = ["receiver_c_wrapper.h"],
+    deps = [
+        ":receiver",
+        ":wrapper_util",
+    ],
+)
+
+psi_cc_test(
+    name = "wrapper_test",
+    srcs = ["wrapper_test.cc"],
+    data = [
+        "//examples/pir/apsi/data:all_files",
+        "//examples/pir/apsi/parameters:all_files",
+    ],
+    flaky = True,  # cuckoo hash stuff
+    deps = [
+        ":receiver_c_wrapper",
+        ":sender_c_wrapper",
+        "@boost//:uuid",
     ],
 )
 

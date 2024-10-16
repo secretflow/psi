@@ -47,7 +47,7 @@ void DenseMtx::Row::operator^=(const Row& r) {
 
 void DenseMtx::resize(uint64_t rows, uint64_t cols) {
   bit_rows_ = rows;
-  rows_ = (rows_ + 127) / 128;
+  rows_ = (rows + 127) / 128;
   cols_ = cols;
   data_.resize(cols_ * rows_);
   data_mtx_ = MatrixView<uint128_t>(data_.data(), cols_, rows_);
@@ -99,7 +99,6 @@ DenseMtx DenseMtx::Invert() const {
 
   auto mtx = *this;
   auto n = this->rows();
-
   auto Inv = Identity(n);
 
   for (uint64_t i = 0; i < n; ++i) {
@@ -113,7 +112,6 @@ DenseMtx DenseMtx::Invert() const {
       }
 
       if (mtx(i, i) == 0) {
-        // std::cout << mtx << std::endl;
         return {};
       }
     }
@@ -127,7 +125,6 @@ DenseMtx DenseMtx::Invert() const {
       }
     }
   }
-
   return Inv;
 }
 

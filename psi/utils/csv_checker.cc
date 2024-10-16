@@ -188,7 +188,7 @@ CheckCsvReport CheckCsv(const std::string& input_file_path,
   const std::shared_ptr<arrow::Schema>& schema = reader->schema();
 
   std::shared_ptr<arrow::io::FileOutputStream> outfile =
-      arrow::io::FileOutputStream::Open(output_file_path).ValueOrDie();
+      io::GetArrowOutputStream(output_file_path);
 
   auto write_options = arrow::csv::WriteOptions::Defaults();
   write_options.include_header = true;

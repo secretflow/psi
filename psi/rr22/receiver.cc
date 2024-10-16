@@ -14,6 +14,9 @@
 
 #include "psi/rr22/receiver.h"
 
+#include <cstdint>
+#include <vector>
+
 #include "yacl/crypto/hash/hash_utils.h"
 #include "yacl/crypto/rand/rand.h"
 #include "yacl/utils/parallel.h"
@@ -21,6 +24,8 @@
 #include "psi/legacy/bucket_psi.h"
 #include "psi/prelude.h"
 #include "psi/rr22/common.h"
+#include "psi/rr22/rr22_psi.h"
+#include "psi/rr22/rr22_utils.h"
 #include "psi/trace_categories.h"
 #include "psi/utils/bucket.h"
 #include "psi/utils/serialize.h"
@@ -28,14 +33,14 @@
 
 namespace psi::rr22 {
 
-Rr22PsiReceiver::Rr22PsiReceiver(const v2::PsiConfig &config,
+Rr22PsiReceiver::Rr22PsiReceiver(const v2::PsiConfig& config,
                                  std::shared_ptr<yacl::link::Context> lctx)
     : AbstractPsiReceiver(config, std::move(lctx)) {}
 
 void Rr22PsiReceiver::Init() {
   TRACE_EVENT("init", "Rr22PsiReceiver::Init");
   SPDLOG_INFO("[Rr22PsiReceiver::Init] start");
-
+  YACL_ENFORCE(lctx_->WorldSize() == 2);
   AbstractPsiReceiver::Init();
 
   CommonInit(key_hash_digest_, &config_, recovery_manager_.get());
@@ -117,16 +122,19 @@ void Rr22PsiReceiver::Online() {
     if (!bucket_items_list.has_value()) {
       continue;
     }
+    size_t mask_size = sizeof(uint128_t);
+    size_t sender_size;
+    auto run_f = std::async([&]() {
+      // Gather Items Size and get mask size
+      auto receiver_size = bucket_items_list->size();
+      std::tie(mask_size, sender_size) =
+          ExchangeTruncateSize(lctx_, receiver_size, rr22_options);
 
-    auto run_f = std::async([&] {
-      std::vector<HashBucketCache::BucketItem> res;
-
-      // Gather Items Size
-      std::vector<size_t> items_size =
-          AllGatherItemsSize(lctx_, bucket_items_list->size());
-      size_t max_size =
-          std::max(items_size[lctx_->Rank()], items_size[lctx_->NextRank()]);
-
+      if ((sender_size == 0) || (receiver_size == 0)) {
+        return std::vector<uint128_t>{};
+      }
+      size_t max_size = std::max(sender_size, receiver_size);
+      // cal item hash
       std::vector<uint128_t> items_hash(bucket_items_list->size());
       yacl::parallel_for(0, bucket_items_list->size(),
                          [&](int64_t begin, int64_t end) {
@@ -141,24 +149,24 @@ void Rr22PsiReceiver::Online() {
           items_hash[idx] = yacl::crypto::SecureRandU128();
         }
       }
-
-      std::vector<size_t> rr22_psi_result =
-          Rr22PsiReceiverInternal(rr22_options, lctx_, items_hash);
-      res.reserve(rr22_psi_result.size());
-
-      for (auto index : rr22_psi_result) {
-        res.emplace_back(bucket_items_list->at(index));
-      }
-      return res;
+      // oprfs
+      return Rr22PsiReceiverOprfs(rr22_options, lctx_, items_hash);
     });
 
-    std::vector<HashBucketCache::BucketItem> result_list =
-        SyncWait(lctx_, &run_f);
+    auto self_oprfs = SyncWait(lctx_, &run_f);
 
     auto write_bucket_res_f = std::async([&] {
-      HandleBucketResultByReceiver(config_.protocol_config().broadcast_result(),
-                                   lctx_, result_list,
-                                   intersection_indices_writer_.get());
+      SPDLOG_INFO("compute intersection begin, threads:{}",
+                  rr22_options.num_threads);
+      std::vector<uint32_t> indices = GetIntersectionReceiver(
+          self_oprfs, sender_size, lctx_, rr22_options.num_threads, mask_size,
+          config_.protocol_config().broadcast_result());
+      SPDLOG_INFO("compute intersection end");
+      for (const auto& idx : indices) {
+        intersection_indices_writer_->WriteCache(
+            bucket_items_list->at(idx).index);
+      }
+      intersection_indices_writer_->Commit();
     });
 
     SyncWait(lctx_, &write_bucket_res_f);

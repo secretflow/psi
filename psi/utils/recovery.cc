@@ -14,13 +14,12 @@
 
 #include "psi/utils/recovery.h"
 
-#include <spdlog/spdlog.h>
-
 #include <filesystem>
 #include <fstream>
 
 #include "google/protobuf/util/json_util.h"
 #include "google/protobuf/util/message_differencer.h"
+#include "spdlog/spdlog.h"
 #include "yacl/base/exception.h"
 
 #include "psi/utils/io.h"

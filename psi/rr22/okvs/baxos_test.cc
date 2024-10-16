@@ -69,6 +69,6 @@ TEST_P(BaxosTest, WORKS) {
 }
 
 INSTANTIATE_TEST_SUITE_P(Works_Instances, BaxosTest,
-                         testing::Values(16, 32, 64, 128, 2048));
+                         testing::Values(1 << 10, 1 << 12, 1 << 14, 1 << 20));
 
 }  // namespace psi::rr22::okvs

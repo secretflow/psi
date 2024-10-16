@@ -272,6 +272,7 @@ psi_cc_library(
     srcs = ["index_store.cc"],
     hdrs = ["index_store.h"],
     deps = [
+        ":io",
         "@org_apache_arrow//:arrow",
         "@yacl//yacl/base:exception",
     ],
@@ -363,6 +364,7 @@ psi_cc_library(
     srcs = ["io.cc"],
     hdrs = ["io.h"],
     deps = [
+        "@org_apache_arrow//:arrow",
         "@yacl//yacl/base:exception",
         "@yacl//yacl/io/rw",
         "@yacl//yacl/io/stream",

@@ -17,6 +17,7 @@
 
 #include "psi/apsi_wrapper/api/sender.h"
 
+#include <cstddef>
 #include <filesystem>
 
 #include "apsi/network/stream_channel.h"
@@ -30,36 +31,33 @@ using namespace std;
 
 namespace psi::apsi_wrapper::api {
 
-bool Sender::LoadCsv(const std::string &csv_file_path,
-                     const std::string &params_file_path,
-                     size_t nonce_byte_count, bool compress) {
-  throw_if_file_invalid(csv_file_path);
-  throw_if_file_invalid(params_file_path);
-  sender_db_ = GenerateSenderDB(csv_file_path, params_file_path,
-                                nonce_byte_count, compress, oprf_key_);
-  return sender_db_ != nullptr;
+void Sender::SetThreadCount(size_t threads) { thread_count_ = threads; }
+
+bool Sender::GenerateSenderDb() {
+  GenerateGroupBucketDB(group_db_, thread_count_);
+
+  return true;
 }
 
-void Sender::SetThreadCount(size_t threads) {
-  ::apsi::ThreadPoolMgr::SetThreadCount(threads);
-}
-
-bool Sender::LoadSenderDb(const std::string &sdb_file_path) {
-  throw_if_file_invalid(sdb_file_path);
-  sender_db_ = TryLoadSenderDB(sdb_file_path, "", oprf_key_);
-  return sender_db_ != nullptr;
-}
-
-bool Sender::SaveSenderDb(const std::string &sdb_file_path) {
-  return psi::apsi_wrapper::TrySaveSenderDB(sdb_file_path, sender_db_,
-                                            oprf_key_);
+GroupDBItem::BucketDBItem Sender::GetDefaultDB() {
+  for (size_t i = 0; i < group_db_.GetBucketNum(); i++) {
+    auto db = group_db_.GetBucketDB(i);
+    if (db.sender_db) {
+      return db;
+    }
+  }
+  YACL_THROW("no valid db found");
 }
 
 std::string Sender::GenerateParams() {
+  YACL_ENFORCE(group_db_.IsDBGenerated(), "group_db is not generated");
+
+  auto default_db = GetDefaultDB();
+
   ::apsi::ParamsResponse response_params =
       make_unique<::apsi::ParamsResponse::element_type>();
   response_params->params =
-      make_unique<::apsi::PSIParams>(sender_db_->get_params());
+      make_unique<::apsi::PSIParams>(default_db.sender_db->get_params());
 
   ::apsi::network::SenderOperationHeader sop_header;
   sop_header.type = response_params->type();
@@ -73,6 +71,8 @@ std::string Sender::GenerateParams() {
 }
 
 std::string Sender::RunOPRF(const std::string &oprf_request_str) {
+  YACL_ENFORCE(group_db_.IsDBGenerated(), "group_db is not generated");
+
   stringstream ss;
   ss << oprf_request_str;
   ::apsi::network::SenderOperationHeader sop_header;
@@ -84,11 +84,11 @@ std::string Sender::RunOPRF(const std::string &oprf_request_str) {
 
   ::apsi::OPRFRequest oprf_request = ::apsi::to_oprf_request(std::move(sop));
 
-  SetBucketIdx(oprf_request->bucket_idx);
+  auto db = group_db_.GetBucketDB(oprf_request->bucket_idx);
 
   ::apsi::OPRFResponse response =
       ::psi::apsi_wrapper::Sender::GenerateOPRFResponse(oprf_request,
-                                                        oprf_key_);
+                                                        db.oprf_key);
 
   sop_header.type = response->type();
 
@@ -101,7 +101,7 @@ std::string Sender::RunOPRF(const std::string &oprf_request_str) {
 }
 
 std::string Sender::RunQuery(const std::string &query_str) {
-  YACL_ENFORCE(sender_db_ != nullptr, "sender_db is null");
+  YACL_ENFORCE(group_db_.IsDBGenerated(), "group_db is not generated");
 
   stringstream ss;
   ss << query_str;
@@ -111,13 +111,19 @@ std::string Sender::RunQuery(const std::string &query_str) {
   unique_ptr<::apsi::network::SenderOperation> sop =
       make_unique<::apsi::network::SenderOperationQuery>();
 
-  sop->load(ss, sender_db_->get_seal_context());
+  auto default_db = GetDefaultDB();
+
+  sop->load(ss, default_db.sender_db->get_seal_context());
 
   auto query_request = ::apsi::to_query_request(std::move(sop));
 
-  SetBucketIdx(query_request->bucket_idx);
+  auto db = group_db_.GetBucketDB(query_request->bucket_idx);
 
-  apsi::sender::Query query(std::move(query_request), sender_db_);
+  if (db.sender_db == nullptr) {
+    return "";
+  }
+
+  apsi::sender::Query query(std::move(query_request), db.sender_db);
 
   {
     // the following is copied from Sender::RunQuery
@@ -235,77 +241,22 @@ std::string Sender::RunQuery(const std::string &query_str) {
   }
 }
 
-bool Sender::SaveBucketizedSenderDb(const std::string &csv_file_path,
-                                    const std::string &params_file_path,
-                                    size_t nonce_byte_count, bool compress,
-                                    const std::string &parent_path,
-                                    size_t bucket_cnt) {
-  throw_if_file_invalid(csv_file_path);
-  throw_if_file_invalid(params_file_path);
-  throw_if_directory_invalid(parent_path);
-
-  if (!std::filesystem::is_empty(parent_path)) {
-    APSI_LOG_ERROR(parent_path << " is not empty.");
-    return false;
+std::vector<std::string> Sender::RunOPRF(
+    const std::vector<std::string> &oprf_request_str) {
+  std::vector<std::string> oprf_response;
+  for (const auto &oprf_request : oprf_request_str) {
+    oprf_response.emplace_back(RunOPRF(oprf_request));
   }
-
-  ApsiCsvReader reader(csv_file_path);
-  reader.bucketize(bucket_cnt, parent_path);
-
-  MultiplexDiskCache disk_cache(parent_path, false);
-
-  for (size_t i = 0; i < bucket_cnt; i++) {
-    std::string db_path = GenerateDbPath(parent_path, i);
-    ::apsi::oprf::OPRFKey oprf_key;
-    auto sender_db = psi::apsi_wrapper::GenerateSenderDB(
-        disk_cache.GetPath(i), params_file_path, nonce_byte_count, compress,
-        oprf_key);
-
-    if (!sender_db) {
-      APSI_LOG_ERROR("Failed to create SenderDB: " << db_path
-                                                   << " terminating");
-      return false;
-    }
-
-    if (!psi::apsi_wrapper::TrySaveSenderDB(db_path, sender_db, oprf_key)) {
-      APSI_LOG_ERROR("Failed to save SenderDB: " << db_path << " terminating");
-      return false;
-    }
-  }
-
-  return true;
+  return oprf_response;
 }
 
-void Sender::LoadBucketizedSenderDb(const std::string &parent_path,
-                                    size_t bucket_cnt) {
-  throw_if_directory_invalid(parent_path);
-
-  bucket_switcher_ =
-      std::make_shared<BucketSenderDbSwitcher>(parent_path, bucket_cnt);
-
-  LoadBucket();
-}
-
-void Sender::LoadBucket() {
-  if (!bucket_switcher_) {
-    return;
+std::vector<std::string> Sender::RunQuery(
+    const std::vector<std::string> &query_str) {
+  std::vector<std::string> query_response;
+  for (const auto &query : query_str) {
+    query_response.emplace_back(RunQuery(query));
   }
-
-  sender_db_ = bucket_switcher_->GetSenderDB();
-  oprf_key_ = bucket_switcher_->GetOPRFKey();
-}
-
-void Sender::SetBucketIdx(size_t idx) {
-  if (!bucket_switcher_) {
-    return;
-  }
-
-  if (idx == bucket_switcher_->bucket_idx()) {
-    return;
-  }
-
-  bucket_switcher_->SetBucketIdx(idx);
-  LoadBucket();
+  return query_response;
 }
 
 }  // namespace psi::apsi_wrapper::api

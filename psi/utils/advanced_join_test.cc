@@ -40,39 +40,39 @@ std::string LoadFile(const std::string& path) {
 }
 
 constexpr auto kInputContentReceiver = R"csv(id1,id2,y1
-3,"d","y1_7"
-1,"b","y1_1"
-1,"b","y1_2"
-3,"c","y1_3"
-3,"d","y1_8"
-4,"b","y1_4"
-2,"a","y1_5"
-2,"a","y1_6"
-5,"c","y1_9"
-3,"d","y1_10"
+3,d,y1_7
+1,b,y1_1
+1,b,y1_2
+3,c,y1_3
+3,d,y1_8
+4,b,y1_4
+2,a,y1_5
+2,a,y1_6
+5,c,y1_9
+3,d,y1_10
 )csv";
 
 constexpr auto kInputContentSender = R"csv(id1,id2,y2
-5,"b","y2_10"
-1,"b","y2_1"
-1,"b","y2_2"
-1,"b","y2_3"
-3,"c","y2_4"
-3,"c","y2_5"
-3,"c","y2_6"
-6,"c","y2_12"
-2,"a","y2_7"
-4,"b","y2_8"
-4,"b","y2_9"
-5,"b","y2_11"
+5,b,y2_10
+1,b,y2_1
+1,b,y2_2
+1,b,y2_3
+3,c,y2_4
+3,c,y2_5
+3,c,y2_6
+6,c,y2_12
+2,a,y2_7
+4,b,y2_8
+4,b,y2_9
+5,b,y2_11
 )csv";
 
 constexpr auto kPSIOuputContentReceiver =
     R"csv(id1,id2,psi_advanced_join_cnt,psi_advanced_join_first_index
-1,"b",2,0
-2,"a",2,2
-3,"c",1,4
-4,"b",1,5
+1,b,2,0
+2,a,2,2
+3,c,1,4
+4,b,1,5
 )csv";
 
 constexpr auto kPSIOuputContentSender =
@@ -86,12 +86,12 @@ constexpr auto kPSIOuputContentSender =
 TEST(AdvancedJoinTest, AdvancedJoinPreprocess) {
   constexpr auto expected_unique_input_keys_cnt_content =
       R"csv(id1,id2,psi_advanced_join_cnt,psi_advanced_join_first_index
-1,"b",2,0
-2,"a",2,2
-3,"c",1,4
-3,"d",3,5
-4,"b",1,8
-5,"c",1,9
+"1","b",2,0
+"2","a",2,2
+"3","c",1,4
+"3","d",3,5
+"4","b",1,8
+"5","c",1,9
 )csv";
 
   std::filesystem::path input_path =
@@ -178,35 +178,35 @@ TEST(AdvancedJoinTest, InnerJoin) {
   AdvancedJoinGenerateResult(sender_config);
 
   constexpr auto expected_output_content_receiver = R"csv("id1","id2","y1"
-1,"b","y1_1"
-1,"b","y1_1"
-1,"b","y1_1"
-1,"b","y1_2"
-1,"b","y1_2"
-1,"b","y1_2"
-2,"a","y1_5"
-2,"a","y1_6"
-3,"c","y1_3"
-3,"c","y1_3"
-3,"c","y1_3"
-4,"b","y1_4"
-4,"b","y1_4"
+1,b,y1_1
+1,b,y1_1
+1,b,y1_1
+1,b,y1_2
+1,b,y1_2
+1,b,y1_2
+2,a,y1_5
+2,a,y1_6
+3,c,y1_3
+3,c,y1_3
+3,c,y1_3
+4,b,y1_4
+4,b,y1_4
 )csv";
 
   constexpr auto expected_output_content_sender = R"csv("id1","id2","y2"
-1,"b","y2_1"
-1,"b","y2_2"
-1,"b","y2_3"
-1,"b","y2_1"
-1,"b","y2_2"
-1,"b","y2_3"
-2,"a","y2_7"
-2,"a","y2_7"
-3,"c","y2_4"
-3,"c","y2_5"
-3,"c","y2_6"
-4,"b","y2_8"
-4,"b","y2_9"
+1,b,y2_1
+1,b,y2_2
+1,b,y2_3
+1,b,y2_1
+1,b,y2_2
+1,b,y2_3
+2,a,y2_7
+2,a,y2_7
+3,c,y2_4
+3,c,y2_5
+3,c,y2_6
+4,b,y2_8
+4,b,y2_9
 )csv";
 
   EXPECT_EQ(LoadFile(receiver_config.output_path),
@@ -283,39 +283,39 @@ TEST(AdvancedJoinTest, LeftJoin) {
   AdvancedJoinGenerateResult(sender_config);
 
   constexpr auto expected_output_content_receiver = R"csv("id1","id2","y1"
-1,"b","y1_1"
-1,"b","y1_1"
-1,"b","y1_1"
-1,"b","y1_2"
-1,"b","y1_2"
-1,"b","y1_2"
-2,"a","y1_5"
-2,"a","y1_6"
-3,"c","y1_3"
-3,"c","y1_3"
-3,"c","y1_3"
-4,"b","y1_4"
-4,"b","y1_4"
-3,"d","y1_7"
-3,"d","y1_8"
-3,"d","y1_10"
-5,"c","y1_9"
+1,b,y1_1
+1,b,y1_1
+1,b,y1_1
+1,b,y1_2
+1,b,y1_2
+1,b,y1_2
+2,a,y1_5
+2,a,y1_6
+3,c,y1_3
+3,c,y1_3
+3,c,y1_3
+4,b,y1_4
+4,b,y1_4
+3,d,y1_7
+3,d,y1_8
+3,d,y1_10
+5,c,y1_9
 )csv";
 
   constexpr auto expected_output_content_sender = R"csv("id1","id2","y2"
-1,"b","y2_1"
-1,"b","y2_2"
-1,"b","y2_3"
-1,"b","y2_1"
-1,"b","y2_2"
-1,"b","y2_3"
-2,"a","y2_7"
-2,"a","y2_7"
-3,"c","y2_4"
-3,"c","y2_5"
-3,"c","y2_6"
-4,"b","y2_8"
-4,"b","y2_9"
+1,b,y2_1
+1,b,y2_2
+1,b,y2_3
+1,b,y2_1
+1,b,y2_2
+1,b,y2_3
+2,a,y2_7
+2,a,y2_7
+3,c,y2_4
+3,c,y2_5
+3,c,y2_6
+4,b,y2_8
+4,b,y2_9
 NA,NA,NA
 NA,NA,NA
 NA,NA,NA
@@ -396,41 +396,41 @@ TEST(AdvancedJoinTest, RightJoin) {
   AdvancedJoinGenerateResult(sender_config);
 
   constexpr auto expected_output_content_receiver = R"csv("id1","id2","y1"
-1,"b","y1_1"
-1,"b","y1_1"
-1,"b","y1_1"
-1,"b","y1_2"
-1,"b","y1_2"
-1,"b","y1_2"
-2,"a","y1_5"
-2,"a","y1_6"
-3,"c","y1_3"
-3,"c","y1_3"
-3,"c","y1_3"
-4,"b","y1_4"
-4,"b","y1_4"
+1,b,y1_1
+1,b,y1_1
+1,b,y1_1
+1,b,y1_2
+1,b,y1_2
+1,b,y1_2
+2,a,y1_5
+2,a,y1_6
+3,c,y1_3
+3,c,y1_3
+3,c,y1_3
+4,b,y1_4
+4,b,y1_4
 NA,NA,NA
 NA,NA,NA
 NA,NA,NA
 )csv";
 
   constexpr auto expected_output_content_sender = R"csv("id1","id2","y2"
-1,"b","y2_1"
-1,"b","y2_2"
-1,"b","y2_3"
-1,"b","y2_1"
-1,"b","y2_2"
-1,"b","y2_3"
-2,"a","y2_7"
-2,"a","y2_7"
-3,"c","y2_4"
-3,"c","y2_5"
-3,"c","y2_6"
-4,"b","y2_8"
-4,"b","y2_9"
-5,"b","y2_10"
-5,"b","y2_11"
-6,"c","y2_12"
+1,b,y2_1
+1,b,y2_2
+1,b,y2_3
+1,b,y2_1
+1,b,y2_2
+1,b,y2_3
+2,a,y2_7
+2,a,y2_7
+3,c,y2_4
+3,c,y2_5
+3,c,y2_6
+4,b,y2_8
+4,b,y2_9
+5,b,y2_10
+5,b,y2_11
+6,c,y2_12
 )csv";
 
   EXPECT_EQ(LoadFile(receiver_config.output_path),
@@ -507,49 +507,49 @@ TEST(AdvancedJoinTest, FullJoin) {
   AdvancedJoinGenerateResult(sender_config);
 
   constexpr auto expected_output_content_receiver = R"csv("id1","id2","y1"
-1,"b","y1_1"
-1,"b","y1_1"
-1,"b","y1_1"
-1,"b","y1_2"
-1,"b","y1_2"
-1,"b","y1_2"
-2,"a","y1_5"
-2,"a","y1_6"
-3,"c","y1_3"
-3,"c","y1_3"
-3,"c","y1_3"
-4,"b","y1_4"
-4,"b","y1_4"
-3,"d","y1_7"
-3,"d","y1_8"
-3,"d","y1_10"
-5,"c","y1_9"
+1,b,y1_1
+1,b,y1_1
+1,b,y1_1
+1,b,y1_2
+1,b,y1_2
+1,b,y1_2
+2,a,y1_5
+2,a,y1_6
+3,c,y1_3
+3,c,y1_3
+3,c,y1_3
+4,b,y1_4
+4,b,y1_4
+3,d,y1_7
+3,d,y1_8
+3,d,y1_10
+5,c,y1_9
 NA,NA,NA
 NA,NA,NA
 NA,NA,NA
 )csv";
 
   constexpr auto expected_output_content_sender = R"csv("id1","id2","y2"
-1,"b","y2_1"
-1,"b","y2_2"
-1,"b","y2_3"
-1,"b","y2_1"
-1,"b","y2_2"
-1,"b","y2_3"
-2,"a","y2_7"
-2,"a","y2_7"
-3,"c","y2_4"
-3,"c","y2_5"
-3,"c","y2_6"
-4,"b","y2_8"
-4,"b","y2_9"
+1,b,y2_1
+1,b,y2_2
+1,b,y2_3
+1,b,y2_1
+1,b,y2_2
+1,b,y2_3
+2,a,y2_7
+2,a,y2_7
+3,c,y2_4
+3,c,y2_5
+3,c,y2_6
+4,b,y2_8
+4,b,y2_9
 NA,NA,NA
 NA,NA,NA
 NA,NA,NA
 NA,NA,NA
-5,"b","y2_10"
-5,"b","y2_11"
-6,"c","y2_12"
+5,b,y2_10
+5,b,y2_11
+6,c,y2_12
 )csv";
 
   EXPECT_EQ(LoadFile(receiver_config.output_path),
@@ -626,10 +626,10 @@ TEST(AdvancedJoinTest, Difference) {
   AdvancedJoinGenerateResult(sender_config);
 
   constexpr auto expected_output_content_receiver = R"csv("id1","id2","y1"
-3,"d","y1_7"
-3,"d","y1_8"
-3,"d","y1_10"
-5,"c","y1_9"
+3,d,y1_7
+3,d,y1_8
+3,d,y1_10
+5,c,y1_9
 NA,NA,NA
 NA,NA,NA
 NA,NA,NA
@@ -640,9 +640,9 @@ NA,NA,NA
 NA,NA,NA
 NA,NA,NA
 NA,NA,NA
-5,"b","y2_10"
-5,"b","y2_11"
-6,"c","y2_12"
+5,b,y2_10
+5,b,y2_11
+6,c,y2_12
 )csv";
 
   EXPECT_EQ(LoadFile(receiver_config.output_path),

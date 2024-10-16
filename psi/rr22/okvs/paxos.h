@@ -100,6 +100,23 @@ class Paxos : public PaxosParam {
     Encode(V, P, h, prng);
   }
 
+  void EncodeU64(
+      absl::Span<uint64_t> values, absl::Span<uint64_t> output,
+      const std::shared_ptr<yacl::crypto::Prg<uint8_t>>& prng = nullptr) {
+    YACL_ENFORCE(dt == DenseType::Binary,
+                 "EncodeU64 only support DenseType::Binary");
+    PxVectorU64 V(values);
+    PxVectorU64 P(output);
+    auto h = P.DefaultHelper();
+    EncodeU64(V, P, h, prng);
+  }
+
+  // encode the given input with the given paxos p. Vec and ConstVec should
+  // meet the PxVector concept... Helper used to perform operations on values.
+  void EncodeU64(
+      const PxVectorU64& values, PxVectorU64& output, PxVectorU64::Helper& h,
+      const std::shared_ptr<yacl::crypto::Prg<uint8_t>>& prng = nullptr);
+
   // encode the given input with the given paxos p. Vec and ConstVec should
   // meet the PxVector concept... Helper used to perform operations on values.
   void Encode(
@@ -111,8 +128,14 @@ class Paxos : public PaxosParam {
   void Decode(absl::Span<const uint128_t> input, absl::Span<uint128_t> values,
               absl::Span<uint128_t> p);
 
+  void DecodeU64(absl::Span<const uint128_t> input, absl::Span<uint64_t> values,
+                 absl::Span<uint64_t> p);
+
   void Decode(absl::Span<const uint128_t> inputs, PxVector& values,
               const PxVector& PP, PxVector::Helper& h);
+
+  void DecodeU64(absl::Span<const uint128_t> inputs, PxVectorU64& values,
+                 const PxVectorU64& PP, PxVectorU64::Helper& h);
 
   // decodes 32 instances. rows should contain the row indicies, dense the dense
   // part. values is where the values are written to. p is the Paxos, h is the
@@ -121,11 +144,20 @@ class Paxos : public PaxosParam {
                 absl::Span<uint128_t> values_span, const PxVector& p,
                 const PxVector::Helper& h);
 
+  void Decode32U64(absl::Span<IdxType> rows_span,
+                   absl::Span<uint128_t> dense_span,
+                   absl::Span<uint64_t> values_span, const PxVectorU64& p,
+                   const PxVectorU64::Helper& h);
+
   // decodes one instances. rows should contain the row indicies, dense the
   // dense part. values is where the values are written to. p is the Paxos, h is
   // the value op. helper.
   void Decode1(absl::Span<IdxType> rows, const uint128_t dense,
                uint128_t* values, const PxVector& p, const PxVector::Helper& h);
+
+  void Decode1U64(absl::Span<IdxType> rows, const uint128_t dense,
+                  uint64_t* values, const PxVectorU64& p,
+                  const PxVectorU64::Helper& h);
 
   // A sparse representation of the F * C^-1 matrix.
   struct FCInv {
@@ -155,6 +187,12 @@ class Paxos : public PaxosParam {
                 const PxVector& values, PxVector& output, PxVector::Helper& h,
                 const std::shared_ptr<yacl::crypto::Prg<uint8_t>>& prng);
 
+  void BackfillU64(absl::Span<IdxType> main_rows, absl::Span<IdxType> main_cols,
+                   absl::Span<std::array<IdxType, 2>> gap_rows,
+                   const PxVectorU64& values, PxVectorU64& output,
+                   PxVectorU64::Helper& h,
+                   const std::shared_ptr<yacl::crypto::Prg<uint8_t>>& prng);
+
   // once triangulated, this is used to assign values
   // to output (paxos). Use the gf128 dense algorithm.
   void BackfillGf128(absl::Span<IdxType> main_rows,
@@ -163,6 +201,20 @@ class Paxos : public PaxosParam {
                      const PxVector& values, PxVector& output,
                      PxVector::Helper& h,
                      const std::shared_ptr<yacl::crypto::Prg<uint8_t>>& prng);
+
+  // once triangulated, this is used to assign values
+  // to output (paxos). Use the gf128 dense algorithm.
+  void BackfillGf128U64(
+      absl::Span<IdxType> main_rows, absl::Span<IdxType> main_cols,
+      absl::Span<std::array<IdxType, 2>> gap_rows, const PxVectorU64& values,
+      PxVectorU64& output, PxVectorU64::Helper& h,
+      const std::shared_ptr<yacl::crypto::Prg<uint8_t>>& prng);
+
+  void BackfillBinaryU64(
+      absl::Span<IdxType> main_rows, absl::Span<IdxType> main_cols,
+      absl::Span<std::array<IdxType, 2>> gap_rows, const PxVectorU64& values,
+      PxVectorU64& output, PxVectorU64::Helper& h,
+      const std::shared_ptr<yacl::crypto::Prg<uint8_t>>& prng);
 
   // once triangulated, this is used to assign values
   // to output (paxos). Use the classic binary dense algorithm.
@@ -188,6 +240,11 @@ class Paxos : public PaxosParam {
                       absl::Span<uint64_t> gap_cols, const PxVector& X,
                       const PxVector& P, PxVector::Helper& h);
 
+  PxVectorU64 GetX2PrimeU64(const FCInv& fcinv,
+                            absl::Span<std::array<IdxType, 2>> gap_rows,
+                            absl::Span<uint64_t> gap_cols, const PxVectorU64& X,
+                            const PxVectorU64& P, PxVectorU64::Helper& h);
+
   // returns E' = -FC^-1B + E
   DenseMtx GetEPrime(const FCInv& fcinv,
                      absl::Span<std::array<IdxType, 2>> gap_rows,
@@ -195,6 +252,10 @@ class Paxos : public PaxosParam {
 
   void RandomizeDenseCols(
       PxVector&, PxVector::Helper&, absl::Span<uint64_t> gap_cols,
+      const std::shared_ptr<yacl::crypto::Prg<uint8_t>>& prng);
+
+  void RandomizeDenseColsU64(
+      PxVectorU64&, PxVectorU64::Helper&, absl::Span<uint64_t> gap_cols,
       const std::shared_ptr<yacl::crypto::Prg<uint8_t>>& prng);
 
   // the number of items to be encoded.

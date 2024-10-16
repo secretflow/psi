@@ -51,6 +51,12 @@ int print_intersection_results(
     const std::vector<::apsi::receiver::MatchRecord> &intersection,
     const std::string &out_file, bool append_to_outfile = false);
 
+int stream_intersection_results(
+    const std::vector<std::string> &orig_items,
+    const std::vector<::apsi::Item> &items,
+    const std::vector<::apsi::receiver::MatchRecord> &intersection,
+    std::vector<std::string> &keys, std::vector<std::string> &values);
+
 std::shared_ptr<arrow::csv::StreamingReader> MakeArrowCsvReader(
     const std::string &file_name, std::vector<std::string> column_names);
 

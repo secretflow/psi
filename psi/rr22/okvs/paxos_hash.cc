@@ -34,6 +34,7 @@ void PaxosHash<IdxType>::BuildRow32(const absl::Span<uint128_t> hash,
                                     absl::Span<IdxType> rows) const {
   if ((weight == 3) && yacl::hasAVX2()) {
 #ifdef __x86_64__
+
     yacl::block row128_[3][16];
 
     for (uint64_t i = 0; i < weight; ++i) {
@@ -203,6 +204,13 @@ void PaxosHash<IdxType>::BuildRow32(const absl::Span<uint128_t> hash,
         rowi[weight * 6 + j] = row64[6];
         rowi[weight * 7 + j] = row64[7];
       }
+    }
+#else
+    auto rows_ptr = rows.data();
+
+    for (uint64_t k = 0; k < 32; ++k) {
+      BuildRow(hash[k], absl::MakeSpan(rows_ptr, weight));
+      rows_ptr += weight;
     }
 #endif
   } else {

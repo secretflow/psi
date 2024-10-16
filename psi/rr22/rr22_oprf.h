@@ -72,13 +72,19 @@ class Rr22Oprf {
  public:
   Rr22Oprf(
       size_t bin_size, size_t ssp, Rr22PsiMode mode = Rr22PsiMode::FastMode,
-      const yacl::crypto::CodeType& code_type = yacl::crypto::CodeType::Silver5,
+      const yacl::crypto::CodeType& code_type = yacl::crypto::CodeType::ExAcc7,
       bool malicious = false)
       : bin_size_(bin_size),
         ssp_(ssp),
         code_type_(code_type),
         mode_(mode),
-        malicious_(malicious) {}
+        malicious_(malicious) {
+    if (code_type == yacl::crypto::CodeType::Silver5 ||
+        code_type == yacl::crypto::CodeType::Silver11) {
+      SPDLOG_WARN(
+          "Silver code should not be used due to it's security issues.");
+    }
+  }
 
   uint64_t GetBinSize() { return bin_size_; }
 
@@ -115,7 +121,7 @@ class Rr22OprfSender : public Rr22Oprf {
  public:
   Rr22OprfSender(
       size_t bin_size, size_t ssp, Rr22PsiMode mode = Rr22PsiMode::FastMode,
-      const yacl::crypto::CodeType& code_type = yacl::crypto::CodeType::Silver5,
+      const yacl::crypto::CodeType& code_type = yacl::crypto::CodeType::ExAcc7,
       bool malicious = false)
       : Rr22Oprf(bin_size, ssp, mode, code_type, malicious) {
     if (malicious && mode == Rr22PsiMode::LowCommMode) {
@@ -158,7 +164,7 @@ class Rr22OprfReceiver : public Rr22Oprf {
  public:
   Rr22OprfReceiver(
       size_t bin_size, size_t ssp, Rr22PsiMode mode = Rr22PsiMode::FastMode,
-      const yacl::crypto::CodeType& code_type = yacl::crypto::CodeType::Silver5,
+      const yacl::crypto::CodeType& code_type = yacl::crypto::CodeType::ExAcc7,
       bool malicious = false)
       : Rr22Oprf(bin_size, ssp, mode, code_type, malicious) {
     if (malicious && mode == Rr22PsiMode::LowCommMode) {

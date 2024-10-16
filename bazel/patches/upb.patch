@@ -24,6 +24,6 @@ index 92e4bf24..e355ace7 100644
 +#else
  #define UPB_ALIGN_OF(type) offsetof (struct { char c; type member; }, member)
 +#endif
- 
+
  /* Hints to the compiler about likely/unlikely branches. */
  #if defined (__GNUC__) || defined(__clang__)

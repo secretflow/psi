@@ -16,9 +16,12 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
+#include <cstdint>
 #include <future>
 #include <ostream>
 #include <random>
+#include <vector>
 
 #include "sparsehash/dense_hash_map"
 #include "yacl/base/byte_container_view.h"
@@ -119,14 +122,11 @@ void Rr22PsiSenderInternal(const Rr22PsiOptions& options,
   SPDLOG_INFO("send rr22 oprf: {} vector:{}", oprf_byteview.size(),
               sender_oprfs.size());
 
-  for (size_t i = 0; i < sender_oprfs.size(); i += 100000) {
-    size_t send_size = std::min<size_t>(100000, sender_oprfs.size() - i);
-    yacl::ByteContainerView send_byteview = yacl::ByteContainerView(
-        oprf_byteview.data() + i * mask_size, send_size * mask_size);
-
-    lctx->SendAsyncThrottled(lctx->NextRank(), send_byteview,
-                             fmt::format("send oprf_buf"));
-  }
+  yacl::ByteContainerView send_byteview = yacl::ByteContainerView(
+      oprf_byteview.data(), sender_oprfs.size() * mask_size);
+  // TODO: split send_byteview then send or may cause recv timeout
+  lctx->SendAsyncThrottled(lctx->NextRank(), send_byteview,
+                           fmt::format("send oprf_buf"));
 
   SPDLOG_INFO("send rr22 oprf finished");
 }
@@ -148,7 +148,6 @@ std::vector<size_t> Rr22PsiReceiverInternal(
   if ((sender_size == 0) || (receiver_size == 0)) {
     return {};
   }
-
   YACL_ENFORCE(sender_size <= receiver_size);
 
   size_t mask_size = sizeof(uint128_t);
@@ -177,6 +176,60 @@ std::vector<size_t> Rr22PsiReceiverInternal(
   SPDLOG_INFO("compute intersection end");
 
   return indices;
+}
+
+std::vector<uint128_t> Rr22PsiSenderOprfs(
+    const Rr22PsiOptions& options,
+    const std::shared_ptr<yacl::link::Context>& lctx,
+    const std::vector<uint128_t>& inputs, size_t receiver_size) {
+  Rr22OprfSender oprf_sender(kRr22OprfBinSize, options.ssp, options.mode,
+                             options.code_type, options.malicious);
+
+  std::vector<uint128_t> inputs_hash(inputs.size());
+
+  oprf_sender.Send(lctx, receiver_size, absl::MakeSpan(inputs),
+                   absl::MakeSpan(inputs_hash), options.num_threads);
+  std::vector<uint128_t> sender_oprfs_v(inputs.size());
+  absl::Span<uint128_t> sender_oprfs =
+      absl::MakeSpan((uint128_t*)(sender_oprfs_v.data()), inputs.size());
+
+  SPDLOG_INFO("oprf eval begin");
+  oprf_sender.Eval(inputs, inputs_hash, sender_oprfs, options.num_threads);
+  SPDLOG_INFO("oprf eval end");
+
+  return sender_oprfs_v;
+}
+
+std::pair<size_t, size_t> ExchangeTruncateSize(
+    const std::shared_ptr<yacl::link::Context>& lctx, size_t self_size,
+    const Rr22PsiOptions& options) {
+  // Gather Items Size
+  std::vector<size_t> items_size = AllGatherItemsSize(lctx, self_size);
+
+  YACL_ENFORCE(self_size == items_size[lctx->Rank()]);
+  size_t peer_size = items_size[lctx->NextRank()];
+  size_t mask_size = sizeof(uint128_t);
+  if (options.compress) {
+    mask_size = ComputeTruncateSize(self_size, peer_size, options.ssp,
+                                    options.malicious);
+  }
+  return {mask_size, peer_size};
+}
+
+std::vector<uint128_t> Rr22PsiReceiverOprfs(
+    const Rr22PsiOptions& options,
+    const std::shared_ptr<yacl::link::Context>& lctx,
+    const std::vector<uint128_t>& inputs) {
+  Rr22OprfReceiver oprf_receiver(kRr22OprfBinSize, options.ssp, options.mode,
+                                 options.code_type, options.malicious);
+
+  SPDLOG_INFO("out buffer begin");
+  std::vector<uint128_t> oprfs;
+  oprfs.resize(inputs.size());
+  absl::Span<uint128_t> outputs = absl::MakeSpan(oprfs.data(), inputs.size());
+  SPDLOG_INFO("out buffer end");
+  oprf_receiver.Recv(lctx, inputs.size(), inputs, outputs, options.num_threads);
+  return oprfs;
 }
 
 }  // namespace psi::rr22

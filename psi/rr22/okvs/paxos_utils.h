@@ -322,4 +322,130 @@ struct PxVector {
   static Helper DefaultHelper() { return {}; }
 };
 
+struct PxVectorU64 {
+  using value_type = uint64_t;
+  using iterator = uint64_t*;
+  using const_iterator = const uint64_t*;
+
+  std::vector<value_type> owning;
+  absl::Span<value_type> elements;
+
+  PxVectorU64() = default;
+  PxVectorU64(const PxVectorU64& v) : PxVectorU64(v.owning.size()) {
+    std::memcpy(owning.data(), v.owning.data(),
+                v.owning.size() * sizeof(value_type));
+  }
+
+  PxVectorU64(PxVectorU64&& v) : PxVectorU64(v.owning.size()) {
+    std::memcpy(owning.data(), v.owning.data(),
+                v.owning.size() * sizeof(value_type));
+  }
+
+  PxVectorU64(absl::Span<value_type> e) { elements = e; }
+
+  PxVectorU64(uint64_t size) {
+    owning.resize(size);
+
+    elements = absl::MakeSpan(owning.data(), owning.size());
+  }
+
+  // return a iterator to the i'th element. Should be pointer symmatics
+  inline iterator operator[](uint64_t i) { return &elements[i]; }
+
+  // return a iterator to the i'th element. Should be pointer symmatics
+  inline const_iterator operator[](uint64_t i) const { return &elements[i]; }
+
+  // return the size of the vector
+  inline auto size() const { return elements.size(); }
+
+  // return a subset of the vector, starting at index offset and of size count.
+  // if count = -1, then get the rest of the vector.
+  inline PxVectorU64 subspan(uint64_t offset, uint64_t count = -1) {
+    return elements.subspan(offset, count);
+  }
+
+  // return a subset of the vector, starting at index offset and of size count.
+  // if count = -1, then get the rest of the vector.
+  inline PxVectorU64 subspan(uint64_t offset, uint64_t count = -1) const {
+    return PxVectorU64(elements.subspan(offset, count));
+  }
+
+  // populate the vector with the zero element.
+  inline void ZeroFill() {
+    // memset(mElements.data(), 0, mElements.size_bytes());
+    memset(elements.data(), 0, elements.size() * sizeof(value_type));
+  }
+
+  // The default implementation of helper for PxVector.
+  // This class performs operations of the elements of PxVector.
+  struct Helper {
+    // mutable version of value_type
+    using mut_value_type = std::remove_const_t<value_type>;
+    using mut_iterator = mut_value_type*;
+
+    // internal mask used to multiply a value with a bit.
+    // Assumes the zero bit string is the zero element.
+    std::array<mut_value_type, 2> zeroOneMask;
+
+    Helper() {
+      memset(&zeroOneMask[0], 0, sizeof(value_type));
+      memset(&zeroOneMask[1], -1, sizeof(value_type));
+    }
+
+    Helper(const Helper&) = default;
+
+    // return a element that the user can use.
+    inline static mut_value_type NewElement() { return {}; }
+
+    // return the iterator for the return type of newElement().
+    mut_iterator AsPtr(mut_value_type& t) { return &t; }
+
+    // return a vector of elements that the user can use.
+    inline static PxVectorU64 NewVec(uint64_t size) { return {size}; }
+
+    // assign the src to the dst, ie *dst = *src.
+    inline static void Assign(mut_iterator dst, const_iterator src) {
+      *dst = *src;
+    }
+
+    // add the src to the dst, ie *dst += *src.
+    inline static void Add(mut_iterator dst, const_iterator src1) {
+      *dst = *dst ^ *src1;
+    }
+
+    // multiply src1 with m and add the result to the dst, ie *dst += (*src) *
+    // m.
+    inline static void MultAdd(mut_iterator dst, const_iterator src1,
+                               const uint128_t& m) {
+      *dst = *dst ^ (Galois128(*src1) * m).get<uint128_t>(0);
+    }
+
+    // multiply src1 with bit and add the result to the dst, ie *dst += (*src) *
+    // bit.
+    inline void MultAdd(mut_iterator dst, const_iterator src1,
+                        const uint8_t& bit) {
+      YACL_ENFORCE(bit < 2, "bit:{}", bit);
+      *dst = *dst ^ (*src1 & zeroOneMask[bit]);
+    }
+
+    // return the iterator plus the given number of rows
+    inline static auto IterPlus(const_iterator p, uint64_t i) { return p + i; }
+
+    // return the iterator plus the given number of rows
+    inline static auto IterPlus(mut_iterator p, uint64_t i) { return p + i; }
+
+    // randomize the given element.
+    inline static void Randomize(
+        mut_iterator p,
+        const std::shared_ptr<yacl::crypto::Prg<uint8_t>>& prng) {
+      prng->Fill(absl::MakeSpan(p, 1));
+    }
+
+    inline static auto eq(iterator p0, iterator p1) { return *p0 == *p1; }
+  };
+
+  // return the default helper for this vector type.
+  static Helper DefaultHelper() { return {}; }
+};
+
 }  // namespace psi::rr22::okvs

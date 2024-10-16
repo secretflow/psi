@@ -61,7 +61,7 @@ struct Rr22PsiOptions {
   // not supported by now
   bool malicious = false;
 
-  yacl::crypto::CodeType code_type = yacl::crypto::CodeType::Silver5;
+  yacl::crypto::CodeType code_type = yacl::crypto::CodeType::ExAcc7;
 };
 
 void Rr22PsiSenderInternal(const Rr22PsiOptions& options,
@@ -74,5 +74,22 @@ std::vector<size_t> Rr22PsiReceiverInternal(
     const Rr22PsiOptions& options,
     const std::shared_ptr<yacl::link::Context>& lctx,
     const std::vector<uint128_t>& inputs);
+
+std::vector<uint128_t> Rr22PsiSenderOprfs(
+    const Rr22PsiOptions& options,
+    const std::shared_ptr<yacl::link::Context>& lctx,
+    const std::vector<uint128_t>& inputs, size_t receiver_size);
+
+// return oprfs,
+// indices are not sorted; need to be sorted by caller.
+std::vector<uint128_t> Rr22PsiReceiverOprfs(
+    const Rr22PsiOptions& options,
+    const std::shared_ptr<yacl::link::Context>& lctx,
+    const std::vector<uint128_t>& inputs);
+
+// return {mask_size, peer_size}
+std::pair<size_t, size_t> ExchangeTruncateSize(
+    const std::shared_ptr<yacl::link::Context>& lctx, size_t self_size,
+    const Rr22PsiOptions& options);
 
 }  // namespace psi::rr22

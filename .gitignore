@@ -45,3 +45,9 @@ coverity*/
 idir/
 
 ossutil_output/
+
+/dist
+*.egg-info
+__pycache__
+/build
+_build

@@ -1,0 +1,3 @@
+pandas
+multiprocess
+protobuf>=4, <5

@@ -203,11 +203,11 @@ def _com_github_microsoft_gsl():
     maybe(
         http_archive,
         name = "com_github_microsoft_gsl",
-        sha256 = "f0e32cb10654fea91ad56bde89170d78cfbf4363ee0b01d8f097de2ba49f6ce9",
-        strip_prefix = "GSL-4.0.0",
+        sha256 = "14255cb38a415ba0cc4f696969562be7d0ed36bbaf13c5e4748870babf130c48",
+        strip_prefix = "GSL-4.1.0",
         type = "tar.gz",
         urls = [
-            "https://github.com/microsoft/GSL/archive/refs/tags/v4.0.0.tar.gz",
+            "https://github.com/microsoft/GSL/archive/refs/tags/v4.1.0.tar.gz",
         ],
         build_file = "@psi//bazel:microsoft_gsl.BUILD",
     )

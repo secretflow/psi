@@ -6,6 +6,7 @@
 
 namespace pir::pps {
 
+//j, b_ in Query
 struct PIRQueryParam {
   uint64_t j_;
   bool b_;
@@ -28,14 +29,14 @@ class PpsPirClient {
     if (r) {
       q += 1;
     }
-    return q * Depth(universe_size_);
+    return q * static_cast<uint32_t>(std::ceil(std::log(universe_size_)));
   }
 
   // sample a bit b from Bernoulli((s - 1) / n)
   bool Bernoulli();
 
   // sample a random from [0, universe_size_]
-  uint64_t UniformUint64();
+  uint64_t GetRandomU64Less();
 
   // Setup(1^\lambda, universe_size_) -> ck, q_h
   void Setup(PIRKey& sk, std::set<uint64_t>& deltas);
@@ -45,7 +46,7 @@ class PpsPirClient {
              PIRQueryParam& param, PIRPuncKey& sk_punc);
 
   // Reconstruct(h ∈ {0, 1}^m, a ∈ {0, 1}) → x_i
-  int Reconstruct(PIRQueryParam& param, yacl::dynamic_bitset<>& h, bool a,
+  uint64_t Reconstruct(PIRQueryParam& param, yacl::dynamic_bitset<>& h, bool a,
                   bool& r);
 
   // Get m = (2 * n / s(n)) * log(n)
@@ -55,7 +56,7 @@ class PpsPirClient {
     if (r) {
       q += 1;
     }
-    return q * Depth(universe_size_);
+    return q * static_cast<uint32_t>(std::ceil(std::log(universe_size_)));
   }
 
   // Construction 44 (Multi-query offline/online PIR)
@@ -69,7 +70,7 @@ class PpsPirClient {
              PIRPuncKey& punc_l, PIRPuncKey& punc_r);
 
   // Reconstruct(h, a_left, a_right) → (h′, x_i)
-  int Reconstruct(PIRQueryParam& param, yacl::dynamic_bitset<>& h, bool a_left,
+  uint64_t Reconstruct(PIRQueryParam& param, yacl::dynamic_bitset<>& h, bool a_left,
                   bool a_right, bool& r);
 
  private:

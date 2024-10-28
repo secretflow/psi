@@ -1,14 +1,18 @@
 #include <set>
 #include <unordered_map>
+#include <future>
 
 #include "benchmark/benchmark.h"
 #include "client.h"
 #include "server.h"
 #include "yacl/base/dynamic_bitset.h"
+#include "receiver.h"
+#include "sender.h"
+#include "yacl/link/test_util.h"
 
 namespace {
 
-#define LAMBDA 1000
+constexpr uint32_t LAMBDA = 1000;
 
 inline void GenerateRandomBitString(yacl::dynamic_bitset<>& bits,
                                     uint64_t len) {
@@ -23,26 +27,81 @@ static void BM_PpsSingleBitPir(benchmark::State& state) {
     state.PauseTiming();
 
     size_t n = state.range(0);
-    pir::pps::PpsPirClient pirClient(LAMBDA, n * n * 2, n);
-    pir::pps::PpsPirServer pirServer(n * n * 2, n);
 
-    pir::pps::PIRKey pirKey;
+    pir::pps::PpsPirClient pirClient(LAMBDA, n * n, n);
+    pir::pps::PpsPirServer pirOfflineServer(n * n, n);
+    pir::pps::PpsPirServer pirOnlineServer(n * n, n);
+
+    pir::pps::PIRKey pirKey, pirKeyOffline;
     pir::pps::PIRQueryParam pirQueryParam;
-    pir::pps::PIRPuncKey pirPuncKey;
-    std::set<uint64_t> deltas;
+    pir::pps::PIRPuncKey pirPuncKey, pirPuncKeyOnline;
+    std::set<uint64_t> deltas, deltasOffline;
     yacl::dynamic_bitset<> bits;
-    GenerateRandomBitString(bits, n * n * 2);
-    yacl::dynamic_bitset<> h;
-    uint64_t query_index = pirClient.UniformUint64();
+    GenerateRandomBitString(bits, n * n);
+    yacl::dynamic_bitset<> h, hOffline;
+    uint64_t query_index = pirClient.GetRandomU64Less();
     bool query_result;
+
+    constexpr int kWorldSize = 2;
+    const auto contextsOffline = yacl::link::test::SetupWorld(kWorldSize);
+    const auto contextsOnline = yacl::link::test::SetupWorld(kWorldSize);
 
     state.ResumeTiming();
 
     pirClient.Setup(pirKey, deltas);
-    pirServer.Hint(pirKey, deltas, bits, h);
+
+    std::future<void> sender_future =
+        std::async(std::launch::async, pir::pps::ClientSendToOfflineServer,
+                   std::ref(pirKey), std::ref(deltas), contextsOffline[0]);
+
+    std::future<void> recver_future = std::async(
+        std::launch::async, pir::pps::OfflineServerRecvFromClient,
+        std::ref(pirKeyOffline), std::ref(deltasOffline), contextsOffline[1]);
+
+    sender_future.get();
+    recver_future.get();
+
+    pirOfflineServer.Hint(pirKeyOffline, deltasOffline, bits, hOffline);
+
+    sender_future =
+        std::async(std::launch::async, pir::pps::OfflineServerSendToClient,
+                   std::ref(hOffline), contextsOffline[0]);
+
+    recver_future =
+        std::async(std::launch::async, pir::pps::ClientRecvFromOfflineServer,
+                   std::ref(h), contextsOffline[1]);
+
+    sender_future.get();
+    recver_future.get();
+
     pirClient.Query(query_index, pirKey, deltas, pirQueryParam, pirPuncKey);
-    bool a = pirServer.Answer(pirPuncKey, bits);
-    pirClient.Reconstruct(pirQueryParam, h, a, query_result);
+
+    sender_future =
+        std::async(std::launch::async, pir::pps::ClientSendToOnlineServer,
+                   std::ref(pirPuncKey), contextsOnline[0]);
+
+    recver_future =
+        std::async(std::launch::async, pir::pps::OnlineServerRecvFromClient,
+                   std::ref(pirPuncKeyOnline), contextsOnline[1]);
+
+    sender_future.get();
+    recver_future.get();
+
+    bool a = pirOnlineServer.Answer(pirPuncKeyOnline, bits);
+    bool aClient;
+
+    sender_future =
+        std::async(std::launch::async, pir::pps::OnlineServerSendToClient,
+                   std::ref(a), contextsOnline[0]);
+
+    recver_future =
+        std::async(std::launch::async, pir::pps::ClientRecvFromOnlineServer,
+                   std::ref(aClient), contextsOnline[1]);
+
+    sender_future.get();
+    recver_future.get();
+
+    pirClient.Reconstruct(pirQueryParam, h, aClient, query_result);
   }
 }
 
@@ -51,25 +110,105 @@ static void BM_PpsMultiBitsPir(benchmark::State& state) {
     state.PauseTiming();
 
     size_t n = state.range(0);
-    pir::pps::PpsPirClient pirClient(LAMBDA, n * n, n);
-    pir::pps::PpsPirServer pirServer(n * n, n);
 
-    std::vector<pir::pps::PIRKeyUnion> pirKey;
+    pir::pps::PpsPirClient pirClient(LAMBDA, n * n, n);
+    pir::pps::PpsPirServer pirOfflineServer(n * n, n);
+    pir::pps::PpsPirServer pirOnlineServer(n * n, n);
+
+    std::vector<pir::pps::PIRKeyUnion> pirKey, pirKeyOffline;
     yacl::dynamic_bitset<> bits;
     GenerateRandomBitString(bits, n * n);
-    yacl::dynamic_bitset<> h;
+    yacl::dynamic_bitset<> h, hOffline;
     pir::pps::PIRQueryParam pirParam;
 
-    bool a_left, a_right, query_result;
+    bool aLeft, aRight, aLeftOnline, aRightOnline, queryResult;
     std::vector<std::unordered_set<uint64_t>> v;
+
+    constexpr int kWorldSize = 2;
+    const auto contextsOffline = yacl::link::test::SetupWorld(kWorldSize);
+    const auto contextsOnline = yacl::link::test::SetupWorld(kWorldSize);
 
     state.ResumeTiming();
 
+    pirClient.Setup(pirKey, v);
+
+    std::future<void> sender_future =
+        std::async(std::launch::async, pir::pps::ClientSendToOfflineServerM,
+                   std::ref(pirKey), contextsOffline[0]);
+
+    std::future<void> recver_future =
+        std::async(std::launch::async, pir::pps::OfflineServerRecvFromClientM,
+                   std::ref(pirKeyOffline), contextsOffline[1]);
+
+    sender_future.get();
+    recver_future.get();
+    pirOfflineServer.Hint(pirKeyOffline, bits, hOffline);
+
+    sender_future =
+        std::async(std::launch::async, pir::pps::OfflineServerSendToClient,
+                   std::ref(hOffline), contextsOffline[0]);
+
+    recver_future =
+        std::async(std::launch::async, pir::pps::ClientRecvFromOfflineServer,
+                   std::ref(h), contextsOffline[1]);
+
+    sender_future.get();
+    recver_future.get();
+
     for (uint i = 0; i < n * n; ++i) {
       pir::pps::PIRPuncKey pirPuncKeyL, pirPuncKeyR;
+      pir::pps::PIRPuncKey pirPuncKeyLOnline, pirPuncKeyROnline;
+
       pirClient.Query(i, pirKey, v, pirParam, pirPuncKeyL, pirPuncKeyR);
-      pirServer.AnswerMulti(pirPuncKeyL, pirPuncKeyR, a_left, a_right, bits);
-      pirClient.Reconstruct(pirParam, h, a_left, a_right, query_result);
+
+      sender_future =
+          std::async(std::launch::async, pir::pps::ClientSendToOnlineServer,
+                     std::ref(pirPuncKeyL), contextsOnline[0]);
+
+      recver_future =
+          std::async(std::launch::async, pir::pps::OnlineServerRecvFromClient,
+                     std::ref(pirPuncKeyLOnline), contextsOnline[1]);
+
+      sender_future.get();
+      recver_future.get();
+
+      sender_future =
+          std::async(std::launch::async, pir::pps::ClientSendToOnlineServer,
+                     std::ref(pirPuncKeyR), contextsOnline[0]);
+
+      recver_future =
+          std::async(std::launch::async, pir::pps::OnlineServerRecvFromClient,
+                     std::ref(pirPuncKeyROnline), contextsOnline[1]);
+
+      sender_future.get();
+      recver_future.get();
+
+      pirOnlineServer.AnswerMulti(pirPuncKeyLOnline, pirPuncKeyROnline,
+                                  aLeftOnline, aRightOnline, bits);
+
+      sender_future =
+          std::async(std::launch::async, pir::pps::OnlineServerSendToClient,
+                     std::ref(aLeftOnline), contextsOnline[0]);
+
+      recver_future =
+          std::async(std::launch::async, pir::pps::ClientRecvFromOnlineServer,
+                     std::ref(aLeft), contextsOnline[1]);
+
+      sender_future.get();
+      recver_future.get();
+
+      sender_future =
+          std::async(std::launch::async, pir::pps::OnlineServerSendToClient,
+                     std::ref(aRightOnline), contextsOnline[0]);
+
+      recver_future =
+          std::async(std::launch::async, pir::pps::ClientRecvFromOnlineServer,
+                     std::ref(aRight), contextsOnline[1]);
+
+      sender_future.get();
+      recver_future.get();
+
+      pirClient.Reconstruct(pirParam, h, aLeft, aRight, queryResult);
     }
   }
 }

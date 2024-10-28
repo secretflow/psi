@@ -12,7 +12,7 @@
 namespace pir::pps {
 
 #define PIR_OK 1
-#define PIR_ABORT 0
+#define PIR_ABORT 0xFFFFFFFFFFFFFFFF
 
 #define MODULE_ADD(a, b, m) \
   (((a) + (b) >= (m)) ? ((a) + (b) - (m)) : ((a) + (b)))
@@ -89,7 +89,13 @@ class PPS {
   PPS() : universe_size_(0), set_size_(0) {}
 
   PPS(uint64_t universe_size, uint64_t set_size)
-      : universe_size_(universe_size), set_size_(set_size) {}
+      : universe_size_(universe_size), set_size_(set_size) {
+    if (set_size * set_size < universe_size / 2 ||
+        set_size * set_size > 2 * universe_size) {
+      std::cerr << "The set size must in [sqrt(n / 2), sqrt(2 * n)]";
+      abort();
+    }
+  }
 
   // Generate a uint128_t k.
   PIRKey Gen(uint32_t lambda);

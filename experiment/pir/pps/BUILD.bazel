@@ -51,6 +51,35 @@ psi_cc_library(
     ],
 )
 
+psi_cc_library(
+    name = "sender",
+    srcs = ["sender.cc"],
+    hdrs = ["sender.h"],
+    deps = [
+        ":ggm_pset",
+        "@yacl//yacl/base:dynamic_bitset",
+        "@yacl//yacl/link:context",
+    ],
+)
+
+psi_cc_library(
+    name = "receiver",
+    srcs = ["receiver.cc"],
+    hdrs = ["receiver.h"],
+    deps = [
+        ":ggm_pset",
+        "@yacl//yacl/base:dynamic_bitset",
+        "@yacl//yacl/link:context",
+    ],
+)
+
+psi_cc_test(
+    name = "pps_test",
+    srcs = ["ggm_pset_test.cc"],
+    deps = [
+        ":ggm_pset",
+    ],
+)
 
 psi_cc_test(
     name = "pps_pir_test",
@@ -58,7 +87,10 @@ psi_cc_test(
     deps = [
         ":client",
         ":server",
+        ":sender",
+        ":receiver",
         "@yacl//yacl/base:dynamic_bitset",
+        "@yacl//yacl/link",
     ],
 )
 
@@ -68,7 +100,10 @@ psi_cc_binary(
     deps = [
         ":client",
         ":server",
+        ":sender",
+        ":receiver",
         "@yacl//yacl/base:dynamic_bitset",
         "@com_github_google_benchmark//:benchmark_main",
+        "@yacl//yacl/link",
     ],
 )

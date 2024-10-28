@@ -32,7 +32,7 @@ PIRKey PPS::Gen(uint32_t lambda) {
     }
   }
 
-  std::cerr << "Running \\lambda iterations of the loop unsuccessfully!\n";
+  std::cerr << "Running lambda iterations of the loop unsuccessfully!";
   abort();
 }
 
@@ -42,7 +42,6 @@ void PPS::Punc(uint64_t i, PIRKey k, PIRPuncKey& sk_punc) {
     uint32_t height = Depth(set_size_);
     sk_punc.pos_ = iter->second;
     yacl::dynamic_bitset<> bits(height, sk_punc.pos_);
-    GGMTree rand(k, height);
     uint128_t root = k, left_child, right_child;
     for (uint32_t i = 0; i < height; ++i) {
       GGMTree::AESPRG(root, left_child, right_child);
@@ -55,7 +54,7 @@ void PPS::Punc(uint64_t i, PIRKey k, PIRPuncKey& sk_punc) {
       }
     }
   } else {
-    std::cerr << "No such l that PRFEval(k, l) = i!\n";
+    std::cerr << "i is not in pseudorandom sets ";
     abort();
   }
 }
@@ -104,16 +103,15 @@ void PPS::Eval(PIRKey k, std::unordered_set<uint64_t>& set) {
 
 void PPS::Eval(const PIRPuncKey& sk_punc, std::set<uint64_t>& set) {
   uint32_t height = Depth(set_size_);
-  GGMTree rand(0, height);
   std::vector<uint128_t> leaf_nodes(1 << height);
-  leaf_nodes[0] = rand.GetRoot();
+  leaf_nodes[0] = 0;
   std::vector<uint128_t> temp((1 << height));
   for (uint32_t depth = 0; depth < height; ++depth) {
     std::copy(leaf_nodes.begin(), leaf_nodes.begin() + (1 << depth),
               temp.begin());
     for (uint32_t i = 0; i < (1u << depth); ++i) {
       if (temp[i]) {
-        rand.AESPRG(temp[i], leaf_nodes[2 * i], leaf_nodes[2 * i + 1]);
+        GGMTree::AESPRG(temp[i], leaf_nodes[2 * i], leaf_nodes[2 * i + 1]);
       } else {
         leaf_nodes[2 * i + 1] = leaf_nodes[2 * i] = 0;
       }

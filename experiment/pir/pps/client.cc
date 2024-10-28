@@ -11,7 +11,7 @@ bool PpsPirClient::Bernoulli() {
   return distribution(gen);
 }
 
-uint64_t PpsPirClient::UniformUint64() {
+uint64_t PpsPirClient::GetRandomU64Less() {
   return LemireTrick(yacl::crypto::RandU64(), set_size_);
 }
 
@@ -47,14 +47,14 @@ void PpsPirClient::Query(uint64_t i, PIRKey& sk, std::set<uint64_t>& deltas,
   if (iter == deltas.end()) {
     param.j_ = PIR_ABORT;
     std::unordered_map<uint64_t, uint64_t>::iterator map_iter =
-        std::next(map.begin(), UniformUint64());
+        std::next(map.begin(), GetRandomU64Less());
     sk_punc.delta_ = MODULE_SUB(i, map_iter->first, universe_size_);
   }
 
   uint64_t i_punc;
   if ((param.b_ = Bernoulli())) {
     std::unordered_map<uint64_t, uint64_t>::iterator map_iter =
-        std::next(map.begin(), UniformUint64());
+        std::next(map.begin(), GetRandomU64Less());
     i_punc = map_iter->first;
   } else {
     i_punc = MODULE_SUB(i, sk_punc.delta_, universe_size_);
@@ -62,9 +62,9 @@ void PpsPirClient::Query(uint64_t i, PIRKey& sk, std::set<uint64_t>& deltas,
   pps_.Punc(i_punc, sk, sk_punc);
 }
 
-int PpsPirClient::Reconstruct(PIRQueryParam& param, yacl::dynamic_bitset<>& h,
+uint64_t PpsPirClient::Reconstruct(PIRQueryParam& param, yacl::dynamic_bitset<>& h,
                               bool a, bool& r) {
-  if (param.b_) {
+  if (param.b_ && (param.j_ != PIR_ABORT)) {
     return PIR_ABORT;
   }
   r = a ^ h[param.j_];
@@ -97,13 +97,13 @@ void PpsPirClient::Query(uint64_t i, std::vector<PIRKeyUnion>& ck,
 
   PIRKey k_new = pps_.Gen(lambda_);
   PIRKeyUnion k_right;
-  uint64_t rand_i = std::next(pps_.getMap().begin(), UniformUint64())->first;
+  uint64_t rand_i = std::next(pps_.getMap().begin(), GetRandomU64Less())->first;
   punc_l.delta_ = MODULE_SUB(i, rand_i, universe_size_);
 
   uint64_t i_punc;
   param.j_ = PIR_ABORT;
   if ((param.b_ = Bernoulli())) {
-    rand_i = std::next(pps_.getMap().begin(), UniformUint64())->first;
+    rand_i = std::next(pps_.getMap().begin(), GetRandomU64Less())->first;
     i_punc = MODULE_ADD(rand_i, punc_l.delta_, universe_size_);
   } else {
     for (param.j_ = 0; param.j_ < ck.size(); ++param.j_) {
@@ -125,7 +125,7 @@ void PpsPirClient::Query(uint64_t i, std::vector<PIRKeyUnion>& ck,
 
   uint64_t i_punc_l = MODULE_SUB(i_punc, punc_l.delta_, universe_size_);
   pps_.Punc(i_punc_l, k_new, punc_l);
-  if (param.j_) {
+  if (param.j_ != PIR_ABORT) {
     pps_.EvalMap(k_right.k_);
     uint64_t i_punc_r = MODULE_SUB(i_punc, k_right.delta_, universe_size_);
     pps_.Punc(i_punc_r, k_right.k_, punc_r);
@@ -135,9 +135,9 @@ void PpsPirClient::Query(uint64_t i, std::vector<PIRKeyUnion>& ck,
   }
 }
 
-int PpsPirClient::Reconstruct(PIRQueryParam& param, yacl::dynamic_bitset<>& h,
+uint64_t PpsPirClient::Reconstruct(PIRQueryParam& param, yacl::dynamic_bitset<>& h,
                               bool a_left, bool a_right, bool& r) {
-  if (param.j_) {
+  if (param.j_ != PIR_ABORT) {
     r = a_right ^ h[param.j_];
     h[param.j_] = a_left ^ r;
     return PIR_OK;

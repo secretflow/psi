@@ -1,5 +1,7 @@
 #include "client.h"
 
+#include <spdlog/spdlog.h>
+
 namespace pir::pps {
 
 bool PpsPirClient::Bernoulli() {
@@ -36,7 +38,7 @@ void PpsPirClient::Setup(PIRKey& sk, std::set<uint64_t>& deltas) {
 void PpsPirClient::Query(uint64_t i, PIRKey& sk, std::set<uint64_t>& deltas,
                          PIRQueryParam& param, PIRPuncKey& sk_punc) {
   std::set<uint64_t>::iterator iter = deltas.begin();
-  PIREvalMap& map = pps_.getMap();
+  const PIREvalMap map = pps_.getMap();
   for (param.j_ = 0; iter != deltas.end(); ++param.j_, ++iter) {
     uint64_t r = MODULE_SUB(i, *iter, universe_size_);
     if (map.find(r) != map.end()) {
@@ -45,16 +47,15 @@ void PpsPirClient::Query(uint64_t i, PIRKey& sk, std::set<uint64_t>& deltas,
     }
   }
   if (iter == deltas.end()) {
+    SPDLOG_INFO("Can't find a j \\in m such that i - \\delta_j \\in Eval(sk)");
     param.j_ = PIR_ABORT;
-    std::unordered_map<uint64_t, uint64_t>::iterator map_iter =
-        std::next(map.begin(), GetRandomU64Less());
+    auto map_iter = std::next(map.begin(), GetRandomU64Less());
     sk_punc.delta_ = MODULE_SUB(i, map_iter->first, universe_size_);
   }
 
   uint64_t i_punc;
   if ((param.b_ = Bernoulli())) {
-    std::unordered_map<uint64_t, uint64_t>::iterator map_iter =
-        std::next(map.begin(), GetRandomU64Less());
+    auto map_iter = std::next(map.begin(), GetRandomU64Less());
     i_punc = map_iter->first;
   } else {
     i_punc = MODULE_SUB(i, sk_punc.delta_, universe_size_);
@@ -62,9 +63,10 @@ void PpsPirClient::Query(uint64_t i, PIRKey& sk, std::set<uint64_t>& deltas,
   pps_.Punc(i_punc, sk, sk_punc);
 }
 
-uint64_t PpsPirClient::Reconstruct(PIRQueryParam& param, yacl::dynamic_bitset<>& h,
-                              bool a, bool& r) {
-  if (param.b_ && (param.j_ != PIR_ABORT)) {
+uint64_t PpsPirClient::Reconstruct(PIRQueryParam& param,
+                                   yacl::dynamic_bitset<>& h, bool a, bool& r) {
+  if (param.b_ || (param.j_ == PIR_ABORT)) {
+    SPDLOG_INFO("Reconstruct: Param b == 1 OR j == \\abort");
     return PIR_ABORT;
   }
   r = a ^ h[param.j_];
@@ -118,6 +120,7 @@ void PpsPirClient::Query(uint64_t i, std::vector<PIRKeyUnion>& ck,
     }
 
     if (param.j_ == ck.size()) {
+      SPDLOG_INFO("Can't find a j \\in [m] such that i \\in Eval(sk_j)");
       param.j_ = PIR_ABORT;
     }
     i_punc = i;
@@ -135,13 +138,15 @@ void PpsPirClient::Query(uint64_t i, std::vector<PIRKeyUnion>& ck,
   }
 }
 
-uint64_t PpsPirClient::Reconstruct(PIRQueryParam& param, yacl::dynamic_bitset<>& h,
-                              bool a_left, bool a_right, bool& r) {
+uint64_t PpsPirClient::Reconstruct(PIRQueryParam& param,
+                                   yacl::dynamic_bitset<>& h, bool a_left,
+                                   bool a_right, bool& r) {
   if (param.j_ != PIR_ABORT) {
     r = a_right ^ h[param.j_];
     h[param.j_] = a_left ^ r;
     return PIR_OK;
   }
+  SPDLOG_INFO("Reconstruct: j == \\abort");
   return PIR_ABORT;
 }
 }  // namespace pir::pps

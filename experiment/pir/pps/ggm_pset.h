@@ -2,6 +2,7 @@
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
+#include <spdlog/spdlog.h>
 
 #include "yacl/base/dynamic_bitset.h"
 #include "yacl/crypto/rand/rand.h"
@@ -92,7 +93,7 @@ class PPS {
       : universe_size_(universe_size), set_size_(set_size) {
     if (set_size * set_size < universe_size / 2 ||
         set_size * set_size > 2 * universe_size) {
-      std::cerr << "The set size must in [sqrt(n / 2), sqrt(2 * n)]";
+      SPDLOG_ERROR("The set size must in [sqrt(n / 2), sqrt(2 * n)]");
       abort();
     }
   }
@@ -111,7 +112,7 @@ class PPS {
 
   void Eval(const PIRPuncKey& sk_punc, std::set<uint64_t>& set);
 
-  PIREvalMap& getMap() { return map_; }
+  const PIREvalMap& getMap() const { return map_; }
 
  private:
   PIREvalMap map_;

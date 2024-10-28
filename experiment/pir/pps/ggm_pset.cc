@@ -1,4 +1,5 @@
 #include "ggm_pset.h"
+#include <spdlog/spdlog.h>
 
 namespace pir::pps {
 
@@ -32,7 +33,7 @@ PIRKey PPS::Gen(uint32_t lambda) {
     }
   }
 
-  std::cerr << "Running lambda iterations of the loop unsuccessfully!";
+  SPDLOG_ERROR("Running lambda iterations of the loop unsuccessfully!");
   abort();
 }
 
@@ -54,7 +55,7 @@ void PPS::Punc(uint64_t i, PIRKey k, PIRPuncKey& sk_punc) {
       }
     }
   } else {
-    std::cerr << "i is not in pseudorandom sets ";
+    SPDLOG_ERROR("i is not in pseudorandom sets ");
     abort();
   }
 }

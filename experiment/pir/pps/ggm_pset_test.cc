@@ -19,8 +19,7 @@ constexpr uint32_t LAMBDA = 1000;
 TEST(PIRTest, GgmPsetGenAbortTest) {
   pir::pps::PPS pps(UNIVERSE_SIZE, SET_SIZE);
   uint32_t error_lambda = 0;
-  ASSERT_DEATH(pps.Gen(error_lambda),
-               "Running lambda iterations of the loop unsuccessfully!");
+  ASSERT_DEATH(pps.Gen(error_lambda), "");
 }
 
 TEST(PIRTest, GgmPsetEvalTest) {
@@ -56,7 +55,6 @@ TEST(PIRTest, GgmPsetPuncTest) {
     ASSERT_NE(map.find(v), map.end());
   }
   uint64_t error_value = UNIVERSE_SIZE + 1;
-  ASSERT_DEATH(pps.Punc(error_value, k, sk_punc),
-               "i is not in pseudorandom sets");
+  ASSERT_DEATH(pps.Punc(error_value, k, sk_punc), "");
 }
 }  // namespace

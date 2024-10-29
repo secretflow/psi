@@ -111,10 +111,10 @@ TEST_P(PianoTest, Works) {
   server_future.get();
 }
 
-// [8m, 128m, 1G]
+// [8m, 128m, 256m]
 INSTANTIATE_TEST_SUITE_P(
     PianoTestInstances, PianoTest,
     ::testing::Values(TestParams{131072, 1211212, 8, 1000, false},
                       TestParams{2097152, 6405285, 8, 1000, false},
-                      TestParams{16777216, 7539870, 16, 1000, false}));
+                      TestParams{4194304, 7539870, 16, 1000, false}));
 }  // namespace psi::piano

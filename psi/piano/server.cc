@@ -46,8 +46,7 @@ void QueryServiceServer::ProcessFetchFullDB() {
   for (uint64_t i = 0; i < set_size_; ++i) {
     const uint64_t down = i * chunk_size_;
     uint64_t up = (i + 1) * chunk_size_;
-
-    up = std::min(up, db_.size());
+    up = std::min(up, static_cast<uint64_t>(db_.size()));
     std::vector<uint64_t> chunk(db_.begin() + down * DBEntryLength,
                                 db_.begin() + up * DBEntryLength);
     auto chunk_buf = SerializeDBChunk(i, chunk.size(), chunk);

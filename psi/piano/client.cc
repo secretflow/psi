@@ -110,7 +110,8 @@ void QueryServiceClient::FetchFullDB() {
     if (chunkBuf.size() == 0) {
       break;
     }
-    auto [chunkId, chunkSize, chunk] = DeserializeDBChunk(chunkBuf);
+    auto dbChunk = DeserializeDBChunk(chunkBuf);
+    auto& chunk = std::get<2>(dbChunk);
 
     std::vector<bool> hitMap(chunk_size_, false);
 
@@ -216,8 +217,7 @@ void QueryServiceClient::SendDummySet() const {
 
   const auto response_buf =
       context_->Recv(context_->NextRank(), "SetParityQueryResponse");
-  auto [parity, server_compute_time] =
-      DeserializeSetParityQueryResponse(response_buf);
+  // auto parityQueryResponse = DeserializeSetParityQueryResponse(response_buf);
 }
 
 DBEntry QueryServiceClient::OnlineSingleQuery(const uint64_t x) {
@@ -295,8 +295,10 @@ DBEntry QueryServiceClient::OnlineSingleQuery(const uint64_t x) {
 
   const auto response_buf =
       context_->Recv(context_->NextRank(), "SetParityQueryResponse");
-  auto [parity, server_compute_time] =
+
+  const auto parityQueryResponse =
       DeserializeSetParityQueryResponse(response_buf);
+  const auto& parity = std::get<0>(parityQueryResponse);
 
   // recover the answer
   xVal = primary_sets_[hitSetId].parity;    // the parity of the hit set

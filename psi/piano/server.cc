@@ -29,7 +29,9 @@ void QueryServiceServer::HandleRequest(const yacl::Buffer& request_data) {
       break;
     }
     case QueryRequest::kSetParityQuery: {
-      auto [set_size, indices] = DeserializeSetParityQueryMsg(request_data);
+      const auto parityQuery = DeserializeSetParityQueryMsg(request_data);
+      const auto& indices = std::get<1>(parityQuery);
+
       auto [parity, server_compute_time] = ProcessSetParityQuery(indices);
       const auto response_buf =
           SerializeSetParityQueryResponse(parity, server_compute_time);

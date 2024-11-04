@@ -93,7 +93,7 @@ void ClientRecvFromOnlineServer(bool& a,
 }
 
 void OfflineServerRecvFromClientM(std::vector<PIRKeyUnion>& pirKey,
-                                 std::shared_ptr<yacl::link::Context> lctx) {
+                                  std::shared_ptr<yacl::link::Context> lctx) {
   yacl::Buffer msg =
       lctx->Recv(lctx->NextRank(), "OfflineServerRecvFromClient");
   DeserializeOfflineMessage(msg, pirKey);

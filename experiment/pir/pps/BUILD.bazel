@@ -22,8 +22,8 @@ psi_cc_library(
     hdrs = ["ggm_pset.h"],
     deps = [
         "@yacl//yacl/base:dynamic_bitset",
+        "@yacl//yacl/crypto/rand",
         "@yacl//yacl/crypto/tools:prg",
-        "@yacl//yacl/crypto/rand:rand",
     ],
 )
 
@@ -34,8 +34,8 @@ psi_cc_library(
     deps = [
         ":ggm_pset",
         "@yacl//yacl/base:dynamic_bitset",
+        "@yacl//yacl/crypto/rand",
         "@yacl//yacl/crypto/tools:prg",
-        "@yacl//yacl/crypto/rand:rand",
     ],
 )
 
@@ -46,8 +46,8 @@ psi_cc_library(
     deps = [
         ":ggm_pset",
         "@yacl//yacl/base:dynamic_bitset",
+        "@yacl//yacl/crypto/rand",
         "@yacl//yacl/crypto/tools:prg",
-        "@yacl//yacl/crypto/rand:rand",
     ],
 )
 
@@ -86,9 +86,9 @@ psi_cc_test(
     srcs = ["pps_pir_test.cc"],
     deps = [
         ":client",
-        ":server",
-        ":sender",
         ":receiver",
+        ":sender",
+        ":server",
         "@yacl//yacl/base:dynamic_bitset",
         "@yacl//yacl/link",
     ],
@@ -99,11 +99,11 @@ psi_cc_binary(
     srcs = ["pps_pir_benchmark.cc"],
     deps = [
         ":client",
-        ":server",
-        ":sender",
         ":receiver",
-        "@yacl//yacl/base:dynamic_bitset",
+        ":sender",
+        ":server",
         "@com_github_google_benchmark//:benchmark_main",
+        "@yacl//yacl/base:dynamic_bitset",
         "@yacl//yacl/link",
     ],
 )

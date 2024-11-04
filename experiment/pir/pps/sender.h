@@ -28,5 +28,5 @@ void OnlineServerSendToClient(bool& a,
                               std::shared_ptr<yacl::link::Context> lctx);
 
 void ClientSendToOfflineServerM(std::vector<PIRKeyUnion>& pirKey,
-                               std::shared_ptr<yacl::link::Context> lctx);
+                                std::shared_ptr<yacl::link::Context> lctx);
 }  // namespace pir::pps

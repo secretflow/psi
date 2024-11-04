@@ -1,8 +1,9 @@
+#include <spdlog/spdlog.h>
+
 #include <cmath>
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
-#include <spdlog/spdlog.h>
 
 #include "yacl/base/dynamic_bitset.h"
 #include "yacl/crypto/rand/rand.h"

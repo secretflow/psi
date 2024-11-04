@@ -30,6 +30,6 @@ void ClientRecvFromOnlineServer(bool& a,
                                 std::shared_ptr<yacl::link::Context> lctx);
 
 void OfflineServerRecvFromClientM(std::vector<PIRKeyUnion>& pirKey,
-                                 std::shared_ptr<yacl::link::Context> lctx);
+                                  std::shared_ptr<yacl::link::Context> lctx);
 
 }  // namespace pir::pps

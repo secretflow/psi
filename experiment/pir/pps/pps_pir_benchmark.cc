@@ -1,13 +1,13 @@
+#include <future>
 #include <set>
 #include <unordered_map>
-#include <future>
 
 #include "benchmark/benchmark.h"
 #include "client.h"
-#include "server.h"
-#include "yacl/base/dynamic_bitset.h"
 #include "receiver.h"
 #include "sender.h"
+#include "server.h"
+#include "yacl/base/dynamic_bitset.h"
 #include "yacl/link/test_util.h"
 
 namespace {

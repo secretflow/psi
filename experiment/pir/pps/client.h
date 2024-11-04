@@ -6,7 +6,7 @@
 
 namespace pir::pps {
 
-//j, b_ in Query
+// j, b_ in Query
 struct PIRQueryParam {
   uint64_t j_;
   bool b_;
@@ -47,7 +47,7 @@ class PpsPirClient {
 
   // Reconstruct(h ∈ {0, 1}^m, a ∈ {0, 1}) → x_i
   uint64_t Reconstruct(PIRQueryParam& param, yacl::dynamic_bitset<>& h, bool a,
-                  bool& r);
+                       bool& r);
 
   // Get m = (2 * n / s(n)) * log(n)
   uint64_t MM() {
@@ -70,8 +70,8 @@ class PpsPirClient {
              PIRPuncKey& punc_l, PIRPuncKey& punc_r);
 
   // Reconstruct(h, a_left, a_right) → (h′, x_i)
-  uint64_t Reconstruct(PIRQueryParam& param, yacl::dynamic_bitset<>& h, bool a_left,
-                  bool a_right, bool& r);
+  uint64_t Reconstruct(PIRQueryParam& param, yacl::dynamic_bitset<>& h,
+                       bool a_left, bool a_right, bool& r);
 
  private:
   PPS pps_;

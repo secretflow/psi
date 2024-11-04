@@ -91,7 +91,7 @@ void OnlineServerSendToClient(bool& a,
 }
 
 void ClientSendToOfflineServerM(std::vector<PIRKeyUnion>& pirKey,
-                               std::shared_ptr<yacl::link::Context> lctx) {
+                                std::shared_ptr<yacl::link::Context> lctx) {
   yacl::Buffer msg = SerializeOfflineMessage(pirKey);
   lctx->SendAsync(lctx->NextRank(), msg, "ClientSendToOfflineServerMsg");
 }

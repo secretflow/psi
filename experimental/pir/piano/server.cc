@@ -101,4 +101,4 @@ std::vector<uint64_t> QueryServiceServer::HandleSetParityQuery(
   return ret;
 }
 
-}
+}  // namespace pir::piano

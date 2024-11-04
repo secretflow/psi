@@ -8,14 +8,13 @@
 #include <utility>
 #include <vector>
 
-#include "gtest/gtest.h"
-#include "yacl/link/context.h"
-#include "yacl/link/test_util.h"
-
 #include "experimental/pir/piano/client.h"
 #include "experimental/pir/piano/serialize.h"
 #include "experimental/pir/piano/server.h"
 #include "experimental/pir/piano/util.h"
+#include "gtest/gtest.h"
+#include "yacl/link/context.h"
+#include "yacl/link/test_util.h"
 
 struct TestParams {
   uint64_t db_size;
@@ -117,4 +116,4 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(TestParams{131072, 1211212, 8, 1000, false},
                       TestParams{2097152, 6405285, 8, 1000, false},
                       TestParams{4194304, 7539870, 16, 1000, false}));
-}
+}  // namespace pir::piano

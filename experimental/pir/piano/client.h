@@ -7,11 +7,10 @@
 #include <iostream>
 #include <thread>
 
-#include "yacl/crypto/rand/rand.h"
-#include "yacl/link/context.h"
-
 #include "experimental/pir/piano/serialize.h"
 #include "experimental/pir/piano/util.h"
+#include "yacl/crypto/rand/rand.h"
+#include "yacl/link/context.h"
 
 namespace pir::piano {
 
@@ -101,4 +100,4 @@ class QueryServiceClient {
   std::vector<LocalReplacementGroup> local_replacement_groups_;
 };
 
-}  
+}  // namespace pir::piano

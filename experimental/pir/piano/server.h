@@ -9,10 +9,9 @@
 #include <utility>
 #include <vector>
 
-#include "yacl/link/context.h"
-
 #include "experimental/pir/piano/serialize.h"
 #include "experimental/pir/piano/util.h"
+#include "yacl/link/context.h"
 
 namespace pir::piano {
 
@@ -51,4 +50,4 @@ class QueryServiceServer {
   uint64_t chunk_size_;                           // The size of each chunk
 };
 
-}
+}  // namespace pir::piano

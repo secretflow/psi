@@ -85,4 +85,4 @@ class PRSetWithShortTag {
       uint64_t chunk_size) const;
 };
 
-}
+}  // namespace pir::piano

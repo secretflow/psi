@@ -345,4 +345,4 @@ std::vector<DBEntry> QueryServiceClient::OnlineMultipleQueries(
   return results;
 }
 
-}
+}  // namespace pir::piano

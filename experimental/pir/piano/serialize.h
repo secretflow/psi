@@ -4,9 +4,8 @@
 #include <utility>
 #include <vector>
 
-#include "yacl/base/buffer.h"
-
 #include "experimental/pir/piano/util.h"
+#include "yacl/base/buffer.h"
 
 #include "experimental/pir/piano/piano.pb.h"
 
@@ -96,4 +95,4 @@ DeserializeSetParityQueryResponse(const yacl::Buffer& buf) {
   return {parity, proto.server_compute_time()};
 }
 
-}
+}  // namespace pir::piano

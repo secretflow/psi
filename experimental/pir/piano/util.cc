@@ -166,4 +166,4 @@ bool PRSetWithShortTag::MemberTestWithLongKeyAndTag(
          (PRFEvalWithLongKeyAndTag(long_key, Tag, chunk_id) & (chunk_size - 1));
 }
 
-}
+}  // namespace pir::piano

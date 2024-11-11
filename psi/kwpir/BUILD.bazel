@@ -19,17 +19,20 @@ package(default_visibility = ["//visibility:public"])
 psi_cc_library(
     name = "kw_pir",
     srcs = ["kw_pir.cc"],
-    hdrs = ["kw_pir.h","index_pir.h"],
+    hdrs = [
+        "index_pir.h",
+        "kw_pir.h",
+    ],
     linkopts = [
         "-ldl",
         "-lm",
     ],
     deps = [
+        "//psi/utils:cuckoo_index",
         "@yacl//yacl/base:byte_container_view",
         "@yacl//yacl/base:exception",
         "@yacl//yacl/base:int128",
         "@yacl//yacl/crypto/rand",
-        "//psi/utils:cuckoo_index",
     ],
 )
 

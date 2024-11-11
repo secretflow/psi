@@ -517,7 +517,9 @@ size_t EcdhOprfPsiClient::SendBlindedItems(
   SPDLOG_INFO("Begin Send BlindedItems items");
 
   while (true) {
-    auto [items, dup_cnt] = batch_provider->ReadNextBatchWithDupCnt();
+    std::vector<std::string> items;
+    std::unordered_map<uint32_t, uint32_t> dup_cnt;
+    std::tie(items, dup_cnt) = batch_provider->ReadNextBatchWithDupCnt();
 
     PsiDataBatch blinded_batch;
     blinded_batch.is_last_batch = items.empty();

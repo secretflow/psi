@@ -189,7 +189,6 @@ class Rr22OprfReceiver : public Rr22Oprf {
       const absl::Span<const uint128_t>& inputs);
 
  private:
-  size_t init_size_ = 0;
   size_t num_threads_ = 0;
   okvs::Baxos baxos_;
   okvs::Paxos<uint32_t> paxos_;

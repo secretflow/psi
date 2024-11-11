@@ -38,7 +38,6 @@ void KkrtPsiReceiver::Init() {
 
   AbstractPsiReceiver::Init();
 
-  CommonInit(key_hash_digest_, &config_, recovery_manager_.get());
   SPDLOG_INFO("[KkrtPsiReceiver::Init] end");
 }
 
@@ -51,7 +50,7 @@ void KkrtPsiReceiver::PreProcess() {
   }
 
   bucket_count_ =
-      NegotiateBucketNum(lctx_, report_.original_count(),
+      NegotiateBucketNum(lctx_, report_.original_key_count(),
                          config_.protocol_config().kkrt_config().bucket_size(),
                          config_.protocol_config().protocol());
 
@@ -60,13 +59,12 @@ void KkrtPsiReceiver::PreProcess() {
 
     auto gen_input_bucket_f = std::async([&] {
       if (recovery_manager_) {
-        input_bucket_store_ = CreateCacheFromCsv(
-            config_.input_config().path(), keys,
-            recovery_manager_->input_bucket_store_path(), bucket_count_);
+        input_bucket_store_ = CreateCacheFromProvider(
+            batch_provider_, recovery_manager_->input_bucket_store_path(),
+            bucket_count_);
       } else {
-        input_bucket_store_ = CreateCacheFromCsv(
-            config_.input_config().path(), keys,
-            std::filesystem::path(config_.input_config().path()).parent_path(),
+        input_bucket_store_ = CreateCacheFromProvider(
+            batch_provider_, GetTaskDir() / "input_bucket_store",
             bucket_count_);
       }
     });
@@ -120,9 +118,9 @@ void KkrtPsiReceiver::Online() {
       continue;
     }
 
+    std::vector<HashBucketCache::BucketItem> res;
+    std::vector<uint32_t> duplicate_cnt;
     auto run_f = std::async([&] {
-      std::vector<HashBucketCache::BucketItem> res;
-
       std::vector<uint128_t> items_hash(bucket_items_list->size());
       yacl::parallel_for(0, bucket_items_list->size(),
                          [&](int64_t begin, int64_t end) {
@@ -131,23 +129,22 @@ void KkrtPsiReceiver::Online() {
                                  bucket_items_list->at(i).base64_data);
                            }
                          });
-
-      std::vector<size_t> kkrt_psi_result =
+      std::vector<size_t> inter_indexes;
+      std::tie(inter_indexes, duplicate_cnt) =
           KkrtPsiRecv(lctx_, *ot_send_, items_hash);
-      res.reserve(kkrt_psi_result.size());
+      res.reserve(inter_indexes.size());
 
-      for (auto index : kkrt_psi_result) {
+      for (auto index : inter_indexes) {
         res.emplace_back(bucket_items_list->at(index));
       }
       return res;
     });
 
-    std::vector<HashBucketCache::BucketItem> result_list =
-        SyncWait(lctx_, &run_f);
+    SyncWait(lctx_, &run_f);
 
     auto write_bucket_res_f = std::async([&] {
       HandleBucketResultByReceiver(config_.protocol_config().broadcast_result(),
-                                   lctx_, result_list,
+                                   lctx_, res, duplicate_cnt,
                                    intersection_indices_writer_.get());
     });
 

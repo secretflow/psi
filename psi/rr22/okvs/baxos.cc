@@ -158,7 +158,7 @@ void Baxos::ImplParSolve(
   YACL_ENFORCE(inputs_param.size() <= num_items_, "input size:{}, num_item:{}",
                inputs_param.size(), num_items_);
 
-  SPDLOG_DEBUG(
+  SPDLOG_INFO(
       "item size:{} paxos size:{} num_bins_:{}, items_per_bin_:{} idxType:{}",
       inputs_param.size(), size(), num_bins_, items_per_bin_, sizeof(IdxType));
 

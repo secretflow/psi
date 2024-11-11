@@ -41,6 +41,7 @@ psi_cc_library(
     deps = [
         ":seal_pir_utils",
         "//psi/sealpir:serializable_cc_proto",
+        "//psi/kwpir:kw_pir",
         "@com_github_microsoft_seal//:seal",
         "@com_github_openssl_openssl//:openssl",
         "@yacl//yacl/base:byte_container_view",

@@ -137,14 +137,14 @@ uint8_t CuckooIndex::MinCollidingHashIdx(uint64_t bin_index) const {
   auto bin = bins_[bin_index];
   size_t num_bins = options_.NumBins();
   uint64_t input_idx = bin.InputIdx();
-  uint64_t target;
   for (uint64_t i = 0; i < options_.num_hash; i++) {
-    target = hashes_[input_idx].GetHash(i) % num_bins;
+    auto target = hashes_[input_idx].GetHash(i) % num_bins;
     if (target == bin_index) {
       return static_cast<uint8_t>(i);
     }
   }
-  return -1;
+  YACL_THROW_WITH_STACK("cannot find min colliding hash idx for bin={}",
+                        bin_index);
 }
 
 }  // namespace psi

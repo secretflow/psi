@@ -56,6 +56,7 @@ psi_cc_library(
         "//psi/apsi_wrapper/utils:group_db",
         "//psi/apsi_wrapper/utils:sender_db",
         "//psi/proto:pir_cc_proto",
+        "//psi/utils:resource_manager",
         "@yacl//yacl/utils:parallel",
     ],
 )

@@ -17,7 +17,7 @@
 
 #include "psi/apsi_wrapper/api/wrapper_util.h"
 
-#include <stdlib.h>
+#include <malloc.h>
 
 #include "yacl/base/exception.h"
 

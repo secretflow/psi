@@ -16,18 +16,4 @@
 
 #include "psi/utils/bucket.h"
 
-namespace psi::kkrt {
-
-void CommonInit(const std::string& key_hash_digest, v2::PsiConfig* config,
-                RecoveryManager* recovery_manager) {
-  if (config->protocol_config().kkrt_config().bucket_size() == 0) {
-    config->mutable_protocol_config()->mutable_kkrt_config()->set_bucket_size(
-        kDefaultBucketSize);
-  }
-
-  if (recovery_manager) {
-    recovery_manager->MarkInitEnd(*config, key_hash_digest);
-  }
-}
-
-}  // namespace psi::kkrt
+namespace psi::kkrt {}  // namespace psi::kkrt

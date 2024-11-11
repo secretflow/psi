@@ -14,22 +14,27 @@
 
 #include "psi/utils/hash_bucket_cache.h"
 
+#include <spdlog/spdlog.h>
+
+#include <cstdint>
 #include <filesystem>
 #include <memory>
 #include <utility>
 
 #include "absl/strings/escaping.h"
-#include "absl/strings/str_split.h"
-#include "spdlog/spdlog.h"
 
 #include "psi/utils/arrow_csv_batch_provider.h"
 
 namespace psi {
 
-HashBucketCache::HashBucketCache(std::string target_dir, uint32_t bucket_num,
-                                 bool use_scoped_tmp_dir)
+HashBucketCache::HashBucketCache(const std::string& target_dir,
+                                 uint32_t bucket_num, bool use_scoped_tmp_dir)
     : bucket_num_(bucket_num), item_index_(0) {
   YACL_ENFORCE(bucket_num_ > 0);
+  if (!std::filesystem::exists(target_dir)) {
+    SPDLOG_INFO("target dir={} does not exists, create it", target_dir);
+    std::filesystem::create_directories(target_dir);
+  }
   disk_cache_ = std::make_unique<MultiplexDiskCache>(
       std::filesystem::path(target_dir), use_scoped_tmp_dir);
   YACL_ENFORCE(disk_cache_, "cannot create disk cache from dir={}", target_dir);
@@ -41,9 +46,11 @@ HashBucketCache::~HashBucketCache() {
   disk_cache_ = nullptr;
 }
 
-void HashBucketCache::WriteItem(const std::string& data) {
+void HashBucketCache::WriteItem(const std::string& data,
+                                uint32_t duplicate_cnt) {
   BucketItem bucket_item;
   bucket_item.index = item_index_;
+  bucket_item.extra_dup_cnt = duplicate_cnt;
   bucket_item.base64_data = absl::Base64Escape(data);
 
   auto& out = bucket_os_vec_[std::hash<std::string>()(bucket_item.base64_data) %
@@ -80,19 +87,30 @@ std::unique_ptr<HashBucketCache> CreateCacheFromCsv(
   auto bucket_cache = std::make_unique<HashBucketCache>(cache_dir, bucket_num,
                                                         use_scoped_tmp_dir);
 
-  auto batch_provider = std::make_unique<ArrowCsvBatchProvider>(
-      csv_path, schema_names, read_batch_size);
+  std::shared_ptr<IBasicBatchProvider> batch_provider =
+      std::make_unique<ArrowCsvBatchProvider>(csv_path, schema_names,
+                                              read_batch_size);
+
+  return CreateCacheFromProvider(batch_provider, cache_dir, bucket_num,
+                                 use_scoped_tmp_dir);
+}
+
+std::unique_ptr<HashBucketCache> CreateCacheFromProvider(
+    std::shared_ptr<IBasicBatchProvider> provider, const std::string& cache_dir,
+    uint32_t bucket_num, bool use_scoped_tmp_dir) {
+  auto bucket_cache = std::make_unique<HashBucketCache>(cache_dir, bucket_num,
+                                                        use_scoped_tmp_dir);
+
   while (true) {
-    auto items = batch_provider->ReadNextBatch();
+    auto [items, duplicate_cnt] = provider->ReadNextBatchWithDupCnt();
     if (items.empty()) {
       break;
     }
-    for (const auto& it : items) {
-      bucket_cache->WriteItem(it);
+    for (size_t i = 0; i < items.size(); ++i) {
+      bucket_cache->WriteItem(items[i], duplicate_cnt[i]);
     }
+    bucket_cache->Flush();
   }
-  bucket_cache->Flush();
-
   return bucket_cache;
 }
 

@@ -142,7 +142,7 @@ TEST(ApiTest, Works) {
 
   {
     std::error_code ec;
-    std::filesystem::remove(receiver_output_file, ec);
+    std::filesystem::remove_all(receiver_output_file, ec);
     if (ec.value() != 0) {
       SPDLOG_WARN("can not remove temp file: {}, msg: {}", receiver_output_file,
                   ec.message());
@@ -151,7 +151,7 @@ TEST(ApiTest, Works) {
 
   {
     std::error_code ec;
-    std::filesystem::remove(sdb_out_file, ec);
+    std::filesystem::remove_all(sdb_out_file, ec);
     if (ec.value() != 0) {
       SPDLOG_WARN("can not remove temp file: {}, msg: {}", sdb_out_file,
                   ec.message());

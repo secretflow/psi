@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@psi//bazel:psi.bzl", "psi_cmake_external")
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -21,13 +21,14 @@ filegroup(
     srcs = glob(["**"]),
 )
 
-psi_cmake_external(
+cmake(
     name = "FlatBuffers",
     cache_entries = {
         "FLATBUFFERS_BUILD_TESTS": "OFF",
         "CMAKE_EXE_LINKER_FLAGS": "-lm",
         "CMAKE_INSTALL_LIBDIR": "lib",
     },
+    generate_args = ["-GNinja"],
     lib_source = ":all_srcs",
     out_binaries = ["flatc"],
     out_static_libs = ["libflatbuffers.a"],

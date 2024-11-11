@@ -21,11 +21,10 @@
 #include <memory>
 #include <utility>
 
-#include "boost/uuid/uuid.hpp"
-#include "boost/uuid/uuid_generators.hpp"
-#include "boost/uuid/uuid_io.hpp"
 #include "spdlog/spdlog.h"
 #include "yacl/base/exception.h"
+
+#include "psi/utils/random_str.h"
 
 namespace psi {
 
@@ -34,10 +33,9 @@ bool ScopedTempDir::CreateUniqueTempDirUnderPath(
   int tries = 0;
 
   const int kMaxTries = 10;
-  boost::uuids::random_generator uuid_generator;
 
   do {
-    auto uuid_str = boost::uuids::to_string(uuid_generator());
+    auto uuid_str = GetRandomString();
     dir_ = parent_path / uuid_str;
     if (!std::filesystem::exists(dir_)) {
       return std::filesystem::create_directory(dir_);
@@ -60,6 +58,8 @@ MultiplexDiskCache::MultiplexDiskCache(const std::filesystem::path& path,
   } else {
     cache_dir_ = path;
   }
+  SPDLOG_INFO("MultiplexDiskCache: dir_prefix={}",
+              (cache_dir_ / prefix_).string());
 }
 
 std::string MultiplexDiskCache::GetPath(size_t index) const {

@@ -18,7 +18,9 @@
 #include <cstdint>
 #include <fstream>
 #include <iostream>
+#include <utility>
 
+#include "absl/strings/str_join.h"
 #include "arrow/api.h"
 #include "arrow/csv/api.h"
 #include "arrow/csv/options.h"
@@ -31,26 +33,42 @@ namespace psi {
 IndexWriter::IndexWriter(const std::filesystem::path& path, size_t cache_size,
                          bool trunc)
     : path_(path), cache_size_(cache_size) {
-  auto write_options = arrow::csv::WriteOptions::Defaults();
-  write_options.include_header = false;
+  std::vector<std::string> fields = {kIdx, kPeerCnt};
   if (trunc || !std::filesystem::exists(path_)) {
     // NOTE(junfeng): This is a hack to write the header without quotation masks
     // to make YACL csv utils happy.
     // Should be fixed as soon as possible.
     {
       std::ofstream file(path_);
-      file << kIdx << "\n";
+
+      file << absl::StrJoin(fields, ",") << '\n';
       file.close();
     }
   }
   outfile_ = io::GetArrowOutputStream(path_, true);
 
-  schema_ = arrow::schema({arrow::field(kIdx, arrow::uint64())});
+  schema_ = arrow::schema({arrow::field(kIdx, arrow::uint64()),
+                           arrow::field(kPeerCnt, arrow::uint64())});
+  auto write_options = arrow::csv::WriteOptions::Defaults();
+  write_options.include_header = false;
   writer_ =
       arrow::csv::MakeCSVWriter(outfile_, schema_, write_options).ValueOrDie();
 
-  builder_ = arrow::MakeBuilder(arrow::uint64()).ValueOrDie();
-  YACL_ENFORCE(builder_->Resize(cache_size_ * sizeof(uint64_t)).ok());
+  index_builder_ = arrow::MakeBuilder(arrow::uint64()).ValueOrDie();
+  cnt_builder_ = arrow::MakeBuilder(arrow::uint64()).ValueOrDie();
+  YACL_ENFORCE(index_builder_->Resize(cache_size_ * sizeof(uint64_t)).ok());
+  YACL_ENFORCE(cnt_builder_->Resize(cache_size_ * sizeof(uint64_t)).ok());
+}
+
+size_t IndexWriter::WriteCache(const std::vector<uint64_t>& indexes,
+                               const std::vector<uint64_t>& duplicate_cnt) {
+  YACL_ENFORCE(!outfile_->closed());
+
+  for (size_t i = 0; i < indexes.size(); i++) {
+    WriteCache(indexes[i], duplicate_cnt[i]);
+  }
+
+  return write_cnt_;
 }
 
 size_t IndexWriter::WriteCache(const std::vector<uint64_t>& indexes) {
@@ -63,10 +81,11 @@ size_t IndexWriter::WriteCache(const std::vector<uint64_t>& indexes) {
   return write_cnt_;
 }
 
-size_t IndexWriter::WriteCache(uint64_t index) {
+size_t IndexWriter::WriteCache(uint64_t index, uint64_t cnt) {
   YACL_ENFORCE(!outfile_->closed());
 
-  YACL_ENFORCE(builder_->AppendScalar(arrow::UInt64Scalar(index)).ok());
+  YACL_ENFORCE(index_builder_->AppendScalar(arrow::UInt64Scalar(index)).ok());
+  YACL_ENFORCE(cnt_builder_->AppendScalar(arrow::UInt64Scalar(cnt)).ok());
   cache_cnt_++;
   write_cnt_++;
 
@@ -81,7 +100,8 @@ void IndexWriter::Commit() {
   }
 
   std::vector<std::shared_ptr<arrow::Array>> output_arrays;
-  output_arrays.emplace_back(builder_->Finish().ValueOrDie());
+  output_arrays.emplace_back(index_builder_->Finish().ValueOrDie());
+  output_arrays.emplace_back(cnt_builder_->Finish().ValueOrDie());
 
   std::shared_ptr<arrow::RecordBatch> output_batch = arrow::RecordBatch::Make(
       schema_, output_arrays[0]->length(), output_arrays);
@@ -89,7 +109,8 @@ void IndexWriter::Commit() {
     YACL_THROW("writer WriteRecordBatch failed.");
   }
   YACL_ENFORCE(outfile_->Flush().ok());
-  builder_->Reset();
+  index_builder_->Reset();
+  cnt_builder_->Reset();
   cache_cnt_ = 0;
 }
 
@@ -107,7 +128,7 @@ void IndexWriter::Close() {
 
 IndexWriter::~IndexWriter() { Close(); }
 
-IndexReader::IndexReader(const std::filesystem::path& path) {
+FileIndexReader::FileIndexReader(const std::filesystem::path& path) {
   YACL_ENFORCE(std::filesystem::exists(path), "Input file {} doesn't exist.",
                path.string());
 
@@ -117,13 +138,13 @@ IndexReader::IndexReader(const std::filesystem::path& path) {
   auto read_options = arrow::csv::ReadOptions::Defaults();
   auto parse_options = arrow::csv::ParseOptions::Defaults();
   auto convert_options = arrow::csv::ConvertOptions::Defaults();
-  convert_options.include_columns = std::vector<std::string>{kIdx};
+  convert_options.include_columns = std::vector<std::string>{kIdx, kPeerCnt};
   reader_ = arrow::csv::StreamingReader::Make(io_context, infile_, read_options,
                                               parse_options, convert_options)
                 .ValueOrDie();
 }
 
-bool IndexReader::HasNext() {
+bool FileIndexReader::HasNext() {
   bool new_batch = false;
   if (!batch_ || idx_in_batch_ >= static_cast<size_t>(batch_->num_rows())) {
     arrow::Status status = reader_->ReadNext(&batch_);
@@ -141,6 +162,8 @@ bool IndexReader::HasNext() {
 
   if (new_batch) {
     array_ = std::static_pointer_cast<arrow::UInt64Array>(batch_->column(0));
+    cnt_array_ =
+        std::static_pointer_cast<arrow::UInt64Array>(batch_->column(1));
 
     idx_in_batch_ = 0;
   }
@@ -148,7 +171,7 @@ bool IndexReader::HasNext() {
   return idx_in_batch_ < static_cast<size_t>(batch_->num_rows());
 }
 
-std::optional<uint64_t> IndexReader::GetNext() {
+std::optional<uint64_t> FileIndexReader::GetNext() {
   if (!HasNext()) {
     return {};
   } else {
@@ -157,6 +180,52 @@ std::optional<uint64_t> IndexReader::GetNext() {
     read_cnt_++;
     return v;
   }
+}
+
+std::optional<std::pair<uint64_t, uint64_t>>
+FileIndexReader::GetNextWithPeerCnt() {
+  if (!HasNext()) {
+    return {};
+  } else {
+    uint64_t v = array_->Value(idx_in_batch_);
+    uint64_t c = cnt_array_->Value(idx_in_batch_);
+    idx_in_batch_++;
+    read_cnt_++;
+    SPDLOG_DEBUG("index: {}, {}, idx_in_batch_ {}", v, c, idx_in_batch_);
+    return std::make_pair(v, c);
+  }
+}
+
+MemoryIndexReader::MemoryIndexReader(
+    const std::vector<uint32_t>& index,
+    const std::vector<uint32_t>& peer_dup_cnt) {
+  YACL_ENFORCE(index.size() == peer_dup_cnt.size());
+  items_.resize(index.size());
+  for (size_t i = 0; i != index.size(); ++i) {
+    items_[i].index = index[i];
+    items_[i].dup_cnt = peer_dup_cnt[i];
+  }
+  std::sort(items_.begin(), items_.end(),
+            [](const auto& a, const auto& b) { return a.index < b.index; });
+}
+
+bool MemoryIndexReader::HasNext() { return read_cnt_ < items_.size(); }
+
+std::optional<uint64_t> MemoryIndexReader::GetNext() {
+  if (!HasNext()) {
+    return {};
+  }
+  return items_[read_cnt_++].index;
+}
+
+std::optional<std::pair<uint64_t, uint64_t>>
+MemoryIndexReader::GetNextWithPeerCnt() {
+  if (!HasNext()) {
+    return {};
+  }
+  auto ret = std::pair(items_[read_cnt_].index, items_[read_cnt_].dup_cnt);
+  read_cnt_++;
+  return ret;
 }
 
 }  // namespace psi

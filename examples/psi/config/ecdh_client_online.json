@@ -1,30 +1,31 @@
 {
-    "ub_psi_config": {
-        "mode": "MODE_ONLINE",
-        "role": "ROLE_CLIENT",
-        "input_config": {
-            "path": "/tmp/client_input.csv"
-        },
-        "output_config": {
-            "path": "/tmp/client_output.csv"
-        },
-        "keys": [
-            "id_0",
-            "id_1"
-        ],
-        "cache_path": "/tmp/client_cache"
+  "ub_psi_config": {
+    "mode": "MODE_ONLINE",
+    "role": "ROLE_CLIENT",
+    "input_config": {
+      "type": "IO_TYPE_FILE_CSV",
+      "path": "/tmp/client_input.csv"
     },
-    "link_config": {
-        "parties": [
-            {
-                "id": "server",
-                "host": "127.0.0.1:5300"
-            },
-            {
-                "id": "client",
-                "host": "127.0.0.1:5400"
-            }
-        ]
+    "output_config": {
+      "type": "IO_TYPE_FILE_CSV",
+      "path": "/tmp/client_output.csv"
     },
-    "self_link_party": "client"
+    "keys": ["id_0", "id_1"],
+    "cache_path": "/tmp/client_cache",
+    "server_get_result": true,
+    "client_get_result": true
+  },
+  "link_config": {
+    "parties": [
+      {
+        "id": "server",
+        "host": "127.0.0.1:5300"
+      },
+      {
+        "id": "client",
+        "host": "127.0.0.1:5400"
+      }
+    ]
+  },
+  "self_link_party": "client"
 }

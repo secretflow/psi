@@ -42,7 +42,6 @@ void KkrtPsiSender::Init() {
 
   AbstractPsiSender::Init();
 
-  CommonInit(key_hash_digest_, &config_, recovery_manager_.get());
   SPDLOG_INFO("[KkrtPsiSender::Init] end");
 }
 
@@ -55,7 +54,7 @@ void KkrtPsiSender::PreProcess() {
   }
 
   bucket_count_ =
-      NegotiateBucketNum(lctx_, report_.original_count(),
+      NegotiateBucketNum(lctx_, report_.original_key_count(),
                          config_.protocol_config().kkrt_config().bucket_size(),
                          config_.protocol_config().protocol());
 
@@ -64,13 +63,12 @@ void KkrtPsiSender::PreProcess() {
 
     auto gen_input_bucket_f = std::async([&] {
       if (recovery_manager_) {
-        input_bucket_store_ = CreateCacheFromCsv(
-            config_.input_config().path(), keys,
-            recovery_manager_->input_bucket_store_path(), bucket_count_);
+        input_bucket_store_ = CreateCacheFromProvider(
+            batch_provider_, recovery_manager_->input_bucket_store_path(),
+            bucket_count_);
       } else {
-        input_bucket_store_ = CreateCacheFromCsv(
-            config_.input_config().path(), keys,
-            std::filesystem::path(config_.input_config().path()).parent_path(),
+        input_bucket_store_ = CreateCacheFromProvider(
+            batch_provider_, GetTaskDir() / "input_bucket_store",
             bucket_count_);
       }
     });
@@ -116,32 +114,28 @@ void KkrtPsiSender::Online() {
           : 0;
 
   for (; bucket_idx < input_bucket_store_->BucketNum(); bucket_idx++) {
+    // TODO(huocun): optimize bucket strore, cat use struct, no need serialize &
+    // deserialize
     auto bucket_items_list =
         PrepareBucketData(config_.protocol_config().protocol(), bucket_idx,
                           lctx_, input_bucket_store_.get());
-
     if (!bucket_items_list.has_value()) {
       continue;
     }
 
-    auto run_f = std::async([&] {
-      std::vector<uint128_t> items_hash(bucket_items_list->size());
-      yacl::parallel_for(0, bucket_items_list->size(),
-                         [&](int64_t begin, int64_t end) {
-                           for (int64_t i = begin; i < end; ++i) {
-                             items_hash[i] = yacl::crypto::Blake3_128(
-                                 bucket_items_list->at(i).base64_data);
-                           }
-                         });
+    auto& bucket_items = *bucket_items_list;
 
-      KkrtPsiSend(lctx_, *ot_recv_, items_hash);
+    auto run_f = std::async([&] {
+      CalcBucketItemSecHash(bucket_items);
+
+      KkrtPsiSend(lctx_, *ot_recv_, bucket_items);
     });
 
     SyncWait(lctx_, &run_f);
 
     auto write_bucket_res_f = std::async([&] {
       HandleBucketResultBySender(config_.protocol_config().broadcast_result(),
-                                 lctx_, *bucket_items_list,
+                                 lctx_, bucket_items,
                                  intersection_indices_writer_.get());
     });
 

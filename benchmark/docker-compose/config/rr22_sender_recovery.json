@@ -3,7 +3,10 @@
     "protocol_config": {
       "protocol": "PROTOCOL_RR22",
       "role": "ROLE_SENDER",
-      "broadcast_result": true
+      "broadcast_result": false,
+      "rr22_config": {
+        "bucket_size": 1000000
+      }
     },
     "input_config": {
       "type": "IO_TYPE_FILE_CSV",

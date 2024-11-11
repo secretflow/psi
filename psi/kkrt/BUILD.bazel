@@ -21,6 +21,7 @@ psi_cc_library(
     srcs = ["kkrt_psi.cc"],
     hdrs = ["kkrt_psi.h"],
     deps = [
+        "//psi/utils:bucket",
         "//psi/utils:communication",
         "//psi/utils:cuckoo_index",
         "//psi/utils:serialize",

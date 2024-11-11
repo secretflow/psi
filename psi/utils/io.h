@@ -108,4 +108,7 @@ std::unique_ptr<OutputStream> BuildOutputStream(const std::any& io_options);
 std::shared_ptr<arrow::io::FileOutputStream> GetArrowOutputStream(
     const std::string& filename, bool append = false);
 
+std::shared_ptr<std::ofstream> GetStdOutFileStream(const std::string& filename,
+                                                   bool append = false);
+
 }  // namespace psi::io

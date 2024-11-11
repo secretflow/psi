@@ -43,7 +43,7 @@ void EcdhPsiReceiver::Init() {
   AbstractPsiReceiver::Init();
 
   if (recovery_manager_) {
-    recovery_manager_->MarkInitEnd(config_, key_hash_digest_);
+    recovery_manager_->MarkInitEnd(config_, keys_hash_);
   }
 
   SPDLOG_INFO("[EcdhPsiReceiver::Init] end");
@@ -73,9 +73,6 @@ void EcdhPsiReceiver::PreProcess() {
   }
 
   psi_options_.ic_mode = false;
-
-  batch_provider_ = std::make_shared<ArrowCsvBatchProvider>(
-      config_.input_config().path(), selected_keys_, psi_options_.batch_size);
 
   if (recovery_manager_) {
     self_ec_point_store_ = std::make_shared<HashBucketEcPointStore>(
@@ -116,8 +113,6 @@ void EcdhPsiReceiver::Online() {
     SyncWait(lctx_, &run_f);
   }
 
-  report_.set_original_count(batch_provider_->row_cnt());
-
   if (recovery_manager_) {
     recovery_manager_->MarkOnlineEnd();
   }
@@ -134,8 +129,8 @@ void EcdhPsiReceiver::PostProcess() {
   }
 
   auto compute_indices_f = std::async([&] {
-    FinalizeAndComputeIndices(self_ec_point_store_, peer_ec_point_store_,
-                              intersection_indices_writer_.get());
+    (void)FinalizeAndComputeIndices(self_ec_point_store_, peer_ec_point_store_,
+                                    intersection_indices_writer_.get());
   });
 
   SyncWait(lctx_, &compute_indices_f);

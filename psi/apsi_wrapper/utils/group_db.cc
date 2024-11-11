@@ -76,7 +76,8 @@ pid_t StartProcess(F&& f, Args&&... args) {
 }
 
 std::string PidFileName(pid_t pid) {
-  return fmt::format("/tmp/apsi_process_{}", pid);
+  return std::filesystem::temp_directory_path() /
+         fmt::format("apsi_process_{}", pid);
 }
 
 }  // namespace

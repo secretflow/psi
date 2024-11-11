@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <vector>
 
@@ -128,36 +129,37 @@ class Rr22OprfSender : public Rr22Oprf {
       YACL_THROW("RR22 malicious psi not support LowCommMode");
     }
   }
+  void Init(const std::shared_ptr<yacl::link::Context>& lctx, size_t init_size,
+            size_t num_threads = 0);
 
-  void Send(const std::shared_ptr<yacl::link::Context>& lctx, size_t n,
-            absl::Span<const uint128_t> inputs,
-            absl::Span<uint128_t> hash_outputs, size_t num_threads);
+  std::vector<uint128_t> Send(const std::shared_ptr<yacl::link::Context>& lctx,
+                              const absl::Span<const uint128_t>& inputs);
 
-  void SendFast(const std::shared_ptr<yacl::link::Context>& lctx, size_t n,
-                absl::Span<const uint128_t> inputs,
-                absl::Span<uint128_t> hash_outputs, size_t num_threads);
+  std::vector<uint128_t> Eval(const absl::Span<const uint128_t>& inputs);
 
-  void SendLowComm(const std::shared_ptr<yacl::link::Context>& lctx, size_t n,
-                   absl::Span<const uint128_t> inputs,
-                   absl::Span<uint128_t> hash_outputs, size_t num_threads);
-
-  void HashInputMulDelta(absl::Span<const uint128_t> inputs,
-                         absl::Span<uint128_t> hash_outputs);
-
-  void Eval(absl::Span<const uint128_t> inputs, absl::Span<uint128_t> outputs,
-            uint64_t num_threads = 0);
-
-  void Eval(absl::Span<const uint128_t> inputs,
-            absl::Span<const uint128_t> inputs_hash,
-            absl::Span<uint128_t> outputs, uint64_t num_threads = 0);
+  std::vector<uint128_t> Eval(const absl::Span<const uint128_t>& inputs,
+                              absl::Span<const uint128_t> inputs_hash);
 
  private:
+  std::vector<uint128_t> SendFast(
+      const std::shared_ptr<yacl::link::Context>& lctx,
+      const absl::Span<const uint128_t>& inputs);
+
+  std::vector<uint128_t> SendLowComm(
+      const std::shared_ptr<yacl::link::Context>& lctx,
+      const absl::Span<const uint128_t>& inputs);
+
+  std::vector<uint128_t> HashInputMulDelta(
+      const absl::Span<const uint128_t>& inputs);
+
+  size_t init_size_ = 0;
+  size_t num_threads_ = 0;
   okvs::Baxos baxos_;
   okvs::Paxos<uint32_t> paxos_;
 
   // b = delta * a + c
   uint128_t delta_ = 0;
-  yacl::Buffer b_;
+  std::vector<uint128_t> b_;
 };
 
 class Rr22OprfReceiver : public Rr22Oprf {
@@ -172,19 +174,30 @@ class Rr22OprfReceiver : public Rr22Oprf {
     }
   }
 
-  void Recv(const std::shared_ptr<yacl::link::Context>& lctx,
-            size_t paxos_init_size, const std::vector<uint128_t>& inputs,
-            absl::Span<uint128_t> outputs, size_t num_threads);
+  void Init(const std::shared_ptr<yacl::link::Context>& lctx, size_t init_size,
+            size_t num_threads = 0);
 
-  void RecvFast(const std::shared_ptr<yacl::link::Context>& lctx,
-                size_t paxos_init_size, const std::vector<uint128_t>& inputs,
-                absl::Span<uint128_t> outputs, size_t num_threads);
+  std::vector<uint128_t> Recv(const std::shared_ptr<yacl::link::Context>& lctx,
+                              const absl::Span<const uint128_t>& inputs);
 
-  void RecvLowComm(const std::shared_ptr<yacl::link::Context>& lctx,
-                   size_t paxos_init_size, const std::vector<uint128_t>& inputs,
-                   absl::Span<uint128_t> outputs, size_t num_threads);
+  std::vector<uint128_t> RecvFast(
+      const std::shared_ptr<yacl::link::Context>& lctx,
+      const absl::Span<const uint128_t>& inputs);
+
+  std::vector<uint128_t> RecvLowComm(
+      const std::shared_ptr<yacl::link::Context>& lctx,
+      const absl::Span<const uint128_t>& inputs);
 
  private:
+  size_t init_size_ = 0;
+  size_t num_threads_ = 0;
+  okvs::Baxos baxos_;
+  okvs::Paxos<uint32_t> paxos_;
+
+  std::vector<uint128_t> a_;
+  // low comm use int64
+  std::vector<uint64_t> a64_;
+  std::vector<uint128_t> c_;
 };
 
 }  // namespace psi::rr22

@@ -1,15 +1,12 @@
 {
-    "ub_psi_config": {
-        "mode": "MODE_OFFLINE_GEN_CACHE",
-        "role": "ROLE_SERVER",
-        "input_config": {
-            "path": "/tmp/server_input.csv"
-        },
-        "keys": [
-            "id_0",
-            "id_1"
-        ],
-        "server_secret_key_path": "/tmp/server_secret_key.key",
-        "cache_path": "/tmp/server_cache.sf"
-    }
+  "ub_psi_config": {
+    "mode": "MODE_OFFLINE_GEN_CACHE",
+    "role": "ROLE_SERVER",
+    "input_config": {
+      "type": "IO_TYPE_FILE_CSV",
+      "path": "/tmp/server_input.csv"
+    },
+    "keys": ["id_0", "id_1"],
+    "cache_path": "/tmp/server_cache.sf"
+  }
 }

@@ -31,7 +31,4 @@ constexpr bool kDefaultCompress = true;
 
 Rr22PsiOptions GenerateRr22PsiOptions(bool low_comm_mode);
 
-void CommonInit(const std::string& key_hash_digest, v2::PsiConfig* config,
-                RecoveryManager* recovery_manager);
-
 }  // namespace psi::rr22

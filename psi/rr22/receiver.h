@@ -14,6 +14,7 @@
 #pragma once
 
 #include "psi/interface.h"
+#include "psi/rr22/rr22_psi.h"
 #include "psi/utils/hash_bucket_cache.h"
 
 #include "psi/proto/psi_v2.pb.h"
@@ -22,7 +23,7 @@ namespace psi::rr22 {
 
 class Rr22PsiReceiver final : public AbstractPsiReceiver {
  public:
-  explicit Rr22PsiReceiver(const v2::PsiConfig &config,
+  explicit Rr22PsiReceiver(const v2::PsiConfig& config,
                            std::shared_ptr<yacl::link::Context> lctx = nullptr);
 
   ~Rr22PsiReceiver() override = default;

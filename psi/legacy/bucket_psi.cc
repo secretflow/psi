@@ -36,9 +36,8 @@
 
 #include "psi/cryptor/cryptor_selector.h"
 #include "psi/ecdh/ecdh_psi.h"
-#include "psi/legacy/bucket_ub_psi.h"
 #include "psi/prelude.h"
-#include "psi/utils/batch_provider.h"
+#include "psi/utils/arrow_csv_batch_provider.h"
 #include "psi/utils/csv_header_analyzer.h"
 #include "psi/utils/ec_point_store.h"
 #include "psi/utils/io.h"
@@ -196,7 +195,7 @@ size_t FilterFileByIndices(const std::string& input, const std::string& output,
   std::string line;
   size_t idx = 0;
   size_t actual_count = 0;
-  IndexReader reader(indices);
+  FileIndexReader reader(indices);
 
   std::optional<uint64_t> intersection_index = reader.GetNext();
 
@@ -323,37 +322,17 @@ PsiResultReport BucketPsi::Run(ProgressCallbacks progress_callbacks,
     if (!digest_equal) {
       uint64_t items_count = checker->data_count();
       indices = RunPsi(psi_progress, items_count);
+
     } else {
       SPDLOG_INFO("Skip doing psi, because dataset has been aligned!");
       indices.resize(checker->data_count());
       std::iota(indices.begin(), indices.end(), 0);
     }
+    report.set_intersection_count(indices.size());
 
   } else {
-    progress->NextSubProgress("UB Precheck");
-
-    if (config_.input_params().precheck() &&
-        (config_.psi_type() == PsiType::ECDH_OPRF_UB_PSI_2PC_SHUFFLE_ONLINE) &&
-        (lctx_->Rank() != config_.receiver_rank())) {
-      SPDLOG_INFO(
-          "Begin sanity check for input file: {}, precheck_switch: true",
-          config_.input_params().path());
-      std::shared_ptr<CsvChecker> checker;
-      auto csv_check_f = std::async([&] {
-        checker = std::make_shared<CsvChecker>(config_.input_params().path(),
-                                               selected_fields_, false);
-      });
-
-      csv_check_f.get();
-
-      SPDLOG_INFO("End sanity check for input file: {}, size={}",
-                  config_.input_params().path(), checker->data_count());
-    }
-
-    auto psi_progress = progress->NextSubProgress("UB RunPsi");
-    uint64_t items_count = 0;
-    indices = RunPsi(psi_progress, items_count);
-    report.set_original_count(items_count);
+    YACL_THROW(
+        "Not support, please use new interface UbPsiConfig in psi_v2.proto.");
   }
 
   progress->NextSubProgress("ProduceOutput");
@@ -440,7 +419,7 @@ std::vector<uint64_t> BucketPsi::RunPsi(std::shared_ptr<Progress>& progress,
     }
     psi_options.ic_mode = ic_mode_;
 
-    auto batch_provider = std::make_shared<CsvBatchProvider>(
+    auto batch_provider = std::make_shared<ArrowCsvBatchProvider>(
         config_.input_params().path(), selected_fields_,
         psi_options.batch_size);
     auto self_ec_point_store = std::make_shared<HashBucketEcPointStore>(
@@ -487,11 +466,8 @@ std::vector<uint64_t> BucketPsi::RunPsi(std::shared_ptr<Progress>& progress,
               PsiType::ECDH_OPRF_UB_PSI_2PC_SHUFFLE_ONLINE) ||
              (config_.psi_type() == PsiType::ECDH_OPRF_UB_PSI_2PC_OFFLINE) ||
              (config_.psi_type() == PsiType::ECDH_OPRF_UB_PSI_2PC_ONLINE)) {
-    std::vector<uint64_t> results;
-
-    std::tie(results, self_items_count) = UbPsi(config_, lctx_);
-
-    return results;
+    YACL_THROW(
+        "not support, please use new interface UbPsiConfig in psi_v2.proto.");
   } else {
     return RunBucketPsi(progress, self_items_count);
   }

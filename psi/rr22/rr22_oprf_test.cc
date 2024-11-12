@@ -92,11 +92,9 @@ TEST_P(Rr22OprfTest, OprfTest) {
   yacl::crypto::Prg<uint128_t> prng(seed);
 
   size_t item_size = params.items_num;
-  std::vector<uint128_t> values_a(item_size);
-  std::vector<uint128_t> values_b(item_size);
+  std::vector<uint128_t> values(item_size);
 
-  prng.Fill(absl::MakeSpan(values_a));
-  prng.Fill(absl::MakeSpan(values_b));
+  prng.Fill(absl::MakeSpan(values));
 
   Rr22OprfSender oprf_sender(kRr22OprfBinSize, kRr22DefaultSsp, params.mode);
   Rr22OprfReceiver oprf_receiver(kRr22OprfBinSize, kRr22DefaultSsp,
@@ -106,16 +104,15 @@ TEST_P(Rr22OprfTest, OprfTest) {
   std::vector<uint128_t> oprf_b(item_size);
 
   auto oprf_sender_proc = std::async([&] {
-    std::vector<uint128_t> sender_inputs_hash(item_size);
-    oprf_sender.Send(lctxs[0], item_size, absl::MakeSpan(values_b),
-                     absl::MakeSpan(sender_inputs_hash), 1);
+    oprf_sender.Init(lctxs[0], item_size);
+    auto sender_inputs_hash = oprf_sender.Send(lctxs[0], values);
 
-    oprf_sender.Eval(absl::MakeSpan(values_b), absl::MakeSpan(oprf_a));
+    oprf_a = oprf_sender.Eval(values, absl::MakeSpan(sender_inputs_hash));
     lctxs[0]->WaitLinkTaskFinish();
   });
   auto oprf_receiver_proc = std::async([&] {
-    oprf_receiver.Recv(lctxs[1], item_size, values_b, absl::MakeSpan(oprf_b),
-                       1);
+    oprf_receiver.Init(lctxs[1], item_size, 1);
+    oprf_b = oprf_receiver.Recv(lctxs[1], values);
     lctxs[1]->WaitLinkTaskFinish();
   });
 
@@ -128,7 +125,7 @@ TEST_P(Rr22OprfTest, OprfTest) {
 INSTANTIATE_TEST_SUITE_P(
     OprfTest_Instances, Rr22OprfTest,
     testing::Values(TestParams{1 << 12, Rr22PsiMode::LowCommMode},
-                    TestParams{1 << 12, Rr22PsiMode::LowCommMode},
+                    TestParams{1 << 12, Rr22PsiMode::FastMode},
                     TestParams{1 << 12, Rr22PsiMode::FastMode, true}));
 
 }  // namespace psi::rr22

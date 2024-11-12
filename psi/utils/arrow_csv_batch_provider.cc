@@ -21,6 +21,7 @@
 #include "arrow/compute/api.h"
 #include "arrow/datum.h"
 #include "spdlog/spdlog.h"
+#include "yacl/base/exception.h"
 
 #include "psi/utils/key.h"
 

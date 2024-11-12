@@ -47,7 +47,7 @@ psi_cc_library(
     defines = ["CURVE25519_DONNA"],
     deps = [
         ":polynomial",
-        "//psi/utils:batch_provider",
+        "//psi/utils:batch_provider_impl",
         "//psi/utils:communication",
         "//psi/utils:cuckoo_index",
         "//psi/utils:serialize",

@@ -14,6 +14,9 @@
 
 #include "psi/rr22/sender.h"
 
+#include <memory>
+#include <mutex>
+
 #include "yacl/crypto/hash/hash_utils.h"
 #include "yacl/utils/parallel.h"
 
@@ -37,7 +40,6 @@ void Rr22PsiSender::Init() {
 
   AbstractPsiSender::Init();
 
-  CommonInit(key_hash_digest_, &config_, recovery_manager_.get());
   SPDLOG_INFO("[Rr22PsiSender::Init] end");
 }
 
@@ -50,7 +52,7 @@ void Rr22PsiSender::PreProcess() {
   }
 
   bucket_count_ =
-      NegotiateBucketNum(lctx_, report_.original_count(),
+      NegotiateBucketNum(lctx_, report_.original_key_count(),
                          config_.protocol_config().rr22_config().bucket_size(),
                          config_.protocol_config().protocol());
 
@@ -59,13 +61,12 @@ void Rr22PsiSender::PreProcess() {
 
     auto gen_input_bucket_f = std::async([&] {
       if (recovery_manager_) {
-        input_bucket_store_ = CreateCacheFromCsv(
-            config_.input_config().path(), keys,
-            recovery_manager_->input_bucket_store_path(), bucket_count_);
+        input_bucket_store_ = CreateCacheFromProvider(
+            batch_provider_, recovery_manager_->input_bucket_store_path(),
+            bucket_count_);
       } else {
-        input_bucket_store_ = CreateCacheFromCsv(
-            config_.input_config().path(), keys,
-            std::filesystem::path(config_.input_config().path()).parent_path(),
+        input_bucket_store_ = CreateCacheFromProvider(
+            batch_provider_, GetTaskDir() / "input_bucket_store",
             bucket_count_);
       }
     });
@@ -108,64 +109,33 @@ void Rr22PsiSender::Online() {
   Rr22PsiOptions rr22_options = GenerateRr22PsiOptions(
       config_.protocol_config().rr22_config().low_comm_mode());
 
-  for (; bucket_idx < input_bucket_store_->BucketNum(); bucket_idx++) {
-    auto bucket_items_list =
-        PrepareBucketData(config_.protocol_config().protocol(), bucket_idx,
-                          lctx_, input_bucket_store_.get());
-
-    if (!bucket_items_list.has_value()) {
-      continue;
+  PreProcessFunc pre_f =
+      [&](size_t idx) -> std::vector<HashBucketCache::BucketItem> {
+    if (idx >= input_bucket_store_->BucketNum()) {
+      return {};
     }
-    std::mt19937 g(yacl::crypto::SecureRandU64());
-    std::shuffle(bucket_items_list->begin(), bucket_items_list->end(), g);
-    size_t mask_size = sizeof(uint128_t);
-    size_t receiver_size;
-    auto run_f = std::async([&]() -> std::vector<uint128_t> {
-      // Gather Items Size and get mask size
-      auto sender_size = bucket_items_list->size();
-      std::tie(mask_size, receiver_size) =
-          ExchangeTruncateSize(lctx_, bucket_items_list->size(), rr22_options);
-      if ((sender_size == 0) || (receiver_size == 0)) {
-        return {};
-      }
-      // cal item hash
-      std::vector<uint128_t> items_hash(bucket_items_list->size());
-      yacl::parallel_for(0, bucket_items_list->size(),
-                         [&](int64_t begin, int64_t end) {
-                           for (int64_t i = begin; i < end; ++i) {
-                             items_hash[i] = yacl::crypto::Blake3_128(
-                                 bucket_items_list->at(i).base64_data);
-                           }
-                         });
+    return input_bucket_store_->LoadBucketItems(idx);
+  };
+  PostProcessFunc post_f =
+      [&](size_t bucket_idx,
+          const std::vector<HashBucketCache::BucketItem>& bucket_items,
+          const std::vector<uint32_t>& indices,
+          const std::vector<uint32_t>& peer_cnt) {
+        for (size_t i = 0; i != indices.size(); ++i) {
+          intersection_indices_writer_->WriteCache(
+              bucket_items[indices[i]].index, peer_cnt[i]);
+        }
+        intersection_indices_writer_->Commit();
+        if (recovery_manager_) {
+          recovery_manager_->UpdateParsedBucketCount(bucket_idx + 1);
+        }
+      };
 
-      auto receiver_hash_size = std::max(sender_size, receiver_size);
-      // oprfs
-      return Rr22PsiSenderOprfs(rr22_options, lctx_, items_hash,
-                                receiver_hash_size);
-    });
-
-    auto self_oprfs = SyncWait(lctx_, &run_f);
-
-    auto write_bucket_res_f = std::async([&] {
-      SPDLOG_INFO("get intersection begin");
-      std::vector<uint32_t> indices =
-          GetIntersectionSender(std::move(self_oprfs), lctx_, mask_size,
-                                config_.protocol_config().broadcast_result());
-      SPDLOG_INFO("get intersection end");
-      for (const auto& idx : indices) {
-        intersection_indices_writer_->WriteCache(
-            bucket_items_list->at(idx).index);
-      }
-      intersection_indices_writer_->Commit();
-    });
-
-    SyncWait(lctx_, &write_bucket_res_f);
-
-    if (recovery_manager_) {
-      recovery_manager_->UpdateParsedBucketCount(bucket_idx + 1);
-    }
-  }
-
+  Rr22Runner runner(lctx_, rr22_options, input_bucket_store_->BucketNum(),
+                    config_.protocol_config().broadcast_result(), pre_f,
+                    post_f);
+  auto f = std::async([&] { runner.AsyncRun(bucket_idx, true); });
+  SyncWait(lctx_, &f);
   SPDLOG_INFO("[Rr22PsiSender::Online] end");
 }
 

@@ -44,19 +44,24 @@ enum PsiType {
   KKRT_PSI_NPC = 6;
 
   // ecdh-oprf 2-party Unbalanced-PSI Generate CACHE.
+  // Not support, please use new interface UbPsiConfig in psi_v2.proto.
   ECDH_OPRF_UB_PSI_2PC_GEN_CACHE = 7;
 
   // ecdh-oprf 2-party Unbalanced-PSI transfer CACHE.
+  // Not support, please use new interface UbPsiConfig in psi_v2.proto.
   ECDH_OPRF_UB_PSI_2PC_TRANSFER_CACHE = 8;
 
   // ecdh-oprf 2-party Unbalanced-PSI offline phase.
+  // Not support, please use new interface UbPsiConfig in psi_v2.proto.
   ECDH_OPRF_UB_PSI_2PC_OFFLINE = 9;
 
   // ecdh-oprf 2-party Unbalanced-PSI online phase.
+  // Not support, please use new interface UbPsiConfig in psi_v2.proto.
   ECDH_OPRF_UB_PSI_2PC_ONLINE = 10;
 
   // ecdh-oprf 2-party Unbalanced-PSI with shuffling online phase.
   // large set party get intersection result
+  // Not support, please use new interface UbPsiConfig in psi_v2.proto.
   ECDH_OPRF_UB_PSI_2PC_SHUFFLE_ONLINE = 11;
 
   // Differentially-Private PSI https://arxiv.org/pdf/2208.13249.pdf
@@ -119,8 +124,13 @@ message OutputParams {
 message PsiResultReport {
   // The data count of input.
   int64 original_count = 1;
-  // The count of intersection. Get `-1` when self party can not get result.
+  // The count of intersection. Get `-1` when self party can not get
+  // result.
   int64 intersection_count = 2;
+
+  int64 original_key_count = 3;
+
+  int64 intersection_key_count = 4;
 }
 
 // The input parameters of dp-psi.

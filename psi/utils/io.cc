@@ -15,6 +15,8 @@
 #include "psi/utils/io.h"
 
 #include <filesystem>
+#include <fstream>
+#include <ios>
 #include <memory>
 #include <utility>
 
@@ -99,6 +101,20 @@ std::shared_ptr<arrow::io::FileOutputStream> GetArrowOutputStream(
     std::filesystem::create_directories(path.parent_path());
   }
   return arrow::io::FileOutputStream::Open(filename, append).ValueOrDie();
+}
+
+std::shared_ptr<std::ofstream> GetStdOutFileStream(const std::string& filename,
+                                                   bool append) {
+  auto path = std::filesystem::path(filename);
+  if (!std::filesystem::exists(path.parent_path())) {
+    SPDLOG_INFO("path for output file {} doesn't exist, creating path: {}",
+                filename, path.parent_path().string());
+    std::filesystem::create_directories(path.parent_path());
+  }
+  if (append) {
+    return std::make_shared<std::ofstream>(path, std::ios_base::app);
+  }
+  return std::make_shared<std::ofstream>(path);
 }
 
 }  // namespace psi::io

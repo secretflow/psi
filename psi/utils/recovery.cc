@@ -96,20 +96,24 @@ void RecoveryManager::SaveCheckpointFile() {
   file.close();
 }
 
-void RecoveryManager::MarkInitEnd(const v2::PsiConfig& config,
-                                  const std::string& input_hash_digest) {
+void RecoveryManager::MarkInitEnd(
+    const v2::PsiConfig& config,
+    const std::vector<uint8_t>& input_hash_digest) {
   if (checkpoint_.stage() != v2::RecoveryCheckpoint::STAGE_UNSPECIFIED) {
     // Check whether config and input_hash_digest match the previous record.
     YACL_ENFORCE(::google::protobuf::util::MessageDifferencer::Equals(
                      config, checkpoint_.config()),
                  "PSI Config doesn't match previous record.");
 
-    YACL_ENFORCE(input_hash_digest == checkpoint_.input_hash_digest(),
-                 "input_hash_digest doesn't match previous record.");
+    YACL_ENFORCE(
+        std::string(input_hash_digest.begin(), input_hash_digest.end()) ==
+            checkpoint_.input_hash_digest(),
+        "input_hash_digest doesn't match previous record.");
   } else {
     checkpoint_.set_stage(v2::RecoveryCheckpoint::STAGE_INIT_END);
     *checkpoint_.mutable_config() = config;
-    checkpoint_.set_input_hash_digest(input_hash_digest);
+    checkpoint_.set_input_hash_digest(
+        std::string(input_hash_digest.begin(), input_hash_digest.end()));
 
     SaveCheckpointFile();
   }

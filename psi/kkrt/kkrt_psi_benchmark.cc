@@ -42,7 +42,7 @@ std::vector<std::size_t> KkrtPsiRecv(
     const std::shared_ptr<yacl::link::Context>& link_ctx,
     const std::vector<uint128_t>& items_hash) {
   auto ot_send = psi::kkrt::GetKkrtOtReceiverOptions(link_ctx, 512);
-  return psi::kkrt::KkrtPsiRecv(link_ctx, ot_send, items_hash);
+  return psi::kkrt::KkrtPsiRecv(link_ctx, ot_send, items_hash).first;
 }
 
 }  // namespace

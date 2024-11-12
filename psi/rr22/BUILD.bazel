@@ -45,6 +45,7 @@ psi_cc_library(
     hdrs = ["rr22_oprf.h"],
     deps = [
         ":davis_meyer_hash",
+        ":rr22_utils",
         "//psi/rr22/okvs:aes_crhash",
         "//psi/rr22/okvs:baxos",
         "@yacl//yacl/base:buffer",
@@ -79,8 +80,10 @@ psi_cc_library(
     srcs = ["rr22_utils.cc"],
     hdrs = ["rr22_utils.h"],
     deps = [
+        ":sparsehash_config",
         "//psi/rr22/okvs:galois128",
         "//psi/rr22/okvs:simple_index",
+        "//psi/utils:bucket",
         "@com_github_ridiculousfish_libdivide//:libdivide",
         "@com_github_sparsehash_sparsehash//:sparsehash",
         "@yacl//yacl/base:buffer",
@@ -97,6 +100,8 @@ psi_cc_library(
     deps = [
         ":rr22_oprf",
         ":rr22_utils",
+        "//psi/proto:psi_v2_cc_proto",
+        "//psi/utils:bucket",
         "//psi/utils:sync",
     ],
 )
@@ -115,6 +120,7 @@ psi_cc_binary(
     srcs = ["rr22_psi_benchmark.cc"],
     deps = [
         ":rr22_psi",
+        ":rr22_utils",
         "//psi/utils:test_utils",
         "@com_github_google_benchmark//:benchmark_main",
         "@yacl//yacl/crypto/rand",

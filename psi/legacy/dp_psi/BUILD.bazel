@@ -39,7 +39,7 @@ psi_cc_library(
         "//psi/cryptor:cryptor_selector",
         "//psi/ecdh:ecdh_3pc_psi",
         "//psi/ecdh:ecdh_psi",
-        "//psi/utils:batch_provider",
+        "//psi/utils:batch_provider_impl",
         "//psi/utils:ec_point_store",
         "//psi/utils:serialize",
         "@com_google_absl//absl/strings",

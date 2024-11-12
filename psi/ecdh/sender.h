@@ -39,8 +39,6 @@ class EcdhPsiSender final : public AbstractPsiSender {
 
   EcdhPsiOptions psi_options_;
 
-  std::shared_ptr<ArrowCsvBatchProvider> batch_provider_;
-
   std::shared_ptr<HashBucketEcPointStore> self_ec_point_store_;
   std::shared_ptr<HashBucketEcPointStore> peer_ec_point_store_;
 };

@@ -15,7 +15,10 @@
 #include "psi/rr22/rr22_oprf.h"
 
 #include <algorithm>
+#include <cstdint>
 #include <future>
+#include <string>
+#include <vector>
 
 #include "spdlog/spdlog.h"
 #include "yacl/base/buffer.h"
@@ -28,6 +31,7 @@
 
 #include "psi/rr22/davis_meyer_hash.h"
 #include "psi/rr22/okvs/galois128.h"
+#include "psi/rr22/rr22_utils.h"
 
 namespace psi::rr22 {
 
@@ -117,37 +121,84 @@ void MocRr22VoleReceiver::RecvF64(
   prng2.Fill(b);
 }
 
-void Rr22OprfSender::Send(const std::shared_ptr<yacl::link::Context>& lctx,
-                          size_t paxos_init_size,
-                          absl::Span<const uint128_t> inputs,
-                          absl::Span<uint128_t> hash_outputs,
-                          [[maybe_unused]] size_t num_threads) {
+std::vector<uint128_t> Rr22OprfSender::Send(
+    const std::shared_ptr<yacl::link::Context>& lctx,
+    const absl::Span<const uint128_t>& inputs) {
   if (mode_ == Rr22PsiMode::FastMode) {
-    SendFast(lctx, paxos_init_size, inputs, hash_outputs, num_threads);
-  } else if (mode_ == Rr22PsiMode::LowCommMode) {
-    SendLowComm(lctx, paxos_init_size, inputs, hash_outputs, num_threads);
+    return SendFast(lctx, inputs);
+  } else {
+    return SendLowComm(lctx, inputs);
   }
 }
 
-void Rr22OprfSender::SendFast(const std::shared_ptr<yacl::link::Context>& lctx,
-                              size_t paxos_init_size,
-                              absl::Span<const uint128_t> inputs,
-                              absl::Span<uint128_t> hash_outputs,
-                              [[maybe_unused]] size_t num_threads) {
-  uint128_t baxos_seed;
-  SPDLOG_INFO("recv paxos seed...");
+void Rr22OprfSender::Init(const std::shared_ptr<yacl::link::Context>& lctx,
+                          size_t init_size, size_t num_threads) {
+  init_size_ = init_size;
+  num_threads_ = num_threads;
+  if (mode_ == Rr22PsiMode::FastMode) {
+    uint128_t baxos_seed;
+    SPDLOG_INFO("recv baxos seed...");
 
-  yacl::Buffer baxos_seed_buf =
-      lctx->Recv(lctx->NextRank(), fmt::format("recv paxos seed"));
-  YACL_ENFORCE(baxos_seed_buf.size() == sizeof(uint128_t));
+    yacl::Buffer baxos_seed_buf =
+        lctx->Recv(lctx->NextRank(), fmt::format("recv baxos seed"));
+    YACL_ENFORCE(baxos_seed_buf.size() == sizeof(uint128_t));
 
-  SPDLOG_INFO("recv paxos seed finished");
+    SPDLOG_INFO("recv baxos seed finished");
 
-  std::memcpy(&baxos_seed, baxos_seed_buf.data(), baxos_seed_buf.size());
+    std::memcpy(&baxos_seed, baxos_seed_buf.data(), baxos_seed_buf.size());
 
-  baxos_.Init(paxos_init_size, bin_size_, kPaxosWeight, ssp_,
-              okvs::PaxosParam::DenseType::GF128, baxos_seed);
+    baxos_.Init(init_size_, bin_size_, kPaxosWeight, ssp_,
+                okvs::PaxosParam::DenseType::GF128, baxos_seed);
+    paxos_size_ = baxos_.size();
+    SPDLOG_INFO("paxos_size:{}", paxos_size_);
+    // vole send function
+    yacl::crypto::SilentVoleSender vole_sender(code_type_, malicious_);
+    size_t v_size = std::max<size_t>(256, baxos_.size());
+    b_ = std::vector<uint128_t>(v_size, 0);
+    absl::Span<uint128_t> b128_span = absl::MakeSpan(b_);
 
+    SPDLOG_INFO("begin vole send");
+
+    vole_sender.Send(lctx, b128_span);
+    delta_ = vole_sender.GetDelta();
+
+    SPDLOG_INFO("end vole send");
+  } else if (mode_ == Rr22PsiMode::LowCommMode) {
+    uint128_t paxos_seed;
+    SPDLOG_INFO("recv paxos seed...");
+
+    yacl::Buffer paxos_seed_buf =
+        lctx->Recv(lctx->NextRank(), fmt::format("recv paxos seed"));
+    YACL_ENFORCE(paxos_seed_buf.size() == sizeof(uint128_t));
+
+    std::memcpy(&paxos_seed, paxos_seed_buf.data(), paxos_seed_buf.size());
+
+    paxos_.Init(init_size_, kPaxosWeight, ssp_,
+                okvs::PaxosParam::DenseType::Binary, paxos_seed);
+
+    paxos_size_ = paxos_.size();
+
+    // vole send function
+
+    yacl::crypto::SilentVoleSender vole_sender(code_type_);
+    size_t v_size = std::max<size_t>(256, paxos_.size());
+    b_ = std::vector<uint128_t>(v_size, 0);
+    absl::Span<uint128_t> b128_span = absl::MakeSpan(b_);
+
+    SPDLOG_INFO("begin vole send");
+
+    vole_sender.SfSend(lctx, b128_span);
+    delta_ = vole_sender.GetDelta();
+
+    SPDLOG_INFO("end vole send");
+  } else {
+    YACL_THROW("unsupported mode:{}", int(mode_));
+  }
+}
+
+std::vector<uint128_t> Rr22OprfSender::SendFast(
+    const std::shared_ptr<yacl::link::Context>& lctx,
+    const absl::Span<const uint128_t>& inputs) {
   uint128_t ws = 0;
   if (malicious_) {
     SPDLOG_INFO("malicious version");
@@ -161,27 +212,7 @@ void Rr22OprfSender::SendFast(const std::shared_ptr<yacl::link::Context>& lctx,
     lctx->SendAsyncThrottled(lctx->NextRank(), ws_hash,
                              fmt::format("send ws_hash"));
   }
-
-  paxos_size_ = baxos_.size();
-
-  // vole send function
-  yacl::crypto::SilentVoleSender vole_sender(code_type_, malicious_);
-
-  b_ = yacl::Buffer(std::max<size_t>(256, baxos_.size()) * sizeof(uint128_t));
-  std::memset(b_.data(), 0, b_.size());
-  absl::Span<uint128_t> b128_span =
-      absl::MakeSpan(reinterpret_cast<uint128_t*>(b_.data()),
-                     std::max<size_t>(256, baxos_.size()));
-
-  SPDLOG_INFO("begin vole send");
-
-  vole_sender.Send(lctx, b128_span);
-  delta_ = vole_sender.GetDelta();
-
-  SPDLOG_INFO("end vole send");
-
-  auto hash_inputs_proc =
-      std::async([&] { HashInputMulDelta(inputs, hash_outputs); });
+  auto hash_inputs_proc = std::async([&] { return HashInputMulDelta(inputs); });
 
   if (malicious_) {
     yacl::Buffer wr_buf = lctx->Recv(lctx->NextRank(), fmt::format("recv wr"));
@@ -196,125 +227,101 @@ void Rr22OprfSender::SendFast(const std::shared_ptr<yacl::link::Context>& lctx,
   }
 
   SPDLOG_INFO("recv paxos solve ...");
-
-  yacl::Buffer paxos_solve_buffer(paxos_size_ * sizeof(uint128_t));
-  std::memset(paxos_solve_buffer.data(), 0, paxos_solve_buffer.size());
-  absl::Span<uint128_t> paxos_solve_vec =
-      absl::MakeSpan((uint128_t*)paxos_solve_buffer.data(), paxos_size_);
-
-  size_t recv_item_count = 0;
-
-  while (true) {
-    yacl::Buffer paxos_solve_buf =
-        lctx->Recv(lctx->NextRank(), fmt::format("recv paxos_solve"));
-
-    std::memcpy(&paxos_solve_vec[recv_item_count], paxos_solve_buf.data(),
-                paxos_solve_buf.size());
-
-    recv_item_count += paxos_solve_buf.size() / sizeof(uint128_t);
-    if (recv_item_count == paxos_size_) {
-      break;
-    }
-  }
-
+  auto paxos_solve_v = RecvChunked<uint128_t>(lctx, paxos_size_);
   SPDLOG_INFO("recv paxos solve finished. bytes:{}",
-              paxos_solve_vec.size() * sizeof(uint128_t));
+              paxos_solve_v.size() * sizeof(uint128_t));
 
-  hash_inputs_proc.get();
+  auto outputs = hash_inputs_proc.get();
 
   okvs::Galois128 delta_gf128(delta_);
 
   SPDLOG_INFO("begin b xor delta a");
-
-  yacl::parallel_for(
-      0, paxos_solve_vec.size(), [&](int64_t begin, int64_t end) {
-        for (int64_t idx = begin; idx < end; ++idx) {
-          b128_span[idx] =
-              b128_span[idx] ^
-              (delta_gf128 * paxos_solve_vec[idx]).get<uint128_t>(0);
-        }
-      });
+  yacl::parallel_for(0, paxos_solve_v.size(), [&](int64_t begin, int64_t end) {
+    for (int64_t idx = begin; idx < end; ++idx) {
+      b_[idx] = b_[idx] ^ (delta_gf128 * paxos_solve_v[idx]).get<uint128_t>(0);
+    }
+  });
 
   SPDLOG_INFO("end b xor delta a");
+  return outputs;
 }
 
-void Rr22OprfSender::SendLowComm(
-    const std::shared_ptr<yacl::link::Context>& lctx, size_t paxos_init_size,
-    absl::Span<const uint128_t> inputs, absl::Span<uint128_t> hash_outputs,
-    [[maybe_unused]] size_t num_threads) {
-  uint128_t paxos_seed;
-  SPDLOG_INFO("recv paxos seed...");
-
-  yacl::Buffer paxos_seed_buf =
-      lctx->Recv(lctx->NextRank(), fmt::format("recv paxos seed"));
-  YACL_ENFORCE(paxos_seed_buf.size() == sizeof(uint128_t));
-
-  std::memcpy(&paxos_seed, paxos_seed_buf.data(), paxos_seed_buf.size());
-
-  paxos_.Init(paxos_init_size, kPaxosWeight, ssp_,
-              okvs::PaxosParam::DenseType::Binary, paxos_seed);
-
-  paxos_size_ = paxos_.size();
-
-  // vole send function
-
-  yacl::crypto::SilentVoleSender vole_sender(code_type_);
-
-  b_ = yacl::Buffer(std::max<size_t>(256, paxos_.size()) * sizeof(uint128_t));
-  std::memset(b_.data(), 0, b_.size());
-  absl::Span<uint128_t> b128_span =
-      absl::MakeSpan(reinterpret_cast<uint128_t*>(b_.data()),
-                     std::max<size_t>(256, paxos_.size()));
-
-  SPDLOG_INFO("begin vole send");
-
-  vole_sender.SfSend(lctx, b128_span);
-  delta_ = vole_sender.GetDelta();
-
-  SPDLOG_INFO("end vole send");
-
-  HashInputMulDelta(inputs, hash_outputs);
+std::vector<uint128_t> Rr22OprfSender::SendLowComm(
+    const std::shared_ptr<yacl::link::Context>& lctx,
+    const absl::Span<const uint128_t>& inputs) {
+  auto hash_outputs = HashInputMulDelta(inputs);
 
   SPDLOG_INFO("recv paxos solve ...");
-  yacl::Buffer paxos_solve_buf =
-      lctx->Recv(lctx->NextRank(), fmt::format("recv paxos_solve"));
-  YACL_ENFORCE(paxos_solve_buf.size() / sizeof(uint64_t) == paxos_size_);
+  auto paxos_solve_v = RecvChunked<uint64_t>(lctx, paxos_size_);
+  SPDLOG_INFO("recv paxos solve finished. bytes:{}",
+              paxos_solve_v.size() * sizeof(uint64_t));
 
-  SPDLOG_INFO("recv paxos solve finished. bytes:{}", paxos_solve_buf.size());
-
-  absl::Span<uint64_t> paxos_solve_u64 =
-      absl::MakeSpan(reinterpret_cast<uint64_t*>(paxos_solve_buf.data()),
-                     paxos_solve_buf.size() / sizeof(uint64_t));
+  absl::Span<uint64_t> paxos_solve_u64 = absl::MakeSpan(paxos_solve_v);
 
   SPDLOG_INFO("paxos_solve_u64 size:{}", paxos_solve_u64.size());
 
   okvs::Galois128 delta_gf128(delta_);
 
+  absl::Span<uint128_t> b128_span =
+      absl::MakeSpan(reinterpret_cast<uint128_t*>(b_.data()),
+                     std::max<size_t>(256, paxos_.size()));
   for (size_t i = 0; i < paxos_solve_u64.size(); ++i) {
     // Delta * (A - P), note that here is GF64 * GF128 = GF128
     b128_span[i] =
         b128_span[i] ^ (delta_gf128 * paxos_solve_u64[i]).get<uint128_t>(0);
   }
+  return hash_outputs;
 }
 
-void Rr22OprfSender::Eval(absl::Span<const uint128_t> inputs,
-                          absl::Span<uint128_t> outputs, uint64_t num_threads) {
+std::vector<uint128_t> Rr22OprfSender::HashInputMulDelta(
+    const absl::Span<const uint128_t>& inputs) {
+  std::vector<uint128_t> hash_outputs(inputs.size());
+  okvs::Galois128 delta_gf128(delta_);
+  okvs::AesCrHash aes_crhash(kAesHashSeed);
+
+  if (mode_ == Rr22PsiMode::FastMode) {
+    yacl::parallel_for(0, inputs.size(), [&](int64_t begin, int64_t end) {
+      for (int64_t i = begin; i < end; ++i) {
+        hash_outputs[i] =
+            (delta_gf128 * aes_crhash.Hash(inputs[i])).get<uint128_t>(0);
+      }
+    });
+
+  } else if (mode_ == Rr22PsiMode::LowCommMode) {
+    yacl::parallel_for(0, inputs.size(), [&](int64_t begin, int64_t end) {
+      for (int64_t i = begin; i < end; ++i) {
+        hash_outputs[i] =
+            (delta_gf128 *
+             yacl::DecomposeUInt128(aes_crhash.Hash(inputs[i])).second)
+                .get<uint128_t>(0);
+      }
+    });
+  } else {
+    YACL_THROW("unsupported rr22 psi mode");
+  }
+  return hash_outputs;
+}
+
+std::vector<uint128_t> Rr22OprfSender::Eval(
+    const absl::Span<const uint128_t>& inputs) {
   SPDLOG_INFO("paxos decode ...");
 
   YACL_ENFORCE(b_.size() > 0, "Must use Send() first");
+  std::vector<uint128_t> outputs(inputs.size());
+  absl::Span<uint128_t> outputs_span = absl::MakeSpan(outputs);
 
   absl::Span<uint128_t> b128_span =
       absl::MakeSpan(reinterpret_cast<uint128_t*>(b_.data()), paxos_size_);
 
   if (mode_ == Rr22PsiMode::FastMode) {
-    baxos_.Decode(inputs, outputs, b128_span, num_threads);
+    baxos_.Decode(inputs, outputs_span, b128_span, num_threads_);
   } else if (mode_ == Rr22PsiMode::LowCommMode) {
-    paxos_.Decode(inputs, outputs, b128_span);
+    paxos_.Decode(inputs, outputs_span, b128_span);
   } else {
     YACL_THROW("unsupported rr22 psi mode");
   }
-
   SPDLOG_INFO("paxos decode finished");
+  b_.clear();
 
   okvs::AesCrHash aes_crhash(kAesHashSeed);
 
@@ -341,41 +348,19 @@ void Rr22OprfSender::Eval(absl::Span<const uint128_t> inputs,
     });
   }
   if (malicious_) {
-    DavisMeyerHash(outputs, inputs, outputs);
+    DavisMeyerHash(outputs_span, inputs, outputs_span);
   } else {
-    aes_crhash.Hash(outputs, outputs);
+    aes_crhash.Hash(outputs_span, outputs_span);
   }
+  return outputs;
 }
 
-void Rr22OprfSender::HashInputMulDelta(absl::Span<const uint128_t> inputs,
-                                       absl::Span<uint128_t> hash_outputs) {
-  YACL_ENFORCE(hash_outputs.size() == inputs.size());
-
-  okvs::Galois128 delta_gf128(delta_);
-  okvs::AesCrHash aes_crhash(kAesHashSeed);
-
-  if (mode_ == Rr22PsiMode::FastMode) {
-    for (size_t i = 0; i < inputs.size(); ++i) {
-      hash_outputs[i] =
-          (delta_gf128 * aes_crhash.Hash(inputs[i])).get<uint128_t>(0);
-    }
-  } else if (mode_ == Rr22PsiMode::LowCommMode) {
-    for (size_t i = 0; i < inputs.size(); ++i) {
-      hash_outputs[i] =
-          (delta_gf128 *
-           yacl::DecomposeUInt128(aes_crhash.Hash(inputs[i])).second)
-              .get<uint128_t>(0);
-    }
-  } else {
-    YACL_THROW("unsupported rr22 psi mode");
-  }
-}
-
-void Rr22OprfSender::Eval(absl::Span<const uint128_t> inputs,
-                          absl::Span<const uint128_t> inputs_hash,
-                          absl::Span<uint128_t> outputs, uint64_t num_threads) {
+std::vector<uint128_t> Rr22OprfSender::Eval(
+    const absl::Span<const uint128_t>& inputs,
+    absl::Span<const uint128_t> inputs_hash) {
   YACL_ENFORCE(b_.size() > 0, "Must use Send() first");
-
+  std::vector<uint128_t> outputs(inputs.size());
+  auto outputs_span = absl::MakeSpan(outputs);
   absl::Span<uint128_t> b128_span =
       absl::MakeSpan(reinterpret_cast<uint128_t*>(b_.data()), paxos_size_);
 
@@ -383,15 +368,15 @@ void Rr22OprfSender::Eval(absl::Span<const uint128_t> inputs,
               mode_ == Rr22PsiMode::FastMode ? "Fast" : "LowComm");
 
   if (mode_ == Rr22PsiMode::FastMode) {
-    baxos_.Decode(inputs, outputs, b128_span, num_threads);
+    baxos_.Decode(inputs, outputs_span, b128_span, num_threads_);
 
   } else if (mode_ == Rr22PsiMode::LowCommMode) {
-    paxos_.Decode(inputs, outputs, b128_span);
+    paxos_.Decode(inputs, outputs_span, b128_span);
   } else {
     YACL_THROW("unsupported rr22 psi mode");
   }
-
   SPDLOG_INFO("paxos decode finished");
+  b_.clear();
 
   yacl::parallel_for(0, inputs.size(), [&](int64_t begin, int64_t end) {
     for (int64_t idx = begin; idx < end; ++idx) {
@@ -404,42 +389,79 @@ void Rr22OprfSender::Eval(absl::Span<const uint128_t> inputs,
   });
 
   if (malicious_) {
-    DavisMeyerHash(outputs, inputs, outputs);
+    DavisMeyerHash(outputs_span, inputs, outputs_span);
   } else {
     okvs::AesCrHash aes_crhash(kAesHashSeed);
 
-    aes_crhash.Hash(outputs, outputs);
+    aes_crhash.Hash(outputs_span, outputs_span);
   }
+  return outputs;
 }
 
-void Rr22OprfReceiver::Recv(const std::shared_ptr<yacl::link::Context>& lctx,
-                            size_t paxos_init_size,
-                            const std::vector<uint128_t>& inputs,
-                            absl::Span<uint128_t> outputs, size_t num_threads) {
+void Rr22OprfReceiver::Init(const std::shared_ptr<yacl::link::Context>& lctx,
+                            size_t init_size, size_t num_threads) {
+  num_threads_ = num_threads;
   if (mode_ == Rr22PsiMode::FastMode) {
-    RecvFast(lctx, paxos_init_size, inputs, outputs, num_threads);
+    uint128_t baxos_seed = 1;
+    yacl::ByteContainerView paxos_seed_buf(&baxos_seed, sizeof(uint128_t));
+
+    lctx->SendAsyncThrottled(lctx->NextRank(), paxos_seed_buf,
+                             fmt::format("send baxos_seed_buf"));
+    baxos_.Init(init_size, bin_size_, kPaxosWeight, ssp_,
+                okvs::PaxosParam::DenseType::GF128, baxos_seed);
+    paxos_size_ = baxos_.size();
+    SPDLOG_INFO("baxos_size:{}", paxos_size_);
+    // c + b = a * delta
+    // vole recv
+    yacl::crypto::SilentVoleReceiver vole_receiver(code_type_, malicious_);
+    size_t v_size = std::max<size_t>(256, baxos_.size());
+    a_ = std::vector<uint128_t>(v_size, 0);
+    c_ = std::vector<uint128_t>(v_size, 0);
+
+    SPDLOG_INFO("begin vole recv");
+    vole_receiver.Recv(lctx, absl::MakeSpan(a_), absl::MakeSpan(c_));
+    SPDLOG_INFO("end vole recv");
   } else if (mode_ == Rr22PsiMode::LowCommMode) {
-    RecvLowComm(lctx, paxos_init_size, inputs, outputs, num_threads);
+    uint128_t paxos_seed = yacl::crypto::SecureRandU128();
+    yacl::ByteContainerView paxos_seed_buf(&paxos_seed, sizeof(uint128_t));
+
+    lctx->SendAsyncThrottled(lctx->NextRank(), paxos_seed_buf,
+                             fmt::format("send paxos_seed_buf"));
+    // here we must use DenseType::Binary for supporting EncodeU64, which
+    // should used in LowComm
+    paxos_.Init(init_size, kPaxosWeight, ssp_,
+                okvs::PaxosParam::DenseType::Binary, paxos_seed);
+    paxos_size_ = paxos_.size();
+
+    // vole recv function
+    SPDLOG_INFO("use SilentVoleReceiver");
+    yacl::crypto::SilentVoleReceiver vole_receiver(code_type_);
+    size_t v_size = std::max<size_t>(256, paxos_.size());
+    a64_ = std::vector<uint64_t>(v_size, 0);
+    c_ = std::vector<uint128_t>(v_size, 0);
+
+    SPDLOG_INFO("begin vole recv");
+    vole_receiver.SfRecv(lctx, absl::MakeSpan(a64_), absl::MakeSpan(c_));
+    SPDLOG_INFO("end vole recv");
+
+  } else {
+    YACL_THROW("unsupported mode:{}", int(mode_));
   }
 }
 
-void Rr22OprfReceiver::RecvFast(
-    const std::shared_ptr<yacl::link::Context>& lctx, size_t paxos_init_size,
-    const std::vector<uint128_t>& inputs, absl::Span<uint128_t> outputs,
-    size_t num_threads) {
-  YACL_ENFORCE(inputs.size() <= paxos_init_size);
+std::vector<uint128_t> Rr22OprfReceiver::Recv(
+    const std::shared_ptr<yacl::link::Context>& lctx,
+    const absl::Span<const uint128_t>& inputs) {
+  if (mode_ == Rr22PsiMode::FastMode) {
+    return RecvFast(lctx, inputs);
+  } else {
+    return RecvLowComm(lctx, inputs);
+  }
+}
 
-  okvs::Baxos paxos;
-
-  uint128_t paxos_seed = yacl::crypto::SecureRandU128();
-
-  yacl::ByteContainerView paxos_seed_buf(&paxos_seed, sizeof(uint128_t));
-
-  lctx->SendAsyncThrottled(lctx->NextRank(), paxos_seed_buf,
-                           fmt::format("send paxos_seed_buf"));
-  paxos.Init(paxos_init_size, bin_size_, kPaxosWeight, ssp_,
-             okvs::PaxosParam::DenseType::GF128, paxos_seed);
-
+std::vector<uint128_t> Rr22OprfReceiver::RecvFast(
+    const std::shared_ptr<yacl::link::Context>& lctx,
+    const absl::Span<const uint128_t>& inputs) {
   uint128_t w = 0;
   uint128_t wr = 0;
   yacl::Buffer ws_hash_buf;
@@ -451,52 +473,15 @@ void Rr22OprfReceiver::RecvFast(
     YACL_ENFORCE(ws_hash_buf.size() == 32);
   }
 
-  paxos_size_ = paxos.size();
-
-  // c + b = a * delta
-  yacl::Buffer a;
-  yacl::Buffer c;
-  absl::Span<uint128_t> a128_span;
-  absl::Span<uint128_t> c128_span;
-
-  // vole recv function
-  auto vole_recv_proc = std::async([&] {
-    yacl::crypto::SilentVoleReceiver vole_receiver(code_type_, malicious_);
-
-    a = yacl::Buffer(std::max<size_t>(256, paxos.size()) * sizeof(uint128_t));
-    c = yacl::Buffer(std::max<size_t>(256, paxos.size()) * sizeof(uint128_t));
-    std::memset(a.data(), 0, a.size());
-    std::memset(c.data(), 0, c.size());
-
-    a128_span = absl::MakeSpan(reinterpret_cast<uint128_t*>(a.data()),
-                               std::max<size_t>(256, paxos.size()));
-    c128_span = absl::MakeSpan(reinterpret_cast<uint128_t*>(c.data()),
-                               std::max<size_t>(256, paxos.size()));
-
-    SPDLOG_INFO("a_,b_ size:{} {}", a128_span.size(), c128_span.size());
-
-    SPDLOG_INFO("begin vole recv");
-
-    vole_receiver.Recv(lctx, a128_span, c128_span);
-
-    SPDLOG_INFO("end vole recv");
-  });
-
   okvs::AesCrHash aes_crhash(kAesHashSeed);
-
-  aes_crhash.Hash(absl::MakeSpan(inputs), outputs);
-
-  yacl::Buffer p_buffer(paxos.size() * sizeof(uint128_t));
-  std::memset((uint8_t*)p_buffer.data(), 0, p_buffer.size());
-
-  absl::Span<uint128_t> p128_span =
-      absl::MakeSpan((uint128_t*)(p_buffer.data()), paxos.size());
-
+  std::vector<uint128_t> outputs(inputs.size(), 0);
+  auto outputs_span = absl::MakeSpan(outputs);
+  aes_crhash.Hash(inputs, absl::MakeSpan(outputs_span));
   SPDLOG_INFO("solve begin");
-  paxos.Solve(absl::MakeSpan(inputs), outputs, p128_span, nullptr, num_threads);
+  std::vector<uint128_t> p128_v(baxos_.size(), 0);
+  auto p128_span = absl::MakeSpan(p128_v);
+  baxos_.Solve(inputs, outputs_span, p128_span, nullptr, num_threads_);
   SPDLOG_INFO("solve end");
-
-  vole_recv_proc.get();
 
   if (malicious_) {
     // send wr
@@ -522,9 +507,9 @@ void Rr22OprfReceiver::RecvFast(
 
   auto oprf_eval_proc = std::async([&] {
     SPDLOG_INFO("begin compute self oprf");
-    paxos.Decode(absl::MakeSpan(inputs), outputs,
-                 absl::MakeSpan(c128_span.data(), paxos.size()), num_threads);
-
+    baxos_.Decode(inputs, outputs_span,
+                  absl::MakeSpan(c_.data(), baxos_.size()), num_threads_);
+    c_.clear();
     if (malicious_) {
       for (size_t i = 0; i < outputs.size(); ++i) {
         outputs[i] = outputs[i] ^ w;
@@ -533,10 +518,10 @@ void Rr22OprfReceiver::RecvFast(
 
     if (malicious_) {
       SPDLOG_INFO("call Davis-Meyer hash");
-      DavisMeyerHash(outputs, inputs, outputs);
+      DavisMeyerHash(outputs_span, inputs, outputs_span);
     } else {
       SPDLOG_INFO("call aes crhash");
-      aes_crhash.Hash(outputs, outputs);
+      aes_crhash.Hash(outputs_span, outputs_span);
     }
     SPDLOG_INFO("end compute self oprf");
   });
@@ -545,76 +530,24 @@ void Rr22OprfReceiver::RecvFast(
 
   yacl::parallel_for(0, p128_span.size(), [&](int64_t begin, int64_t end) {
     for (int64_t idx = begin; idx < end; ++idx) {
-      p128_span[idx] = p128_span[idx] ^ a128_span[idx];
+      p128_span[idx] = p128_span[idx] ^ a_[idx];
     }
   });
+  a_.clear();
 
   SPDLOG_INFO("end p xor a");
 
-  for (size_t i = 0; i < p128_span.size(); i += 100000) {
-    size_t batch_size = std::min<size_t>(100000, p128_span.size() - i);
-    yacl::ByteContainerView paxos_solve_byteview(
-        &p128_span[i], batch_size * sizeof(uint128_t));
-
-    lctx->SendAsyncThrottled(lctx->NextRank(), paxos_solve_byteview,
-                             fmt::format("send paxos_solve_byteview"));
-  }
-
+  SendChunked(lctx, p128_span);
   oprf_eval_proc.get();
+  return outputs;
 }
 
-void Rr22OprfReceiver::RecvLowComm(
-    const std::shared_ptr<yacl::link::Context>& lctx, size_t paxos_init_size,
-    const std::vector<uint128_t>& inputs, absl::Span<uint128_t> outputs,
-    [[maybe_unused]] size_t num_threads) {
-  YACL_ENFORCE(inputs.size() <= paxos_init_size);
-
-  okvs::Paxos<uint32_t> paxos;
-
-  uint128_t paxos_seed = yacl::crypto::SecureRandU128();
-
-  yacl::ByteContainerView paxos_seed_buf(&paxos_seed, sizeof(uint128_t));
-
-  lctx->SendAsyncThrottled(lctx->NextRank(), paxos_seed_buf,
-                           fmt::format("send paxos_seed_buf"));
-  // here we must use DenseType::Binary for supporting EncodeU64, which
-  // should used in LowComm
-  paxos.Init(paxos_init_size, kPaxosWeight, ssp_,
-             okvs::PaxosParam::DenseType::Binary, paxos_seed);
-
-  paxos_size_ = paxos.size();
-
-  // c + b = a * delta
-  yacl::Buffer a;
-  yacl::Buffer c;
-  absl::Span<uint64_t> a64_span;
-  absl::Span<uint128_t> c128_span;
-
-  // vole recv function
-  auto vole_recv_proc = std::async([&] {
-    SPDLOG_INFO("use SilentVoleReceiver");
-    yacl::crypto::SilentVoleReceiver vole_receiver(code_type_);
-
-    a = yacl::Buffer(std::max<size_t>(256, paxos.size()) * sizeof(uint64_t));
-    memset(a.data(), 0, a.size());
-    c = yacl::Buffer(std::max<size_t>(256, paxos.size()) * sizeof(uint128_t));
-    memset(c.data(), 0, c.size());
-
-    a64_span = absl::MakeSpan(reinterpret_cast<uint64_t*>(a.data()),
-                              std::max<size_t>(256, paxos.size()));
-    c128_span = absl::MakeSpan(reinterpret_cast<uint128_t*>(c.data()),
-                               std::max<size_t>(256, paxos.size()));
-    SPDLOG_INFO("a_,b_ size:{} {} ", a64_span.size(), c128_span.size());
-
-    SPDLOG_INFO("begin vole recv");
-
-    vole_receiver.SfRecv(lctx, absl::MakeSpan(a64_span), c128_span);
-
-    SPDLOG_INFO("end vole recv");
-  });
-
+std::vector<uint128_t> Rr22OprfReceiver::RecvLowComm(
+    const std::shared_ptr<yacl::link::Context>& lctx,
+    const absl::Span<const uint128_t>& inputs) {
   okvs::AesCrHash aes_crhash(kAesHashSeed);
-
+  std::vector<uint128_t> outputs(inputs.size());
+  auto outputs_span = absl::MakeSpan(outputs);
   for (size_t i = 0; i < inputs.size(); ++i) {
     outputs[i] = aes_crhash.Hash(inputs[i]);
   }
@@ -627,51 +560,35 @@ void Rr22OprfReceiver::RecvLowComm(
   }
   absl::Span<uint64_t> outputs_u64_span(outputs_u64);
 
-  // yacl::Buffer p_buffer(paxos.size() * sizeof(uint128_t));
-  // yacl::Buffer p_buffer(paxos.size() * sizeof(uint64_t));
-  // std::memset(p_buffer.data(), 0, p_buffer.size());
-
-  yacl::Buffer p64_buffer(paxos.size() * sizeof(uint64_t));
-  // yacl::Buffer p_buffer(paxos.size() * sizeof(uint64_t));
-  std::memset(p64_buffer.data(), 0, p64_buffer.size());
-
-  absl::Span<uint64_t> p64_span((uint64_t*)p64_buffer.data(), paxos.size());
-  // absl::Span<uint128_t> p128_span((uint128_t*)p_buffer.data(), paxos.size());
+  std::vector<uint64_t> p64_v(paxos_.size(), 0);
+  absl::Span<uint64_t> p64_span = absl::MakeSpan(p64_v);
 
   SPDLOG_INFO("solve begin");
-  paxos.SetInput(absl::MakeSpan(inputs));
-  SPDLOG_INFO("finished SetInput");
-
-  paxos.EncodeU64(outputs_u64_span, p64_span, nullptr);
-
+  paxos_.SetInput(inputs);
+  paxos_.EncodeU64(outputs_u64_span, p64_span, nullptr);
   SPDLOG_INFO("solve end");
-
-  vole_recv_proc.get();
 
   auto oprf_eval_proc = std::async([&] {
     SPDLOG_INFO("begin receiver oprf");
-    paxos.Decode(absl::MakeSpan(inputs), outputs,
-                 absl::MakeSpan(c128_span.data(), paxos.size()));
+    paxos_.Decode(inputs, outputs_span,
+                  absl::MakeSpan(c_.data(), paxos_.size()));
+    c_.clear();
     // oprf end output
-    aes_crhash.Hash(outputs, outputs);
+    aes_crhash.Hash(outputs_span, outputs_span);
     SPDLOG_INFO("end receiver oprf");
   });
 
   SPDLOG_INFO("begin p xor a");
 
   for (size_t i = 0; i < p64_span.size(); ++i) {
-    p64_span[i] ^= a64_span[i];
+    p64_span[i] ^= a64_[i];
   }
-
+  a64_.clear();
   SPDLOG_INFO("end p xor a");
 
-  yacl::ByteContainerView paxos_solve_byteview(
-      p64_span.data(), p64_span.size() * sizeof(uint64_t));
-
-  lctx->SendAsyncThrottled(lctx->NextRank(), paxos_solve_byteview,
-                           fmt::format("send paxos_solve_byteview"));
-
+  SendChunked(lctx, p64_span);
   oprf_eval_proc.get();
+  return outputs;
 }
 
 }  // namespace psi::rr22

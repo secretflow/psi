@@ -24,7 +24,4 @@ namespace psi::kkrt {
 // For KkrtOt
 constexpr size_t kDefaultNumOt = 512;
 
-void CommonInit(const std::string& key_hash_digest, v2::PsiConfig* config,
-                RecoveryManager* recovery_manager);
-
 }  // namespace psi::kkrt

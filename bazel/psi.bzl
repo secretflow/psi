@@ -30,9 +30,9 @@ FAST_FLAGS = ["-O1"]
 
 def _psi_copts():
     return select({
-        "@psi//bazel:psi_build_as_release": RELEASE_FLAGS,
-        "@psi//bazel:psi_build_as_debug": DEBUG_FLAGS,
-        "@psi//bazel:psi_build_as_fast": FAST_FLAGS,
+        "//bazel:psi_build_as_release": RELEASE_FLAGS,
+        "//bazel:psi_build_as_debug": DEBUG_FLAGS,
+        "//bazel:psi_build_as_fast": FAST_FLAGS,
         "//conditions:default": FAST_FLAGS,
     }) + WARNING_FLAGS
 
@@ -59,8 +59,6 @@ def psi_cc_library(
         ] + OMP_DEPS,
         **kargs
     )
-
-psi_cmake_external = yacl_cmake_external
 
 def _psi_version_file_impl(ctx):
     out = ctx.actions.declare_file(ctx.attr.filename)

@@ -28,16 +28,4 @@ Rr22PsiOptions GenerateRr22PsiOptions(bool low_comm_mode) {
   return options;
 }
 
-void CommonInit(const std::string& key_hash_digest, v2::PsiConfig* config,
-                RecoveryManager* recovery_manager) {
-  if (config->protocol_config().rr22_config().bucket_size() == 0) {
-    config->mutable_protocol_config()->mutable_rr22_config()->set_bucket_size(
-        kDefaultBucketSize);
-  }
-
-  if (recovery_manager) {
-    recovery_manager->MarkInitEnd(*config, key_hash_digest);
-  }
-}
-
 }  // namespace psi::rr22

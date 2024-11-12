@@ -40,7 +40,7 @@ class RecoveryManager {
   explicit RecoveryManager(const std::string& folder_path);
 
   void MarkInitEnd(const v2::PsiConfig& config,
-                   const std::string& input_hash_digest);
+                   const std::vector<uint8_t>& input_hash_digest);
 
   void MarkPreProcessEnd(const std::shared_ptr<IEccCryptor>& cryptor = nullptr);
 

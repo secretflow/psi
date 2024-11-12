@@ -42,7 +42,7 @@ std::vector<std::size_t> KkrtPsiRecv(
     const std::vector<uint128_t>& items_hash) {
   auto ot_send = GetKkrtOtReceiverOptions(link_ctx, 512);
 
-  return KkrtPsiRecv(link_ctx, ot_send, items_hash);
+  return KkrtPsiRecv(link_ctx, ot_send, items_hash).first;
 }
 
 std::vector<size_t> GetIntersection(const TestParams& params) {

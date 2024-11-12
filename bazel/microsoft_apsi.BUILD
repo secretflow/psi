@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@psi//bazel:psi.bzl", "psi_cmake_external")
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -21,7 +21,7 @@ filegroup(
     srcs = glob(["**"]),
 )
 
-psi_cmake_external(
+cmake(
     name = "apsi",
     cache_entries = {
         "APSI_USE_LOG4CPLUS": "ON",
@@ -29,6 +29,7 @@ psi_cmake_external(
         "CMAKE_INSTALL_LIBDIR": "lib",
         "EXT_BUILD_DEPS": "$EXT_BUILD_DEPS",
     },
+    generate_args = ["-GNinja"],
     lib_source = "@com_github_microsoft_apsi//:all",
     out_include_dir = "include/APSI-0.11",
     out_static_libs = ["libapsi-0.11.a"],

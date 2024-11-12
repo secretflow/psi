@@ -18,10 +18,10 @@
 
 #include "yacl/base/exception.h"
 
-#include "psi/ecdh/client.h"
 #include "psi/ecdh/receiver.h"
 #include "psi/ecdh/sender.h"
-#include "psi/ecdh/server.h"
+#include "psi/ecdh/ub_psi/client.h"
+#include "psi/ecdh/ub_psi/server.h"
 #include "psi/kkrt/receiver.h"
 #include "psi/kkrt/sender.h"
 #include "psi/rr22/receiver.h"

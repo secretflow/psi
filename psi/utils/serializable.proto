@@ -26,8 +26,25 @@ message PsiDataBatchProto {
   uint32 item_num = 1;
   bytes flatten_bytes = 2;
   bool is_last_batch = 3;
+  uint32 batch_index = 4;
+  string type = 5;
+  map<uint32, uint32> duplicate_item_cnt = 6;
 }
 
 message StrItemsProto {
   repeated string items = 1;
+}
+
+message StrItemsProtoWithCnt {
+  repeated string items = 1;
+
+  map<uint32, uint32> duplicate_item_cnt = 2;
+}
+
+message ItemsCntProto {
+  map<uint32, uint32> duplicate_item_cnt = 2;
+}
+
+message IndexesProto {
+  repeated uint32 indexes = 1;
 }

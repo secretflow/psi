@@ -113,4 +113,8 @@ std::vector<size_t> AllGatherItemsSize(
 void BroadcastResult(const std::shared_ptr<yacl::link::Context>& link_ctx,
                      std::vector<std::string>* res);
 
+void BroadcastResult(const std::shared_ptr<yacl::link::Context>& link_ctx,
+                     std::vector<std::string>* res,
+                     std::unordered_map<uint32_t, uint32_t>* res_dup_cnt);
+
 }  // namespace psi

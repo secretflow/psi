@@ -14,9 +14,10 @@
 
 #pragma once
 
+#include <filesystem>
+#include <fstream>
 #include <memory>
 #include <string>
-#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -25,37 +26,46 @@
 #include "psi/utils/batch_provider.h"
 #include "psi/utils/io.h"
 
+#include "psi/utils/ub_psi_cache.pb.h"
+
 namespace psi {
+
+inline constexpr int kMaxCipherSize = 32;
+
+struct UbPsiCacheItem {
+  uint32_t origin_index = 0;
+  uint32_t shuffle_index = 0;
+  uint32_t dup_cnt = 0;
+  char data[kMaxCipherSize] = {};
+};
 
 class UbPsiCacheProvider : public IBasicBatchProvider,
                            public IShuffledBatchProvider {
  public:
-  UbPsiCacheProvider(const std::string &file_path, size_t batch_size,
-                     size_t data_len);
-  ~UbPsiCacheProvider() override { in_->Close(); }
+  UbPsiCacheProvider(const std::string& file_path, size_t batch_size);
+  ~UbPsiCacheProvider() override {}
 
   std::vector<std::string> ReadNextBatch() override;
 
-  std::tuple<std::vector<std::string>, std::vector<size_t>, std::vector<size_t>>
-  ReadNextShuffledBatch() override;
+  ShuffledBatch ReadNextShuffledBatch() override;
 
-  const std::vector<std::string> &GetSelectedFields();
+  std::pair<std::vector<std::string>, std::unordered_map<uint32_t, uint32_t>>
+  ReadNextBatchWithDupCnt() override;
+
+  std::vector<std::string> GetSelectedFields();
+
+  std::vector<uint8_t> GetCachePrivateKey();
 
   [[nodiscard]] size_t batch_size() const override { return batch_size_; }
 
  private:
-  std::vector<std::tuple<std::string, size_t, size_t>> ReadData(
-      size_t read_count);
+  std::vector<UbPsiCacheItem> ReadData(size_t read_count);
 
-  const size_t batch_size_;
+  const uint32_t batch_size_;
   std::string file_path_;
-  size_t file_size_;
-  size_t file_cursor_ = 0;
-  std::unique_ptr<io::InputStream> in_;
-  size_t data_len_;
-  size_t data_index_len_;
-
-  std::vector<std::string> selected_fields_;
+  std::ifstream in_;
+  proto::UBPsiCacheMeta meta_;
+  uint32_t read_count_ = 0;
 };
 
 class IUbPsiCache {
@@ -65,26 +75,41 @@ class IUbPsiCache {
   virtual void SaveData(yacl::ByteContainerView item, size_t index,
                         size_t shuffle_index) = 0;
 
+  virtual void SaveData(yacl::ByteContainerView item, size_t index,
+                        size_t shuffle_index, uint32_t /*dup_cnt*/) {
+    SaveData(item, index, shuffle_index);
+  }
+
   virtual void Flush() { return; }
 };
 
 class UbPsiCache : public IUbPsiCache {
  public:
-  UbPsiCache(const std::string &file_path, size_t data_len,
-             const std::vector<std::string> &ids);
+  UbPsiCache(const std::string& file_path, uint64_t data_len,
+             const std::vector<std::string>& selected_fields,
+             std::vector<uint8_t> private_key);
 
-  ~UbPsiCache() { out_stream_->Close(); }
+  ~UbPsiCache() {
+    Flush();
+    out_stream_->Close();
+  }
 
   void SaveData(yacl::ByteContainerView item, size_t index,
-                size_t shuffle_index) override;
+                size_t shuffle_index) override {
+    SaveData(item, index, shuffle_index, 0);
+  }
 
-  void Flush() override { out_stream_->Flush(); }
+  void SaveData(yacl::ByteContainerView item, size_t index,
+                size_t shuffle_index, uint32_t dup_cnt) override;
+
+  void Flush() override;
 
  private:
-  std::string file_path_;
+  std::filesystem::path file_path_;
+  proto::UBPsiCacheMeta meta_;
   size_t data_len_;
-  size_t data_index_len_;
   std::unique_ptr<io::OutputStream> out_stream_;
+  size_t cache_cnt_ = 0;
 };
 
 }  // namespace psi

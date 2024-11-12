@@ -121,12 +121,17 @@ JoinProcessor::JoinProcessor(const v2::UbPsiConfig& ub_psi_config,
       v2::UbPsiConfig::MODE_FULL,
   };
 
-  if (gen_output_mode.find(ub_psi_config.mode()) != gen_output_mode.end()) {
-    YACL_ENFORCE(
-        ub_psi_config.output_config().type() == v2::IoType::IO_TYPE_FILE_CSV,
-        "unsupport output format {}",
-        v2::IoType_Name(ub_psi_config.input_config().type()));
-    output_path_ = ub_psi_config.output_config().path();
+  bool gen_output =
+      (role_ == v2::ROLE_SERVER && ub_psi_config.server_get_result()) ||
+      (role_ == v2::ROLE_CLIENT && ub_psi_config.client_get_result());
+  if (gen_output) {
+    if (gen_output_mode.find(ub_psi_config.mode()) != gen_output_mode.end()) {
+      YACL_ENFORCE(
+          ub_psi_config.output_config().type() == v2::IoType::IO_TYPE_FILE_CSV,
+          "unsupport output format {}",
+          v2::IoType_Name(ub_psi_config.input_config().type()));
+      output_path_ = ub_psi_config.output_config().path();
+    }
   }
 
   if (!std::filesystem::exists(ub_psi_config.cache_path())) {

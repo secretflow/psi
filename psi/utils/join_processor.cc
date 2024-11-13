@@ -270,6 +270,7 @@ std::shared_ptr<KeyInfo> JoinProcessor::GetUniqueKeysInfo() {
 KeyInfo::StatInfo JoinProcessor::DealResultIndex(IndexReader& index) {
   ResultDumper dumper(sorted_intersect_path_, sorted_except_path_);
   auto stat = GetUniqueKeysInfo()->ApplyPeerDupCnt(index, dumper);
+  dumper.Flush();
   if (is_input_key_unique_ && align_output_) {
     if (!sorted_intersect_path_.empty()) {
       Table::MakeFromCsv(sorted_intersect_path_)

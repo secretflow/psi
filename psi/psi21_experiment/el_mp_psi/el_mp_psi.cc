@@ -16,9 +16,9 @@
 
 #include <future>
 
-#include "psi/psi21_experiment/el_mp_psi/el_sender.h"
-#include "psi/utils/communication.h"
-#include "psi/utils/sync.h"
+#include "psi/psi/psi21_experiment/el_mp_psi/el_sender.h"
+#include "psi/psi/utils/communication.h"
+#include "psi/psi/utils/sync.h"
 #include "yacl/crypto/hash/hash_utils.h"
 #include "yacl/crypto/rand/rand.h"
 #include "yacl/utils/serialize.h"

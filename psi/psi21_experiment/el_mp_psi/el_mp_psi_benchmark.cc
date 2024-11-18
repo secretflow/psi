@@ -16,8 +16,8 @@
 #include <iostream>
 
 #include "benchmark/benchmark.h"
-#include "psi/psi21_experiment/el_mp_psi/el_mp_psi.h"
-#include "psi/psi21_experiment/el_mp_psi/el_sender.h"
+#include "psi/psi/psi21_experiment/el_mp_psi/el_mp_psi.h"
+#include "psi/psi/psi21_experiment/el_mp_psi/el_sender.h"
 #include "yacl/base/exception.h"
 #include "yacl/crypto/hash/hash_utils.h"
 #include "yacl/link/test_util.h"

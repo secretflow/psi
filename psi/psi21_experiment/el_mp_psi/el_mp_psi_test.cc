@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "psi/psi21_experiment/el_mp_psi/el_mp_psi.h"
+#include "psi/psi/psi21_experiment/el_mp_psi/el_mp_psi.h"
 
 #include <random>
 #include <set>
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "psi/utils/test_utils.h"
+#include "psi/psi/utils/test_utils.h"
 #include "yacl/link/test_util.h"
 
 namespace psi::psi {

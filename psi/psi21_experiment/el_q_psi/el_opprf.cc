@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "psi/psi21_experiment/el_q_psi/el_opprf.h"
+#include "psi/psi/psi21_experiment/el_q_psi/el_opprf.h"
 
 #include <algorithm>
 #include <cmath>
 #include <memory>
 
-#include "psi/psi21_experiment/el_q_psi/el_hashing.h"
+#include "psi/psi/psi21_experiment/el_q_psi/el_hashing.h"
 #include "yacl/crypto/rand/rand.h"
 #include "yacl/crypto/tools/ro.h"
 #include "yacl/kernel/algorithms/base_ot.h"

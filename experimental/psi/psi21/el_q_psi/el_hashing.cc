@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "psi/psi/psi21_experiment/el_q_psi/el_hashing.h"
+#include "experimental/psi/psi21/el_q_psi/el_hashing.h"
 
 #include <random>
 #include <utility>

@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "psi/psi/psi21_experiment/el_q_psi/el_opprf.h"
+#include "experimental/psi/psi21/el_c_psi/el_opprf.h"
 
 #include <algorithm>
 #include <cmath>
 #include <memory>
 
-#include "psi/psi/psi21_experiment/el_q_psi/el_hashing.h"
+#include "experimental/psi/psi21/el_c_psi/el_hashing.h"
 #include "yacl/crypto/rand/rand.h"
 #include "yacl/crypto/tools/ro.h"
 #include "yacl/kernel/algorithms/base_ot.h"
@@ -177,7 +177,6 @@ void ElOpprfSend(const std::shared_ptr<yacl::link::Context>& ctx,
       for (size_t i{}; i != TABLE_SIZE[c]; ++i) {
         table[i] == uint64_t{0} && (table[i] = yc::FastRandU128());
       }
-
       ctx->SendAsync(ctx->NextRank(), yacl::SerializeUint128(nonce),
                      fmt::format("OPPRF:Nonce={}", nonce));
       yacl::Buffer buf(table.data(), table.size() * sizeof(uint64_t));

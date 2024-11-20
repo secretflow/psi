@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "psi/psi/psi21_experiment/el_c_psi/el_c_psi.h"
+#include "experimental/psi/psi21/el_mp_psi/el_mp_psi.h"
 
 #include <random>
 #include <set>
@@ -26,13 +26,13 @@ namespace psi::psi {
 
 namespace {
 
-struct NCTestParams {
+struct NMpTestParams {
   std::vector<size_t> item_size;
   size_t intersection_size;
 };
 
 std::vector<std::vector<std::string>> CreateNPartyItems(
-    const NCTestParams& params) {
+    const NMpTestParams& params) {
   std::vector<std::vector<std::string>> ret(params.item_size.size() + 1);
   ret[params.item_size.size()] =
       test::CreateRangeItems(1, params.intersection_size);
@@ -61,10 +61,10 @@ std::vector<std::vector<std::string>> CreateNPartyItems(
 
 }  // namespace
 
-class NCPsiTest : public testing::TestWithParam<NCTestParams> {};
+class NMpPsiTest : public testing::TestWithParam<NMpTestParams> {};
 
 // FIXME : this test is not stable in arm env
-TEST_P(NCPsiTest, Works) {
+TEST_P(NMpPsiTest, Works) {
   std::vector<std::vector<std::string>> items;
   std::vector<std::vector<std::string>> resultvec;
   std::vector<std::string> finalresult;
@@ -73,7 +73,6 @@ TEST_P(NCPsiTest, Works) {
   items = CreateNPartyItems(params);
   size_t leader_rank = 0;
   uint128_t maxlength = 0;
-  uint128_t n = params.item_size.size() - 1;
 
   for (size_t i = 0; i < params.item_size.size() - 1; i++) {
     std::vector<std::vector<std::string>> items1;
@@ -83,10 +82,10 @@ TEST_P(NCPsiTest, Works) {
 
     auto ctxs = yacl::link::test::SetupWorld(2);
     auto proc = [&](int idx) -> std::vector<std::string> {
-      NcParty::Options opts;
+      NmpParty::Options opts;
       opts.link_ctx = ctxs[idx];
       opts.leader_rank = leader_rank;
-      NcParty op(opts);
+      NmpParty op(opts);
       // for (size_t j{}; j != items1[idx].size(); ++j) {
       //   SPDLOG_INFO(" items[{}][{}] = {}, size{}", idx, i, items[idx][i],
       //   items[idx].size());
@@ -106,48 +105,27 @@ TEST_P(NCPsiTest, Works) {
     result = f_links[0].get();
     resultvec.push_back(result);
 
-    /*for (size_t j = 0; j < result.size(); j++) {
-      SPDLOG_INFO("i{}  j{}, result[j] {}  size{}", i, j, result[j],
-                  result.size());
-    }*/
+    // for (size_t j = 0; j < result.size() ; j++) {
+    //   SPDLOG_INFO("i{}  j{}, result[j] {}  size{}",i,j,result[j],
+    //   result.size());
+    // }
   }
 
   maxlength = items[0].size();
-  std::vector<uint128_t> qpsivector;
   for (size_t j = 0; j < maxlength; j++) {
-    uint128_t sum = 0;
     for (size_t i = 0; i < params.item_size.size() - 1; i++) {
-      // 如果有的集合没有那么多项就continue
-      // results[i] = f_links[i].get();
       if (resultvec[i].size() <= j) {
-        continue;
+        break;
+      }
+      if (resultvec[i][j] != "0") {
+        break;
       }
 
-      // SPDLOG_INFO(" result[{}][{}] = {}", i, j, resultvec[i][j]);
-      auto it = resultvec[i].begin() + j;
-      std::string element = *it;
-      if (element == "1") {
-        sum++;
+      if (i == params.item_size.size() - 2) {
+        finalresult.push_back(items[0][j]);
       }
     }
-    if (sum >= n) {
-      // todo//推入对应input元素 之后再查输入变量从param中怎么取出推入
-      qpsivector.push_back(1);
-    } else {
-      qpsivector.push_back(0);
-    }
   }
-
-  // std::vector<std::string> intersectionnparty;
-  for (size_t k{}; k != items[0].size(); ++k) {
-    if (qpsivector[k] == 1) {
-      finalresult.push_back(items[0][k]);
-    }
-  }
-
-  /*for (size_t i{}; i != finalresult.size(); ++i) {
-    SPDLOG_INFO("intersectionnparty = {}", finalresult[i]);
-  }*/
 
   std::vector<std::string> intersection = items[params.item_size.size()];
   std::sort(intersection.begin(), intersection.end());
@@ -158,14 +136,14 @@ TEST_P(NCPsiTest, Works) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    Works_Instances, NCPsiTest,
-    // testing::Values(NCTestParams{{1, 3}, 1}));
-    testing::Values(NCTestParams{{0, 3}, 0},                 //
-                    NCTestParams{{3, 0}, 0},                 //
-                    NCTestParams{{0, 0}, 0},                 //
-                    NCTestParams{{4, 3}, 2},                 //
-                    NCTestParams{{20, 17, 14}, 10},          //
-                    NCTestParams{{20, 17, 14, 30}, 10},      //
-                    NCTestParams{{20, 17, 14, 30, 35}, 11},  //
-                    NCTestParams{{20, 17, 14, 30, 35}, 0}));
+    Works_Instances, NMpPsiTest,
+    testing::Values(NMpTestParams{{0, 3}, 0},                 //
+                    NMpTestParams{{3, 0}, 0},                 //
+                    NMpTestParams{{0, 0}, 0},                 //
+                    NMpTestParams{{4, 3}, 2},                 //
+                    NMpTestParams{{20, 17, 14}, 10},          //
+                    NMpTestParams{{20, 17, 14, 30}, 10},      //
+                    NMpTestParams{{20, 17, 14, 30, 35}, 11},  //
+                    NMpTestParams{{20, 17, 14, 30, 35}, 0}));
+
 }  // namespace psi::psi

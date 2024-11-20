@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "psi/psi/psi21_experiment/el_q_psi/el_q_psi.h"
+#include "experimental/psi/psi21/el_c_psi/el_c_psi.h"
 
 #include <random>
 #include <set>
@@ -29,7 +29,6 @@ namespace {
 struct NCTestParams {
   std::vector<size_t> item_size;
   size_t intersection_size;
-  size_t n;
 };
 
 std::vector<std::vector<std::string>> CreateNPartyItems(
@@ -56,10 +55,6 @@ std::vector<std::vector<std::string>> CreateNPartyItems(
     for (const auto& iter : idx_set) {
       ret[idx][iter] = ret[params.item_size.size()][j++];
     }
-
-    if (/*idx > dis(gen) &&*/ idx >= params.n) {
-      break;
-    }
   }
   return ret;
 }
@@ -75,39 +70,16 @@ TEST_P(NCPsiTest, Works) {
   std::vector<std::string> finalresult;
 
   auto params = GetParam();
-  size_t n = params.n;
   items = CreateNPartyItems(params);
   size_t leader_rank = 0;
   uint128_t maxlength = 0;
+  uint128_t n = params.item_size.size() - 1;
 
-  if (n >= params.item_size.size()) {
-    SPDLOG_INFO("param error: n > items[0].size() ");
-    return;
-  }
-
-  if (n <= 0) {
-    SPDLOG_INFO("param error: n <= 0 ");
-    return;
-  }
-
-  /*
-  for (size_t j{}; j != items[0].size(); ++j) {
-    SPDLOG_INFO(" items[{}][{}] = {}, size{}", 0, j, items[0][j],
-                items[0].size());
-  }
-  */
   for (size_t i = 0; i < params.item_size.size() - 1; i++) {
     std::vector<std::vector<std::string>> items1;
     items1.push_back(items[0]);
     items1.push_back(items[i + 1]);
     leader_rank = 0;
-
-    /*
-    for (size_t j{}; j != items[i + 1].size(); ++j) {
-         SPDLOG_INFO(" items[{}][{}] = {}, size{}", i+1, j, items[i+1][j],
-         items[i+1].size());
-    }
-    */
 
     auto ctxs = yacl::link::test::SetupWorld(2);
     auto proc = [&](int idx) -> std::vector<std::string> {
@@ -115,6 +87,10 @@ TEST_P(NCPsiTest, Works) {
       opts.link_ctx = ctxs[idx];
       opts.leader_rank = leader_rank;
       NcParty op(opts);
+      // for (size_t j{}; j != items1[idx].size(); ++j) {
+      //   SPDLOG_INFO(" items[{}][{}] = {}, size{}", idx, i, items[idx][i],
+      //   items[idx].size());
+      // }
 
       return op.Run(items[idx]);
     };
@@ -130,10 +106,9 @@ TEST_P(NCPsiTest, Works) {
     result = f_links[0].get();
     resultvec.push_back(result);
 
-    /*
-    for (size_t j = 0; j < result.size(); j++) {
-        SPDLOG_INFO("i{}  j{}, result[j] {}  size{}", i, j, result[j],
-                    result.size());
+    /*for (size_t j = 0; j < result.size(); j++) {
+      SPDLOG_INFO("i{}  j{}, result[j] {}  size{}", i, j, result[j],
+                  result.size());
     }*/
   }
 
@@ -170,9 +145,9 @@ TEST_P(NCPsiTest, Works) {
     }
   }
 
-  for (size_t i{}; i != finalresult.size(); ++i) {
+  /*for (size_t i{}; i != finalresult.size(); ++i) {
     SPDLOG_INFO("intersectionnparty = {}", finalresult[i]);
-  }
+  }*/
 
   std::vector<std::string> intersection = items[params.item_size.size()];
   std::sort(intersection.begin(), intersection.end());
@@ -184,13 +159,13 @@ TEST_P(NCPsiTest, Works) {
 
 INSTANTIATE_TEST_SUITE_P(
     Works_Instances, NCPsiTest,
-    testing::Values(NCTestParams{{0, 3}, 0, 1},                 //
-                    NCTestParams{{3, 0}, 0, 1},                 //
-                    NCTestParams{{0, 0}, 0, 1},                 //
-                    NCTestParams{{4, 3}, 2, 1},                 //
-                    NCTestParams{{20, 17, 14}, 10, 2},          //
-                    NCTestParams{{20, 17, 14, 30}, 10, 3},      //
-                    NCTestParams{{20, 17, 14, 30, 35}, 11, 4},  //
-                    NCTestParams{{20, 17, 14, 30, 35}, 0, 4}));
-// testing::Values(NCTestParams{{3, 0}, 0, 1}));
+    // testing::Values(NCTestParams{{1, 3}, 1}));
+    testing::Values(NCTestParams{{0, 3}, 0},                 //
+                    NCTestParams{{3, 0}, 0},                 //
+                    NCTestParams{{0, 0}, 0},                 //
+                    NCTestParams{{4, 3}, 2},                 //
+                    NCTestParams{{20, 17, 14}, 10},          //
+                    NCTestParams{{20, 17, 14, 30}, 10},      //
+                    NCTestParams{{20, 17, 14, 30, 35}, 11},  //
+                    NCTestParams{{20, 17, 14, 30, 35}, 0}));
 }  // namespace psi::psi

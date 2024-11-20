@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "psi/psi21_experiment/el_mp_psi/el_mp_psi.h"
+#include "experimental/psi/psi21/el_mp_psi/el_mp_psi.h"
 
 #include <future>
 
-#include "psi/psi/psi21_experiment/el_mp_psi/el_sender.h"
+#include "experimental/psi/psi21/el_mp_psi/el_sender.h"
 #include "psi/psi/utils/communication.h"
 #include "psi/psi/utils/sync.h"
 #include "yacl/crypto/hash/hash_utils.h"

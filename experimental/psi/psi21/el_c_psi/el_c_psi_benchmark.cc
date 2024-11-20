@@ -16,8 +16,8 @@
 #include <iostream>
 
 #include "benchmark/benchmark.h"
-#include "psi/psi/psi21_experiment/el_q_psi/el_opprf.h"
-#include "psi/psi/psi21_experiment/el_q_psi/el_q_psi.h"
+#include "experimental/psi/psi21/el_c_psi/el_c_psi.h"
+#include "experimental/psi/psi21/el_c_psi/el_opprf.h"
 #include "yacl/base/exception.h"
 #include "yacl/crypto/hash/hash_utils.h"
 #include "yacl/link/test_util.h"
@@ -32,7 +32,7 @@ std::vector<uint128_t> CreateRangeItems(size_t begin, size_t size) {
   return ret;
 }
 
-void ElQPsiSend(const std::shared_ptr<yacl::link::Context>& link_ctx,
+void ElCPsiSend(const std::shared_ptr<yacl::link::Context>& link_ctx,
                 const std::vector<uint128_t>& items_hash) {
   // auto ot_recv = psi::kkrt::GetKkrtOtSenderOptions(link_ctx, 512);
   // return psi::kkrt::KkrtPsiSend(link_ctx, ot_recv, items_hash);
@@ -45,7 +45,7 @@ void ElQPsiSend(const std::shared_ptr<yacl::link::Context>& link_ctx,
   return psi::psi::ElOpprfSend(link_ctx, items_hash, shares);
 }
 
-std::vector<uint64_t> ElQPsiRecv(
+std::vector<uint64_t> ElCPsiRecv(
     const std::shared_ptr<yacl::link::Context>& link_ctx,
     const std::vector<uint128_t>& items_hash) {
   // auto ot_send = psi::kkrt::GetKkrtOtReceiverOptions(link_ctx, 512);
@@ -55,7 +55,7 @@ std::vector<uint64_t> ElQPsiRecv(
 
 }  // namespace
 
-static void BM_El_Q_Psi(benchmark::State& state) {
+static void BM_El_C_Psi(benchmark::State& state) {
   for (auto _ : state) {
     state.PauseTiming();
     size_t n = state.range(0);
@@ -67,9 +67,9 @@ static void BM_El_Q_Psi(benchmark::State& state) {
     state.ResumeTiming();
 
     std::future<void> kkrt_psi_sender =
-        std::async([&] { return ElQPsiSend(contexts[0], alice_items); });
+        std::async([&] { return ElCPsiSend(contexts[0], alice_items); });
     std::future<std::vector<uint64_t>> kkrt_psi_receiver =
-        std::async([&] { return ElQPsiRecv(contexts[1], bob_items); });
+        std::async([&] { return ElCPsiRecv(contexts[1], bob_items); });
 
     kkrt_psi_sender.get();
     auto results_b = kkrt_psi_receiver.get();
@@ -77,7 +77,7 @@ static void BM_El_Q_Psi(benchmark::State& state) {
 }
 
 // [256k, 512k, 1m, 2m, 4m, 8m]
-BENCHMARK(BM_El_Q_Psi)
+BENCHMARK(BM_El_C_Psi)
     ->Unit(benchmark::kMillisecond)
     ->Arg(256 << 10)
     ->Arg(512 << 10)

@@ -481,15 +481,6 @@ void ResultDumper::Dump(const std::string& line, int64_t duplicate_cnt,
   }
 }
 
-void ResultDumper::Flush() {
-  if (intersect_file_) {
-    intersect_file_->flush();
-  }
-  if (except_file_) {
-    except_file_->flush();
-  }
-}
-
 std::vector<std::string> KeyInfo::SourceFileColumns() const {
   return table_->Columns();
 }

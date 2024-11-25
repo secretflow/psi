@@ -129,8 +129,6 @@ struct ResultDumper {
   int64_t except_cnt() const { return except_cnt_; }
   int64_t intersect_cnt() const { return intersect_cnt_; }
 
-  void Flush();
-
  private:
   void Dump(const std::string& line, int64_t duplicate_cnt,
             std::shared_ptr<std::ofstream>& file, int64_t* total_dump_cnt);

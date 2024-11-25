@@ -219,6 +219,20 @@ void AbstractPsiParty::CheckSelfConfig() {
   YACL_ENFORCE_EQ(static_cast<int>(keys_set.size()), config_.keys().size(),
                   "Duplicated key is not allowed.");
 
+  if (!config_.protocol_config().broadcast_result() &&
+      config_.advanced_join_type() !=
+          v2::PsiConfig::ADVANCED_JOIN_TYPE_UNSPECIFIED) {
+    SPDLOG_WARN(
+        "broadcast_result turns off while advanced join is enabled. "
+        "broadcast_result is modified to true since intersection has to be "
+        "sent to both parties.");
+
+    YACL_ENFORCE(!config_.output_config().path().empty(),
+                 "You have to provide path of output.");
+
+    config_.mutable_protocol_config()->set_broadcast_result(true);
+  }
+
   if (!config_.skip_duplicates_check() &&
       config_.advanced_join_type() !=
           v2::PsiConfig::ADVANCED_JOIN_TYPE_UNSPECIFIED) {

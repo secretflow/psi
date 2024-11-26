@@ -15,28 +15,50 @@
 namespace {
 
 std::vector<uint64_t> GenerateQueries(const uint64_t query_num,
-                                      const uint64_t db_size) {
+                                      const uint64_t entry_num) {
   std::vector<uint64_t> queries;
   queries.reserve(query_num);
 
-  std::mt19937_64 rng(yacl::crypto::FastRandU64());
+  yacl::crypto::Prg<uint64_t> prg(yacl::crypto::SecureRandU64());
   for (uint64_t q = 0; q < query_num; ++q) {
-    queries.push_back(rng() % db_size);
+    queries.push_back(prg() % entry_num);
   }
 
   return queries;
 }
 
-std::vector<uint64_t> CreateDatabase(const uint64_t db_size,
-                                     const uint64_t db_seed) {
-  const auto [ChunkSize, SetSize] = pir::piano::GenParams(db_size);
-  std::vector<uint64_t> DB;
-  DB.assign(ChunkSize * SetSize * pir::piano::DBEntryLength, 0);
+std::vector<uint8_t> FNVHash(uint64_t key) {
+  constexpr uint64_t FNV_offset_basis = 14695981039346656037ULL;
+  uint64_t hash = FNV_offset_basis;
 
-  for (uint64_t i = 0; i < DB.size() / pir::piano::DBEntryLength; ++i) {
-    auto entry = pir::piano::GenDBEntry(db_seed, i);
-    std::memcpy(&DB[i * pir::piano::DBEntryLength], entry.data(),
-                pir::piano::DBEntryLength * sizeof(uint64_t));
+  for (int i = 0; i < 8; ++i) {
+    constexpr uint64_t FNV_prime = 1099511628211ULL;
+    const auto byte = static_cast<uint8_t>(key & 0xFF);
+    hash ^= static_cast<uint64_t>(byte);
+    hash *= FNV_prime;
+    key >>= 8;
+  }
+
+  std::vector<uint8_t> hash_bytes(8);
+  for (size_t i = 0; i < 8; ++i) {
+    hash_bytes[i] = static_cast<uint8_t>((hash >> (i * 8)) & 0xFF);
+  }
+
+  return hash_bytes;
+}
+
+std::vector<uint8_t> CreateDatabase(const uint64_t entry_size,
+                                    const uint64_t entry_num,
+                                    const uint64_t db_seed) {
+  const auto [ChunkSize, SetSize] = pir::piano::GenParams(entry_num);
+  std::vector<uint8_t> DB;
+  DB.assign(ChunkSize * SetSize * entry_size, 0);
+
+  for (uint64_t i = 0; i < DB.size() / entry_size; ++i) {
+    auto entry =
+        pir::piano::DBEntry::GenDBEntry(entry_size, db_seed, i, FNVHash);
+    std::memcpy(&DB[i * entry_size], entry.data().data(),
+                entry_size * sizeof(uint8_t));
   }
 
   return DB;
@@ -44,18 +66,21 @@ std::vector<uint64_t> CreateDatabase(const uint64_t db_size,
 
 void SetupAndRunServer(
     const std::shared_ptr<yacl::link::Context>& server_context,
-    const uint64_t db_size, std::promise<void>& exit_signal,
-    std::vector<uint64_t>& db) {
-  const auto [ChunkSize, SetSize] = pir::piano::GenParams(db_size);
-  pir::piano::QueryServiceServer server(db, server_context, SetSize, ChunkSize);
+    const uint64_t entry_size, const uint64_t entry_num,
+    std::promise<void>& exit_signal, std::vector<uint8_t>& db) {
+  const auto [ChunkSize, SetSize] = pir::piano::GenParams(entry_num);
+  pir::piano::QueryServiceServer server(db, server_context, SetSize, ChunkSize,
+                                        entry_size);
   server.Start(exit_signal.get_future());
 }
 
 std::vector<pir::piano::DBEntry> SetupAndRunClient(
-    const uint64_t db_size, const uint64_t thread_num,
+    const uint64_t entry_num, const uint64_t thread_num,
+    const uint64_t entry_size,
     const std::shared_ptr<yacl::link::Context>& client_context,
     const std::vector<uint64_t>& queries) {
-  pir::piano::QueryServiceClient client(db_size, thread_num, client_context);
+  pir::piano::QueryServiceClient client(entry_num, thread_num, entry_size,
+                                        client_context);
   client.FetchFullDB();
   return client.OnlineMultipleQueries(queries);
 }
@@ -65,8 +90,9 @@ std::vector<pir::piano::DBEntry> SetupAndRunClient(
 static void BM_PianoPir(benchmark::State& state) {
   for (auto _ : state) {
     state.PauseTiming();
-    uint64_t db_size = state.range(0) / sizeof(pir::piano::DBEntry);
-    const uint64_t query_num = state.range(1);
+    const uint64_t entry_size = state.range(0);
+    const uint64_t entry_num = state.range(1) / entry_size / CHAR_BIT;
+    const uint64_t query_num = state.range(2);
     constexpr uint64_t db_seed = 2315127;
     uint64_t thread_num = 8;
 
@@ -74,18 +100,18 @@ static void BM_PianoPir(benchmark::State& state) {
     const auto contexts = yacl::link::test::SetupWorld(kWorldSize);
     yacl::link::RecvTimeoutGuard guard(contexts[0], 1000000);
 
-    auto db = CreateDatabase(db_size, db_seed);
-    auto queries = GenerateQueries(query_num, db_size);
+    auto db = CreateDatabase(entry_size, entry_num, db_seed);
+    auto queries = GenerateQueries(query_num, entry_num);
 
     state.ResumeTiming();
     std::promise<void> exitSignal;
     auto server_future =
-        std::async(std::launch::async, SetupAndRunServer, contexts[0], db_size,
-                   std::ref(exitSignal), std::ref(db));
+        std::async(std::launch::async, SetupAndRunServer, contexts[0],
+                   entry_size, entry_num, std::ref(exitSignal), std::ref(db));
 
     auto client_future =
-        std::async(std::launch::async, SetupAndRunClient, db_size, thread_num,
-                   contexts[1], std::cref(queries));
+        std::async(std::launch::async, SetupAndRunClient, entry_num, thread_num,
+                   entry_size, contexts[1], std::cref(queries));
     auto results = client_future.get();
 
     exitSignal.set_value();
@@ -93,10 +119,9 @@ static void BM_PianoPir(benchmark::State& state) {
   }
 }
 
-// [1m, 16m, 64m, 128m]
 BENCHMARK(BM_PianoPir)
     ->Unit(benchmark::kMillisecond)
-    ->Args({1 << 20, 1000})
-    ->Args({16 << 20, 1000})
-    ->Args({64 << 20, 1000})
-    ->Args({128 << 20, 1000});
+    ->Args({4, 1 << 20, 1000})
+    ->Args({4, 2 << 20, 1000})
+    ->Args({8, 1 << 20, 1000})
+    ->Args({8, 2 << 20, 1000});

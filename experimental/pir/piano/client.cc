@@ -20,36 +20,37 @@ double FailProbBallIntoBins(const uint64_t ball_num, const uint64_t bin_num,
 }
 
 QueryServiceClient::QueryServiceClient(
-    const uint64_t db_size, const uint64_t thread_num,
-    std::shared_ptr<yacl::link::Context> context)
-    : db_size_(db_size), thread_num_(thread_num), context_(std::move(context)) {
+    const uint64_t entry_num, const uint64_t thread_num,
+    const uint64_t entry_size, std::shared_ptr<yacl::link::Context> context)
+    : entry_num_(entry_num),
+      thread_num_(thread_num),
+      context_(std::move(context)),
+      entry_size_(entry_size) {
   Initialize();
   InitializeLocalSets();
 }
 
 void QueryServiceClient::Initialize() {
-  std::mt19937_64 rng(yacl::crypto::FastRandU64());
-
-  master_key_ = RandKey(rng);
-  long_key_ = GetLongKey(&master_key_);
+  master_key_ = SecureRandKey();
+  long_key_ = GetLongKey(master_key_);
 
   // Q = sqrt(n) * ln(n)
-  totalQueryNum =
-      static_cast<uint64_t>(std::sqrt(static_cast<double>(db_size_)) *
-                            std::log(static_cast<double>(db_size_)));
+  total_query_num_ =
+      static_cast<uint64_t>(std::sqrt(static_cast<double>(entry_num_)) *
+                            std::log(static_cast<double>(entry_num_)));
 
-  std::tie(chunk_size_, set_size_) = GenParams(db_size_);
+  std::tie(chunk_size_, set_size_) = GenParams(entry_num_);
 
   primary_set_num_ =
-      primaryNumParam(static_cast<double>(totalQueryNum),
-                      static_cast<double>(chunk_size_), FailureProbLog2 + 1);
+      primaryNumParam(static_cast<double>(total_query_num_),
+                      static_cast<double>(chunk_size_), kFailureProbLog2 + 1);
   // if localSetNum is not a multiple of thread_num_ then we need to add some
   // padding
   primary_set_num_ =
       (primary_set_num_ + thread_num_ - 1) / thread_num_ * thread_num_;
 
   backup_set_num_per_chunk_ =
-      3 * static_cast<uint64_t>(static_cast<double>(totalQueryNum) /
+      3 * static_cast<uint64_t>(static_cast<double>(total_query_num_) /
                                 static_cast<double>(set_size_));
   backup_set_num_per_chunk_ =
       (backup_set_num_per_chunk_ + thread_num_ - 1) / thread_num_ * thread_num_;
@@ -67,8 +68,17 @@ void QueryServiceClient::InitializeLocalSets() {
   local_miss_elements_.clear();
   uint32_t tagCounter = 0;
 
+  // Initialize primary_sets_
   for (uint64_t j = 0; j < primary_set_num_; j++) {
-    primary_sets_.emplace_back(tagCounter, ZeroEntry(), 0, false);
+    primary_sets_.emplace_back(tagCounter, DBEntry::ZeroEntry(entry_size_), 0,
+                               false);
+    tagCounter += 1;
+  }
+
+  // Initialize local_backup_sets_
+  for (uint64_t i = 0; i < total_backup_set_num_; ++i) {
+    local_backup_sets_.emplace_back(tagCounter,
+                                    DBEntry::ZeroEntry(entry_size_));
     tagCounter += 1;
   }
 
@@ -77,6 +87,7 @@ void QueryServiceClient::InitializeLocalSets() {
   local_replacement_groups_.clear();
   local_replacement_groups_.reserve(set_size_);
 
+  // Initialize local_backup_set_groups_ and local_replacement_groups_
   for (uint64_t i = 0; i < set_size_; i++) {
     std::vector<std::reference_wrapper<LocalBackupSet>> backupSets;
     for (uint64_t j = 0; j < backup_set_num_per_chunk_; j++) {
@@ -90,14 +101,6 @@ void QueryServiceClient::InitializeLocalSets() {
     std::vector<DBEntry> values(backup_set_num_per_chunk_);
     LocalReplacementGroup replacementGroup(0, indices, values);
     local_replacement_groups_.emplace_back(std::move(replacementGroup));
-  }
-
-  for (uint64_t j = 0; j < set_size_; j++) {
-    for (uint64_t k = 0; k < backup_set_num_per_chunk_; k++) {
-      local_backup_set_groups_[j].sets[k].get() =
-          LocalBackupSet{tagCounter, ZeroEntry()};
-      tagCounter += 1;
-    }
   }
 }
 
@@ -145,8 +148,7 @@ void QueryServiceClient::FetchFullDB() {
             std::lock_guard<std::mutex> lock(hitMapMutex);
             hitMap[offset] = true;
           }
-          DBEntryXorFromRaw(&primary_sets_[j].parity,
-                            &chunk[offset * DBEntryLength]);
+          primary_sets_[j].parity.XorFromRaw(&chunk[offset * entry_size_]);
         }
 
         // update the parities for the backup hints
@@ -154,8 +156,8 @@ void QueryServiceClient::FetchFullDB() {
           const auto tmp =
               PRFEvalWithLongKeyAndTag(long_key_, local_backup_sets_[j].tag, i);
           const auto offset = tmp & (chunk_size_ - 1);
-          DBEntryXorFromRaw(&local_backup_sets_[j].parityAfterPunct,
-                            &chunk[offset * DBEntryLength]);
+          local_backup_sets_[j].parityAfterPuncture.XorFromRaw(
+              &chunk[offset * entry_size_]);
         }
       });
     }
@@ -171,10 +173,10 @@ void QueryServiceClient::FetchFullDB() {
     // empty.
     for (uint64_t j = 0; j < chunk_size_; j++) {
       if (!hitMap[j]) {
-        std::array<uint64_t, DBEntryLength> entry_slice{};
-        std::memcpy(entry_slice.data(), &chunk[j * DBEntryLength],
-                    DBEntryLength * sizeof(uint64_t));
-        const auto entry = DBEntryFromSlice(entry_slice);
+        std::vector<uint8_t> entry_slice(entry_size_);
+        std::memcpy(entry_slice.data(), &chunk[j * entry_size_],
+                    entry_size_ * sizeof(uint8_t));
+        const auto entry = DBEntry::DBEntryFromSlice(entry_slice);
         local_miss_elements_[j + (i * chunk_size_)] = entry;
       }
     }
@@ -185,30 +187,30 @@ void QueryServiceClient::FetchFullDB() {
       const auto tag = local_backup_set_groups_[i].sets[k].get().tag;
       const auto tmp = PRFEvalWithLongKeyAndTag(long_key_, tag, i);
       const auto offset = tmp & (chunk_size_ - 1);
-      DBEntryXorFromRaw(
-          &local_backup_set_groups_[i].sets[k].get().parityAfterPunct,
-          &chunk[offset * DBEntryLength]);
+      local_backup_set_groups_[i].sets[k].get().parityAfterPuncture.XorFromRaw(
+          &chunk[offset * entry_size_]);
     }
 
     // store the replacement
-    std::mt19937_64 rng(yacl::crypto::FastRandU64());
+    yacl::crypto::Prg<uint64_t> prg(yacl::crypto::SecureRandU64());
     for (uint64_t k = 0; k < backup_set_num_per_chunk_; k++) {
       // generate a random offset between 0 and ChunkSize - 1
-      const auto offset = rng() & (chunk_size_ - 1);
+      const auto offset = prg() & (chunk_size_ - 1);
       local_replacement_groups_[i].indices[k] = offset + i * chunk_size_;
-      std::array<uint64_t, DBEntryLength> entry_slice{};
-      std::memcpy(entry_slice.data(), &chunk[offset * DBEntryLength],
-                  DBEntryLength * sizeof(uint64_t));
-      local_replacement_groups_[i].value[k] = DBEntryFromSlice(entry_slice);
+      std::vector<uint8_t> entry_slice(entry_size_);
+      std::memcpy(entry_slice.data(), &chunk[offset * entry_size_],
+                  entry_size_ * sizeof(uint8_t));
+      local_replacement_groups_[i].value[k] =
+          DBEntry::DBEntryFromSlice(entry_slice);
     }
   }
 }
 
 void QueryServiceClient::SendDummySet() const {
-  std::mt19937_64 rng(yacl::crypto::FastRandU64());
+  yacl::crypto::Prg<uint64_t> prg(yacl::crypto::SecureRandU64());
   std::vector<uint64_t> randSet(set_size_);
   for (uint64_t i = 0; i < set_size_; i++) {
-    randSet[i] = rng() % chunk_size_ + i * chunk_size_;
+    randSet[i] = prg() % chunk_size_ + i * chunk_size_;
   }
 
   // send the random dummy set to the server
@@ -249,7 +251,7 @@ DBEntry QueryServiceClient::OnlineSingleQuery(const uint64_t x) {
     }
   }
 
-  DBEntry xVal = ZeroEntry();
+  DBEntry xVal = DBEntry::ZeroEntry(entry_size_);
 
   if (hitSetId == std::numeric_limits<uint64_t>::max()) {
     if (local_miss_elements_.find(x) == local_miss_elements_.end()) {
@@ -301,9 +303,9 @@ DBEntry QueryServiceClient::OnlineSingleQuery(const uint64_t x) {
   const auto& parity = std::get<0>(parityQueryResponse);
 
   // recover the answer
-  xVal = primary_sets_[hitSetId].parity;    // the parity of the hit set
-  DBEntryXorFromRaw(&xVal, parity.data());  // xor the parity of the edited set
-  DBEntryXor(&xVal, &repVal);               // xor the replacement value
+  xVal = primary_sets_[hitSetId].parity;  // the parity of the hit set
+  xVal.XorFromRaw(parity.data());         // xor the parity of the edited set
+  xVal.Xor(repVal);                       // xor the replacement value
 
   // update the local cache
   local_cache_[x] = xVal;
@@ -319,9 +321,10 @@ DBEntry QueryServiceClient::OnlineSingleQuery(const uint64_t x) {
   primary_sets_[hitSetId].tag =
       local_backup_set_groups_[chunkId].sets[consumed].get().tag;
   // backup set doesn't XOR the chunk(x)-th element in preparation
-  DBEntryXor(
-      &xVal,
-      &local_backup_set_groups_[chunkId].sets[consumed].get().parityAfterPunct);
+  xVal.Xor(local_backup_set_groups_[chunkId]
+               .sets[consumed]
+               .get()
+               .parityAfterPuncture);
   primary_sets_[hitSetId].parity = xVal;
   primary_sets_[hitSetId].isProgrammed = true;
   // for load balancing, the chunk(x)-th element differs from the one expanded

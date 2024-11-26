@@ -2,73 +2,64 @@
 
 #include <spdlog/spdlog.h>
 
-#include <cmath>
 #include <cstdint>
-#include <iostream>
-#include <thread>
+#include <utility>
 
 #include "experimental/pir/piano/serialize.h"
 #include "experimental/pir/piano/util.h"
-#include "yacl/crypto/rand/rand.h"
+#include "yacl/crypto/tools/prg.h"
 #include "yacl/link/context.h"
 
 namespace pir::piano {
 
-class LocalSet {
- public:
-  uint32_t tag;  // the tag of the set
-  DBEntry parity;
-  uint64_t
-      programmedPoint;  // identifier for the element replaced after refresh,
-                        // differing from those expanded by PRFEval
-  bool isProgrammed;
-
-  LocalSet(const uint32_t tag, const DBEntry& parity,
-           const uint64_t programmed_point, const bool is_programmed)
+struct LocalSet {
+  LocalSet(const uint32_t tag, DBEntry parity, const uint64_t programmed_point,
+           const bool is_programmed)
       : tag(tag),
-        parity(parity),
+        parity(std::move(parity)),
         programmedPoint(programmed_point),
         isProgrammed(is_programmed) {}
+
+  uint32_t tag;  // the tag of the set
+  DBEntry parity;
+  uint64_t programmedPoint;  // identifier for the element replaced after
+                             // refresh differing from those expanded by PRFEval
+  bool isProgrammed;
 };
 
-class LocalBackupSet {
- public:
+struct LocalBackupSet {
+  LocalBackupSet(const uint32_t tag, DBEntry parity_after_puncture)
+      : tag(tag), parityAfterPuncture(std::move(parity_after_puncture)) {}
+
   uint32_t tag;
-  DBEntry parityAfterPunct;
-
-  LocalBackupSet(const uint32_t tag, const DBEntry& parity_after_punct)
-      : tag(tag), parityAfterPunct(parity_after_punct) {}
+  DBEntry parityAfterPuncture;
 };
 
-class LocalBackupSetGroup {
- public:
-  uint64_t consumed;
-  std::vector<std::reference_wrapper<LocalBackupSet>> sets;
-
+struct LocalBackupSetGroup {
   LocalBackupSetGroup(
       const uint64_t consumed,
       const std::vector<std::reference_wrapper<LocalBackupSet>>& sets)
       : consumed(consumed), sets(sets) {}
+
+  uint64_t consumed;
+  std::vector<std::reference_wrapper<LocalBackupSet>> sets;
 };
 
-class LocalReplacementGroup {
- public:
-  uint64_t consumed;
-  std::vector<uint64_t> indices;
-  std::vector<DBEntry> value;
-
+struct LocalReplacementGroup {
   LocalReplacementGroup(const uint64_t consumed,
                         const std::vector<uint64_t>& indices,
                         const std::vector<DBEntry>& value)
       : consumed(consumed), indices(indices), value(value) {}
+
+  uint64_t consumed;
+  std::vector<uint64_t> indices;
+  std::vector<DBEntry> value;
 };
 
 class QueryServiceClient {
  public:
-  static constexpr uint64_t FailureProbLog2 = 40;
-  uint64_t totalQueryNum{};
-
-  QueryServiceClient(uint64_t db_size, uint64_t thread_num,
+  QueryServiceClient(uint64_t entry_num, uint64_t thread_num,
+                     uint64_t entry_size,
                      std::shared_ptr<yacl::link::Context> context);
 
   void Initialize();
@@ -78,24 +69,28 @@ class QueryServiceClient {
   DBEntry OnlineSingleQuery(uint64_t x);
   std::vector<DBEntry> OnlineMultipleQueries(
       const std::vector<uint64_t>& queries);
+  uint64_t getTotalQueryNumber() const { return total_query_num_; };
 
  private:
-  uint64_t db_size_;
+  static constexpr uint64_t kFailureProbLog2 = 40;
+  uint64_t total_query_num_{};
+  uint64_t entry_num_;
   uint64_t thread_num_;
   std::shared_ptr<yacl::link::Context> context_;
 
   uint64_t chunk_size_{};
   uint64_t set_size_{};
+  uint64_t entry_size_{};
   uint64_t primary_set_num_{};
   uint64_t backup_set_num_per_chunk_{};
   uint64_t total_backup_set_num_{};
-  PrfKey master_key_{};
+  uint128_t master_key_{};
   yacl::crypto::AES_KEY long_key_{};
 
   std::vector<LocalSet> primary_sets_;
   std::vector<LocalBackupSet> local_backup_sets_;
-  std::map<uint64_t, DBEntry> local_cache_;
-  std::map<uint64_t, DBEntry> local_miss_elements_;
+  std::unordered_map<uint64_t, DBEntry> local_cache_;
+  std::unordered_map<uint64_t, DBEntry> local_miss_elements_;
   std::vector<LocalBackupSetGroup> local_backup_set_groups_;
   std::vector<LocalReplacementGroup> local_replacement_groups_;
 };

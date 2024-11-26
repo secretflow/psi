@@ -34,6 +34,7 @@ psi_cc_library(
     hdrs = ["util.h"],
     deps = [
         "@yacl//yacl/crypto/aes:aes_intrinsics",
+        "@yacl//yacl/crypto/rand",
     ],
 )
 
@@ -67,7 +68,6 @@ psi_cc_library(
         ":piano_cc_proto",
         ":serialize",
         ":util",
-        "@yacl//yacl/crypto/rand",
         "@yacl//yacl/link:context",
     ],
 )
@@ -80,7 +80,6 @@ psi_cc_test(
         ":client",
         ":server",
         ":util",
-        "@yacl//yacl/crypto/rand",
         "@yacl//yacl/link:context",
         "@yacl//yacl/link:test_util",
     ],

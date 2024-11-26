@@ -2,75 +2,93 @@
 
 #include <spdlog/spdlog.h>
 
-#include <array>
 #include <cstdint>
-#include <random>
+#include <functional>
 #include <utility>
 #include <vector>
 
+#include "yacl/base/int128.h"
 #include "yacl/crypto/aes/aes_intrinsics.h"
+#include "yacl/crypto/rand/rand.h"
 
 namespace pir::piano {
 
-constexpr size_t DBEntrySize = 8;  // has to be a multiple of 8
-constexpr size_t DBEntryLength = DBEntrySize / 8;
+class DBEntry {
+ public:
+  DBEntry() = default;
 
-using PrfKey128 = uint128_t;
-using DBEntry = std::array<uint64_t, DBEntryLength>;
-using PrfKey = PrfKey128;
+  // entry_size represents the number of bytes in the DBEntry
+  explicit DBEntry(const size_t entry_size)
+      : k_length_(entry_size), data_(entry_size, 0) {}
 
-uint128_t BytesToUint128(const std::string& bytes);
+  explicit DBEntry(const std::vector<uint8_t>& data)
+      : k_length_(data.size()), data_(data) {}
 
-std::string Uint128ToBytes(uint128_t value);
+  // Accessor for the underlying data
+  std::vector<uint8_t>& data() { return data_; }
+  [[nodiscard]] const std::vector<uint8_t>& data() const { return data_; }
 
-// Generates a random 128-bit key using the provided RNG
-PrfKey128 RandKey128(std::mt19937_64& rng);
+  // XOR operations
+  void Xor(const DBEntry& other) {
+    for (size_t i = 0; i < k_length_; ++i) {
+      data_[i] ^= other.data_[i];
+    }
+  }
 
-// Generates a random PRF key
-PrfKey RandKey(std::mt19937_64& rng);
+  void XorFromRaw(const uint8_t* src) {
+    for (size_t i = 0; i < k_length_; ++i) {
+      data_[i] ^= src[i];
+    }
+  }
 
-// Evaluates PRF using 128-bit key and returns a 64-bit result
-uint64_t PRFEval128(const PrfKey128* key, uint64_t x);
+  // Static method to generate a zero-filled DBEntry
+  static DBEntry ZeroEntry(const size_t entry_size) {
+    return DBEntry(entry_size);
+  }
 
-// Evaluates PRF using a general PrfKey and returns a 64-bit result
-uint64_t PRFEval(const PrfKey* key, uint64_t x);
+  // Generate a DBEntry based on a key and ID using a custom hash function
+  static DBEntry GenDBEntry(
+      const size_t entry_size, const uint64_t key, const uint64_t id,
+      const std::function<std::vector<uint8_t>(uint64_t)>& hash_func) {
+    DBEntry entry(entry_size);
+    const std::vector<uint8_t> hash = hash_func(key ^ id);
+    for (size_t i = 0; i < entry_size; ++i) {
+      if (i < hash.size()) {
+        entry.data_[i] = hash[i];
+      } else {
+        entry.data_[i] = 0;
+      }
+    }
+    return entry;
+  }
 
-// XOR two DBEntry structures
-void DBEntryXor(DBEntry* dst, const DBEntry* src);
+  // Convert a slice (vector) into a DBEntry structure
+  static DBEntry DBEntryFromSlice(const std::vector<uint8_t>& s) {
+    return DBEntry(s);
+  }
 
-// XOR a DBEntry with raw uint64_t data
-void DBEntryXorFromRaw(DBEntry* dst, const uint64_t* src);
+ private:
+  size_t k_length_{};
+  std::vector<uint8_t> data_;
+};
 
-// Compare two DBEntry structures for equality
-bool EntryIsEqual(const DBEntry& a, const DBEntry& b);
+// Generate secure master key
+uint128_t SecureRandKey();
 
-// Generate a random DBEntry using the provided RNG
-DBEntry RandDBEntry(std::mt19937_64& rng);
-
-// Default FNV hash implementation for 64-bit keys
-uint64_t DefaultHash(uint64_t key);
-
-// Generate a DBEntry based on a key and ID
-DBEntry GenDBEntry(uint64_t key, uint64_t id);
-
-// Generate a zero-filled DBEntry
-DBEntry ZeroEntry();
-
-// Convert a slice (array) into a DBEntry structure
-DBEntry DBEntryFromSlice(const std::array<uint64_t, DBEntryLength>& s);
+// Evaluates PRF using a 128-bit key and returns a 64-bit result
+uint64_t PRFEval(uint128_t key, uint64_t x);
 
 // Generate parameters for ChunkSize and SetSize
-std::pair<uint64_t, uint64_t> GenParams(uint64_t db_size);
+std::pair<uint64_t, uint64_t> GenParams(uint64_t entry_num);
 
 // Returns a long key (AES expanded key) for PRF evaluation
-yacl::crypto::AES_KEY GetLongKey(const PrfKey128* key);
+yacl::crypto::AES_KEY GetLongKey(uint128_t key);
 
 // PRF evaluation with a long key and tag, returns a 64-bit result
 uint64_t PRFEvalWithLongKeyAndTag(const yacl::crypto::AES_KEY& long_key,
                                   uint32_t tag, uint64_t x);
 
-class PRSetWithShortTag {
- public:
+struct PRSetWithShortTag {
   uint32_t Tag;
 
   // Expands the set with a long key and tag

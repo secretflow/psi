@@ -9,7 +9,7 @@ message FetchFullDbMsg {
 message DbChunk {
     uint64 chunk_id = 1;
     uint64 chunk_size = 2;
-    repeated uint64 chunks = 3;
+    bytes chunks = 3;
 }
 
 message SetParityQueryMsg {
@@ -18,7 +18,7 @@ message SetParityQueryMsg {
 }
 
 message SetParityQueryResponse {
-    repeated uint64 parity = 1;
+    bytes parity = 1;
     uint64 server_compute_time = 2;
 }
 

@@ -20,7 +20,6 @@
 
 namespace psi {
 
-// TODO(junfeng): replace CsvChecker with CheckCsv.
 class CsvChecker {
  public:
   explicit CsvChecker(const std::string& csv_path,

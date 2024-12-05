@@ -45,7 +45,7 @@ std::vector<std::string> KkrtPsiOperator::OnRun(
   if (options_.receiver_rank == link_ctx_->Rank()) {
     auto ot_send =
         kkrt::GetKkrtOtReceiverOptions(options_.link_ctx, options_.num_ot);
-    std::vector<size_t> kkrt_psi_result =
+    auto [kkrt_psi_result, _] =
         kkrt::KkrtPsiRecv(options_.link_ctx, ot_send, items_hash);
 
     for (auto index : kkrt_psi_result) {

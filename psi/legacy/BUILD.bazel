@@ -86,18 +86,6 @@ psi_cc_library(
     ],
 )
 
-# psi_cc_library(
-#     name = "bc22_2party_psi",
-#     srcs = ["bc22_2party_psi.cc"],
-#     hdrs = ["bc22_2party_psi.h"],
-#     deps = [
-#         ":base_operator",
-#         ":factory",
-#         "//psi/bc22:bc22_psi",
-#     ],
-#     alwayslink = True,
-# )
-
 psi_cc_library(
     name = "kmprt17_mp_psi",
     srcs = ["kmprt17_mp_psi.cc"],
@@ -173,44 +161,20 @@ psi_cc_test(
 )
 
 psi_cc_library(
-    name = "bucket_ub_psi",
-    srcs = ["bucket_ub_psi.cc"],
-    hdrs = [
-        "bucket_ub_psi.h",
-    ],
-    deps = [
-        "//psi:prelude",
-        "//psi/ecdh:ecdh_oprf_psi",
-        "//psi/proto:psi_cc_proto",
-        "//psi/utils:batch_provider",
-        "//psi/utils:csv_checker",
-        "//psi/utils:csv_header_analyzer",
-        "//psi/utils:ec",
-        "//psi/utils:ec_point_store",
-        "//psi/utils:progress",
-        "//psi/utils:sync",
-        "@com_google_absl//absl/synchronization",
-        "@com_google_absl//absl/time",
-        "@yacl//yacl/utils:scope_guard",
-    ],
-)
-
-psi_cc_library(
     name = "bucket_psi",
     srcs = ["bucket_psi.cc"],
     hdrs = [
         "bucket_psi.h",
     ],
     deps = [
-        ":bucket_ub_psi",
         ":memory_psi",
         "//psi:prelude",
         "//psi/proto:psi_cc_proto",
-        "//psi/utils:batch_provider",
+        "//psi/utils:arrow_csv_batch_provider",
         "//psi/utils:csv_checker",
         "//psi/utils:csv_header_analyzer",
         "//psi/utils:ec_point_store",
-        "@boost//:uuid",
+        "//psi/utils:progress",
     ],
 )
 
@@ -220,14 +184,5 @@ psi_cc_test(
     deps = [
         ":bucket_psi",
         "@yacl//yacl/utils:scope_guard",
-    ],
-)
-
-psi_cc_test(
-    name = "bucket_ub_psi_test",
-    srcs = ["bucket_ub_psi_test.cc"],
-    deps = [
-        ":bucket_psi",
-        "//psi/utils:test_utils",
     ],
 )

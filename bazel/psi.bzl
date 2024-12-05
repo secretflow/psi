@@ -60,8 +60,6 @@ def psi_cc_library(
         **kargs
     )
 
-psi_cmake_external = yacl_cmake_external
-
 def _psi_version_file_impl(ctx):
     out = ctx.actions.declare_file(ctx.attr.filename)
     ctx.actions.write(

@@ -14,6 +14,7 @@
 
 #include <omp.h>
 
+#include <cstdint>
 #include <future>
 #include <random>
 #include <tuple>
@@ -26,11 +27,17 @@
 #include "yacl/link/context.h"
 #include "yacl/link/test_util.h"
 
+#include "psi/rr22/rr22_oprf.h"
 #include "psi/rr22/rr22_psi.h"
+#include "psi/rr22/rr22_utils.h"
 
 namespace {
 
-std::tuple<std::vector<uint128_t>, std::vector<uint128_t>, std::vector<size_t>>
+constexpr size_t kRr22OprfBinSize = 1 << 14;
+constexpr size_t kRr22DefaultSsp = 40;
+
+std::tuple<std::vector<uint128_t>, std::vector<uint128_t>,
+           std::vector<uint32_t>>
 GenerateTestData(size_t item_size, [[maybe_unused]] double p = 0.5) {
   // uint128_t seed = yacl::MakeUint128(0, 0);
   uint128_t seed = yacl::crypto::FastRandSeed();
@@ -45,7 +52,7 @@ GenerateTestData(size_t item_size, [[maybe_unused]] double p = 0.5) {
   std::mt19937 std_rand(yacl::crypto::FastRandU64());
   std::bernoulli_distribution dist(p);
 
-  std::vector<size_t> indices;
+  std::vector<uint32_t> indices;
   for (size_t i = 0; i < item_size; ++i) {
     if (dist(std_rand)) {
       // if (i % 3 == 0) {
@@ -100,7 +107,7 @@ static void BM_Rr22FastPsi(benchmark::State& state) {
 
     std::vector<uint128_t> inputs_a;
     std::vector<uint128_t> inputs_b;
-    std::vector<size_t> indices;
+    std::vector<uint32_t> indices;
 
     size_t thread_num = omp_get_num_procs();
 
@@ -116,17 +123,37 @@ static void BM_Rr22FastPsi(benchmark::State& state) {
       psi_options.malicious = true;
     }
 
-    auto psi_sender_proc = std::async([&] {
-      psi::rr22::Rr22PsiSenderInternal(psi_options, lctxs[0], inputs_a);
+    auto psi_receiver_proc = std::async([&] {
+      size_t mask_size;
+      size_t peer_size;
+      std::tie(mask_size, peer_size) =
+          ExchangeTruncateSize(lctxs[0], inputs_a.size(), psi_options);
+      psi::rr22::Rr22OprfReceiver oprf_receiver(
+          kRr22OprfBinSize, kRr22DefaultSsp, psi_options.mode);
+      oprf_receiver.Init(lctxs[0], inputs_a.size(), psi_options.num_threads);
+      auto oprfs = oprf_receiver.Recv(lctxs[0], inputs_a);
+      return psi::rr22::GetIntersectionReceiver(oprfs, peer_size, lctxs[0],
+                                                psi_options.num_threads,
+                                                mask_size, false);
     });
 
-    auto psi_receiver_proc = std::async([&] {
-      return psi::rr22::Rr22PsiReceiverInternal(psi_options, lctxs[1],
-                                                inputs_b);
+    auto psi_sender_proc = std::async([&] {
+      size_t mask_size;
+      size_t peer_size;
+      std::tie(mask_size, peer_size) =
+          ExchangeTruncateSize(lctxs[1], inputs_b.size(), psi_options);
+      psi::rr22::Rr22OprfSender oprf_sender(kRr22OprfBinSize, kRr22DefaultSsp,
+                                            psi_options.mode);
+      oprf_sender.Init(lctxs[1], std::max(peer_size, inputs_b.size()),
+                       psi_options.num_threads);
+      auto inputs_hash = oprf_sender.Send(lctxs[1], inputs_b);
+      auto oprfs = oprf_sender.Eval(inputs_b, inputs_hash);
+      return psi::rr22::GetIntersectionSender(std::move(oprfs), lctxs[1],
+                                              mask_size, false);
     });
 
     psi_sender_proc.get();
-    std::vector<size_t> indices_psi = psi_receiver_proc.get();
+    auto indices_psi = psi_receiver_proc.get();
 
     SPDLOG_INFO("intersection size: {}", indices_psi.size());
 

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <fstream>
+#include <memory>
 
 #include "gflags/gflags.h"
 #include "google/protobuf/util/json_util.h"
@@ -20,6 +21,7 @@
 
 #include "psi/kuscia_adapter.h"
 #include "psi/launch.h"
+#include "psi/utils/resource_manager.h"
 #include "psi/version.h"
 
 #include "psi/proto/entry.pb.h"
@@ -83,16 +85,9 @@ int main(int argc, char* argv[]) {
 
   std::shared_ptr<yacl::link::Context> lctx = nullptr;
   if (!launch_config.self_link_party().empty()) {
-    yacl::link::ContextDesc lctx_desc(launch_config.link_config());
-    int rank = -1;
-    for (int i = 0; i < launch_config.link_config().parties().size(); i++) {
-      if (launch_config.link_config().parties(i).id() ==
-          launch_config.self_link_party()) {
-        rank = i;
-      }
-    }
-    YACL_ENFORCE_GE(rank, 0, "Couldn't find rank in YACL Link.");
-    lctx = yacl::link::FactoryBrpc().CreateContext(lctx_desc, rank);
+    auto link_resource = psi::ResourceManager::GetInstance().AddLinkResource(
+        launch_config.self_link_party(), launch_config.link_config());
+    lctx = link_resource->GetLinkContext();
   }
 
   google::protobuf::util::JsonPrintOptions json_print_options;
@@ -130,6 +125,8 @@ int main(int argc, char* argv[]) {
   } else {
     SPDLOG_WARN("No runtime config is provided.");
   }
+
+  psi::ResourceManager::GetInstance().RemoveAllResource();
 
   SPDLOG_INFO("Report: {}", report_json);
   SPDLOG_INFO("Thank you for trusting SecretFlow PSI Library.");

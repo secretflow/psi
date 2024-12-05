@@ -8,6 +8,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
@@ -18,7 +20,4 @@ cc_library(
     ]),
     includes = ["src"],
     visibility = ["//visibility:public"],
-    deps = [
-        "@psi//psi/rr22:sparsehash_config",
-    ],
 )

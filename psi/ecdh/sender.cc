@@ -44,7 +44,7 @@ void EcdhPsiSender::Init() {
   AbstractPsiSender::Init();
 
   if (recovery_manager_) {
-    recovery_manager_->MarkInitEnd(config_, key_hash_digest_);
+    recovery_manager_->MarkInitEnd(config_, keys_hash_);
   }
 
   SPDLOG_INFO("[EcdhPsiSender::Init] end");
@@ -75,9 +75,6 @@ void EcdhPsiSender::PreProcess() {
 
   psi_options_.ic_mode = false;
 
-  batch_provider_ = std::make_shared<ArrowCsvBatchProvider>(
-      config_.input_config().path(), selected_keys_, psi_options_.batch_size);
-
   if (recovery_manager_) {
     self_ec_point_store_ = std::make_shared<HashBucketEcPointStore>(
         recovery_manager_->ecdh_dual_masked_self_cache_path(), kDefaultBinNum,
@@ -89,9 +86,9 @@ void EcdhPsiSender::PreProcess() {
     psi_options_.recovery_manager = recovery_manager_;
   } else {
     self_ec_point_store_ = std::make_shared<HashBucketEcPointStore>(
-        std::filesystem::temp_directory_path(), kDefaultBinNum);
+        dir_resource_->Path() / "self_ec_point_store", kDefaultBinNum);
     peer_ec_point_store_ = std::make_shared<HashBucketEcPointStore>(
-        std::filesystem::temp_directory_path(), kDefaultBinNum);
+        dir_resource_->Path() / "peer_ec_point_store", kDefaultBinNum);
   }
 
   SPDLOG_INFO("[EcdhPsiSender::PreProcess] end");
@@ -116,8 +113,6 @@ void EcdhPsiSender::Online() {
     SyncWait(lctx_, &run_f);
   }
 
-  report_.set_original_count(batch_provider_->row_cnt());
-
   if (recovery_manager_) {
     recovery_manager_->MarkOnlineEnd();
   }
@@ -134,8 +129,8 @@ void EcdhPsiSender::PostProcess() {
   }
 
   auto compute_indices_f = std::async([&] {
-    FinalizeAndComputeIndices(self_ec_point_store_, peer_ec_point_store_,
-                              intersection_indices_writer_.get());
+    (void)FinalizeAndComputeIndices(self_ec_point_store_, peer_ec_point_store_,
+                                    intersection_indices_writer_.get());
   });
 
   SyncWait(lctx_, &compute_indices_f);

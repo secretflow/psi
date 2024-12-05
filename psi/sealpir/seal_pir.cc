@@ -33,7 +33,7 @@ namespace {
 uint64_t ElementsPerPtxt(uint32_t logt, uint64_t N, uint64_t ele_size) {
   uint64_t coeffs_per_element = ceil((ele_size * 8) / (double)logt);
   uint64_t elements_per_plaintext = N / coeffs_per_element;
-  YACL_ENFORCE(elements_per_plaintext > 0);
+  YACL_ENFORCE_GT(elements_per_plaintext, 0UL);
   return elements_per_plaintext;
 }
 
@@ -59,8 +59,8 @@ uint64_t CoefficientsPerElement(uint32_t logt, uint64_t ele_size) {
 }
 
 vector<uint64_t> GetDimensions(uint64_t num_of_plaintexts, uint32_t d) {
-  YACL_ENFORCE(d > 0);
-  YACL_ENFORCE(num_of_plaintexts > 0);
+  YACL_ENFORCE_GT(d, 0UL);
+  YACL_ENFORCE_GT(num_of_plaintexts, 0UL);
 
   uint64_t root =
       max(static_cast<uint64_t>(2),
@@ -79,7 +79,7 @@ vector<uint64_t> GetDimensions(uint64_t num_of_plaintexts, uint32_t d) {
 
   uint64_t prod = accumulate(dimension_vec.begin(), dimension_vec.end(),
                              static_cast<uint64_t>(1), multiplies<uint64_t>());
-  YACL_ENFORCE(prod >= num_of_plaintexts);
+  YACL_ENFORCE_GE(prod, num_of_plaintexts);
 
   return dimension_vec;
 }
@@ -472,22 +472,22 @@ SealPirServer::SealPirServer(const SealPirOptions &options,
 void SealPirServer::SetDatabase(const vector<yacl::ByteContainerView> &db_vec) {
   vector<uint8_t> db_flatten_bytes(db_vec.size() * options_.element_size);
   for (uint32_t i = 0; i < db_vec.size(); ++i) {
-    YACL_ENFORCE(db_vec[i].size() == options_.element_size);
+    YACL_ENFORCE_EQ(db_vec[i].size(), options_.element_size);
     memcpy(&db_flatten_bytes[i * options_.element_size], db_vec[i].data(),
            db_vec[i].size());
   }
 
   shared_ptr<IDbElementProvider> db_provider =
-      make_shared<MemoryDbElementProvider>(db_flatten_bytes,
+      make_shared<MemoryDbElementProvider>(std::move(db_flatten_bytes),
                                            options_.element_size);
 
-  return SetDatabase(db_provider);
+  return SetDatabaseByProvider(db_provider);
 }
 
-void SealPirServer::SetDatabase(
+void SealPirServer::SetDatabaseByProvider(
     const shared_ptr<IDbElementProvider> &db_provider) {
   uint64_t db_size = options_.element_number * pir_params_.ele_size;
-  YACL_ENFORCE(db_provider->GetDbByteSize() == db_size);
+  YACL_ENFORCE_EQ(db_provider->GetDbByteSize(), db_size);
 
   uint32_t N = enc_params_->poly_modulus_degree();
   uint32_t logt = floor(log2(enc_params_->plain_modulus().value()));
@@ -497,7 +497,7 @@ void SealPirServer::SetDatabase(
   uint64_t bytes_per_ptxt = ele_per_ptxt * pir_params_.ele_size;
   uint64_t coeffs_per_ele = CoefficientsPerElement(logt, pir_params_.ele_size);
   uint64_t coeffs_per_ptxt = ele_per_ptxt * coeffs_per_ele;
-  YACL_ENFORCE(coeffs_per_ptxt <= N);
+  YACL_ENFORCE_LE(coeffs_per_ptxt, N);
 
   uint64_t db_num;
   if (options_.ind_degree == 0) {
@@ -514,7 +514,7 @@ void SealPirServer::SetDatabase(
   for (uint32_t i = 0; i < pir_params_.dimension; ++i) {
     prod *= pir_params_.dimension_vec[i];
   }
-  YACL_ENFORCE(prod > num_of_ptxt);
+  YACL_ENFORCE_GT(prod, num_of_ptxt);
 
   plaintext_store_->SetSubDbNumber(db_num);
 
@@ -534,7 +534,7 @@ void SealPirServer::SetDatabase(
       } else {
         process_bytes = bytes_per_ptxt;
       }
-      YACL_ENFORCE(process_bytes % pir_params_.ele_size == 0);
+      YACL_ENFORCE_EQ(process_bytes % pir_params_.ele_size, 0UL);
 
       vector<uint8_t> bytes = db_provider->ReadElement(offset, process_bytes);
       uint64_t ele_in_chunk = process_bytes / pir_params_.ele_size;
@@ -551,7 +551,7 @@ void SealPirServer::SetDatabase(
 
       offset += process_bytes;
       uint64_t used = coeffs.size();
-      YACL_ENFORCE(used <= coeffs_per_ptxt);
+      YACL_ENFORCE_LE(used, coeffs_per_ptxt);
 
       // padding
       for (uint64_t j = 0; j < (N - used); ++j) {
@@ -565,7 +565,7 @@ void SealPirServer::SetDatabase(
 
     uint64_t current_ptxts = db_vec.size();
     uint64_t matrix_ptxts = prod;
-    YACL_ENFORCE(current_ptxts <= num_of_ptxt);
+    YACL_ENFORCE_LE(current_ptxts, num_of_ptxt);
 
     vector<uint64_t> padding(N, 1);
 
@@ -587,6 +587,18 @@ void SealPirServer::SetDatabase(
   is_db_preprocessed_ = true;
 }
 
+yacl::Buffer SealPirServer::GenerateIndexReply(
+    const yacl::Buffer &query_buffer) {
+  SealPirQueryProto query_proto;
+  query_proto.ParseFromArray(query_buffer.data(), query_buffer.size());
+
+  PirQuery query = DeSerializeQuery(query_proto);
+  yacl::Buffer reply_buffer =
+      SerializeCiphertexts(GenerateReply(query, query_proto.start_pos(), 0));
+
+  return reply_buffer;
+}
+
 SealPir::PirReply SealPirServer::GenerateReply(const SealPir::PirQuery &query,
                                                uint32_t start_pos,
                                                uint32_t client_id) {
@@ -596,7 +608,7 @@ SealPir::PirReply SealPirServer::GenerateReply(const SealPir::PirQuery &query,
 
   uint32_t sub_db_idx = 0;
   if (options_.ind_degree > 0) {
-    YACL_ENFORCE(start_pos % options_.ind_degree == 0);
+    YACL_ENFORCE_EQ(start_pos % options_.ind_degree, 0UL);
     sub_db_idx = start_pos / options_.ind_degree;
   }
   vector<Plaintext> db_plaintext = plaintext_store_->ReadPlaintexts(sub_db_idx);
@@ -633,7 +645,7 @@ SealPir::PirReply SealPirServer::GenerateReply(const SealPir::PirQuery &query,
                             make_move_iterator(part_expanded_query.end()));
       part_expanded_query.clear();
     }
-    YACL_ENFORCE(expanded_query.size() == ni);
+    YACL_ENFORCE_EQ(expanded_query.size(), ni);
 
     yacl::parallel_for(
         0, expanded_query.size(), [&](uint32_t begin, uint32_t end) {
@@ -836,6 +848,21 @@ SealPirClient::SealPirClient(const SealPirOptions &options) : SealPir(options) {
   decryptor_ = make_unique<seal::Decryptor>(*context_, secret_key);
 }
 
+yacl::Buffer SealPirClient::GenerateIndexQuery(uint64_t ele_index,
+                                               uint64_t &offset) {
+  uint64_t query_index = ele_index;
+  size_t start_pos = 0;
+  if (options_.ind_degree > 0) {
+    query_index = ele_index % options_.ind_degree;
+    start_pos = ele_index - query_index;
+  }
+
+  uint64_t index = GetFVIndex(query_index);
+  offset = GetFVOffset(query_index);
+  yacl::Buffer query_buffer = SerializeQuery(GenerateQuery(index), start_pos);
+  return query_buffer;
+}
+
 SealPir::PirQuery SealPirClient::GenerateQuery(uint64_t index) {
   indices_ = ComputeIndices(index, pir_params_.dimension_vec);
 
@@ -879,6 +906,13 @@ SealPir::PirQuery SealPirClient::GenerateQuery(uint64_t index) {
   return result;
 }
 
+vector<uint8_t> SealPirClient::DecodeIndexReply(
+    const yacl::Buffer &reply_buffer, uint64_t offset) {
+  PirReply reply = DeSerializeCiphertexts(reply_buffer);
+  vector<uint8_t> elems = DecodeReply(reply, offset);
+  return elems;
+}
+
 vector<uint8_t> SealPirClient::DecodeReply(SealPir::PirReply &reply,
                                            uint64_t offset) {
   Plaintext ptxt = DecodeReply(reply);
@@ -920,7 +954,7 @@ Plaintext SealPirClient::DecodeReply(SealPir::PirReply &reply) {
     }
 
     if (i == d - 1) {
-      YACL_ENFORCE(tmp.size() == 1);
+      YACL_ENFORCE_EQ(tmp.size(), 1UL);
       return tmpplain[0];
     } else {
       tmpplain.clear();

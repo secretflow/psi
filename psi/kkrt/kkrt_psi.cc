@@ -16,6 +16,7 @@
 
 #include <future>
 #include <numeric>
+#include <unordered_map>
 
 #include "absl/strings/escaping.h"
 #include "openssl/crypto.h"
@@ -110,14 +111,14 @@ yacl::crypto::OtSendStore GetKkrtOtReceiverOptions(
 void KkrtPsiSend(const std::shared_ptr<yacl::link::Context>& link_ctx,
                  const KkrtPsiOptions& kkrt_psi_options,  // with kkrt options
                  const yacl::crypto::OtRecvStore& ot_recv,
-                 const std::vector<uint128_t>& items_hash) {
+                 const std::vector<HashBucketCache::BucketItem>& items) {
   YACL_ENFORCE((kkrt_psi_options.cuckoo_hash_num == 3) &&
                    (kkrt_psi_options.stash_size == 0),
                "now only support cuckoo HashNum = 3 , stash size = 0");
   YACL_ENFORCE(ot_recv.Size() == 512,
                "now only support baseRecvOption block size 512");
 
-  size_t self_size = items_hash.size();
+  size_t self_size = items.size();
   size_t peer_size = ExchangeSetSize(link_ctx, self_size);
   YACL_ENFORCE((peer_size > 0) && (self_size > 0),
                "item size need not zero, mine={}, peer={}", self_size,
@@ -182,7 +183,7 @@ void KkrtPsiSend(const std::shared_ptr<yacl::link::Context>& link_ctx,
   bin_indices.resize(self_size);
 
   for (size_t i = 0; i < self_size; ++i) {
-    CuckooIndex::HashRoom itemHash(items_hash[i]);
+    CuckooIndex::HashRoom itemHash(items[i].sec_hash);
     uint64_t bin_idx0 = itemHash.GetHash(0) % num_bins;
     uint64_t bin_idx1 = itemHash.GetHash(1) % num_bins;
     uint64_t bin_idx2 = itemHash.GetHash(2) % num_bins;
@@ -233,7 +234,8 @@ void KkrtPsiSend(const std::shared_ptr<yacl::link::Context>& link_ctx,
           uint8_t* encoding =
               encode_buf.data<uint8_t>() +
               (t * kkrt_psi_options.cuckoo_hash_num + h) * encode_size;
-          sender.Encode(b_idx, items_hash[input_idx], encoding, encode_size);
+          sender.Encode(b_idx, items[input_idx].sec_hash, encoding,
+                        encode_size);
 
           // make this location as already been encoded
           bin_indices[input_idx][h] = -1;
@@ -260,7 +262,6 @@ void KkrtPsiSend(const std::shared_ptr<yacl::link::Context>& link_ctx,
         curr_step_item_num * kkrt_psi_options.cuckoo_hash_num;
 
     PsiDataBatch batch;
-    batch.flatten_bytes.resize(encode_size * curr_step_encode_num);
     uint8_t* encoding = encode_buf.data<uint8_t>() +
                         (i * kkrt_psi_options.cuckoo_hash_num) * encode_size;
     for (size_t j = 0; j < curr_step_item_num; ++j) {
@@ -270,9 +271,13 @@ void KkrtPsiSend(const std::shared_ptr<yacl::link::Context>& link_ctx,
         uint64_t b_idx = bin_indices[input_idx][k];
 
         if (b_idx != static_cast<uint64_t>(-1)) {
-          sender.Encode(b_idx, items_hash[input_idx], encoding, encode_size);
+          sender.Encode(b_idx, items[input_idx].sec_hash, encoding,
+                        encode_size);
         }
         encoding += encode_size;
+      }
+      if (items[input_idx].extra_dup_cnt > 0) {
+        batch.duplicate_item_cnt[j] = items[input_idx].extra_dup_cnt;
       }
     }
 
@@ -281,6 +286,7 @@ void KkrtPsiSend(const std::shared_ptr<yacl::link::Context>& link_ctx,
 
     encoding = encode_buf.data<uint8_t>() +
                (i * kkrt_psi_options.cuckoo_hash_num) * encode_size;
+    batch.flatten_bytes.resize(encode_size * curr_step_encode_num);
     memcpy(batch.flatten_bytes.data(), encoding,
            encode_size * curr_step_encode_num);
 
@@ -300,7 +306,7 @@ void KkrtPsiSend(const std::shared_ptr<yacl::link::Context>& link_ctx,
                                fmt::format("KKRT:PSI:Finished"));
 }
 
-std::vector<std::size_t> KkrtPsiRecv(
+std::pair<std::vector<size_t>, std::vector<uint32_t>> KkrtPsiRecv(
     const std::shared_ptr<yacl::link::Context>& link_ctx,
     const KkrtPsiOptions& kkrt_psi_options,  // with kkrt options
     const yacl::crypto::OtSendStore& ot_send,
@@ -313,6 +319,7 @@ std::vector<std::size_t> KkrtPsiRecv(
                "now only support yacl::OtSendStore block size 512");
 
   std::vector<std::size_t> ret_intersection;
+  std::vector<uint32_t> duplicate_cnt;
 
   size_t self_size = items_hash.size();
   size_t peer_size = ExchangeSetSize(link_ctx, self_size);
@@ -383,8 +390,6 @@ std::vector<std::size_t> KkrtPsiRecv(
                     batch_count)));
     batch_count++;
 
-    const bool is_last_batch = batch.is_last_batch;
-
     size_t curr_step_item_num = batch.item_num;
     size_t curr_step_encode_num =
         curr_step_item_num * kkrt_psi_options.cuckoo_hash_num;
@@ -400,11 +405,12 @@ std::vector<std::size_t> KkrtPsiRecv(
         auto it = oprf_encode_map[j].find(encode_sub_str);
         if (it != oprf_encode_map[j].end()) {
           ret_intersection.emplace_back(it->second);
+          duplicate_cnt.emplace_back(batch.duplicate_item_cnt[i]);
         }
       }
     }
 
-    if (is_last_batch) {
+    if (batch.is_last_batch) {
       break;
     }
   }
@@ -412,7 +418,7 @@ std::vector<std::size_t> KkrtPsiRecv(
   link_ctx->Recv(link_ctx->NextRank(),
                  fmt::format("KKRT:PSI:Wait Sender Finished"));
 
-  return ret_intersection;
+  return {ret_intersection, duplicate_cnt};
 }
 
 }  // namespace psi::kkrt

@@ -24,6 +24,8 @@
 #include "yacl/kernel/type/ot_store.h"
 #include "yacl/link/link.h"
 
+#include "psi/utils/bucket.h"
+
 //
 // implementation of KKRT16 PSI protocol
 // https://eprint.iacr.org/2016/799.pdf
@@ -66,28 +68,41 @@ KkrtPsiOptions GetDefaultKkrtPsiOptions();
 void KkrtPsiSend(const std::shared_ptr<yacl::link::Context>& link_ctx,
                  const KkrtPsiOptions& kkrt_psi_options,  // with kkrt options
                  const yacl::crypto::OtRecvStore& ot_recv,
-                 const std::vector<uint128_t>& items_hash);
+                 const std::vector<HashBucketCache::BucketItem>& items_hash);
 
-std::vector<std::size_t> KkrtPsiRecv(
+std::pair<std::vector<size_t>, std::vector<uint32_t>> KkrtPsiRecv(
     const std::shared_ptr<yacl::link::Context>& link_ctx,
     const KkrtPsiOptions& kkrt_psi_options,  // with kkrt options
     const yacl::crypto::OtSendStore& ot_send,
     const std::vector<uint128_t>& items_hash);
 
-// inline functions
-inline void KkrtPsiSend(const std::shared_ptr<yacl::link::Context>& link_ctx,
-                        const yacl::crypto::OtRecvStore& ot_recv,
-                        const std::vector<uint128_t>& items_hash) {
+inline void KkrtPsiSend(
+    const std::shared_ptr<yacl::link::Context>& link_ctx,
+    const yacl::crypto::OtRecvStore& ot_recv,
+    const std::vector<HashBucketCache::BucketItem>& items_hash) {
   KkrtPsiOptions kkrt_psi_options = GetDefaultKkrtPsiOptions();
   return KkrtPsiSend(link_ctx, kkrt_psi_options, ot_recv, items_hash);
 }
 
-inline std::vector<std::size_t> KkrtPsiRecv(
+inline std::pair<std::vector<size_t>, std::vector<uint32_t>> KkrtPsiRecv(
     const std::shared_ptr<yacl::link::Context>& link_ctx,
     const yacl::crypto::OtSendStore& ot_send,
     const std::vector<uint128_t>& items_hash) {
   KkrtPsiOptions kkrt_psi_options = GetDefaultKkrtPsiOptions();
   return KkrtPsiRecv(link_ctx, kkrt_psi_options, ot_send, items_hash);
+}
+
+// inline functions
+inline void KkrtPsiSend(const std::shared_ptr<yacl::link::Context>& link_ctx,
+                        const yacl::crypto::OtRecvStore& ot_recv,
+                        const std::vector<uint128_t>& items_hash) {
+  std::vector<HashBucketCache::BucketItem> items_hash_bucket;
+  for (auto& item : items_hash) {
+    HashBucketCache::BucketItem bucket_item;
+    bucket_item.sec_hash = item;
+    items_hash_bucket.push_back(bucket_item);
+  }
+  KkrtPsiSend(link_ctx, ot_recv, items_hash_bucket);
 }
 
 }  // namespace psi::kkrt

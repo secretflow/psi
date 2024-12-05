@@ -5,6 +5,12 @@
 > - `[API]` prefix for API changes.
 > - `[Improvement]` prefix for implementation improvement.
 
+## v0.5.0.dev241107
+- `[API]` delete legacy ub psi function.
+- `[API]` output csv null_rep can be specified.
+- `[Feature]` join can be done with one receiver.
+- `[Feature]` join can be done with ub psi protocol.
+
 ## v0.4.0.dev240801
 - [Bugfix] Fix MacOS and arm build.
 

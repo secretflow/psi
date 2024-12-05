@@ -14,8 +14,10 @@
 
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 #include "yacl/base/buffer.h"
 #include "yacl/link/link.h"
@@ -63,12 +65,19 @@ struct PsiDataBatch {
   // "dual.enc": the second stage ciphertext
   std::string type;
 
+  std::unordered_map<uint32_t, uint32_t> duplicate_item_cnt;
+
   // deprecated. use IcPsiBatchSerializer instead.
   yacl::Buffer Serialize() const {
     proto::PsiDataBatchProto proto;
+    proto.set_type(type);
+    proto.set_batch_index(batch_index);
     proto.set_item_num(item_num);
     proto.set_flatten_bytes(flatten_bytes);
     proto.set_is_last_batch(is_last_batch);
+    for (const auto& [k, v] : duplicate_item_cnt) {
+      proto.mutable_duplicate_item_cnt()->insert({k, v});
+    }
 
     yacl::Buffer buf(proto.ByteSizeLong());
     proto.SerializeToArray(buf.data(), buf.size());
@@ -84,6 +93,11 @@ struct PsiDataBatch {
     batch.item_num = proto.item_num();
     batch.flatten_bytes = proto.flatten_bytes();
     batch.is_last_batch = proto.is_last_batch();
+    batch.batch_index = proto.batch_index();
+    batch.type = proto.type();
+    for (const auto& [k, v] : proto.duplicate_item_cnt()) {
+      batch.duplicate_item_cnt[k] = v;
+    }
 
     return batch;
   }

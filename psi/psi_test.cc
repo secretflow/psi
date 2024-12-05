@@ -27,17 +27,16 @@
 #include "arrow/csv/api.h"
 #include "arrow/io/api.h"
 #include "arrow/ipc/api.h"
-#include "boost/uuid/uuid.hpp"
-#include "boost/uuid/uuid_generators.hpp"
-#include "boost/uuid/uuid_io.hpp"
 #include "fmt/format.h"
 #include "gtest/gtest.h"
 #include "spdlog/spdlog.h"
+#include "utils/random_str.h"
 #include "yacl/link/test_util.h"
 
 #include "psi/factory.h"
 #include "psi/prelude.h"
 #include "psi/utils/io.h"
+#include "psi/utils/random_str.h"
 
 #include "psi/proto/psi_v2.pb.h"
 
@@ -201,8 +200,7 @@ TEST_P(PsiTest, Works) {
   std::replace(test_suite_name.begin(), test_suite_name.end(), '/', '_');
   std::replace(test_case_name.begin(), test_case_name.end(), '/', '_');
 
-  boost::uuids::random_generator uuid_generator;
-  auto uuid_str = boost::uuids::to_string(uuid_generator());
+  auto uuid_str = GetRandomString();
 
   std::string test_name =
       test_suite_name + "-" + test_case_name + "-" + uuid_str;
@@ -271,7 +269,6 @@ TEST_P(PsiTest, Works) {
     if (i == 0 || params.broadcast_result || params.advanced_join_type) {
       TestTable output_hat = LoadTableFromFile(output_paths[i].string(),
                                                params.outputs[i].headers);
-
       EXPECT_EQ(params.outputs[i].rows, output_hat.rows);
     }
   }
@@ -306,15 +303,15 @@ INSTANTIATE_TEST_SUITE_P(
                        {TestTable{// header
                                   {"id1"},
                                   {// row
-                                   {"3"},
+                                   {"1"},
                                    // row
-                                   {"1"}}},
+                                   {"3"}}},
                         TestTable{// header
                                   {"id2"},
                                   {// row
-                                   {"3"},
+                                   {"1"},
                                    // row
-                                   {"1"}}}},
+                                   {"3"}}}},
                        // keys
                        {{"id1"}, {"id2"}},
                        /*disable_alignment = */ true,
@@ -500,17 +497,17 @@ INSTANTIATE_TEST_SUITE_P(
                        {TestTable{// header
                                   {"id1"},
                                   {// row
-                                   {"3"},
-                                   // row
                                    {"1"},
+                                   // row
+                                   {"3"},
                                    // row
                                    {"5"}}},
                         TestTable{// header
                                   {"id2"},
                                   {// row
-                                   {"3"},
-                                   // row
                                    {"1"},
+                                   // row
+                                   {"3"},
                                    // row
                                    {"5"}}}},
                        // keys
@@ -553,19 +550,19 @@ INSTANTIATE_TEST_SUITE_P(
                                    // row
                                    {"7"},
                                    // row
-                                   {"NA"},
+                                   {"NULL"},
                                    // row
-                                   {"NA"},
+                                   {"NULL"},
                                    // row
-                                   {"NA"}}},
+                                   {"NULL"}}},
                         TestTable{// header
                                   {"id2"},
                                   {// row
-                                   {"NA"},
+                                   {"NULL"},
                                    // row
-                                   {"NA"},
+                                   {"NULL"},
                                    // row
-                                   {"NA"},
+                                   {"NULL"},
                                    // row
                                    {"6"},
                                    // row
@@ -606,19 +603,19 @@ INSTANTIATE_TEST_SUITE_P(
                                    // row
                                    {"5"},
                                    // row
-                                   {"NA"},
+                                   {"NULL"},
                                    // row
-                                   {"NA"},
+                                   {"NULL"},
                                    // row
-                                   {"NA"}}},
+                                   {"NULL"}}},
                         TestTable{// header
                                   {"id2"},
                                   {// row
-                                   {"NA"},
+                                   {"NULL"},
                                    // row
-                                   {"NA"},
+                                   {"NULL"},
                                    // row
-                                   {"NA"},
+                                   {"NULL"},
                                    // row
                                    {"2"},
                                    // row

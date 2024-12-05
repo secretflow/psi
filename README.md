@@ -205,8 +205,8 @@ chmod +x traceconv
 ```
 4. Open chrome://tracing in your chrome and load JSON file.
 
-
 ## PSI V2 Benchamrk
+
 Please refer to [PSI V2 Benchmark](docs/user_guide/psi_v2_benchmark.md)
 
 ## APSI Benchmark

@@ -25,7 +25,7 @@ psi_cc_library(
     hdrs = ["multiplex_disk_cache.h"],
     deps = [
         ":io",
-        "@boost//:uuid",
+        ":random_str",
         "@yacl//yacl/base:exception",
     ],
 )
@@ -45,7 +45,70 @@ psi_cc_library(
     deps = [
         ":arrow_csv_batch_provider",
         ":multiplex_disk_cache",
+        ":random_str",
         "@com_google_absl//absl/strings",
+        "@yacl//yacl/base:int128",
+    ],
+)
+
+psi_cc_library(
+    name = "arrow_helper",
+    srcs = ["arrow_helper.cc"],
+    hdrs = ["arrow_helper.h"],
+    deps = [
+        "@org_apache_arrow//:arrow",
+        "@yacl//yacl/base:exception",
+    ],
+)
+
+psi_cc_library(
+    name = "pb_helper",
+    srcs = ["pb_helper.cc"],
+    hdrs = ["pb_helper.h"],
+    deps = [
+        ":io",
+        "@yacl//yacl/base:exception",
+    ],
+)
+
+psi_cc_library(
+    name = "table_utils",
+    srcs = ["table_utils.cc"],
+    hdrs = ["table_utils.h"],
+    deps = [
+        ":arrow_csv_batch_provider",
+        ":arrow_helper",
+        ":index_store",
+        ":pb_helper",
+        ":random_str",
+        ":table_utils_cc_proto",
+        "@yacl//yacl/base:exception",
+        "@yacl//yacl/crypto/hash:ssl_hash",
+    ],
+)
+
+psi_cc_library(
+    name = "join_processor",
+    srcs = ["join_processor.cc"],
+    hdrs = ["join_processor.h"],
+    deps = [
+        ":index_store",
+        ":random_str",
+        ":table_utils",
+        "//psi/proto:psi_v2_cc_proto",
+        "@yacl//yacl/base:exception",
+        "@yacl//yacl/link",
+    ],
+)
+
+psi_cc_test(
+    name = "table_utils_test",
+    srcs = ["table_utils_test.cc"],
+    deps = [
+        ":arrow_helper",
+        ":index_store",
+        ":table_utils",
+        "@yacl//yacl/base:exception",
     ],
 )
 
@@ -56,7 +119,7 @@ psi_cc_library(
     deps = [
         ":io",
         ":key",
-        "@boost//:uuid",
+        ":random_str",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/time",
         "@org_apache_arrow//:arrow",
@@ -85,6 +148,26 @@ cc_proto_library(
     deps = [":serializable_proto"],
 )
 
+proto_library(
+    name = "table_utils_proto",
+    srcs = ["table_utils.proto"],
+)
+
+cc_proto_library(
+    name = "table_utils_cc_proto",
+    deps = [":table_utils_proto"],
+)
+
+proto_library(
+    name = "ub_psi_cache_proto",
+    srcs = ["ub_psi_cache.proto"],
+)
+
+cc_proto_library(
+    name = "ub_psi_cache_cc_proto",
+    deps = [":ub_psi_cache_proto"],
+)
+
 psi_cc_library(
     name = "csv_header_analyzer",
     hdrs = ["csv_header_analyzer.h"],
@@ -110,6 +193,7 @@ psi_cc_library(
         "//conditions:default": ["-fopenmp"],
     }),
     deps = [
+        ":arrow_csv_batch_provider",
         ":hash_bucket_cache",
         ":index_store",
         "@yacl//yacl/link",
@@ -118,9 +202,15 @@ psi_cc_library(
 
 psi_cc_library(
     name = "batch_provider",
-    srcs = ["batch_provider.cc"],
     hdrs = ["batch_provider.h"],
+)
+
+psi_cc_library(
+    name = "batch_provider_impl",
+    srcs = ["batch_provider_impl.cc"],
+    hdrs = ["batch_provider_impl.h"],
     deps = [
+        ":arrow_csv_batch_provider",
         ":csv_header_analyzer",
         ":io",
         ":key",
@@ -190,7 +280,10 @@ psi_cc_library(
     deps = [
         ":batch_provider",
         ":io",
+        ":pb_helper",
         ":serialize",
+        ":ub_psi_cache_cc_proto",
+        "@yacl//yacl/base:byte_container_view",
         "@yacl//yacl/base:exception",
     ],
 )
@@ -200,7 +293,6 @@ psi_cc_test(
     srcs = ["ub_psi_cache_test.cc"],
     deps = [
         ":ub_psi_cache",
-        "@boost//:uuid",
         "@com_google_absl//absl/time",
         "@yacl//yacl/crypto/rand",
         "@yacl//yacl/utils:scope_guard",
@@ -213,6 +305,15 @@ psi_cc_library(
     hdrs = ["progress.h"],
     deps = [
         "@com_github_fmtlib_fmt//:fmtlib",
+    ],
+)
+
+psi_cc_library(
+    name = "random_str",
+    hdrs = ["random_str.h"],
+    deps = [
+        "@com_google_absl//absl/strings",
+        "@yacl//yacl/crypto/rand",
     ],
 )
 
@@ -233,6 +334,7 @@ psi_cc_library(
         ":batch_provider",
         ":key",
         "@org_apache_arrow//:arrow",
+        "@yacl//yacl/base:exception",
     ],
 )
 
@@ -241,29 +343,6 @@ psi_cc_test(
     srcs = ["arrow_csv_batch_provider_test.cc"],
     deps = [
         ":arrow_csv_batch_provider",
-    ],
-)
-
-psi_cc_library(
-    name = "advanced_join",
-    srcs = ["advanced_join.cc"],
-    hdrs = ["advanced_join.h"],
-    deps = [
-        ":key",
-        "//psi:prelude",
-        "//psi/proto:psi_v2_cc_proto",
-        "@boost//:uuid",
-        "@org_apache_arrow//:arrow",
-        "@yacl//yacl/base:exception",
-        "@yacl//yacl/link",
-    ],
-)
-
-psi_cc_test(
-    name = "advanced_join_test",
-    srcs = ["advanced_join_test.cc"],
-    deps = [
-        ":advanced_join",
     ],
 )
 
@@ -393,6 +472,16 @@ psi_cc_library(
     deps = [
         ":ic_protocol_psi_cc_proto",
         ":serialize",
+        "@yacl//yacl/base:exception",
+        "@yacl//yacl/link",
+    ],
+)
+
+psi_cc_library(
+    name = "resource_manager",
+    srcs = ["resource_manager.cc"],
+    hdrs = ["resource_manager.h"],
+    deps = [
         "@yacl//yacl/base:exception",
         "@yacl//yacl/link",
     ],

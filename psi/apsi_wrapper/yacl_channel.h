@@ -37,7 +37,7 @@ class YaclChannel : public ::apsi::network::NetworkChannel {
   explicit YaclChannel(std::shared_ptr<yacl::link::Context> lctx)
       : lctx_(lctx) {}
 
-  ~YaclChannel() { lctx_->WaitLinkTaskFinish(); }
+  ~YaclChannel() {}
 
   /**
   Send a SenderOperation from a receiver to a sender. These operations represent

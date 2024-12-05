@@ -26,6 +26,8 @@ namespace psi {
 // Default bucket size when not provided.
 constexpr uint64_t kDefaultBucketSize = 1 << 20;
 
+void CalcBucketItemSecHash(std::vector<HashBucketCache::BucketItem>& items);
+
 std::optional<std::vector<HashBucketCache::BucketItem>> PrepareBucketData(
     v2::Protocol protocol, size_t bucket_idx,
     const std::shared_ptr<yacl::link::Context>& lctx,
@@ -40,5 +42,9 @@ void HandleBucketResultByReceiver(
     bool broadcast_result, const std::shared_ptr<yacl::link::Context>& lctx,
     const std::vector<HashBucketCache::BucketItem>& result_list,
     IndexWriter* writer);
+void HandleBucketResultByReceiver(
+    bool broadcast_result, const std::shared_ptr<yacl::link::Context>& lctx,
+    const std::vector<HashBucketCache::BucketItem>& result_list,
+    const std::vector<uint32_t>& peer_extra_dup_cnt, IndexWriter* writer);
 
 }  // namespace psi

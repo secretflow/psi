@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@psi//bazel:psi.bzl", "psi_cmake_external")
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -21,12 +21,13 @@ filegroup(
     srcs = glob(["**"]),
 )
 
-psi_cmake_external(
+cmake(
     name = "ZeroMQ",
     cache_entries = {
         "ZMQ_BUILD_TESTS": "OFF",
         "CMAKE_INSTALL_LIBDIR": "lib",
     },
+    generate_args = ["-GNinja"],
     lib_source = "@com_github_zeromq_libzmq//:all",
     out_static_libs = ["libzmq.a"],
 )

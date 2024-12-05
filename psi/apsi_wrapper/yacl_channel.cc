@@ -258,14 +258,10 @@ void YaclChannel::send(unique_ptr<::apsi::network::ResultPackage> rp) {
   }
 
   stringstream ss;
-  size_t old_bytes_sent = bytes_sent_;
 
   bytes_sent_ += rp->save(ss);
 
   lctx_->Send(lctx_->NextRank(), ss.str(), "rp");
-
-  APSI_LOG_DEBUG("Sent a result package (" << bytes_sent_ - old_bytes_sent
-                                           << " bytes)");
 }
 
 unique_ptr<::apsi::network::ResultPackage> YaclChannel::receive_result(

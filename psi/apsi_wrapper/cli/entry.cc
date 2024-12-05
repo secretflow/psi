@@ -43,7 +43,6 @@
 #include "apsi/log.h"
 #include "apsi/network/zmq/zmq_channel.h"
 #include "apsi/thread_pool_mgr.h"
-#include "yacl/utils/parallel.h"
 
 #include "psi/apsi_wrapper/cli/common_utils.h"
 #include "psi/apsi_wrapper/cli/sender_dispatcher.h"
@@ -55,6 +54,7 @@
 #include "psi/apsi_wrapper/utils/sender_db.h"
 #include "psi/apsi_wrapper/yacl_channel.h"
 #include "psi/utils/multiplex_disk_cache.h"
+#include "psi/utils/resource_manager.h"
 
 using namespace std;
 
@@ -126,19 +126,21 @@ int RunReceiver(const ReceiverOptions &options,
       channel = std::make_unique<psi::apsi_wrapper::YaclChannel>(lctx);
     } else {
       yacl::link::ContextDesc ctx_desc;
-      ctx_desc.parties.push_back(
-          {"sender", fmt::format("{}:{}", options.yacl_sender_ip_addr,
-                                 options.yacl_sender_port)});
-      ctx_desc.parties.push_back(
-          {"receiver", fmt::format("{}:{}", options.yacl_receiver_ip_addr,
-                                   options.yacl_receiver_port)});
 
-      std::shared_ptr<yacl::link::Context> lctx_ =
-          yacl::link::FactoryBrpc().CreateContext(ctx_desc, 1);
+      ctx_desc.parties.emplace_back(
+          "sender", fmt::format("{}:{}", options.yacl_sender_ip_addr,
+                                options.yacl_sender_port));
+      ctx_desc.parties.emplace_back(
+          "receiver", fmt::format("{}:{}", options.yacl_receiver_ip_addr,
+                                  options.yacl_receiver_port));
 
-      lctx_->ConnectToMesh();
+      auto link = psi::ResourceManager::GetInstance().AddLinkResource("sender",
+                                                                      ctx_desc);
 
-      channel = std::make_unique<psi::apsi_wrapper::YaclChannel>(lctx_);
+      auto lctx = link->GetLinkContext();
+      lctx->ConnectToMesh();
+
+      channel = std::make_unique<psi::apsi_wrapper::YaclChannel>(lctx);
     }
   }
 
@@ -330,12 +332,13 @@ void RunDispatcher(const SenderOptions &options,
           "receiver", fmt::format("{}:{}", options.yacl_receiver_ip_addr,
                                   options.yacl_receiver_port));
 
-      std::shared_ptr<yacl::link::Context> lctx_ =
-          yacl::link::FactoryBrpc().CreateContext(ctx_desc, 0);
+      auto link = psi::ResourceManager::GetInstance().AddLinkResource(
+          "receiver", ctx_desc);
 
-      lctx_->ConnectToMesh();
+      auto lctx = link->GetLinkContext();
+      lctx->ConnectToMesh();
 
-      dispatcher.run(stop, lctx_, options.streaming_result);
+      dispatcher.run(stop, lctx, options.streaming_result);
     }
   }
 }

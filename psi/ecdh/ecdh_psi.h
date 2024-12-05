@@ -19,6 +19,7 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
 
 #include "yacl/link/link.h"
@@ -120,12 +121,23 @@ class EcdhPsiContext {
  protected:
   void SendBatch(const std::vector<std::string>& batch_items, int32_t batch_idx,
                  std::string_view tag = "");
+  void SendBatch(
+      const std::vector<std::string>& batch_items,
+      const std::unordered_map<uint32_t, uint32_t>& duplicate_item_cnt,
+      int32_t batch_idx, std::string_view tag = "");
 
   void SendBatch(const std::vector<std::string_view>& batch_items,
                  int32_t batch_idx, std::string_view tag = "");
+  void SendBatch(
+      const std::vector<std::string_view>& batch_items,
+      const std::unordered_map<uint32_t, uint32_t>& duplicate_item_cnt,
+      int32_t batch_idx, std::string_view tag = "");
 
   void RecvBatch(std::vector<std::string>* items, int32_t batch_idx,
                  std::string_view tag = "");
+  void RecvBatch(std::vector<std::string>* items,
+                 std::unordered_map<uint32_t, uint32_t>* duplicate_item_cnt,
+                 int32_t batch_idx, std::string_view tag);
 
   void SendDualMaskedBatch(const std::vector<std::string>& batch_items,
                            int32_t batch_idx, std::string_view tag = "");

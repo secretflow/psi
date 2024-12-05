@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@psi//bazel:psi.bzl", "psi_cmake_external")
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -21,7 +21,7 @@ filegroup(
     srcs = glob(["**"]),
 )
 
-psi_cmake_external(
+cmake(
     name = "seal",
     cache_entries = {
         "SEAL_USE_MSGSL": "ON",
@@ -36,6 +36,7 @@ psi_cmake_external(
         # "EXT_BUILD_DEPS": "$EXT_BUILD_DEPS",
         # "SEAL_USE_INTEL_HEXL": "ON",
     },
+    generate_args = ["-GNinja"],
     lib_source = "@com_github_microsoft_seal//:all",
     out_include_dir = "include/SEAL-4.1",
     out_static_libs = ["libseal-4.1.a"],

@@ -20,12 +20,10 @@
 #include <fstream>
 
 #include "boost/algorithm/string.hpp"
-#include "boost/uuid/uuid.hpp"
-#include "boost/uuid/uuid_generators.hpp"
-#include "boost/uuid/uuid_io.hpp"
 #include "google/protobuf/util/json_util.h"
 #include "perfetto.h"
 #include "spdlog/spdlog.h"
+#include "utils/random_str.h"
 
 #include "psi/apsi_wrapper/cli/entry.h"
 #include "psi/factory.h"
@@ -120,11 +118,9 @@ PsiResultReport RunPsi(const v2::PsiConfig& psi_config,
       createPsiParty(psi_config, lctx);
   PsiResultReport report = psi_party->Run();
 
-  boost::uuids::random_generator uuid_generator;
   StopTracing(std::move(tracing_session),
               psi_config.debug_options().trace_path().empty()
-                  ? fmt::format("/tmp/psi_{}.trace",
-                                boost::uuids::to_string(uuid_generator()))
+                  ? fmt::format("/tmp/psi_{}.trace", GetRandomString())
                   : psi_config.debug_options().trace_path());
 
   return report;

@@ -1,0 +1,2 @@
+docker-compose/tmp_data/*
+docker-compose/logs/*

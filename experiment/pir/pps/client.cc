@@ -15,6 +15,7 @@
 #include "client.h"
 
 #include <spdlog/spdlog.h>
+#include "yacl/base/exception.h"
 
 namespace pir::pps {
 
@@ -34,17 +35,22 @@ uint64_t PpsPirClient::GetRandomU64Less() {
 // Generate sk and m random numbers \in [n]
 void PpsPirClient::Setup(PIRKey& sk, std::set<uint64_t>& deltas) {
   sk = pps_.Gen(lambda_);
+
+  size_t max_try_count = 10 * M();
+  size_t count = 0;
+
   // The map.size() must be equal to SET_SIZE.
-  std::vector<uint64_t> rand =
-      yacl::crypto::PrgAesCtr<uint64_t>(yacl::crypto::RandU64(), M());
-  for (uint64_t i = 0; i < M(); i++) {
-    // The most expensive operation.
-    uint64_t r = LemireTrick(rand[i], universe_size_);
+  size_t i = 0;
+  while (i < M() && count < max_try_count) {
+    count += 1;
+    uint64_t r = LemireTrick(yacl::crypto::RandU64(), universe_size_);
     if (!deltas.insert(r).second) {
-      rand[i] = yacl::crypto::RandU64();
-      i--;
+      continue;
     }
+    ++i;
   }
+
+  YACL_ENFORCE(count < max_try_count);
 }
 
 // Params:
@@ -91,18 +97,25 @@ void PpsPirClient::Setup(std::vector<PIRKeyUnion>& ck,
                          std::vector<std::unordered_set<uint64_t>>& v) {
   ck.resize(MM());
   v.resize(MM());
-  std::vector<uint128_t> rand =
-      yacl::crypto::PrgAesCtr<uint128_t>(yacl::crypto::RandU128(), MM());
-  for (uint64_t i = 0; i < MM(); ++i) {
-    pps_.Eval(rand[i], v[i]);
+
+  size_t max_try_count = 10 * MM();
+  size_t count = 0;
+
+  size_t i = 0;
+  while (i < MM() && count < max_try_count) {
+    count+=1;
+    auto rand = yacl::crypto::RandU128();
+    pps_.Eval(rand, v[i]);
     if (v[i].size() == set_size_) {
-      ck[i] = PIRKeyUnion(rand[i]);
-    } else {
+      ck[i] = PIRKeyUnion(rand);
+    }else {
       v[i].clear();
-      rand[i] = yacl::crypto::RandU128();
-      --i;
+      continue;
     }
+    ++i;
   }
+  YACL_ENFORCE(count < max_try_count);
+
 }
 
 void PpsPirClient::Query(uint64_t i, std::vector<PIRKeyUnion>& ck,

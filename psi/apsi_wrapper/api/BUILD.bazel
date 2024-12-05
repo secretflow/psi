@@ -119,3 +119,25 @@ psi_cc_test(
         "@boost//:uuid",
     ],
 )
+
+exports_files(
+    [
+        "exported_symbols.lds",
+    ],
+    visibility = ["//visibility:private"],
+)
+
+cc_shared_library(
+    name = "wrapper_shared",
+    additional_linker_inputs = [
+        ":exported_symbols.lds",
+    ],
+    shared_lib_name = "wrapper.so",
+    user_link_flags = [
+        "-Wl,--version-script=$(location :exported_symbols.lds)",
+    ],
+    deps = [
+        ":receiver_c_wrapper",
+        ":sender_c_wrapper",
+    ],
+)

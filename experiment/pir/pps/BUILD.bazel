@@ -36,6 +36,7 @@ psi_cc_library(
         "@yacl//yacl/base:dynamic_bitset",
         "@yacl//yacl/crypto/rand",
         "@yacl//yacl/crypto/tools:prg",
+        "@yacl//yacl/base:exception",
     ],
 )
 

@@ -46,15 +46,15 @@ static void BM_PpsSingleBitPir(benchmark::State& state) {
     pir::pps::PpsPirServer pirOfflineServer(n * n, n);
     pir::pps::PpsPirServer pirOnlineServer(n * n, n);
 
-    pir::pps::PIRKey pirKey, pirKeyOffline;
-    pir::pps::PIRQueryParam pirQueryParam;
-    pir::pps::PIRPuncKey pirPuncKey, pirPuncKeyOnline;
-    std::set<uint64_t> deltas, deltasOffline;
+    pir::pps::PIRKey pirKey{}, pirKeyOffline{};
+    pir::pps::PIRQueryParam pirQueryParam{};
+    pir::pps::PIRPuncKey pirPuncKey{}, pirPuncKeyOnline{};
+    std::set<uint64_t> deltas{}, deltasOffline{};
     yacl::dynamic_bitset<> bits;
     GenerateRandomBitString(bits, n * n);
     yacl::dynamic_bitset<> h, hOffline;
     uint64_t query_index = pirClient.GetRandomU64Less();
-    bool query_result;
+    bool query_result{};
 
     constexpr int kWorldSize = 2;
     const auto contextsOffline = yacl::link::test::SetupWorld(kWorldSize);
@@ -102,7 +102,7 @@ static void BM_PpsSingleBitPir(benchmark::State& state) {
     recver_future.get();
 
     bool a = pirOnlineServer.Answer(pirPuncKeyOnline, bits);
-    bool aClient;
+    bool aClient{};
 
     sender_future =
         std::async(std::launch::async, pir::pps::OnlineServerSendToClient,
@@ -129,13 +129,13 @@ static void BM_PpsMultiBitsPir(benchmark::State& state) {
     pir::pps::PpsPirServer pirOfflineServer(n * n, n);
     pir::pps::PpsPirServer pirOnlineServer(n * n, n);
 
-    std::vector<pir::pps::PIRKeyUnion> pirKey, pirKeyOffline;
+    std::vector<pir::pps::PIRKeyUnion> pirKey{}, pirKeyOffline{};
     yacl::dynamic_bitset<> bits;
     GenerateRandomBitString(bits, n * n);
     yacl::dynamic_bitset<> h, hOffline;
-    pir::pps::PIRQueryParam pirParam;
+    pir::pps::PIRQueryParam pirParam{};
 
-    bool aLeft, aRight, aLeftOnline, aRightOnline, queryResult;
+    bool aLeft{}, aRight{}, aLeftOnline{}, aRightOnline{}, queryResult{};
     std::vector<std::unordered_set<uint64_t>> v;
 
     constexpr int kWorldSize = 2;
@@ -170,8 +170,8 @@ static void BM_PpsMultiBitsPir(benchmark::State& state) {
     recver_future.get();
 
     for (uint i = 0; i < n * n; ++i) {
-      pir::pps::PIRPuncKey pirPuncKeyL, pirPuncKeyR;
-      pir::pps::PIRPuncKey pirPuncKeyLOnline, pirPuncKeyROnline;
+      pir::pps::PIRPuncKey pirPuncKeyL{}, pirPuncKeyR{};
+      pir::pps::PIRPuncKey pirPuncKeyLOnline{}, pirPuncKeyROnline{};
 
       pirClient.Query(i, pirKey, v, pirParam, pirPuncKeyL, pirPuncKeyR);
 

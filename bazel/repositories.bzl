@@ -20,8 +20,6 @@ def psi_deps():
     _bazel_platform()
     _upb()
     _com_github_emptoolkit_emp_tool()
-    _com_github_emptoolkit_emp_ot()
-    _com_github_emptoolkit_emp_zk()
     _com_github_facebook_zstd()
     _com_github_microsoft_seal()
     _com_github_microsoft_apsi()
@@ -95,7 +93,7 @@ def _upb():
         ],
         patch_args = ["-p1"],
         patches = [
-            "@psi//bazel:patches/upb.patch",
+            "@psi//bazel/patches:upb.patch",
         ],
     )
 
@@ -108,29 +106,14 @@ def _com_github_emptoolkit_emp_tool():
         type = "tar.gz",
         patch_args = ["-p1"],
         patches = [
-            "@psi//bazel:patches/emp-tool.patch",
-            "@psi//bazel:patches/emp-tool-cmake.patch",
-            "@psi//bazel:patches/emp-tool-sse2neon.patch",
+            "@psi//bazel/patches:emp-tool.patch",
+            "@psi//bazel/patches:emp-tool-cmake.patch",
+            "@psi//bazel/patches:emp-tool-sse2neon.patch",
         ],
         urls = [
             "https://github.com/emp-toolkit/emp-tool/archive/refs/tags/0.2.5.tar.gz",
         ],
         build_file = "@psi//bazel:emp-tool.BUILD",
-    )
-
-def _com_github_emptoolkit_emp_ot():
-    maybe(
-        http_archive,
-        name = "com_github_emptoolkit_emp_ot",
-        sha256 = "358036e5d18143720ee17103f8172447de23014bcfc1f8e7d5849c525ca928ac",
-        strip_prefix = "emp-ot-0.2.4",
-        type = "tar.gz",
-        patch_args = ["-p1"],
-        patches = ["@psi//bazel:patches/emp-ot.patch"],
-        urls = [
-            "https://github.com/emp-toolkit/emp-ot/archive/refs/tags/0.2.4.tar.gz",
-        ],
-        build_file = "@psi//bazel:emp-ot.BUILD",
     )
 
 def _com_github_intel_ipp():
@@ -142,26 +125,11 @@ def _com_github_intel_ipp():
         build_file = "@psi//bazel:ipp.BUILD",
         patch_args = ["-p1"],
         patches = [
-            "@psi//bazel:patches/ippcp.patch",
+            "@psi//bazel/patches:ippcp.patch",
         ],
         urls = [
             "https://github.com/intel/cryptography-primitives/archive/refs/tags/ippcp_2021.8.tar.gz",
         ],
-    )
-
-def _com_github_emptoolkit_emp_zk():
-    maybe(
-        http_archive,
-        name = "com_github_emptoolkit_emp_zk",
-        sha256 = "e02e6abc6ee14ca0e69e6f5f0efe24cab7da1bc905fc7c86a3e5a529114e489a",
-        strip_prefix = "emp-zk-0.2.1",
-        type = "tar.gz",
-        patch_args = ["-p1"],
-        patches = ["@psi//bazel:patches/emp-zk.patch"],
-        urls = [
-            "https://github.com/emp-toolkit/emp-zk/archive/refs/tags/0.2.1.tar.gz",
-        ],
-        build_file = "@psi//bazel:emp-zk.BUILD",
     )
 
 def _com_github_microsoft_seal():
@@ -172,7 +140,7 @@ def _com_github_microsoft_seal():
         strip_prefix = "SEAL-4.1.1",
         type = "tar.gz",
         patch_args = ["-p1"],
-        patches = ["@psi//bazel:patches/seal.patch"],
+        patches = ["@psi//bazel/patches:seal.patch"],
         urls = [
             "https://github.com/microsoft/SEAL/archive/refs/tags/v4.1.1.tar.gz",
         ],
@@ -191,8 +159,8 @@ def _com_github_microsoft_apsi():
         build_file = "@psi//bazel:microsoft_apsi.BUILD",
         patch_args = ["-p1"],
         patches = [
-            "@psi//bazel:patches/apsi.patch",
-            "@psi//bazel:patches/apsi-fourq.patch",
+            "@psi//bazel/patches:apsi.patch",
+            "@psi//bazel/patches:apsi-fourq.patch",
         ],
         patch_cmds = [
             "rm -rf common/apsi/fourq",
@@ -263,7 +231,7 @@ def _com_github_grpc_grpc():
         strip_prefix = "grpc-1.51.0",
         type = "tar.gz",
         patch_args = ["-p1"],
-        patches = ["@psi//bazel:patches/grpc.patch"],
+        patches = ["@psi//bazel/patches:grpc.patch"],
         urls = [
             "https://github.com/grpc/grpc/archive/refs/tags/v1.51.0.tar.gz",
         ],
@@ -278,7 +246,7 @@ def _com_github_nelhage_rules_boost():
         sha256 = "a7c42df432fae9db0587ff778d84f9dc46519d67a984eff8c79ae35e45f277c1",
         strip_prefix = "rules_boost-%s" % RULES_BOOST_COMMIT,
         patch_args = ["-p1"],
-        patches = ["@psi//bazel:patches/boost.patch"],
+        patches = ["@psi//bazel/patches:boost.patch"],
         urls = [
             "https://github.com/nelhage/rules_boost/archive/%s.tar.gz" % RULES_BOOST_COMMIT,
         ],
@@ -392,7 +360,7 @@ def _com_github_google_perfetto():
         sha256 = "4c8fe8a609fcc77ca653ec85f387ab6c3a048fcd8df9275a1aa8087984b89db8",
         strip_prefix = "perfetto-41.0",
         patch_args = ["-p1"],
-        patches = ["@psi//bazel:patches/perfetto.patch"],
+        patches = ["@psi//bazel/patches:perfetto.patch"],
         build_file = "@psi//bazel:perfetto.BUILD",
     )
 

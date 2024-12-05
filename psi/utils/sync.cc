@@ -14,6 +14,8 @@
 
 #include "psi/utils/sync.h"
 
+#include <unordered_map>
+
 #include "psi/utils/serialize.h"
 
 namespace psi {
@@ -34,6 +36,13 @@ std::vector<size_t> AllGatherItemsSize(
 
 void BroadcastResult(const std::shared_ptr<yacl::link::Context>& link_ctx,
                      std::vector<std::string>* res) {
+  std::unordered_map<uint32_t, uint32_t> res_dup_cnt;
+  BroadcastResult(link_ctx, res, &res_dup_cnt);
+}
+
+void BroadcastResult(const std::shared_ptr<yacl::link::Context>& link_ctx,
+                     std::vector<std::string>* res,
+                     std::unordered_map<uint32_t, uint32_t>* res_dup_cnt) {
   size_t max_size = res->size();
   size_t broadcast_rank = 0;
   std::vector<size_t> res_size_list = AllGatherItemsSize(link_ctx, res->size());
@@ -49,12 +58,12 @@ void BroadcastResult(const std::shared_ptr<yacl::link::Context>& link_ctx,
     // no need broadcast
     return;
   }
-  auto recv_res_buf =
-      yacl::link::Broadcast(link_ctx, utils::SerializeStrItems(*res),
-                            broadcast_rank, "broadcast psi result");
+  auto recv_res_buf = yacl::link::Broadcast(
+      link_ctx, utils::SerializeStrItems(*res, *res_dup_cnt), broadcast_rank,
+      "broadcast psi result");
   if (res->empty()) {
     // use broadcast result
-    utils::DeserializeStrItems(recv_res_buf, res);
+    utils::DeserializeStrItems(recv_res_buf, res, res_dup_cnt);
   }
 }
 

@@ -19,9 +19,6 @@
 #include <string>
 #include <vector>
 
-#include "boost/uuid/uuid.hpp"
-#include "boost/uuid/uuid_generators.hpp"
-#include "boost/uuid/uuid_io.hpp"
 #include "yacl/base/exception.h"
 #include "yacl/link/link.h"
 #include "yacl/utils/scope_guard.h"
@@ -32,6 +29,7 @@
 #include "psi/utils/index_store.h"
 #include "psi/utils/key.h"
 #include "psi/utils/progress.h"
+#include "psi/utils/random_str.h"
 
 #include "psi/proto/psi.pb.h"
 
@@ -66,8 +64,7 @@ size_t GenerateResult(const std::string& input_path,
                       const T& indices, bool sort_output, bool digest_equal,
                       bool output_difference = false) {
   // use tmp file to avoid `shell Injection`
-  boost::uuids::random_generator uuid_generator;
-  auto uuid_str = boost::uuids::to_string(uuid_generator());
+  auto uuid_str = GetRandomString();
   auto tmp_sort_in_file = std::filesystem::path(output_path)
                               .parent_path()
                               .append(fmt::format("tmp-sort-in-{}", uuid_str));

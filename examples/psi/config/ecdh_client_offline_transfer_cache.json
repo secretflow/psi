@@ -1,20 +1,20 @@
 {
-    "ub_psi_config": {
-        "mode": "MODE_OFFLINE_TRANSFER_CACHE",
-        "role": "ROLE_CLIENT",
-        "cache_path": "/tmp/client_cache"
-    },
-    "link_config": {
-        "parties": [
-            {
-                "id": "server",
-                "host": "127.0.0.1:5300"
-            },
-            {
-                "id": "client",
-                "host": "127.0.0.1:5400"
-            }
-        ]
-    },
-    "self_link_party": "client",
+  "ub_psi_config": {
+    "mode": "MODE_OFFLINE_TRANSFER_CACHE",
+    "role": "ROLE_CLIENT",
+    "cache_path": "/tmp/client_cache"
+  },
+  "link_config": {
+    "parties": [
+      {
+        "id": "server",
+        "host": "127.0.0.1:5300"
+      },
+      {
+        "id": "client",
+        "host": "127.0.0.1:5400"
+      }
+    ]
+  },
+  "self_link_party": "client"
 }

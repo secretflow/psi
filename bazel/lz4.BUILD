@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@psi//bazel:psi.bzl", "psi_cmake_external")
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -21,7 +21,7 @@ filegroup(
     srcs = glob(["**"]),
 )
 
-psi_cmake_external(
+cmake(
     name = "lz4",
     cache_entries = {
         "LZ4_BUILD_CLI": "OFF",
@@ -29,6 +29,7 @@ psi_cmake_external(
         "BUILD_STATIC_LIBS": "ON",
         "CMAKE_INSTALL_LIBDIR": "lib",
     },
+    generate_args = ["-GNinja"],
     lib_source = ":all_srcs",
     out_static_libs = [
         "liblz4.a",

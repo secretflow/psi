@@ -27,7 +27,7 @@
 #include "psi/cryptor/cryptor_selector.h"
 #include "psi/ecdh/ecdh_3pc_psi.h"
 #include "psi/legacy/dp_psi/dp_psi_utils.h"
-#include "psi/utils/batch_provider.h"
+#include "psi/utils/batch_provider_impl.h"
 #include "psi/utils/communication.h"
 #include "psi/utils/ec_point_store.h"
 #include "psi/utils/serialize.h"

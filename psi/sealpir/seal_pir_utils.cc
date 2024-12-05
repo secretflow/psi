@@ -55,7 +55,8 @@ void MemoryDbPlaintextStore::SavePlaintexts(
 
 std::vector<seal::Plaintext> MemoryDbPlaintextStore::ReadPlaintexts(
     size_t sub_db_index) {
-  return std::move(db_vec_[sub_db_index]);
+  // return std::move(db_vec_[sub_db_index]);
+  return db_vec_[sub_db_index];
 }
 
 }  // namespace psi::sealpir

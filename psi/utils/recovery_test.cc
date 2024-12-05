@@ -19,6 +19,7 @@
 #include <filesystem>
 #include <memory>
 
+#include "absl/strings/escaping.h"
 #include "gtest/gtest.h"
 
 #include "psi/cryptor/cryptor_selector.h"
@@ -48,14 +49,15 @@ TEST_F(RecoveryTest, Mark) {
   RecoveryManager mgr(tmp_dir_);
 
   v2::PsiConfig config;
-  mgr.MarkInitEnd(config, "input_hash_digest");
+  std::vector<uint8_t> input_hash_digest(32, 1);
+  mgr.MarkInitEnd(config, input_hash_digest);
 
   {
     v2::RecoveryCheckpoint pb =
         LoadRecoveryCheckpointFromFile(mgr.checkpoint_file_path());
 
     EXPECT_EQ(pb.stage(), v2::RecoveryCheckpoint::STAGE_INIT_END);
-    EXPECT_EQ(pb.input_hash_digest(), "input_hash_digest");
+    EXPECT_EQ(pb.input_hash_digest().size(), input_hash_digest.size());
   }
 
   std::shared_ptr<IEccCryptor> ecc_cryptor =
@@ -66,7 +68,7 @@ TEST_F(RecoveryTest, Mark) {
         LoadRecoveryCheckpointFromFile(mgr.checkpoint_file_path());
 
     EXPECT_EQ(pb.stage(), v2::RecoveryCheckpoint::STAGE_PRE_PROCESS_END);
-    EXPECT_EQ(pb.input_hash_digest(), "input_hash_digest");
+    EXPECT_EQ(pb.input_hash_digest().size(), input_hash_digest.size());
 
     EXPECT_TRUE(std::filesystem::exists(mgr.private_key_file_path()));
   }
@@ -77,7 +79,7 @@ TEST_F(RecoveryTest, Mark) {
         LoadRecoveryCheckpointFromFile(mgr.checkpoint_file_path());
 
     EXPECT_EQ(pb.stage(), v2::RecoveryCheckpoint::STAGE_ONLINE_START);
-    EXPECT_EQ(pb.input_hash_digest(), "input_hash_digest");
+    EXPECT_EQ(pb.input_hash_digest().size(), input_hash_digest.size());
   }
 
   mgr.UpdateEcdhDualMaskedItemSelfCount(100);
@@ -88,7 +90,7 @@ TEST_F(RecoveryTest, Mark) {
     EXPECT_EQ(pb.stage(), v2::RecoveryCheckpoint::STAGE_ONLINE_START);
     EXPECT_EQ(pb.ecdh_dual_masked_item_self_count(), 100);
     EXPECT_EQ(pb.ecdh_dual_masked_item_peer_count(), 0);
-    EXPECT_EQ(pb.input_hash_digest(), "input_hash_digest");
+    EXPECT_EQ(pb.input_hash_digest().size(), input_hash_digest.size());
   }
 
   mgr.UpdateEcdhDualMaskedItemPeerCount(150);
@@ -99,7 +101,7 @@ TEST_F(RecoveryTest, Mark) {
     EXPECT_EQ(pb.stage(), v2::RecoveryCheckpoint::STAGE_ONLINE_START);
     EXPECT_EQ(pb.ecdh_dual_masked_item_self_count(), 100);
     EXPECT_EQ(pb.ecdh_dual_masked_item_peer_count(), 150);
-    EXPECT_EQ(pb.input_hash_digest(), "input_hash_digest");
+    EXPECT_EQ(pb.input_hash_digest().size(), input_hash_digest.size());
   }
 
   mgr.MarkOnlineEnd();
@@ -110,7 +112,7 @@ TEST_F(RecoveryTest, Mark) {
     EXPECT_EQ(pb.stage(), v2::RecoveryCheckpoint::STAGE_ONLINE_END);
     EXPECT_EQ(pb.ecdh_dual_masked_item_self_count(), 100);
     EXPECT_EQ(pb.ecdh_dual_masked_item_peer_count(), 150);
-    EXPECT_EQ(pb.input_hash_digest(), "input_hash_digest");
+    EXPECT_EQ(pb.input_hash_digest().size(), input_hash_digest.size());
   }
 
   mgr.MarkPostProcessEnd();
@@ -121,7 +123,7 @@ TEST_F(RecoveryTest, Mark) {
     EXPECT_EQ(pb.stage(), v2::RecoveryCheckpoint::STAGE_POST_PROCESS_END);
     EXPECT_EQ(pb.ecdh_dual_masked_item_self_count(), 100);
     EXPECT_EQ(pb.ecdh_dual_masked_item_peer_count(), 150);
-    EXPECT_EQ(pb.input_hash_digest(), "input_hash_digest");
+    EXPECT_EQ(pb.input_hash_digest().size(), input_hash_digest.size());
   }
 }
 

@@ -127,6 +127,18 @@ message IoConfig {
   string path = 2;
 }
 
+message InputAttr {
+  // Keys in input file are unique.
+  // If not set, use default value: false.
+  bool keys_unique = 1;
+}
+
+message OutputAttr {
+  // Null representation in output csv file.
+  // If not set, use default value: "NULL".
+  string csv_null_rep = 1;
+}
+
 // Configuration for recovery.
 // If a PSI task failed unexpectedly, e.g. network failures and restart, the
 // task can resume to the latest checkpoint to save time.
@@ -366,6 +378,12 @@ message PsiConfig {
   // Check if hash digest of keys from parties are equal to determine whether to
   // early-stop.
   bool check_hash_digest = 14;
+
+  // Input attributes.
+  InputAttr input_attr = 15;
+
+  // Output attributes.
+  OutputAttr output_attr = 16;
 }
 
 // Save some critical information for future recovery.
@@ -391,7 +409,7 @@ message RecoveryCheckpoint {
   PsiConfig config = 2;
 
   // Hash digest of input keys.
-  string input_hash_digest = 3;
+  bytes input_hash_digest = 3;
 
   // Saved dual masked item count from self originally.
   // PROTOCOL_ECDH only.
@@ -476,4 +494,16 @@ message UbPsiConfig {
 
   // Logging level.
   DebugOptions debug_options = 11;
+
+  PsiConfig.AdvancedJoinType advanced_join_type = 12;
+
+  // Required if advanced_join_type is ADVANCED_JOIN_TYPE_LEFT_JOIN or
+  // ADVANCED_JOIN_TYPE_RIGHT_JOIN.
+  Role left_side = 13;
+
+  // Input attributes.
+  InputAttr input_attr = 14;
+
+  // Output attributes.
+  OutputAttr output_attr = 15;
 }

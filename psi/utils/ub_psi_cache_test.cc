@@ -20,9 +20,6 @@
 #include <utility>
 #include <vector>
 
-#include "boost/uuid/uuid.hpp"
-#include "boost/uuid/uuid_generators.hpp"
-#include "boost/uuid/uuid_io.hpp"
 #include "gtest/gtest.h"
 #include "yacl/crypto/rand/rand.h"
 #include "yacl/utils/scope_guard.h"
@@ -32,10 +29,7 @@ namespace psi {
 TEST(UbPsiCacheTest, Simple) {
   size_t data_len = 12;
 
-  boost::uuids::random_generator uuid_generator;
-  auto uuid_str = boost::uuids::to_string(uuid_generator());
-  auto tmp_file_path =
-      std::filesystem::path(fmt::format("tmp-cache-{}", uuid_str));
+  auto tmp_file_path = std::filesystem::path("tmp-cache-ub_psi");
 
   // register remove of temp file.
   ON_SCOPE_EXIT([&] {
@@ -50,7 +44,8 @@ TEST(UbPsiCacheTest, Simple) {
   std::vector<std::vector<uint8_t>> items;
 
   std::vector<std::string> selected_fields = {"id1", "id2"};
-  UbPsiCache cache(tmp_file_path.string(), data_len, selected_fields);
+  std::vector<uint8_t> priv_key(32, 0);
+  UbPsiCache cache(tmp_file_path.string(), data_len, selected_fields, priv_key);
 
   std::vector<uint8_t> rand_bytes = yacl::crypto::RandBytes(data_len);
   items.push_back(rand_bytes);
@@ -61,17 +56,14 @@ TEST(UbPsiCacheTest, Simple) {
   cache.SaveData(rand_bytes, 1, 11);
   cache.Flush();
 
-  UbPsiCacheProvider provider(tmp_file_path.string(), items.size() + 1,
-                              data_len);
+  UbPsiCacheProvider provider(tmp_file_path.string(), items.size() + 1);
 
   const std::vector<std::string>& read_fields = provider.GetSelectedFields();
   EXPECT_EQ(read_fields.size(), selected_fields.size());
 
-  std::vector<std::string> batch_data;
-  std::vector<size_t> batch_indices;
-  std::vector<size_t> shuffle_indices;
-  std::tie(batch_data, batch_indices, shuffle_indices) =
-      provider.ReadNextShuffledBatch();
+  auto shuffled_batch = provider.ReadNextShuffledBatch();
+  auto& batch_data = shuffled_batch.batch_items;
+  auto& batch_indices = shuffled_batch.batch_indices;
 
   EXPECT_EQ(batch_data.size(), items.size());
 

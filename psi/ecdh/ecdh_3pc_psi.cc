@@ -28,6 +28,7 @@
 #include "yacl/utils/serialize.h"
 
 #include "psi/cryptor/cryptor_selector.h"
+#include "psi/utils/batch_provider_impl.h"
 
 namespace psi::ecdh {
 

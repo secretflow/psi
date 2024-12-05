@@ -14,18 +14,19 @@
 
 #pragma once
 
-#include <cstddef>
+#include <sys/types.h>
+
+#include <filesystem>
 #include <memory>
 #include <string>
 
-#include "absl/status/status.h"
-#include "yacl/base/exception.h"
+#include "utils/batch_provider.h"
 #include "yacl/link/algorithm/barrier.h"
-#include "yacl/link/link.h"
 
-#include "psi/utils/advanced_join.h"
 #include "psi/utils/index_store.h"
+#include "psi/utils/join_processor.h"
 #include "psi/utils/recovery.h"
+#include "psi/utils/resource_manager.h"
 
 #include "psi/proto/psi_v2.pb.h"
 
@@ -78,6 +79,8 @@ class AbstractPsiParty {
   // Dependent to Protocol
   virtual void PostProcess() = 0;
 
+  std::filesystem::path GetTaskDir();
+
   // Including tasks independent to protocol:
   // - Compose output.
   // - Sort output.
@@ -102,9 +105,12 @@ class AbstractPsiParty {
 
   std::shared_ptr<RecoveryManager> recovery_manager_;
 
-  std::string key_hash_digest_;
+  std::shared_ptr<JoinProcessor> join_processor_;
+  std::vector<uint8_t> keys_hash_;
+  std::shared_ptr<KeyInfo> keys_info_;
+  std::shared_ptr<IBasicBatchProvider> batch_provider_;
 
-  std::shared_ptr<AdvancedJoinConfig> advanced_join_config_;
+  std::shared_ptr<DirResource> dir_resource_;
 
  private:
   void CheckPeerConfig();

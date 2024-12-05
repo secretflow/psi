@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@psi//bazel:psi.bzl", "psi_cmake_external")
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -21,7 +21,7 @@ filegroup(
     srcs = glob(["**"]),
 )
 
-psi_cmake_external(
+cmake(
     name = "jsoncpp",
     cache_entries = {
         "JSONCPP_WITH_TESTS": "OFF",
@@ -30,6 +30,7 @@ psi_cmake_external(
         "BUILD_OBJECT_LIBS": "OFF",
         "CMAKE_INSTALL_LIBDIR": "lib",
     },
+    generate_args = ["-GNinja"],
     env = {
         "CCACHE_DISABLE": "1",
     },

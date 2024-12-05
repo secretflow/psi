@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@psi//bazel:psi.bzl", "psi_cmake_external")
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -21,7 +21,7 @@ filegroup(
     srcs = glob(["**"]),
 )
 
-psi_cmake_external(
+cmake(
     name = "log4cplus",
     cache_entries = {
         "LOG4CPLUS_BUILD_TESTING": "OFF",
@@ -31,6 +31,7 @@ psi_cmake_external(
         "LOG4CPLUS_ENABLE_DECORATED_LIBRARY_NAME": "OFF",
         "CMAKE_INSTALL_LIBDIR": "lib",
     },
+    generate_args = ["-GNinja"],
     lib_source = "@com_github_log4cplus_log4cplus//:all",
     out_static_libs = ["liblog4cplus.a"],
 )

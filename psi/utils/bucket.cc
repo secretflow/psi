@@ -14,10 +14,23 @@
 
 #include "psi/utils/bucket.h"
 
+#include <cstdint>
+#include <unordered_map>
+
+#include "yacl/crypto/hash/hash_utils.h"
+
 #include "psi/prelude.h"
 #include "psi/utils/sync.h"
 
 namespace psi {
+
+void CalcBucketItemSecHash(std::vector<HashBucketCache::BucketItem>& items) {
+  yacl::parallel_for(0, items.size(), [&](int64_t begin, int64_t end) {
+    for (int64_t i = begin; i < end; ++i) {
+      items[i].sec_hash = yacl::crypto::Blake3_128(items[i].base64_data);
+    }
+  });
+}
 
 std::optional<std::vector<HashBucketCache::BucketItem>> PrepareBucketData(
     v2::Protocol protocol, size_t bucket_idx,
@@ -59,22 +72,28 @@ void HandleBucketResultBySender(
     IndexWriter* writer) {
   if (broadcast_result) {
     std::vector<std::string> result_list;
-    BroadcastResult(lctx, &result_list);
+    std::unordered_map<uint32_t, uint32_t> duplicate_item_cnt;
+
+    BroadcastResult(lctx, &result_list, &duplicate_item_cnt);
 
     if (result_list.empty()) {
       return;
     }
+    std::unordered_map<std::string, uint32_t> peer_result;
+    for (size_t i = 0; i != result_list.size(); ++i) {
+      peer_result[result_list[i]] = duplicate_item_cnt[i];
+    }
 
     if (result_list.size() == bucket_items_list.size()) {
       for (const auto& item : bucket_items_list) {
-        writer->WriteCache(item.index);
+        writer->WriteCache(item.index, peer_result[item.base64_data]);
       }
     } else {
       std::sort(result_list.begin(), result_list.end());
       for (const auto& item : bucket_items_list) {
-        if (std::binary_search(result_list.begin(), result_list.end(),
-                               item.base64_data)) {
-          writer->WriteCache(item.index);
+        auto iter = peer_result.find(item.base64_data);
+        if (iter != peer_result.end()) {
+          writer->WriteCache(item.index, iter->second);
         }
       }
     }
@@ -87,19 +106,31 @@ void HandleBucketResultByReceiver(
     bool broadcast_result, const std::shared_ptr<yacl::link::Context>& lctx,
     const std::vector<HashBucketCache::BucketItem>& result_list,
     IndexWriter* writer) {
+  std::vector<uint32_t> duplicate_item_cnt(result_list.size(), 0);
+  HandleBucketResultByReceiver(broadcast_result, lctx, result_list,
+                               duplicate_item_cnt, writer);
+}
+
+void HandleBucketResultByReceiver(
+    bool broadcast_result, const std::shared_ptr<yacl::link::Context>& lctx,
+    const std::vector<HashBucketCache::BucketItem>& result_list,
+    const std::vector<uint32_t>& peer_extra_dup_cnt, IndexWriter* writer) {
   if (broadcast_result) {
     std::vector<std::string> item_data_list;
     item_data_list.reserve(result_list.size());
-
-    for (const auto& item : result_list) {
-      item_data_list.emplace_back(item.base64_data);
+    std::unordered_map<uint32_t, uint32_t> duplicate_item_cnt;
+    for (size_t i = 0; i != result_list.size(); ++i) {
+      item_data_list.emplace_back(result_list[i].base64_data);
+      if (result_list[i].extra_dup_cnt > 0) {
+        duplicate_item_cnt[i] = result_list[i].extra_dup_cnt;
+      }
     }
 
-    BroadcastResult(lctx, &item_data_list);
+    BroadcastResult(lctx, &item_data_list, &duplicate_item_cnt);
   }
 
-  for (const auto& item : result_list) {
-    writer->WriteCache(item.index);
+  for (size_t i = 0; i < result_list.size(); ++i) {
+    writer->WriteCache(result_list[i].index, peer_extra_dup_cnt[i]);
   }
 
   writer->Commit();

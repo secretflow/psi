@@ -15,6 +15,7 @@
 #include "psi/utils/arrow_csv_batch_provider.h"
 
 #include <filesystem>
+#include <fstream>
 #include <memory>
 
 #include "gtest/gtest.h"

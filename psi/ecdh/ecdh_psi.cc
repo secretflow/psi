@@ -16,6 +16,9 @@
 
 #include <cstdint>
 #include <future>
+#include <memory>
+#include <string>
+#include <unordered_map>
 #include <utility>
 
 #include "spdlog/spdlog.h"
@@ -25,7 +28,7 @@
 #include "yacl/utils/serialize.h"
 
 #include "psi/cryptor/cryptor_selector.h"
-#include "psi/utils/batch_provider.h"
+#include "psi/utils/batch_provider_impl.h"
 
 namespace psi::ecdh {
 
@@ -66,8 +69,10 @@ void EcdhPsiContext::MaskSelf(
   bool read_next_batch = true;
 
   std::vector<std::string> batch_items;
+  std::unordered_map<uint32_t, uint32_t> duplicate_item_cnt;
   while (processed_item_cnt > 0) {
-    auto read_batch_items = batch_provider->ReadNextBatch();
+    auto [read_batch_items, item_cnt] =
+        batch_provider->ReadNextBatchWithDupCnt();
 
     if (read_batch_items.empty()) {
       YACL_ENFORCE_EQ(processed_item_cnt, 0U);
@@ -81,6 +86,11 @@ void EcdhPsiContext::MaskSelf(
           read_batch_items.begin() + processed_item_cnt,
           read_batch_items.end());
       processed_item_cnt = 0;
+      for (auto [index, cnt] : item_cnt) {
+        if (index >= processed_item_cnt) {
+          duplicate_item_cnt[index - processed_item_cnt] = cnt;
+        }
+      }
     }
   }
 
@@ -88,7 +98,8 @@ void EcdhPsiContext::MaskSelf(
     // NOTE: we still need to send one batch even there is no data.
     // This dummy batch is used to notify peer the end of data stream.
     if (read_next_batch) {
-      batch_items = batch_provider->ReadNextBatch();
+      std::tie(batch_items, duplicate_item_cnt) =
+          batch_provider->ReadNextBatchWithDupCnt();
     } else {
       read_next_batch = true;
     }
@@ -101,7 +112,15 @@ void EcdhPsiContext::MaskSelf(
 
     // Send x^a.
     const auto tag = fmt::format("ECDHPSI:X^A:{}", batch_count);
-    SendBatch(masked_items, batch_count, tag);
+    if (PeerCanTouchResults()) {
+      if (!duplicate_item_cnt.empty()) {
+        SPDLOG_INFO("send extra item cnt: {}", duplicate_item_cnt.size());
+      }
+      SendBatch(masked_items, duplicate_item_cnt, batch_count, tag);
+    } else {
+      SendBatch(masked_items, batch_count, tag);
+    }
+
     if (batch_items.empty()) {
       SPDLOG_INFO("MaskSelf:{} --finished, batch_count={}, self_item_count={}",
                   Id(), batch_count, item_count);
@@ -136,17 +155,22 @@ void EcdhPsiContext::MaskPeer(
     // Fetch y^b.
     std::vector<std::string> peer_items;
     std::vector<std::string> dual_masked_peers;
+    std::unordered_map<uint32_t, uint32_t> duplicate_item_cnt;
     const auto tag = fmt::format("ECDHPSI:Y^B:{}", batch_count);
-    RecvBatch(&peer_items, batch_count, tag);
+    RecvBatch(&peer_items, &duplicate_item_cnt, batch_count, tag);
+    if (!duplicate_item_cnt.empty()) {
+      SPDLOG_INFO("recv extra item cnt: {}", duplicate_item_cnt.size());
+    }
+
     auto peer_points = options_.ecc_cryptor->DeserializeEcPoints(peer_items);
 
     // Compute (y^b)^a.
     if (!peer_items.empty()) {
       // TODO: avoid mem copy
-      for (const auto& masked_point :
-           options_.ecc_cryptor->EccMask(peer_points)) {
+      const auto& masked_points = options_.ecc_cryptor->EccMask(peer_points);
+      for (uint32_t i = 0; i != peer_points.size(); ++i) {
         const auto masked =
-            options_.ecc_cryptor->SerializeEcPoint(masked_point);
+            options_.ecc_cryptor->SerializeEcPoint(masked_points[i]);
         // In the final comparison, we only send & compare `kFinalCompareBytes`
         // number of bytes.
         std::string cipher(
@@ -154,7 +178,7 @@ void EcdhPsiContext::MaskPeer(
             options_.dual_mask_size);
         if (SelfCanTouchResults()) {
           // Store cipher of peer items for later intersection compute.
-          peer_ec_point_store->Save(cipher);
+          peer_ec_point_store->Save(cipher, duplicate_item_cnt[i]);
         }
         dual_masked_peers.emplace_back(std::move(cipher));
       }
@@ -168,18 +192,27 @@ void EcdhPsiContext::MaskPeer(
       }
     }
 
+    auto target_rank_str = [&, this]() {
+      return options_.target_rank == yacl::link::kAllRank
+                 ? "all"
+                 : std::to_string(options_.target_rank);
+    };
+
     // Should send out the dual masked items to peer.
     if (PeerCanTouchResults()) {
       if (batch_count == 0) {
-        SPDLOG_INFO("SendDualMaskedItems to peer: {} begin...",
-                    options_.target_rank);
+        SPDLOG_INFO("SendDualMaskedItems to peer: {}, batch={}, begin...",
+                    target_rank_str(), batch_count);
       }
       const auto tag = fmt::format("ECDHPSI:Y^B^A:{}", batch_count);
       // call non-block to avoid blocking each other with MaskSelf
       SendDualMaskedBatchNonBlock(dual_masked_peers, batch_count, tag);
+      SPDLOG_INFO("SendDualMaskedItems to peer: {}, batch={}, end...",
+                  target_rank_str(), batch_count);
       if (dual_masked_peers.empty()) {
-        SPDLOG_INFO("SendDualMaskedItems to peer: {} finished, batch_count={}",
-                    options_.target_rank, batch_count);
+        SPDLOG_INFO(
+            "SendDualMaskedItems to peer: {}, batch_count={}, finished.",
+            target_rank_str(), batch_count);
       }
     }
 
@@ -225,9 +258,9 @@ void EcdhPsiContext::RecvDualMaskedSelf(
                                 options_.ecc_cryptor->GetPrivateKey(),
                                 item_count, masked_items);
     }
-    for (auto& item : masked_items) {
-      self_ec_point_store->Save(std::move(item));
-    }
+
+    self_ec_point_store->Save(masked_items);
+
     if (masked_items.empty()) {
       SPDLOG_INFO(
           "RecvDualMaskedSelf:{} recv last batch finished, batch_count={}",
@@ -254,8 +287,10 @@ void EcdhPsiContext::RecvDualMaskedSelf(
 namespace {
 
 template <typename T>
-PsiDataBatch BatchData(const std::vector<T>& batch_items, std::string_view type,
-                       int32_t batch_idx) {
+PsiDataBatch BatchData(
+    const std::vector<T>& batch_items,
+    const std::unordered_map<uint32_t, uint32_t>& duplicate_item_cnt,
+    std::string_view type, int32_t batch_idx) {
   PsiDataBatch batch;
   batch.is_last_batch = batch_items.empty();
   batch.item_num = batch_items.size();
@@ -266,8 +301,29 @@ PsiDataBatch BatchData(const std::vector<T>& batch_items, std::string_view type,
     for (const auto& item : batch_items) {
       batch.flatten_bytes.append(item);
     }
+    for (const auto& [idx, cnt] : duplicate_item_cnt) {
+      batch.duplicate_item_cnt[idx] = cnt;
+    }
   }
   return batch;
+}
+
+template <typename T>
+PsiDataBatch BatchData(const std::vector<T>& batch_items, std::string_view type,
+                       int32_t batch_idx) {
+  return BatchData(batch_items, std::unordered_map<uint32_t, uint32_t>(), type,
+                   batch_idx);
+}
+
+template <typename T>
+void SendBatchImpl(
+    const std::vector<T>& batch_items,
+    const std::unordered_map<uint32_t, uint32_t>& duplicate_item_cnt,
+    const std::shared_ptr<yacl::link::Context>& link_ctx, std::string_view type,
+    int32_t batch_idx, std::string_view tag) {
+  auto batch = BatchData<T>(batch_items, duplicate_item_cnt, type, batch_idx);
+  // TODO(huocun) : fix interconnection protocol
+  link_ctx->SendAsyncThrottled(link_ctx->NextRank(), batch.Serialize(), tag);
 }
 
 template <typename T>
@@ -275,27 +331,35 @@ void SendBatchImpl(const std::vector<T>& batch_items,
                    const std::shared_ptr<yacl::link::Context>& link_ctx,
                    std::string_view type, int32_t batch_idx,
                    std::string_view tag) {
-  auto batch = BatchData<T>(batch_items, type, batch_idx);
-  link_ctx->SendAsyncThrottled(
-      link_ctx->NextRank(), IcPsiBatchSerializer::Serialize(std::move(batch)),
-      tag);
+  SendBatchImpl(batch_items, std::unordered_map<uint32_t, uint32_t>(), link_ctx,
+                type, batch_idx, tag);
 }
 
+template <typename T>
+void SendBatchNonBlockImpl(
+    const std::vector<T>& batch_items,
+    const std::unordered_map<uint32_t, uint32_t>& duplicate_item_cnt,
+    const std::shared_ptr<yacl::link::Context>& link_ctx, std::string_view type,
+    int32_t batch_idx, std::string_view tag) {
+  auto batch = BatchData<T>(batch_items, duplicate_item_cnt, type, batch_idx);
+  // TODO(huocun) : fix interconnection protocol
+  link_ctx->SendAsync(link_ctx->NextRank(), batch.Serialize(), tag);
+}
 template <typename T>
 void SendBatchNonBlockImpl(const std::vector<T>& batch_items,
                            const std::shared_ptr<yacl::link::Context>& link_ctx,
                            std::string_view type, int32_t batch_idx,
                            std::string_view tag) {
-  auto batch = BatchData<T>(batch_items, type, batch_idx);
-  link_ctx->SendAsync(link_ctx->NextRank(),
-                      IcPsiBatchSerializer::Serialize(std::move(batch)), tag);
+  SendBatchNonBlockImpl(batch_items, std::unordered_map<uint32_t, uint32_t>(),
+                        link_ctx, type, batch_idx, tag);
 }
 
 void RecvBatchImpl(const std::shared_ptr<yacl::link::Context>& link_ctx,
                    int32_t batch_idx, std::string_view tag,
                    std::vector<std::string>* items) {
-  PsiDataBatch batch = IcPsiBatchSerializer::Deserialize(
-      link_ctx->Recv(link_ctx->NextRank(), tag));
+  // FIXME(huocun) : fix interconnection protocol
+  PsiDataBatch batch =
+      PsiDataBatch::Deserialize(link_ctx->Recv(link_ctx->NextRank(), tag));
 
   YACL_ENFORCE(batch.batch_index == batch_idx, "Expected batch {}, but got {} ",
                batch_idx, batch.batch_index);
@@ -308,18 +372,60 @@ void RecvBatchImpl(const std::shared_ptr<yacl::link::Context>& link_ctx,
   }
 }
 
+void RecvBatchImpl(const std::shared_ptr<yacl::link::Context>& link_ctx,
+                   int32_t batch_idx, std::string_view tag,
+                   std::vector<std::string>& items,
+                   std::unordered_map<uint32_t, uint32_t>& duplicate_item_cnt) {
+  // TODO(huocun) : fix interconnection protocol
+  PsiDataBatch batch =
+      PsiDataBatch::Deserialize(link_ctx->Recv(link_ctx->NextRank(), tag));
+
+  YACL_ENFORCE(batch.batch_index == batch_idx, "Expected batch {}, but got {} ",
+               batch_idx, batch.batch_index);
+
+  if (batch.item_num > 0) {
+    auto item_size = batch.flatten_bytes.size() / batch.item_num;
+    for (size_t i = 0; i < batch.item_num; ++i) {
+      items.emplace_back(batch.flatten_bytes.substr(i * item_size, item_size));
+    }
+    for (const auto& [idx, cnt] : batch.duplicate_item_cnt) {
+      duplicate_item_cnt[idx] = cnt;
+    }
+  }
+}
+
 };  // namespace
 
+void EcdhPsiContext::SendBatch(
+    const std::vector<std::string>& batch_items,
+    const std::unordered_map<uint32_t, uint32_t>& duplicate_item_cnt,
+    int32_t batch_idx, std::string_view tag) {
+  SendBatchImpl(batch_items, duplicate_item_cnt, main_link_ctx_, "enc",
+                batch_idx, tag);
+}
 void EcdhPsiContext::SendBatch(const std::vector<std::string>& batch_items,
                                int32_t batch_idx, std::string_view tag) {
   SendBatchImpl(batch_items, main_link_ctx_, "enc", batch_idx, tag);
 }
 
+void EcdhPsiContext::SendBatch(
+    const std::vector<std::string_view>& batch_items,
+    const std::unordered_map<uint32_t, uint32_t>& duplicate_item_cnt,
+    int32_t batch_idx, std::string_view tag) {
+  SendBatchImpl(batch_items, duplicate_item_cnt, main_link_ctx_, "enc",
+                batch_idx, tag);
+}
 void EcdhPsiContext::SendBatch(const std::vector<std::string_view>& batch_items,
                                int32_t batch_idx, std::string_view tag) {
   SendBatchImpl(batch_items, main_link_ctx_, "enc", batch_idx, tag);
 }
 
+void EcdhPsiContext::RecvBatch(
+    std::vector<std::string>* items,
+    std::unordered_map<uint32_t, uint32_t>* duplicate_item_cnt,
+    int32_t batch_idx, std::string_view tag) {
+  RecvBatchImpl(main_link_ctx_, batch_idx, tag, *items, *duplicate_item_cnt);
+}
 void EcdhPsiContext::RecvBatch(std::vector<std::string>* items,
                                int32_t batch_idx, std::string_view tag) {
   RecvBatchImpl(main_link_ctx_, batch_idx, tag, items);

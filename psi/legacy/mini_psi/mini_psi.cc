@@ -38,7 +38,7 @@ extern "C" {
 #include "yacl/utils/parallel.h"
 
 #include "psi/legacy/mini_psi/polynomial.h"
-#include "psi/utils/batch_provider.h"
+#include "psi/utils/batch_provider_impl.h"
 #include "psi/utils/communication.h"
 #include "psi/utils/cuckoo_index.h"
 #include "psi/utils/serialize.h"

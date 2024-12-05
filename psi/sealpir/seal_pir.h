@@ -23,6 +23,7 @@
 #include "seal/util/polyarithsmallmod.h"
 #include "yacl/base/byte_container_view.h"
 
+#include "psi/kwpir/index_pir.h"
 #include "psi/sealpir/seal_pir_utils.h"
 
 #include "psi/sealpir/serializable.pb.h"
@@ -142,19 +143,22 @@ class SealPir {
   std::unique_ptr<seal::BatchEncoder> encoder_;
 };
 
-class SealPirServer : public SealPir {
+class SealPirServer : public SealPir, public psi::kwpir::IndexPirServer {
  public:
   SealPirServer(const SealPirOptions &options,
                 std::shared_ptr<IDbPlaintextStore> plaintext_store);
+  ~SealPirServer() override = default;
 
-  void SetDatabase(const std::shared_ptr<IDbElementProvider> &db_provider);
-  void SetDatabase(const std::vector<yacl::ByteContainerView> &db_vec);
+  void SetDatabaseByProvider(
+      const std::shared_ptr<IDbElementProvider> &db_provider);
+  void SetDatabase(const std::vector<yacl::ByteContainerView> &db_vec) override;
 
   std::vector<seal::Ciphertext> ExpandQuery(const seal::Ciphertext &encrypted,
                                             uint64_t m, uint32_t client_id);
 
   PirReply GenerateReply(const PirQuery &query, uint32_t start_pos,
                          uint32_t client_id);
+  yacl::Buffer GenerateIndexReply(const yacl::Buffer &query_buffer) override;
 
   void SetGaloisKey(uint32_t client_id, seal::GaloisKeys galkey);
 
@@ -176,13 +180,18 @@ class SealPirServer : public SealPir {
                         seal::Ciphertext &destination, uint32_t index);
 };
 
-class SealPirClient : public SealPir {
+class SealPirClient : public SealPir, public psi::kwpir::IndexPirClient {
  public:
   SealPirClient(const SealPirOptions &options);
+  ~SealPirClient() override = default;
   PirQuery GenerateQuery(uint64_t index);
+  yacl::Buffer GenerateIndexQuery(uint64_t ele_index,
+                                  uint64_t &offset) override;
 
   seal::Plaintext DecodeReply(PirReply &reply);
   std::vector<uint8_t> DecodeReply(PirReply &reply, uint64_t offset);
+  std::vector<uint8_t> DecodeIndexReply(const yacl::Buffer &reply_buffer,
+                                        uint64_t offset) override;
 
   seal::GaloisKeys GenerateGaloisKeys();
 

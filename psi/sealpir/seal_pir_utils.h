@@ -53,7 +53,7 @@ class IDbPlaintextStore {
 
 class MemoryDbElementProvider : public IDbElementProvider {
  public:
-  explicit MemoryDbElementProvider(const std::vector<uint8_t>& items,
+  explicit MemoryDbElementProvider(std::vector<uint8_t> items,
                                    size_t element_size)
       : items_(std::move(items)), element_size_(element_size) {}
 

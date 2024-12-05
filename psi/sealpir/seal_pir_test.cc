@@ -77,10 +77,11 @@ TEST_P(SealPirTest, Works) {
     }
   }
   shared_ptr<IDbElementProvider> db_provider =
-      make_shared<MemoryDbElementProvider>(db_data, params.size_per_item);
+      make_shared<MemoryDbElementProvider>(std::move(db_data),
+                                           params.size_per_item);
 
   // Measure database setup
-  server.SetDatabase(db_provider);
+  server.SetDatabaseByProvider(db_provider);
   SPDLOG_INFO("Main: database pre processed ");
 
   // Set galois key for client with id 0
@@ -96,6 +97,7 @@ TEST_P(SealPirTest, Works) {
   }
 
   uint64_t ele_index = rd() % num_of_items;  // element in DB at random position
+
   uint64_t query_index = ele_index;
   size_t start_pos = 0;
   if (params.ind_degree > 0) {
@@ -113,19 +115,14 @@ TEST_P(SealPirTest, Works) {
 
   vector<uint8_t> elems;
   if (isSerialized) {
-    yacl::Buffer query_buffer =
-        client.SerializeQuery(client.GenerateQuery(index), start_pos);
-    SealPirQueryProto query_proto;
-    query_proto.ParseFromArray(query_buffer.data(), query_buffer.size());
+    uint64_t offset;
+    yacl::Buffer query_buffer = client.GenerateIndexQuery(ele_index, offset);
     SPDLOG_INFO("Main: query generated");
 
-    SealPir::PirQuery query = server.DeSerializeQuery(query_proto);
-    yacl::Buffer reply_buffer = server.SerializeCiphertexts(
-        server.GenerateReply(query, query_proto.start_pos(), 0));
+    yacl::Buffer reply_buffer = server.GenerateIndexReply(query_buffer);
     SPDLOG_INFO("Main: reply generated");
 
-    SealPir::PirReply reply = client.DeSerializeCiphertexts(reply_buffer);
-    elems = client.DecodeReply(reply, offset);
+    elems = client.DecodeIndexReply(reply_buffer, offset);
     SPDLOG_INFO("Main: reply decoded");
   } else {
     SealPir::PirQuery query = client.GenerateQuery(index);
@@ -141,10 +138,7 @@ TEST_P(SealPirTest, Works) {
   EXPECT_EQ(elems.size(), size_per_item);
 
   // Check that we retrieved the correct element
-  EXPECT_EQ(elems,
-            std::vector<uint8_t>(
-                db_data.begin() + ele_index * size_per_item,
-                db_data.begin() + ele_index * size_per_item + size_per_item));
+  EXPECT_EQ(elems, db_provider->ReadElement(ele_index * size_per_item));
   SPDLOG_INFO("Main: PIR result correct!");
 }
 

@@ -25,6 +25,8 @@ namespace psi {
 
 class IndexStoreTest : public ::testing::Test {
  protected:
+  void SetUp() override { std::filesystem::remove(index_store_path_); }
+
   void TearDown() override { std::filesystem::remove(index_store_path_); }
 
   std::filesystem::path index_store_path_ =
@@ -93,7 +95,7 @@ TEST_F(IndexStoreTest, Works) {
   }
 
   {
-    IndexReader reader(index_store_path_);
+    FileIndexReader reader(index_store_path_);
 
     uint64_t idx = 0;
 
@@ -115,17 +117,34 @@ TEST_F(IndexStoreTest, Works) {
 }
 
 TEST_F(IndexStoreTest, Empty) {
-  {
-    IndexWriter writer(index_store_path_);
-  }
+  { IndexWriter writer(index_store_path_); }
 
   {
-    IndexReader reader(index_store_path_);
+    FileIndexReader reader(index_store_path_);
     EXPECT_FALSE(reader.HasNext());
     EXPECT_FALSE(reader.HasNext());
     EXPECT_FALSE(reader.GetNext().has_value());
     EXPECT_FALSE(reader.HasNext());
   }
+}
+
+TEST(MemoryIndexStoreTest, Memory) {
+  std::vector<uint32_t> index;
+  index.resize(10);
+  std::iota(index.begin(), index.end(), 0);
+  std::vector<uint32_t> dup_cnt(10);
+
+  MemoryIndexReader reader(index, dup_cnt);
+  auto batch = reader.GetNextWithPeerCnt();
+  EXPECT_TRUE(batch.has_value());
+  auto value = batch.value();
+  EXPECT_EQ(value.first, 0);
+  EXPECT_EQ(value.second, 0);
+  batch = reader.GetNextWithPeerCnt();
+  EXPECT_TRUE(batch.has_value());
+  value = batch.value();
+  EXPECT_EQ(value.first, 1);
+  EXPECT_EQ(value.second, 0);
 }
 
 }  // namespace psi

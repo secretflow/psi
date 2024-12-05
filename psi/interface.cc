@@ -18,50 +18,26 @@
 #include <cstddef>
 #include <filesystem>
 
-#include "absl/time/time.h"
-#include "boost/uuid/uuid.hpp"
-#include "boost/uuid/uuid_generators.hpp"
-#include "boost/uuid/uuid_io.hpp"
 #include "google/protobuf/util/message_differencer.h"
 #include "spdlog/spdlog.h"
+#include "utils/index_store.h"
+#include "utils/join_processor.h"
+#include "utils/recovery.h"
+#include "utils/resource_manager.h"
 #include "yacl/base/exception.h"
 #include "yacl/link/link.h"
 
 #include "psi/legacy/bucket_psi.h"
 #include "psi/prelude.h"
 #include "psi/trace_categories.h"
-#include "psi/utils/advanced_join.h"
-#include "psi/utils/csv_checker.h"
+#include "psi/utils/bucket.h"
 #include "psi/utils/key.h"
+#include "psi/utils/random_str.h"
 #include "psi/utils/sync.h"
 
 #include "psi/proto/psi_v2.pb.h"
 
 namespace psi {
-
-namespace {
-
-std::string GenerateIndexFileName(v2::Role role = v2::ROLE_UNSPECIFIED) {
-  if (role) {
-    return fmt::format("psi_index_{}.csv", role);
-  } else {
-    boost::uuids::random_generator uuid_generator;
-    return fmt::format("psi_index_{}.csv",
-                       boost::uuids::to_string(uuid_generator()));
-  }
-}
-
-std::string GenerateSortedIndexFileName(v2::Role role = v2::ROLE_UNSPECIFIED) {
-  if (role) {
-    return fmt::format("sorted_psi_index_{}.csv", role);
-  } else {
-    boost::uuids::random_generator uuid_generator;
-    return fmt::format("sorted_psi_index_{}.csv",
-                       boost::uuids::to_string(uuid_generator()));
-  }
-}
-
-}  // namespace
 
 constexpr size_t kIndexWriterBatchSize = 1 << 10;
 
@@ -71,6 +47,22 @@ AbstractPsiParty::AbstractPsiParty(const v2::PsiConfig &config, v2::Role role,
       role_(role),
       selected_keys_(config_.keys().begin(), config_.keys().end()),
       lctx_(std::move(lctx)) {}
+
+std::filesystem::path AbstractPsiParty::GetTaskDir() {
+  if (config_.recovery_config().enabled()) {
+    if (recovery_manager_ == nullptr) {
+      recovery_manager_ =
+          std::make_shared<RecoveryManager>(config_.recovery_config().folder());
+    }
+    return config_.recovery_config().folder();
+  } else {
+    if (dir_resource_ == nullptr) {
+      dir_resource_ = ResourceManager::GetInstance().AddDirResouce(
+          std::filesystem::temp_directory_path() / GetRandomString());
+    }
+    return dir_resource_->Path();
+  }
+}
 
 void AbstractPsiParty::Init() {
   TRACE_EVENT("init", "AbstractPsiParty::Init");
@@ -85,86 +77,38 @@ void AbstractPsiParty::Init() {
 
   CheckPeerConfig();
 
-  if (config_.advanced_join_type() !=
-      v2::PsiConfig::ADVANCED_JOIN_TYPE_UNSPECIFIED) {
-    SPDLOG_INFO("[AbstractPsiParty::Init][Advanced join pre-process] start");
+  join_processor_ = JoinProcessor::Make(config_, GetTaskDir());
 
-    if (config_.recovery_config().enabled()) {
-      advanced_join_config_ =
-          std::make_shared<AdvancedJoinConfig>(BuildAdvancedJoinConfig(
-              config_,
-              std::filesystem::path(config_.recovery_config().folder())));
-    } else {
-      advanced_join_config_ = std::make_shared<AdvancedJoinConfig>(
-          BuildAdvancedJoinConfig(config_));
-    }
+  auto preprocess_f = std::async([&] {
+    SPDLOG_INFO("[AbstractPsiParty::Init][Check csv pre-process] start");
 
-    config_.mutable_input_config()->set_path(
-        advanced_join_config_->unique_input_keys_cnt_path);
-    config_.mutable_output_config()->set_path(
-        advanced_join_config_->self_intersection_cnt_path);
+    // TODO(huocun): construct batch provider according to input_attr field
+    keys_info_ = join_processor_->GetUniqueKeysInfo();
+    keys_hash_ = keys_info_->KeysHash();
+    report_.set_original_count(keys_info_->OriginCnt());
+    report_.set_original_key_count(keys_info_->KeyCnt());
 
-    auto advanced_join_preprocess_f = std::async(
-        [&] { AdvancedJoinPreprocess(advanced_join_config_.get()); });
-
-    SyncWait(lctx_, &advanced_join_preprocess_f);
-
-    SPDLOG_INFO("[AbstractPsiParty::Init][Advanced join pre-process] end");
-  }
-
-  if (config_.recovery_config().enabled()) {
-    recovery_manager_ =
-        std::make_shared<RecoveryManager>(config_.recovery_config().folder());
-  }
-
-  bool check_duplicates = !config_.skip_duplicates_check();
-  if (check_duplicates && recovery_manager_) {
-    if (recovery_manager_->checkpoint().stage() >=
-        v2::RecoveryCheckpoint::STAGE_INIT_END) {
-      SPDLOG_WARN(
-          "A previous recovery checkpoint is found, duplicates check is "
-          "skipped.");
-      check_duplicates = false;
-    }
-  }
-
-  CheckCsvReport check_csv_report;
-  auto check_csv_f = std::async([&] {
-    if (check_duplicates || config_.check_hash_digest() ||
-        config_.protocol_config().protocol() != v2::PROTOCOL_ECDH) {
-      SPDLOG_INFO("[AbstractPsiParty::Init][Check csv pre-process] start");
-
-      check_csv_report =
-          CheckCsv(config_.input_config().path(), selected_keys_,
-                   check_duplicates, config_.check_hash_digest());
-
-      key_hash_digest_ = check_csv_report.key_hash_digest;
-      report_.set_original_count(check_csv_report.num_rows);
-
-      SPDLOG_INFO("[AbstractPsiParty::Init][Check csv pre-process] end");
-    }
+    batch_provider_ = keys_info_->GetKeysProviderWithDupCnt();
+    SPDLOG_INFO("[AbstractPsiParty::Init][Check csv pre-process] end");
   });
+  SyncWait(lctx_, &preprocess_f);
 
-  SyncWait(lctx_, &check_csv_f);
-
-  YACL_ENFORCE(
-      !check_csv_report.contains_duplicates,
-      "Input file {} contains duplicates, please check duplicates at {}",
-      config_.input_config().path(),
-      check_csv_report.duplicates_keys_file_path);
+  if (!config_.skip_duplicates_check()) {
+    YACL_ENFORCE(keys_info_->DupKeyCnt() == 0,
+                 "input file {} contains duplicates keys",
+                 config_.input_config().path());
+  }
 
   // Check if the input are the same between receiver and sender.
   if (config_.check_hash_digest()) {
-    std::vector<yacl::Buffer> digest_buf_list =
-        yacl::link::AllGather(lctx_, key_hash_digest_, "PSI:SYNC_DIGEST");
+    std::vector<yacl::Buffer> digest_buf_list = yacl::link::AllGather(
+        lctx_, {keys_hash_.data(), keys_hash_.size()}, "PSI:SYNC_DIGEST");
     digest_equal_ = HashListEqualTest(digest_buf_list);
   }
 
   std::filesystem::path intersection_indices_writer_path =
-      recovery_manager_
-          ? std::filesystem::path(config_.recovery_config().folder()) /
-                GenerateIndexFileName(role_)
-          : std::filesystem::temp_directory_path() / GenerateIndexFileName();
+      GetTaskDir() /
+      fmt::format("intersection_indices_{}.csv", v2::Role_Name(role_));
 
   intersection_indices_writer_ = std::make_shared<IndexWriter>(
       intersection_indices_writer_path, kIndexWriterBatchSize,
@@ -172,12 +116,28 @@ void AbstractPsiParty::Init() {
 
   if (digest_equal_) {
     SPDLOG_WARN("The keys between two parties share the same set.");
-    for (int64_t i = 0; i < report_.original_count(); i++) {
+    // FIXME(huocun): This is broken now.
+    for (int64_t i = 0; i < report_.original_key_count(); i++) {
       if (intersection_indices_writer_->WriteCache(i) ==
           kIndexWriterBatchSize) {
         intersection_indices_writer_->Commit();
       }
     }
+  }
+
+  if (config_.protocol_config().protocol() == v2::Protocol::PROTOCOL_KKRT &&
+      config_.protocol_config().kkrt_config().bucket_size() == 0) {
+    config_.mutable_protocol_config()->mutable_kkrt_config()->set_bucket_size(
+        kDefaultBucketSize);
+  }
+  if (config_.protocol_config().protocol() == v2::Protocol::PROTOCOL_RR22 &&
+      config_.protocol_config().rr22_config().bucket_size() == 0) {
+    config_.mutable_protocol_config()->mutable_rr22_config()->set_bucket_size(
+        kDefaultBucketSize);
+  }
+
+  if (recovery_manager_) {
+    recovery_manager_->MarkInitEnd(config_, keys_hash_);
   }
   SPDLOG_INFO("[AbstractPsiParty::Init] end");
 }
@@ -189,14 +149,8 @@ PsiResultReport AbstractPsiParty::Finalize() {
   intersection_indices_writer_->Close();
 
   std::filesystem::path sorted_intersection_indices_path =
-      intersection_indices_writer_->path().parent_path() /
-      (recovery_manager_ ? GenerateSortedIndexFileName(role_)
-                         : GenerateSortedIndexFileName());
-
-  bool sort_output = !config_.disable_alignment();
-  if (advanced_join_config_) {
-    sort_output = false;
-  }
+      GetTaskDir() /
+      fmt::format("sorted_intersection_indices_{}.csv", v2::Role_Name(role_));
 
   SPDLOG_INFO("[AbstractPsiParty::Finalize][Generate result] start");
   auto gen_result_f = std::async([&] {
@@ -206,44 +160,31 @@ PsiResultReport AbstractPsiParty::Finalize() {
 
     if (role_ == v2::ROLE_RECEIVER ||
         config_.protocol_config().broadcast_result()) {
-      report_.set_intersection_count(GenerateResult(
-          config_.input_config().path(), config_.output_config().path(),
-          selected_keys_, sorted_intersection_indices_path, sort_output,
-          digest_equal_, false));
+      FileIndexReader index_reader(sorted_intersection_indices_path);
+      auto stat = join_processor_->DealResultIndex(index_reader);
+      SPDLOG_INFO("Join stat: {}", stat.ToString());
+
+      if (config_.protocol_config().broadcast_result()) {
+        std::vector<size_t> items_size =
+            AllGatherItemsSize(lctx_, stat.original_count);
+        join_processor_->GenerateResult(items_size[lctx_->NextRank()] -
+                                        stat.peer_intersection_count);
+        SPDLOG_INFO("Peer table line: {}", items_size[lctx_->NextRank()]);
+      } else {
+        join_processor_->GenerateResult(0);
+      }
+
+      report_.set_intersection_count(stat.self_intersection_count);
+      report_.set_intersection_key_count(stat.inter_unique_cnt);
     }
   });
 
   SyncWait(lctx_, &gen_result_f);
   SPDLOG_INFO("[AbstractPsiParty::Finalize][Generate result] end");
 
-  if (advanced_join_config_) {
-    SPDLOG_INFO("[AbstractPsiParty::Finalize][Advanced join sync] start");
-    auto sync_intersection_f = std::async(
-        [&] { return AdvancedJoinSync(lctx_, advanced_join_config_.get()); });
-
-    SyncWait(lctx_, &sync_intersection_f);
-    SPDLOG_INFO("[AbstractPsiParty::Finalize][Advanced join sync] end");
-
-    SPDLOG_INFO(
-        "[AbstractPsiParty::Finalize][Advanced join generate result] start");
-    AdvancedJoinGenerateResult(*advanced_join_config_);
-    SPDLOG_INFO(
-        "[AbstractPsiParty::Finalize][Advanced join generate result] end");
-
-    report_.set_intersection_count(
-        advanced_join_config_->self_intersection_cnt);
-  } else {
-    if (role_ == v2::ROLE_SENDER &&
-        !config_.protocol_config().broadcast_result()) {
-      report_.set_intersection_count(-1);
-    }
-  }
-
-  // remove result indices records.
-  if (!recovery_manager_) {
-    std::error_code ec;
-    std::filesystem::remove(sorted_intersection_indices_path, ec);
-    std::filesystem::remove(intersection_indices_writer_->path(), ec);
+  if (role_ == v2::ROLE_SENDER &&
+      !config_.protocol_config().broadcast_result()) {
+    report_.set_intersection_count(-1);
   }
 
   SPDLOG_INFO("[AbstractPsiParty::Finalize] end");
@@ -276,21 +217,7 @@ void AbstractPsiParty::CheckSelfConfig() {
 
   std::set<std::string> keys_set(config_.keys().begin(), config_.keys().end());
   YACL_ENFORCE_EQ(static_cast<int>(keys_set.size()), config_.keys().size(),
-                  "Duplicated key is provided.");
-
-  if (!config_.protocol_config().broadcast_result() &&
-      config_.advanced_join_type() !=
-          v2::PsiConfig::ADVANCED_JOIN_TYPE_UNSPECIFIED) {
-    SPDLOG_WARN(
-        "broadcast_result turns off while advanced join is enabled. "
-        "broadcast_result is modified to true since intersection has to be "
-        "sent to both parties.");
-
-    YACL_ENFORCE(!config_.output_config().path().empty(),
-                 "You have to provide path of output.");
-
-    config_.mutable_protocol_config()->set_broadcast_result(true);
-  }
+                  "Duplicated key is not allowed.");
 
   if (!config_.skip_duplicates_check() &&
       config_.advanced_join_type() !=
@@ -321,6 +248,7 @@ void AbstractPsiParty::CheckPeerConfig() {
   config.mutable_debug_options()->Clear();
   config.set_skip_duplicates_check(false);
   config.set_disable_alignment(false);
+  config.mutable_input_attr()->set_keys_unique(false);
 
   // Recovery must be enabled by all parties at the same time.
   config.mutable_recovery_config()->set_folder("");

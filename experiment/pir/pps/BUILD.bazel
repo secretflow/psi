@@ -34,9 +34,9 @@ psi_cc_library(
     deps = [
         ":ggm_pset",
         "@yacl//yacl/base:dynamic_bitset",
+        "@yacl//yacl/base:exception",
         "@yacl//yacl/crypto/rand",
         "@yacl//yacl/crypto/tools:prg",
-        "@yacl//yacl/base:exception",
     ],
 )
 

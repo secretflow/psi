@@ -21,6 +21,7 @@
 #include <utility>
 #include <vector>
 
+#include "spdlog/spdlog.h"
 #include "yacl/base/byte_container_view.h"
 
 #include "psi/utils/batch_provider.h"
@@ -90,8 +91,14 @@ class UbPsiCache : public IUbPsiCache {
              std::vector<uint8_t> private_key);
 
   ~UbPsiCache() {
-    Flush();
-    out_stream_->Close();
+    try {
+      Flush();
+      if (out_stream_) {
+        out_stream_->Close();
+      }
+    } catch (const std::exception& e) {
+      SPDLOG_ERROR("UbPsiCache flush failed: {}", e.what());
+    }
   }
 
   void SaveData(yacl::ByteContainerView item, size_t index,

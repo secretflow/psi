@@ -52,6 +52,7 @@ uint32_t ComputeExpansionRatio(seal::EncryptionParameters params) {
     double logqi = log2(params.coeff_modulus()[i].value());
     expansion_ratio += ceil(logqi / logt);
   }
+  YACL_ENFORCE(expansion_ratio > 0, "expansion_ratio must be greater than 0");
   return expansion_ratio;
 }
 uint64_t CoefficientsPerElement(uint32_t logt, uint64_t ele_size) {
@@ -169,7 +170,7 @@ vector<seal::Plaintext> DecomposeToPlaintexts(seal::EncryptionParameters params,
   const auto N = params.poly_modulus_degree();
   const auto coeff_mod_count = params.coeff_modulus().size();
   const uint32_t logt = log2(params.plain_modulus().value());
-  const uint64_t pt_bitmask = (1 << logt) - 1;
+  const uint64_t pt_bitmask = (1ULL << logt) - 1;
 
   vector<seal::Plaintext> result(ComputeExpansionRatio(params) * ct.size());
   auto pt_iter = result.begin();
@@ -750,7 +751,7 @@ inline vector<Ciphertext> SealPirServer::ExpandQuery(
 
   for (uint32_t i = 0; i < logm - 1; ++i) {
     vector<Ciphertext> new_tmp(tmp.size() << 1);
-    int index_raw = (N << 1) - (1 << i);
+    int index_raw = (N << 1) - (1ULL << i);
     int index = (index_raw + N) % (N << 1);
     // int index = (index_raw * galelts[i]) % (N << 1);
 
@@ -768,13 +769,13 @@ inline vector<Ciphertext> SealPirServer::ExpandQuery(
   }
 
   vector<Ciphertext> new_tmp(tmp.size() << 1);
-  int index_raw = (N << 1) - (1 << (logm - 1));
+  int index_raw = (N << 1) - (1ULL << (logm - 1));
   int index = (index_raw + N) % (N << 1);
   // int index = (index_raw * galelts[logm - 1]) % (N << 1);
   Plaintext two("2");
 
   for (uint32_t j = 0; j < tmp.size(); ++j) {
-    if (j < (m - (1 << (logm - 1)))) {
+    if (j < (m - (1ULL << (logm - 1)))) {
       evaluator_->apply_galois(tmp[j], galelts[logm - 1], galkey,
                                tmpctxt_rotated);
       evaluator_->add(tmp[j], tmpctxt_rotated, new_tmp[j]);

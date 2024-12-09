@@ -22,7 +22,7 @@
 
 namespace pir::pps {
 std::array<std::byte, 16> Uint128_to_bytes(PIRKey sk) {
-  std::array<std::byte, 16> bytes;
+  std::array<std::byte, 16> bytes{};
   uint64_t high = static_cast<uint64_t>(sk >> 64);
   uint64_t low = static_cast<uint64_t>(sk & 0xFFFFFFFFFFFFFFFF);
   std::memcpy(bytes.data(), &high, sizeof(high));

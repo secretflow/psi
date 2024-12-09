@@ -16,6 +16,7 @@ import docker
 import json
 import csv
 import sys
+import os
 import time
 from datetime import datetime
 
@@ -40,7 +41,7 @@ def stream_container_stats(container_name, output_file):
                 data = json.loads(stats)
                 running_time_s = int(time.time()) - start_unix_time
                 cpu_percent = ((data['cpu_stats']['cpu_usage']['total_usage'] - prev_cpu_total) /
-                           (data['cpu_stats']['system_cpu_usage'] - prev_cpu_system)) * 100
+                           (data['cpu_stats']['system_cpu_usage'] - prev_cpu_system)) * 100 * os.cpu_count()
                 mem_usage = (data['memory_stats']['usage'] - data['memory_stats']['stats']['inactive_file']) / 1024 / 1024
                 mem_limit = data['memory_stats']['limit'] / 1024 / 1024
                 net_tx = 0

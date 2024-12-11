@@ -257,13 +257,18 @@ class Rr22Runner {
       futures[i] = std::async(
           std::launch::async,
           [&](size_t thread_idx) {
+            std::shared_ptr<yacl::link::Context> spawn_read_lctx =
+                read_lctx_->Spawn(std::to_string(thread_idx));
+            std::shared_ptr<yacl::link::Context> spawn_run_lctx =
+                run_lctx_->Spawn(std::to_string(thread_idx));
+            std::shared_ptr<yacl::link::Context> spawn_intersection_lctx =
+                intersection_lctx_->Spawn(std::to_string(thread_idx));
             for (size_t j = 0; j < bucket_num_; j++) {
               if (j % parallel_num == thread_idx) {
                 auto runner = CreateBucketRunner(j, is_sender);
-                runner->Prepare(read_lctx_->Spawn(std::to_string(thread_idx)));
-                runner->RunOprf(run_lctx_->Spawn(std::to_string(thread_idx)));
-                runner->GetIntersection(
-                    intersection_lctx_->Spawn(std::to_string(thread_idx)));
+                runner->Prepare(spawn_read_lctx);
+                runner->RunOprf(spawn_run_lctx);
+                runner->GetIntersection(spawn_intersection_lctx);
               }
             }
           },

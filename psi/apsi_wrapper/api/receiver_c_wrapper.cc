@@ -36,7 +36,7 @@ Receiver* BucketReceiverMake(size_t bucket_cnt, size_t thread_count) {
 }
 
 void BucketReceiverFree(Receiver** receiver) {
-  if (receiver != nullptr || *receiver == nullptr) {
+  if (receiver == nullptr || *receiver == nullptr) {
     return;
   }
   (void)std::unique_ptr<ApiReceiver>(reinterpret_cast<ApiReceiver*>(*receiver));

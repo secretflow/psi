@@ -15,6 +15,7 @@
 #include "client.h"
 
 #include <spdlog/spdlog.h>
+
 #include "yacl/base/exception.h"
 
 namespace pir::pps {
@@ -103,19 +104,18 @@ void PpsPirClient::Setup(std::vector<PIRKeyUnion>& ck,
 
   size_t i = 0;
   while (i < MM() && count < max_try_count) {
-    count+=1;
+    count += 1;
     auto rand = yacl::crypto::RandU128();
     pps_.Eval(rand, v[i]);
     if (v[i].size() == set_size_) {
       ck[i] = PIRKeyUnion(rand);
-    }else {
+    } else {
       v[i].clear();
       continue;
     }
     ++i;
   }
   YACL_ENFORCE(count < max_try_count);
-
 }
 
 void PpsPirClient::Query(uint64_t i, std::vector<PIRKeyUnion>& ck,

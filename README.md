@@ -166,7 +166,7 @@ Install gcc>=11.2, cmake>=3.26, ninja, nasm>=2.15, python>=3.8, bazel, golang, x
 ```
 
 > **Note**<br>
-Please install bazel with version in .bazelversion or use bazelisk.
+Please install bazel with version in .bazeliskrc or use bazelisk.
 
 ### Build & UnitTest
 

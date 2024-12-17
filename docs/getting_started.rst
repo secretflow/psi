@@ -152,7 +152,7 @@ You need to install:
 * xxd
 * lld
 
-For bazel, please check version in `.bazelversion <https://github.com/secretflow/psi/blob/main/.bazelversion>`_ or use bazelisk instead.
+For bazel, please check version in `.bazeliskrc <https://github.com/secretflow/psi/blob/main/.bazeliskrc>`_ or use bazelisk instead.
 
 Build & UnitTest
 ^^^^^^^^^^^^^^^^

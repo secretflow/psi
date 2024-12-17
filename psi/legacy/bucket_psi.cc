@@ -34,11 +34,10 @@
 #include "yacl/crypto/rand/rand.h"
 #include "yacl/utils/serialize.h"
 
+#include "psi/algorithm/ecdh/ecdh_psi.h"
 #include "psi/cryptor/cryptor_selector.h"
-#include "psi/ecdh/ecdh_psi.h"
 #include "psi/prelude.h"
 #include "psi/utils/arrow_csv_batch_provider.h"
-#include "psi/utils/csv_header_analyzer.h"
 #include "psi/utils/ec_point_store.h"
 #include "psi/utils/io.h"
 #include "psi/utils/serialize.h"
@@ -406,66 +405,11 @@ std::vector<uint64_t> BucketPsi::RunPsi(std::shared_ptr<Progress>& progress,
   SPDLOG_INFO("Run psi protocol={}, self_items_count={}", config_.psi_type(),
               self_items_count);
 
-  if (config_.psi_type() == PsiType::ECDH_PSI_2PC) {
-    ecdh::EcdhPsiOptions psi_options;
-    if (config_.curve_type() == CurveType::CURVE_INVALID_TYPE) {
-      YACL_THROW("Unsupported curve type");
-    }
-    psi_options.ecc_cryptor = CreateEccCryptor(config_.curve_type());
-    psi_options.link_ctx = lctx_;
-    psi_options.target_rank = static_cast<size_t>(config_.receiver_rank());
-    if (config_.broadcast_result()) {
-      psi_options.target_rank = yacl::link::kAllRank;
-    }
-    psi_options.ic_mode = ic_mode_;
-
-    auto batch_provider = std::make_shared<ArrowCsvBatchProvider>(
-        config_.input_params().path(), selected_fields_,
-        psi_options.batch_size);
-    auto self_ec_point_store = std::make_shared<HashBucketEcPointStore>(
-        std::filesystem::path(config_.output_params().path()).parent_path(),
-        64);
-
-    auto peer_ec_point_store = std::make_shared<HashBucketEcPointStore>(
-        std::filesystem::path(config_.output_params().path()).parent_path(),
-        64);
-
-    // Hook progress->
-    if (progress) {
-      psi_options.on_batch_finished = [progress, self_items_count,
-                                       psi_options](size_t batch_count) {
-        size_t last_percent = progress->Get().percentage;
-
-        size_t completed = batch_count * psi_options.batch_size;
-        size_t total = std::max<size_t>(1, self_items_count);
-        size_t curr_percent = 100 * completed / total;
-        progress->Update(curr_percent);
-
-        // Log something.
-        constexpr size_t kLogEveryNPercent = 5;
-        if (curr_percent != last_percent &&
-            curr_percent % kLogEveryNPercent == 0) {
-          SPDLOG_INFO("ECDH progress {}%", curr_percent);
-        }
-      };
-    }
-
-    // Launch ECDH-PSI core.
-    ecdh::RunEcdhPsi(psi_options, batch_provider, self_ec_point_store,
-                     peer_ec_point_store);
-
-    std::vector<uint64_t> results;
-    results =
-        FinalizeAndComputeIndices(self_ec_point_store, peer_ec_point_store);
-
-    return results;
-  } else if ((config_.psi_type() == PsiType::ECDH_OPRF_UB_PSI_2PC_GEN_CACHE) ||
-             (config_.psi_type() ==
-              PsiType::ECDH_OPRF_UB_PSI_2PC_TRANSFER_CACHE) ||
-             (config_.psi_type() ==
-              PsiType::ECDH_OPRF_UB_PSI_2PC_SHUFFLE_ONLINE) ||
-             (config_.psi_type() == PsiType::ECDH_OPRF_UB_PSI_2PC_OFFLINE) ||
-             (config_.psi_type() == PsiType::ECDH_OPRF_UB_PSI_2PC_ONLINE)) {
+  if ((config_.psi_type() == PsiType::ECDH_OPRF_UB_PSI_2PC_GEN_CACHE) ||
+      (config_.psi_type() == PsiType::ECDH_OPRF_UB_PSI_2PC_TRANSFER_CACHE) ||
+      (config_.psi_type() == PsiType::ECDH_OPRF_UB_PSI_2PC_SHUFFLE_ONLINE) ||
+      (config_.psi_type() == PsiType::ECDH_OPRF_UB_PSI_2PC_OFFLINE) ||
+      (config_.psi_type() == PsiType::ECDH_OPRF_UB_PSI_2PC_ONLINE)) {
     YACL_THROW(
         "not support, please use new interface UbPsiConfig in psi_v2.proto.");
   } else {

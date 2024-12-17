@@ -30,10 +30,10 @@ cmake(
         "BUILD_OBJECT_LIBS": "OFF",
         "CMAKE_INSTALL_LIBDIR": "lib",
     },
-    generate_args = ["-GNinja"],
     env = {
         "CCACHE_DISABLE": "1",
     },
+    generate_args = ["-GNinja"],
     lib_source = "@com_github_open_source_parsers_jsoncpp//:all",
     out_static_libs = ["libjsoncpp.a"],
 )

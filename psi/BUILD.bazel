@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library", "psi_cc_test")
+load("//bazel:psi.bzl", "psi_cc_library")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -41,39 +41,9 @@ psi_cc_library(
         "//psi/utils:recovery",
         "//psi/utils:resource_manager",
         "//psi/utils:table_utils",
-        "@com_github_google_perfetto//:perfetto",
-        "@com_google_absl//absl/status",
+        "@abseil-cpp//absl/status",
+        "@perfetto",
         "@yacl//yacl/link",
-    ],
-)
-
-psi_cc_library(
-    name = "factory",
-    srcs = ["factory.cc"],
-    hdrs = ["factory.h"],
-    deps = [
-        "//psi/ecdh:receiver",
-        "//psi/ecdh:sender",
-        "//psi/ecdh/ub_psi:client",
-        "//psi/ecdh/ub_psi:server",
-        "//psi/kkrt:receiver",
-        "//psi/kkrt:sender",
-        "//psi/rr22:receiver",
-        "//psi/rr22:sender",
-        "@yacl//yacl/base:exception",
-    ],
-)
-
-psi_cc_library(
-    name = "launch",
-    srcs = ["launch.cc"],
-    hdrs = ["launch.h"],
-    deps = [
-        ":factory",
-        ":trace_categories",
-        "//psi/apsi_wrapper/cli:entry",
-        "//psi/legacy:bucket_psi",
-        "@boost//:algorithm",
     ],
 )
 
@@ -82,59 +52,11 @@ psi_cc_library(
     srcs = ["trace_categories.cc"],
     hdrs = ["trace_categories.h"],
     deps = [
-        "@com_github_google_perfetto//:perfetto",
-    ],
-)
-
-psi_cc_test(
-    name = "psi_test",
-    srcs = ["psi_test.cc"],
-    flaky = True,
-    deps = [
-        ":factory",
-        "//psi/utils:arrow_csv_batch_provider",
-        "@yacl//yacl/utils:scope_guard",
+        "@perfetto",
     ],
 )
 
 psi_cc_library(
     name = "version",
     hdrs = ["version.h"],
-)
-
-psi_cc_library(
-    name = "kuscia_adapter",
-    srcs = [
-        "kuscia_adapter.cc",
-    ],
-    hdrs = [
-        "kuscia_adapter.h",
-    ],
-    deps = [
-        "//psi/proto:entry_cc_proto",
-        "//psi/proto:kuscia_cc_proto",
-        "@com_github_tencent_rapidjson//:rapidjson",
-        "@yacl//yacl/base:exception",
-    ],
-)
-
-psi_cc_test(
-    name = "kuscia_adapter_test",
-    srcs = ["kuscia_adapter_test.cc"],
-    deps = [
-        ":kuscia_adapter",
-    ],
-)
-
-psi_cc_binary(
-    name = "main",
-    srcs = ["main.cc"],
-    deps = [
-        ":kuscia_adapter",
-        ":version",
-        "//psi:launch",
-        "//psi/proto:entry_cc_proto",
-        "//psi/utils:resource_manager",
-        "@com_github_gflags_gflags//:gflags",
-    ],
 )

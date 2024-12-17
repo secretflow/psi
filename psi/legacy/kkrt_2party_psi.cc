@@ -19,7 +19,7 @@
 #include "yacl/crypto/hash/hash_utils.h"
 #include "yacl/utils/parallel.h"
 
-#include "psi/kkrt/kkrt_psi.h"
+#include "psi/algorithm/kkrt/kkrt_psi.h"
 #include "psi/legacy/factory.h"
 
 namespace psi {

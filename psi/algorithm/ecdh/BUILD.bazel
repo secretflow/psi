@@ -1,0 +1,116 @@
+# Copyright 2022 Ant Group Co., Ltd.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library", "psi_cc_test")
+
+package(default_visibility = ["//visibility:public"])
+
+psi_cc_library(
+    name = "ecdh_psi",
+    srcs = ["ecdh_psi.cc"],
+    hdrs = ["ecdh_psi.h"],
+    deps = [
+        ":ecdh_logger",
+        "//psi/cryptor:cryptor_selector",
+        "//psi/utils:batch_provider_impl",
+        "//psi/utils:communication",
+        "//psi/utils:ec_point_store",
+        "//psi/utils:recovery",
+        "@abseil-cpp//absl/strings",
+        "@yacl//yacl/link",
+        "@yacl//yacl/utils:parallel",
+    ],
+)
+
+psi_cc_test(
+    name = "ecdh_psi_test",
+    srcs = ["ecdh_psi_test.cc"],
+    deps = [
+        ":ecdh_psi",
+        "//psi/utils:test_utils",
+    ],
+)
+
+psi_cc_binary(
+    name = "ecdh_psi_benchmark",
+    srcs = ["ecdh_psi_benchmark.cc"],
+    deps = [
+        ":ecdh_psi",
+        "@com_github_google_benchmark//:benchmark_main",
+    ],
+)
+
+psi_cc_library(
+    name = "ecdh_3pc_psi",
+    srcs = ["ecdh_3pc_psi.cc"],
+    hdrs = ["ecdh_3pc_psi.h"],
+    deps = [
+        ":ecdh_psi",
+    ],
+)
+
+psi_cc_test(
+    name = "ecdh_3pc_psi_test",
+    srcs = ["ecdh_3pc_psi_test.cc"],
+    deps = [
+        ":ecdh_3pc_psi",
+        "//psi/utils:test_utils",
+    ],
+)
+
+psi_cc_binary(
+    name = "ecdh_3pc_psi_benchmark",
+    srcs = ["ecdh_3pc_psi_benchmark.cc"],
+    deps = [
+        ":ecdh_3pc_psi",
+        "//psi/utils:test_utils",
+        "@com_github_google_benchmark//:benchmark_main",
+    ],
+)
+
+psi_cc_library(
+    name = "ecdh_logger",
+    hdrs = ["ecdh_logger.h"],
+    deps = [
+        "//psi/cryptor:ecc_cryptor",
+        "@yacl//yacl/base:exception",
+    ],
+)
+
+psi_cc_library(
+    name = "common",
+    hdrs = ["common.h"],
+)
+
+psi_cc_library(
+    name = "receiver",
+    srcs = ["receiver.cc"],
+    hdrs = ["receiver.h"],
+    deps = [
+        ":common",
+        "//psi:interface",
+        "//psi/utils:arrow_csv_batch_provider",
+    ],
+)
+
+psi_cc_library(
+    name = "sender",
+    srcs = ["sender.cc"],
+    hdrs = ["sender.h"],
+    deps = [
+        ":common",
+        "//psi:interface",
+        "//psi/utils:arrow_csv_batch_provider",
+    ],
+)

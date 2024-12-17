@@ -21,7 +21,9 @@ import os
 def plot_cpu(docker_csv_path, output_path):
     df1 = pd.read_csv(docker_csv_path)
 
-    plt.plot(df1["running_time_s"], df1["cpu_percent"], marker="o", linestyle="-", color="b")
+    plt.plot(
+        df1["running_time_s"], df1["cpu_percent"], marker="o", linestyle="-", color="b"
+    )
     max_time_count = 10
     interval = 1
     if len(df1) > max_time_count:
@@ -44,10 +46,13 @@ def plot_cpu(docker_csv_path, output_path):
     plt.savefig(output_path)
     plt.clf()
 
+
 def plot_mem(docker_csv_path, output_path):
     df1 = pd.read_csv(docker_csv_path)
 
-    plt.plot(df1["running_time_s"], df1["mem_usage_MB"], marker="o", linestyle="-", color="b")
+    plt.plot(
+        df1["running_time_s"], df1["mem_usage_MB"], marker="o", linestyle="-", color="b"
+    )
     max_time_count = 10
     interval = 1
     if len(df1) > max_time_count:
@@ -70,11 +75,16 @@ def plot_mem(docker_csv_path, output_path):
     plt.savefig(output_path)
     plt.clf()
 
+
 def plot_net(docker_csv_path, output_path):
     df1 = pd.read_csv(docker_csv_path)
 
-    plt.plot(df1["running_time_s"], df1["net_tx_kb"], marker="o", linestyle="-", color="b")
-    plt.plot(df1["running_time_s"], df1["net_rx_kb"], marker="*", linestyle="-", color="y")
+    plt.plot(
+        df1["running_time_s"], df1["net_tx_kb"], marker="o", linestyle="-", color="b"
+    )
+    plt.plot(
+        df1["running_time_s"], df1["net_rx_kb"], marker="*", linestyle="-", color="y"
+    )
     max_time_count = 10
     interval = 1
     if len(df1) > max_time_count:

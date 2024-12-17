@@ -149,17 +149,8 @@ TEST_P(MemoryTaskPsiTest, BroadcastFalse) {
 INSTANTIATE_TEST_SUITE_P(
     Works_Instances, MemoryTaskPsiTest,
     testing::Values(
-        MemoryTaskTestParams{{0, 3}, 0, PsiType::ECDH_PSI_2PC},        //
-        MemoryTaskTestParams{{3, 0}, 0, PsiType::KKRT_PSI_2PC},        //
-        MemoryTaskTestParams{{0, 0}, 0, PsiType::KKRT_PSI_2PC},        //
         MemoryTaskTestParams{{4, 3, 0}, 0, PsiType::ECDH_PSI_3PC},     //
         MemoryTaskTestParams{{4, 3, 0, 6}, 0, PsiType::ECDH_PSI_NPC},  //
-
-        //
-        MemoryTaskTestParams{{20, 20}, 10, PsiType::KKRT_PSI_2PC},  //
-        MemoryTaskTestParams{{20, 17}, 10, PsiType::KKRT_PSI_2PC},  //
-        MemoryTaskTestParams{{17, 20}, 10, PsiType::KKRT_PSI_2PC},  //
-        MemoryTaskTestParams{{33, 45}, 20, PsiType::ECDH_PSI_2PC},  //
 
         MemoryTaskTestParams{{20, 17, 14}, 10, PsiType::ECDH_PSI_3PC},      //
         MemoryTaskTestParams{{20, 17, 14, 30}, 10, PsiType::ECDH_PSI_NPC},  //
@@ -190,8 +181,6 @@ TEST_P(MemoryTaskPsiTestFailedTest, FailedWorks) {
 INSTANTIATE_TEST_SUITE_P(FailedWorks_Instances, MemoryTaskPsiTestFailedTest,
                          testing::Values(
                              // invalid link world size
-                             FailedTestParams{3, 0, PsiType::KKRT_PSI_2PC},
-                             FailedTestParams{4, 0, PsiType::ECDH_PSI_2PC},
                              FailedTestParams{2, 0, PsiType::ECDH_PSI_3PC},
                              // invalid receiver_rank
                              FailedTestParams{3, 4, PsiType::ECDH_PSI_3PC},

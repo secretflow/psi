@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 
-#include "psi/ecdh/ecdh_3pc_psi.h"
+#include "psi/algorithm/ecdh/ecdh_3pc_psi.h"
 #include "psi/legacy/base_operator.h"
 
 namespace psi {

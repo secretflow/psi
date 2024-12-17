@@ -47,9 +47,9 @@ If you want to try a similar CLI like APSI, you could compile the source code by
 
 .. code-block::
 
-    bazel build psi/apsi_wrapper/cli:receiver
+    bazel build psi/wrapper/apsi/cli:receiver
 
-    bazel build psi/apsi_wrapper/cli:sender
+    bazel build psi/wrapper/apsi/cli:sender
 
 
 And run CLI like
@@ -57,9 +57,9 @@ And run CLI like
 
 .. code-block::
 
-    ./bazel-bin/psi/apsi_wrapper/cli/sender
+    ./bazel-bin/psi/wrapper/apsi/cli/sender
 
-    ./bazel-bin/psi/apsi_wrapper/cli/receiver
+    ./bazel-bin/psi/wrapper/apsi/cli/receiver
 
 
 Prepare data and config

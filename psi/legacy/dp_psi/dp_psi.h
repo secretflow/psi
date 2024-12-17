@@ -23,7 +23,7 @@
 #include "spdlog/spdlog.h"
 #include "yacl/link/link.h"
 
-#include "psi/ecdh/ecdh_psi.h"
+#include "psi/algorithm/ecdh/ecdh_psi.h"
 
 namespace psi::dp_psi {
 

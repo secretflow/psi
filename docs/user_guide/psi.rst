@@ -7,9 +7,9 @@ Quick start with Private Set Intersection (PSI) V1 APIs.
 Supported Protocols
 ----------------------
 
-The :psi_code_host:`ECDH-PSI </blob/master/psi/ecdh/ecdh_psi.h>` is favorable if the bandwidth is the bottleneck.
+The :psi_code_host:`ECDH-PSI </blob/master/psi/algorithm/ecdh/ecdh_psi.h>` is favorable if the bandwidth is the bottleneck.
 If the computing is the bottleneck, you should try the BaRK-OPRF based
-PSI :psi_code_host:`KKRT-PSI </blob/master/psi/kkrt/kkrt_psi.h>`.
+PSI :psi_code_host:`KKRT-PSI </blob/master/psi/algorithm/kkrt/kkrt_psi.h>`.
 
 +---------------+--------------+--------------+--------------+
 | PSI protocols | Threat Model | Party Number |  PsiTypeCode |
@@ -97,7 +97,7 @@ benchmark result without data load time
 ECDH PSI Benchmark
 >>>>>>>>>>>>>>>>>>
 
-:psi_code_host:`DH-PSI benchmark code <blob/main/psi/ecdh/ecdh_psi_benchmark.cc>`
+:psi_code_host:`DH-PSI benchmark code <blob/main/psi/algorithm/ecdh/ecdh_psi_benchmark.cc>`
 
 cpu limited by docker(--cpu)
 

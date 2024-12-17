@@ -20,7 +20,7 @@
 #include "spdlog/spdlog.h"
 #include "yacl/base/exception.h"
 
-#include "psi/utils/csv_header_parser.h"
+#include "psi/utils/arrow_helper.h"
 #include "psi/utils/io.h"
 
 namespace psi {
@@ -39,7 +39,8 @@ namespace psi {
 void MultiKeySort(const std::string& in_csv, const std::string& out_csv,
                   const std::vector<std::string>& keys, bool numeric_sort,
                   bool unique) {
-  CsvHeaderParser parser(in_csv);
+  auto csv_reader = MakeCsvReader(in_csv);
+  auto schema = csv_reader->schema();
 
   std::string line;
   {
@@ -58,9 +59,12 @@ void MultiKeySort(const std::string& in_csv, const std::string& out_csv,
   }
 
   // Construct sort key indices.
-  // NOTE: `sort` cmd starts from index 1.
   std::vector<std::string> sort_keys;
-  for (size_t index : parser.target_indices(keys, 1)) {
+  for (auto key : keys) {
+    auto index = schema->GetFieldIndex(key);
+    YACL_ENFORCE(index >= 0, "field {} is not found in {}", key, in_csv);
+    // NOTE: `sort` cmd starts from index 1.
+    auto sort_index = index + 1;
     // About `sort --key=KEYDEF`
     //
     // KEYDEF is F[.C][OPTS][,F[.C][OPTS]] for start and stop position, where
@@ -74,7 +78,7 @@ void MultiKeySort(const std::string& in_csv, const std::string& out_csv,
     //
     // I have already verified `sort --key=3,3 --key=1,1` will firstly sort by
     // 3rd field and then 1st field.
-    sort_keys.push_back(fmt::format("--key={},{}", index, index));
+    sort_keys.push_back(fmt::format("--key={},{}", sort_index, sort_index));
   }
   YACL_ENFORCE(sort_keys.size() == keys.size(),
                "mismatched header, field_names={}, line={}",

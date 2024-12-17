@@ -15,6 +15,8 @@
 #pragma once
 
 #include <cstddef>
+#include <future>
+#include <mutex>
 #include <string>
 
 #include "arrow/csv/api.h"
@@ -32,6 +34,8 @@ class ArrowCsvBatchProvider : public IBasicBatchProvider,
                                  size_t batch_size = 1 << 20,
                                  const std::vector<std::string>& labels = {});
 
+  ~ArrowCsvBatchProvider() override;
+
   std::vector<std::string> ReadNextBatch() override;
 
   std::pair<std::vector<std::string>, std::vector<std::string>>
@@ -44,8 +48,12 @@ class ArrowCsvBatchProvider : public IBasicBatchProvider,
  private:
   void Init();
 
-  void ReadNextBatch(std::vector<std::string>* read_keys,
-                     std::vector<std::string>* read_labels = nullptr);
+  void ReadBatch(std::vector<std::string>* read_keys,
+                 std::vector<std::string>* read_labels = nullptr);
+
+  void ReadAsync();
+
+  std::pair<std::vector<std::string>, std::vector<std::string>> GetBuffer();
 
   const size_t batch_size_;
 
@@ -55,16 +63,18 @@ class ArrowCsvBatchProvider : public IBasicBatchProvider,
 
   const std::vector<std::string> labels_;
 
-  size_t row_cnt_ = 0;
-
   std::shared_ptr<arrow::io::ReadableFile> infile_;
 
   std::shared_ptr<arrow::csv::StreamingReader> reader_;
 
-  std::shared_ptr<arrow::RecordBatch> batch_;
+  std::future<std::pair<std::vector<std::string>, std::vector<std::string>>>
+      buffer_future_;
 
+  std::mutex buffer_mutex_;
+  bool reach_eof_ = false;
   int64_t idx_in_batch_ = 0;
-
+  std::shared_ptr<arrow::RecordBatch> buffer_batch_;
+  size_t row_cnt_ = 0;
   std::vector<std::shared_ptr<arrow::StringArray>> arrays_;
 };
 

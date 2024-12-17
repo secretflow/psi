@@ -30,7 +30,7 @@ cmake(
         "CMAKE_INSTALL_LIBDIR": "lib",
     },
     generate_args = ["-GNinja"],
-    lib_source = "@com_github_microsoft_kuku//:all",
+    lib_source = "@kuku//:all",
     out_include_dir = "include/Kuku-2.1",
     out_static_libs = ["libkuku-2.1.a"],
     deps = ["@com_github_microsoft_gsl//:Microsoft.GSL"],

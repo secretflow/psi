@@ -27,7 +27,6 @@
 #include <vector>
 
 #include "psi/utils/batch_provider.h"
-#include "psi/utils/csv_header_analyzer.h"
 #include "psi/utils/io.h"
 
 namespace psi {
@@ -61,29 +60,6 @@ class MemoryBatchProvider : public IBasicBatchProvider,
   const std::vector<std::string>& labels_;
   std::vector<size_t> buffer_shuffled_indices_;
   size_t cursor_index_ = 0;
-};
-
-class CsvBatchProvider : public IBasicBatchProvider,
-                         public ILabeledBatchProvider {
- public:
-  CsvBatchProvider(const std::string& path,
-                   const std::vector<std::string>& item_fields,
-                   size_t batch_size,
-                   const std::vector<std::string>& label_fields = {});
-
-  std::vector<std::string> ReadNextBatch() override;
-
-  std::pair<std::vector<std::string>, std::vector<std::string>>
-  ReadNextLabeledBatch() override;
-
-  [[nodiscard]] size_t batch_size() const override { return batch_size_; }
-
- private:
-  const size_t batch_size_;
-  const std::string path_;
-  std::unique_ptr<io::InputStream> in_;
-  CsvHeaderAnalyzer item_analyzer_;
-  std::unique_ptr<CsvHeaderAnalyzer> label_analyzer_;
 };
 
 // NOTE(junfeng):

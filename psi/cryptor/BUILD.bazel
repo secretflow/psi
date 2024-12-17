@@ -22,7 +22,7 @@ psi_cc_library(
     hdrs = ["ecc_cryptor.h"],
     deps = [
         "//psi/proto:psi_cc_proto",
-        "@com_google_absl//absl/types:span",
+        "@abseil-cpp//absl/types:span",
         "@yacl//yacl/base:exception",
         "@yacl//yacl/crypto/ecc",
         "@yacl//yacl/utils:parallel",
@@ -52,8 +52,8 @@ psi_cc_library(
     deps = [
         ":ecc_cryptor",
         ":hash_to_curve_elligator2",
-        "@com_github_intel_ipp//:ipp",
-        "@com_github_openssl_openssl//:openssl",
+        "@ippcp//:ipp",
+        "@openssl",
         "@yacl//yacl/base:exception",
         "@yacl//yacl/utils:parallel",
     ],
@@ -108,7 +108,7 @@ psi_cc_library(
     # Openssl::libcrypto requires `dlopen`...
     linkopts = ["-ldl"],
     deps = [
-        "@com_github_openssl_openssl//:openssl",
+        "@openssl",
         "@yacl//yacl/base:exception",
         "@yacl//yacl/crypto/hash:hash_utils",
         "@yacl//yacl/utils:parallel",

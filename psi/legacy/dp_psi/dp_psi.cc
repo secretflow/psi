@@ -24,8 +24,8 @@
 #include "yacl/crypto/rand/rand.h"
 #include "yacl/utils/parallel.h"
 
+#include "psi/algorithm/ecdh/ecdh_3pc_psi.h"
 #include "psi/cryptor/cryptor_selector.h"
-#include "psi/ecdh/ecdh_3pc_psi.h"
 #include "psi/legacy/dp_psi/dp_psi_utils.h"
 #include "psi/utils/batch_provider_impl.h"
 #include "psi/utils/communication.h"

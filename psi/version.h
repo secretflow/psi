@@ -15,6 +15,6 @@
 #pragma once
 
 #define PSI_VERSION_MAJOR 0
-#define PSI_VERSION_MINOR 5
+#define PSI_VERSION_MINOR 6
 #define PSI_VERSION_PATCH 0
-#define PSI_DEV_IDENTIFIER ".dev241111"
+#define PSI_DEV_IDENTIFIER ".dev241212"

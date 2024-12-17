@@ -1,0 +1,84 @@
+# Copyright 2022 Ant Group Co., Ltd.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+psi_cc_library(
+    name = "common_utils",
+    srcs = ["common_utils.cc"],
+    hdrs = ["common_utils.h"],
+    deps = [
+        "@apsi",
+    ],
+)
+
+psi_cc_library(
+    name = "sender_dispatcher",
+    srcs = ["sender_dispatcher.cc"],
+    hdrs = ["sender_dispatcher.h"],
+    deps = [
+        "//psi/wrapper/apsi:sender",
+        "//psi/wrapper/apsi:yacl_channel",
+        "//psi/wrapper/apsi/utils:bucket",
+        "//psi/wrapper/apsi/utils:group_db",
+        "@apsi",
+    ],
+)
+
+psi_cc_library(
+    name = "entry",
+    srcs = ["entry.cc"],
+    hdrs = ["entry.h"],
+    deps = [
+        ":common_utils",
+        ":sender_dispatcher",
+        "//psi/proto:pir_cc_proto",
+        "//psi/utils:resource_manager",
+        "//psi/wrapper/apsi:receiver",
+        "//psi/wrapper/apsi:sender",
+        "//psi/wrapper/apsi:yacl_channel",
+        "//psi/wrapper/apsi/utils:bucket",
+        "//psi/wrapper/apsi/utils:common",
+        "//psi/wrapper/apsi/utils:csv_reader",
+        "//psi/wrapper/apsi/utils:group_db",
+        "//psi/wrapper/apsi/utils:sender_db",
+        "@yacl//yacl/utils:parallel",
+    ],
+)
+
+psi_cc_binary(
+    name = "receiver",
+    srcs = ["receiver.cc"],
+    data = [
+        "//examples/pir/apsi/data:all_files",
+        "//examples/pir/apsi/parameters:all_files",
+    ],
+    deps = [
+        ":entry",
+    ],
+)
+
+psi_cc_binary(
+    name = "sender",
+    srcs = ["sender.cc"],
+    data = [
+        "//examples/pir/apsi/data:all_files",
+        "//examples/pir/apsi/parameters:all_files",
+    ],
+    deps = [
+        ":entry",
+    ],
+)

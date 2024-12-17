@@ -88,3 +88,4 @@ If a PSI task fails, just restart the task with the same config, the progress wi
 3. What is **Easy PSI**? Why and when to use **Easy PSI**?
 
 [Easy PSI](https://www.secretflow.org.cn/zh-CN/docs/easy-psi) is a standalone PSI product powered by this library. It provides a simple User Interface and utilize [Kuscia](https://www.secretflow.org.cn/docs/kuscia) to launch PSI binaries between both parties.
+

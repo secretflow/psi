@@ -18,15 +18,21 @@ syntax = "proto3";
 
 package psi;
 
+// **Deprecation notice**
+// This enum is scheduled for removal in a future release.
+// Use psi.v2.ProtocolConfig instead.
+//
 // The algorithm type of psi.
 enum PsiType {
   reserved 3;
 
   INVALID_PSI_TYPE = 0;
 
+  // **NOTICED**: No longer supported
   // DDH based PSI
   ECDH_PSI_2PC = 1;
 
+  // **NOTICED**: No longer supported
   // Efficient Batched Oblivious PRF with Applications to Private Set
   // Intersection https://eprint.iacr.org/2016/799.pdf
   KKRT_PSI_2PC = 2;
@@ -43,39 +49,37 @@ enum PsiType {
   // Notice: two-party intersection leak
   KKRT_PSI_NPC = 6;
 
+  // **NOTICED**: No longer supported
   // ecdh-oprf 2-party Unbalanced-PSI Generate CACHE.
-  // Not support, please use new interface UbPsiConfig in psi_v2.proto.
   ECDH_OPRF_UB_PSI_2PC_GEN_CACHE = 7;
 
+  // **NOTICED**: No longer supported
   // ecdh-oprf 2-party Unbalanced-PSI transfer CACHE.
-  // Not support, please use new interface UbPsiConfig in psi_v2.proto.
   ECDH_OPRF_UB_PSI_2PC_TRANSFER_CACHE = 8;
 
+  // **NOTICED**: No longer supported
   // ecdh-oprf 2-party Unbalanced-PSI offline phase.
-  // Not support, please use new interface UbPsiConfig in psi_v2.proto.
   ECDH_OPRF_UB_PSI_2PC_OFFLINE = 9;
 
+  // **NOTICED**: No longer supported
   // ecdh-oprf 2-party Unbalanced-PSI online phase.
-  // Not support, please use new interface UbPsiConfig in psi_v2.proto.
   ECDH_OPRF_UB_PSI_2PC_ONLINE = 10;
 
+  // **NOTICED**: No longer supported
   // ecdh-oprf 2-party Unbalanced-PSI with shuffling online phase.
   // large set party get intersection result
-  // Not support, please use new interface UbPsiConfig in psi_v2.proto.
   ECDH_OPRF_UB_PSI_2PC_SHUFFLE_ONLINE = 11;
 
   // Differentially-Private PSI https://arxiv.org/pdf/2208.13249.pdf
   // bases on ECDH-PSI, and provides: Differentially private PSI results.
   DP_PSI_2PC = 12;
 
+  // **NOTICED**: No longer supported
   // Blazing Fast PSI https://eprint.iacr.org/2022/320.pdf
   // two mode: fast mode or low communication mode
   RR22_FAST_PSI_2PC = 13;
   RR22_LOWCOMM_PSI_2PC = 14;
   RR22_MALICIOUS_PSI_2PC = 15;
-
-  // KMPRT17 PSI https://eprint.iacr.org/2017/799.pdf
-  KMPRT17_MP_PSI = 16;
 }
 
 // The specified elliptic curve cryptography used in psi.
@@ -102,6 +106,9 @@ enum CurveType {
   // CURVE_RISTRETTO255 = 5;
 }
 
+// **Deprecation notice**
+// This message is scheduled for removal in a future release.
+//
 // The input parameters of psi.
 message InputParams {
   // The path of input csv file.
@@ -112,6 +119,9 @@ message InputParams {
   bool precheck = 3;
 }
 
+// **Deprecation notice**.
+// This message is scheduled for removal in a future release.
+//
 // The output parameters of psi.
 message OutputParams {
   // The path of output csv file.
@@ -141,6 +151,10 @@ message DpPsiParams {
   double epsilon = 2;
 }
 
+// **Deprecation notice**.
+// This message is scheduled for removal in a future release.
+// Use psi.v2.PsiConfig instead.
+//
 // The Bucket-psi configuration.
 //
 // ```python
@@ -196,6 +210,9 @@ message BucketPsiConfig {
   DpPsiParams dppsi_params = 10;
 }
 
+// **Deprecation notice**.
+// This message is scheduled for removal in a future release.
+//
 // The In-memory psi configuration.
 //
 // ```python

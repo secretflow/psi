@@ -46,7 +46,7 @@ psi_cc_library(
         ":arrow_csv_batch_provider",
         ":multiplex_disk_cache",
         ":random_str",
-        "@com_google_absl//absl/strings",
+        "@abseil-cpp//absl/strings",
         "@yacl//yacl/base:int128",
     ],
 )
@@ -120,8 +120,8 @@ psi_cc_library(
         ":io",
         ":key",
         ":random_str",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/time",
+        "@abseil-cpp//absl/strings",
+        "@abseil-cpp//absl/time",
         "@org_apache_arrow//:arrow",
         "@yacl//yacl/base:exception",
         "@yacl//yacl/crypto/hash:hash_utils",
@@ -168,14 +168,6 @@ cc_proto_library(
     deps = [":ub_psi_cache_proto"],
 )
 
-psi_cc_library(
-    name = "csv_header_analyzer",
-    hdrs = ["csv_header_analyzer.h"],
-    deps = [
-        "@yacl//yacl/base:exception",
-    ],
-)
-
 psi_cc_test(
     name = "csv_checker_test",
     srcs = ["csv_checker_test.cc"],
@@ -211,10 +203,9 @@ psi_cc_library(
     hdrs = ["batch_provider_impl.h"],
     deps = [
         ":arrow_csv_batch_provider",
-        ":csv_header_analyzer",
         ":io",
         ":key",
-        "@com_google_absl//absl/strings",
+        "@abseil-cpp//absl/strings",
         "@yacl//yacl/base:exception",
         "@yacl//yacl/crypto/rand",
     ],
@@ -226,7 +217,7 @@ psi_cc_library(
     hdrs = ["resource.h"],
     deps = [
         ":hash_bucket_cache",
-        "@com_google_absl//absl/strings",
+        "@abseil-cpp//absl/strings",
         "@yacl//yacl/base:exception",
     ],
 )
@@ -253,27 +244,6 @@ psi_cc_library(
 )
 
 psi_cc_library(
-    name = "emp_io_adapter",
-    srcs = ["emp_io_adapter.cc"],
-    hdrs = [
-        "emp_io_adapter.h",
-    ],
-    deps = [
-        "@com_github_emptoolkit_emp_tool//:emp-tool",
-        "@yacl//yacl/link",
-    ],
-)
-
-psi_cc_test(
-    name = "emp_io_adapter_test",
-    srcs = ["emp_io_adapter_test.cc"],
-    copts = AES_COPT_FLAGS,
-    deps = [
-        "emp_io_adapter",
-    ],
-)
-
-psi_cc_library(
     name = "ub_psi_cache",
     srcs = ["ub_psi_cache.cc"],
     hdrs = ["ub_psi_cache.h"],
@@ -293,7 +263,7 @@ psi_cc_test(
     srcs = ["ub_psi_cache_test.cc"],
     deps = [
         ":ub_psi_cache",
-        "@com_google_absl//absl/time",
+        "@abseil-cpp//absl/time",
         "@yacl//yacl/crypto/rand",
         "@yacl//yacl/utils:scope_guard",
     ],
@@ -304,7 +274,7 @@ psi_cc_library(
     srcs = ["progress.cc"],
     hdrs = ["progress.h"],
     deps = [
-        "@com_github_fmtlib_fmt//:fmtlib",
+        "@fmt",
     ],
 )
 
@@ -312,7 +282,7 @@ psi_cc_library(
     name = "random_str",
     hdrs = ["random_str.h"],
     deps = [
-        "@com_google_absl//absl/strings",
+        "@abseil-cpp//absl/strings",
         "@yacl//yacl/crypto/rand",
     ],
 )
@@ -366,24 +336,6 @@ psi_cc_test(
 )
 
 psi_cc_library(
-    name = "csv_header_parser",
-    srcs = ["csv_header_parser.cc"],
-    hdrs = ["csv_header_parser.h"],
-    deps = [
-        "@org_apache_arrow//:arrow",
-        "@yacl//yacl/base:exception",
-    ],
-)
-
-psi_cc_test(
-    name = "csv_header_parser_test",
-    srcs = ["csv_header_parser_test.cc"],
-    deps = [
-        ":csv_header_parser",
-    ],
-)
-
-psi_cc_library(
     name = "recovery",
     srcs = [
         "recovery.cc",
@@ -432,7 +384,7 @@ psi_cc_library(
         "key.h",
     ],
     deps = [
-        ":csv_header_parser",
+        ":arrow_helper",
         ":io",
         "@yacl//yacl/base:exception",
     ],
@@ -493,7 +445,7 @@ psi_cc_library(
     hdrs = ["cuckoo_index.h"],
     linkopts = ["-lm"],
     deps = [
-        "@com_google_absl//absl/types:span",
+        "@abseil-cpp//absl/types:span",
         "@yacl//yacl/base:exception",
         "@yacl//yacl/base:int128",
     ],

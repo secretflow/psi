@@ -40,7 +40,7 @@
 ## v0.3.0beta
 - [Improvement] add uuid in system temp folder.
 - [Improvement] use arrow csv reader in pir.
-- [Bugfix] fix typo in psi config check.
+- [Bugfix] fix typo in psi config check. 
 
 ## v0.3.0.dev240304
 - [API] expose ic_mode in RunLegacyPsi api

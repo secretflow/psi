@@ -1,0 +1,178 @@
+# Copyright 2023 Ant Group Co., Ltd.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+load("//bazel:psi.bzl", "psi_cc_library", "psi_cc_test")
+
+package(default_visibility = ["//visibility:public"])
+
+psi_cc_library(
+    name = "baxos",
+    srcs = ["baxos.cc"],
+    hdrs = ["baxos.h"],
+    deps = [
+        ":dense_mtx",
+        ":galois128",
+        ":paxos",
+        ":paxos_hash",
+        ":paxos_utils",
+        ":simple_index",
+    ],
+)
+
+psi_cc_test(
+    name = "baxos_test",
+    srcs = ["baxos_test.cc"],
+    deps = [
+        ":baxos",
+        "@abseil-cpp//absl/strings",
+        "@yacl//yacl/crypto/rand",
+        "@yacl//yacl/crypto/tools:prg",
+    ],
+)
+
+psi_cc_library(
+    name = "paxos",
+    srcs = ["paxos.cc"],
+    hdrs = [
+        "paxos.h",
+    ],
+    deps = [
+        ":dense_mtx",
+        ":galois128",
+        ":paxos_hash",
+        ":paxos_utils",
+    ],
+)
+
+psi_cc_test(
+    name = "paxos_test",
+    srcs = ["paxos_test.cc"],
+    deps = [
+        ":paxos",
+        "@abseil-cpp//absl/strings",
+        "@yacl//yacl/crypto/rand",
+        "@yacl//yacl/crypto/tools:prg",
+    ],
+)
+
+psi_cc_library(
+    name = "paxos_hash",
+    srcs = ["paxos_hash.cc"],
+    hdrs = ["paxos_hash.h"],
+    copts = select({
+        "@platforms//cpu:x86_64": ["-msse4.2"],
+        "//conditions:default": [],
+    }),
+    deps = [
+        ":aes_crhash",
+        ":galois128",
+        "@abseil-cpp//absl/types:span",
+        "@libdivide",
+        "@yacl//yacl/math:gadget",
+        "@yacl//yacl/utils:platform_utils",
+    ],
+)
+
+psi_cc_test(
+    name = "paxos_hash_test",
+    srcs = ["paxos_hash_test.cc"],
+    deps = [
+        ":paxos_hash",
+        "@yacl//yacl/crypto/rand",
+    ],
+)
+
+psi_cc_library(
+    name = "paxos_utils",
+    srcs = ["paxos_utils.cc"],
+    hdrs = ["paxos_utils.h"],
+    deps = [
+        ":galois128",
+        "@abseil-cpp//absl/types:span",
+        "@yacl//yacl/crypto/tools:prg",
+    ],
+)
+
+psi_cc_library(
+    name = "aes_crhash",
+    srcs = ["aes_crhash.cc"],
+    hdrs = ["aes_crhash.h"],
+    deps = [
+        "@yacl//yacl/crypto/block_cipher:symmetric_crypto",
+        "@yacl//yacl/utils:parallel",
+    ],
+)
+
+psi_cc_test(
+    name = "aes_crhash_test",
+    srcs = ["aes_crhash_test.cc"],
+    deps = [
+        ":aes_crhash",
+        ":galois128",
+        "@abseil-cpp//absl/strings",
+        "@yacl//yacl/crypto/tools:prg",
+    ],
+)
+
+psi_cc_library(
+    name = "galois128",
+    srcs = ["galois128.cc"],
+    hdrs = [
+        "galois128.h",
+    ],
+    copts = select({
+        "@platforms//cpu:x86_64": ["-mpclmul"],
+        "//conditions:default": [],
+    }),
+    deps = [
+        "@abseil-cpp//absl/strings",
+        "@yacl//yacl/base:block",
+        "@yacl//yacl/base:int128",
+        "@yacl//yacl/link",
+        "@yacl//yacl/utils:platform_utils",
+    ],
+)
+
+psi_cc_test(
+    name = "galois128_test",
+    srcs = ["galois128_test.cc"],
+    deps = [
+        ":galois128",
+        "@abseil-cpp//absl/strings",
+        "@yacl//yacl/crypto/rand",
+        "@yacl//yacl/crypto/tools:prg",
+    ],
+)
+
+psi_cc_library(
+    name = "dense_mtx",
+    srcs = ["dense_mtx.cc"],
+    hdrs = ["dense_mtx.h"],
+    deps = [
+        ":galois128",
+        "@abseil-cpp//absl/types:span",
+        "@yacl//yacl/crypto/tools:prg",
+    ],
+)
+
+psi_cc_library(
+    name = "simple_index",
+    srcs = ["simple_index.cc"],
+    hdrs = ["simple_index.h"],
+    deps = [
+        "@boost.math//:boost.math",
+        "@boost.multiprecision//:boost.multiprecision",
+        "@yacl//yacl/base:exception",
+    ],
+)

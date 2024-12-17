@@ -34,7 +34,7 @@ psi_cc_library(
     deps = [
         ":base_operator",
         ":factory",
-        "//psi/ecdh:ecdh_3pc_psi",
+        "//psi/algorithm/ecdh:ecdh_3pc_psi",
     ],
     alwayslink = True,
 )
@@ -46,7 +46,7 @@ psi_cc_library(
     deps = [
         ":base_operator",
         ":factory",
-        "//psi/kkrt:kkrt_psi",
+        "//psi/algorithm/kkrt:kkrt_psi",
         "@yacl//yacl/utils:parallel",
     ],
     alwayslink = True,
@@ -60,7 +60,7 @@ psi_cc_library(
         ":base_operator",
         ":factory",
         ":kkrt_2party_psi",
-        "//psi/ecdh:ecdh_psi",
+        "//psi/algorithm/ecdh:ecdh_psi",
         "@yacl//yacl/utils:parallel",
     ],
     alwayslink = True,
@@ -87,18 +87,6 @@ psi_cc_library(
 )
 
 psi_cc_library(
-    name = "kmprt17_mp_psi",
-    srcs = ["kmprt17_mp_psi.cc"],
-    hdrs = ["kmprt17_mp_psi.h"],
-    deps = [
-        ":base_operator",
-        ":factory",
-        "//psi/legacy/kmprt17_mp_psi",
-    ],
-    alwayslink = True,
-)
-
-psi_cc_library(
     name = "dp_2party_psi",
     srcs = ["dp_2party_psi.cc"],
     hdrs = ["dp_2party_psi.h"],
@@ -111,27 +99,11 @@ psi_cc_library(
 )
 
 psi_cc_library(
-    name = "rr22_2party_psi",
-    srcs = ["rr22_2party_psi.cc"],
-    hdrs = ["rr22_2party_psi.h"],
-    deps = [
-        ":base_operator",
-        ":factory",
-        "//psi/rr22:rr22_psi",
-        "@yacl//yacl/utils:parallel",
-    ],
-    alwayslink = True,
-)
-
-psi_cc_library(
     name = "operator",
     deps = [
         ":dp_2party_psi",
         ":ecdh_3party_psi",
-        ":kkrt_2party_psi",
-        ":kmprt17_mp_psi",
         ":nparty_psi",
-        ":rr22_2party_psi",
     ],
 )
 
@@ -145,7 +117,6 @@ psi_cc_library(
         ":factory",
         ":operator",
         "//psi:prelude",
-        "//psi/ecdh:ecdh_psi",
         "//psi/proto:psi_cc_proto",
         "//psi/utils:sync",
     ],
@@ -172,7 +143,6 @@ psi_cc_library(
         "//psi/proto:psi_cc_proto",
         "//psi/utils:arrow_csv_batch_provider",
         "//psi/utils:csv_checker",
-        "//psi/utils:csv_header_analyzer",
         "//psi/utils:ec_point_store",
         "//psi/utils:progress",
     ],

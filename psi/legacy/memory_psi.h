@@ -36,8 +36,6 @@ class MemoryPsi {
  private:
   void CheckOptions() const;
 
-  std::vector<std::string> EcdhPsi(const std::vector<std::string>& inputs);
-
  private:
   MemoryPsiConfig config_;
 

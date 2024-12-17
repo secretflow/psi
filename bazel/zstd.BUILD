@@ -32,7 +32,7 @@ cmake(
         "CMAKE_INSTALL_LIBDIR": "lib",
     },
     generate_args = ["-GNinja"],
-    lib_source = "@com_github_facebook_zstd//:all",
+    lib_source = "@zstd//:all",
     out_include_dir = "include/",
     out_static_libs = ["libzstd.a"],
     working_directory = "build/cmake",

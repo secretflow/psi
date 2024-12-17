@@ -16,7 +16,6 @@
 
 #include "spdlog/spdlog.h"
 
-#include "psi/ecdh/ecdh_psi.h"
 #include "psi/legacy/factory.h"
 #include "psi/prelude.h"
 #include "psi/utils/sync.h"
@@ -40,13 +39,6 @@ void MemoryPsi::CheckOptions() const {
       lctx_->WorldSize());
 
   // check world size
-  if (config_.psi_type() == PsiType::ECDH_PSI_2PC ||
-      config_.psi_type() == PsiType::KKRT_PSI_2PC) {
-    YACL_ENFORCE(lctx_->WorldSize() == 2,
-                 "psi_type:{}, only two parties supported, got "
-                 "{}",
-                 config_.psi_type(), lctx_->WorldSize());
-  }
   if (config_.psi_type() == PsiType::ECDH_PSI_3PC) {
     if (lctx_->WorldSize() != 3) {
       YACL_ENFORCE(lctx_->WorldSize() == 3,
@@ -76,29 +68,11 @@ std::vector<std::string> MemoryPsi::Run(
     return res;
   }
 
-  if (config_.psi_type() == PsiType::ECDH_PSI_2PC) {
-    auto run_f = std::async([&] { return EcdhPsi(inputs); });
-    res = SyncWait(lctx_, &run_f);
-  } else {
-    res = OperatorFactory::GetInstance()
-              ->Create(config_, lctx_)
-              ->Run(inputs, config_.broadcast_result());
-  }
+  res = OperatorFactory::GetInstance()
+            ->Create(config_, lctx_)
+            ->Run(inputs, config_.broadcast_result());
 
   return res;
-}
-
-std::vector<std::string> MemoryPsi::EcdhPsi(
-    const std::vector<std::string>& inputs) {
-  size_t target_rank = config_.receiver_rank();
-  if (config_.broadcast_result()) {
-    target_rank = yacl::link::kAllRank;
-  }
-
-  if (config_.curve_type() != CurveType::CURVE_INVALID_TYPE) {
-    return ecdh::RunEcdhPsi(lctx_, inputs, target_rank, config_.curve_type());
-  }
-  return ecdh::RunEcdhPsi(lctx_, inputs, target_rank);
 }
 
 }  // namespace psi

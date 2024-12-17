@@ -194,6 +194,7 @@ struct IntersectionIndexInfo {
   std::vector<uint32_t> self_dup_cnt;
   std::vector<uint32_t> peer_dup_cnt;
 };
+
 IntersectionIndexInfo ComputeIndicesWithDupCnt(
     const std::shared_ptr<UbPsiClientCacheMemoryStore>& self,
     const std::shared_ptr<UbPsiClientCacheFileStore>& peer, size_t batch_size);

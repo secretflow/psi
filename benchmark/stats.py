@@ -20,6 +20,7 @@ import os
 import time
 from datetime import datetime
 
+
 def stream_container_stats(container_name, output_file):
     client = docker.from_env()
 
@@ -27,8 +28,16 @@ def stream_container_stats(container_name, output_file):
         container = client.containers.get(container_name)
         stats_stream = container.stats(stream=True)
 
-        with open(output_file, 'w', newline='') as csvfile:
-            fieldnames = ['cpu_percent', 'mem_usage_MB', 'mem_limit_MB', 'net_tx_kb', 'net_rx_kb', 'running_time_s', 'time']
+        with open(output_file, "w", newline="") as csvfile:
+            fieldnames = [
+                "cpu_percent",
+                "mem_usage_MB",
+                "mem_limit_MB",
+                "net_tx_kb",
+                "net_rx_kb",
+                "running_time_s",
+                "time",
+            ]
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
             writer.writeheader()
@@ -40,36 +49,54 @@ def stream_container_stats(container_name, output_file):
             for stats in stats_stream:
                 data = json.loads(stats)
                 running_time_s = int(time.time()) - start_unix_time
-                cpu_percent = ((data['cpu_stats']['cpu_usage']['total_usage'] - prev_cpu_total) /
-                           (data['cpu_stats']['system_cpu_usage'] - prev_cpu_system)) * 100 * os.cpu_count()
-                mem_usage = (data['memory_stats']['usage'] - data['memory_stats']['stats']['inactive_file']) / 1024 / 1024
-                mem_limit = data['memory_stats']['limit'] / 1024 / 1024
+                cpu_percent = (
+                    (
+                        (data["cpu_stats"]["cpu_usage"]["total_usage"] - prev_cpu_total)
+                        / (data["cpu_stats"]["system_cpu_usage"] - prev_cpu_system)
+                    )
+                    * 100
+                    * os.cpu_count()
+                )
+                mem_usage = (
+                    (
+                        data["memory_stats"]["usage"]
+                        - data["memory_stats"]["stats"]["inactive_file"]
+                    )
+                    / 1024
+                    / 1024
+                )
+                mem_limit = data["memory_stats"]["limit"] / 1024 / 1024
                 net_tx = 0
                 net_rx = 0
-                for key, value in data['networks'].items():
-                    net_tx += value['tx_bytes'] / 1024
-                    net_rx += value['rx_bytes'] / 1024
+                for key, value in data["networks"].items():
+                    net_tx += value["tx_bytes"] / 1024
+                    net_rx += value["rx_bytes"] / 1024
                 # skip first five seconds, due to running setting up network
                 if running_time_s > 5:
-                    writer.writerow({
-                        'cpu_percent': cpu_percent,
-                        'mem_usage_MB': int(mem_usage),
-                        'mem_limit_MB': int(mem_limit),
-                        'net_tx_kb': int((net_tx - prev_net_tx) * 8),
-                        'net_rx_kb': int((net_rx - prev_net_rx) * 8),
-                        'running_time_s': running_time_s,
-                        'time': datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')
-                    })
+                    writer.writerow(
+                        {
+                            "cpu_percent": cpu_percent,
+                            "mem_usage_MB": int(mem_usage),
+                            "mem_limit_MB": int(mem_limit),
+                            "net_tx_kb": int((net_tx - prev_net_tx) * 8),
+                            "net_rx_kb": int((net_rx - prev_net_rx) * 8),
+                            "running_time_s": running_time_s,
+                            "time": datetime.fromtimestamp(time.time()).strftime(
+                                "%H:%M:%S"
+                            ),
+                        }
+                    )
                 prev_net_tx = net_tx
                 prev_net_rx = net_rx
-                prev_cpu_total = data['cpu_stats']['cpu_usage']['total_usage']
-                prev_cpu_system = data['cpu_stats']['system_cpu_usage']
+                prev_cpu_total = data["cpu_stats"]["cpu_usage"]["total_usage"]
+                prev_cpu_system = data["cpu_stats"]["system_cpu_usage"]
 
     except docker.errors.NotFound:
         print(f"Container {container_name} not found.")
     except Exception as e:
-        if container.status != 'exited':
+        if container.status != "exited":
             print(f"An error occurred: {e} container.status: {container.status}")
+
 
 if __name__ == "__main__":
     stream_container_stats(sys.argv[1], sys.argv[2])

@@ -11,13 +11,13 @@
     - [MemoryPsiConfig](#memorypsiconfig)
     - [OutputParams](#outputparams)
     - [PsiResultReport](#psiresultreport)
-
+  
 
 
 - Enums
     - [CurveType](#curvetype)
     - [PsiType](#psitype)
-
+  
 
 
 - [Scalar Value Types](#scalar-value-types)
@@ -198,3 +198,4 @@ The algorithm type of psi.
 | <div><h4 id="bool" /></div><a name="bool" /> bool |  | bool | boolean | boolean |
 | <div><h4 id="string" /></div><a name="string" /> string | A string must always contain UTF-8 encoded or 7-bit ASCII text. | string | String | str/unicode |
 | <div><h4 id="bytes" /></div><a name="bytes" /> bytes | May contain any arbitrary sequence of bytes. | string | ByteString | str |
+

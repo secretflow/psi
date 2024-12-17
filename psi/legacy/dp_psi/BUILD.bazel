@@ -36,13 +36,13 @@ psi_cc_library(
     ],
     deps = [
         ":dp_psi_utils",
+        "//psi/algorithm/ecdh:ecdh_3pc_psi",
+        "//psi/algorithm/ecdh:ecdh_psi",
         "//psi/cryptor:cryptor_selector",
-        "//psi/ecdh:ecdh_3pc_psi",
-        "//psi/ecdh:ecdh_psi",
         "//psi/utils:batch_provider_impl",
         "//psi/utils:ec_point_store",
         "//psi/utils:serialize",
-        "@com_google_absl//absl/strings",
+        "@abseil-cpp//absl/strings",
         "@yacl//yacl/base:exception",
         "@yacl//yacl/crypto/rand",
         "@yacl//yacl/link",
@@ -55,7 +55,7 @@ psi_cc_test(
     srcs = ["dp_psi_test.cc"],
     deps = [
         ":dp_psi",
-        "@com_google_absl//absl/container:flat_hash_set",
+        "@abseil-cpp//absl/container:flat_hash_set",
     ],
 )
 
@@ -64,8 +64,8 @@ psi_cc_binary(
     srcs = ["dp_psi_benchmark.cc"],
     deps = [
         ":dp_psi",
+        "@abseil-cpp//absl/container:flat_hash_set",
         "@com_github_google_benchmark//:benchmark_main",
-        "@com_google_absl//absl/container:flat_hash_set",
     ],
 )
 
@@ -74,7 +74,7 @@ psi_cc_binary(
     srcs = ["dp_psi_payload_benchmark.cc"],
     deps = [
         ":dp_psi",
+        "@abseil-cpp//absl/container:flat_hash_set",
         "@com_github_google_benchmark//:benchmark_main",
-        "@com_google_absl//absl/container:flat_hash_set",
     ],
 )

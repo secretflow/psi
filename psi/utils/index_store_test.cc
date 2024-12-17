@@ -117,7 +117,10 @@ TEST_F(IndexStoreTest, Works) {
 }
 
 TEST_F(IndexStoreTest, Empty) {
-  { IndexWriter writer(index_store_path_); }
+  {
+    // format off
+    IndexWriter writer(index_store_path_);
+  }
 
   {
     FileIndexReader reader(index_store_path_);

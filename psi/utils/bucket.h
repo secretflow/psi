@@ -42,6 +42,7 @@ void HandleBucketResultByReceiver(
     bool broadcast_result, const std::shared_ptr<yacl::link::Context>& lctx,
     const std::vector<HashBucketCache::BucketItem>& result_list,
     IndexWriter* writer);
+
 void HandleBucketResultByReceiver(
     bool broadcast_result, const std::shared_ptr<yacl::link::Context>& lctx,
     const std::vector<HashBucketCache::BucketItem>& result_list,

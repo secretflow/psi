@@ -19,7 +19,7 @@
 
 #include "yacl/link/link.h"
 
-#include "psi/ecdh/ecdh_psi.h"
+#include "psi/algorithm/ecdh/ecdh_psi.h"
 #include "psi/legacy/base_operator.h"
 
 namespace psi {

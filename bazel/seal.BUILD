@@ -37,11 +37,11 @@ cmake(
         # "SEAL_USE_INTEL_HEXL": "ON",
     },
     generate_args = ["-GNinja"],
-    lib_source = "@com_github_microsoft_seal//:all",
+    lib_source = "@seal//:all",
     out_include_dir = "include/SEAL-4.1",
     out_static_libs = ["libseal-4.1.a"],
     deps = [
-        "@com_github_facebook_zstd//:zstd",
+        "@zstd",
         "@com_github_microsoft_gsl//:Microsoft.GSL",
         "@zlib",
         # Uncomment to use hexl

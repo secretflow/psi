@@ -20,7 +20,7 @@ Welcome to SecretFlow PSI Library. There are multiple methods to use PSI/PIR.
 For PSI, we have a developing v2 PSI.
 
 +------------------------+------------------------------------------------+---------------------------------------------+
-|                        | PSI v1 APIs                                    | PSI v2 APIs                                 |
+|                        | PSI v1 APIs                                    | PSI v2 APIs                                 | 
 +========================+================================================+=============================================+
 | Supported Protocols    | ECDH, KKRT, ECDH_OPRF_UB, DP_PSI, RR22         | ECDH, KKRT, RR22, ECDH_OPRF_UB              |
 +------------------------+------------------------------------------------+---------------------------------------------+
@@ -133,7 +133,7 @@ We use the same dev docker from secretflow/ubuntu-base-ci::
          --entrypoint="bash" \
          secretflow/ubuntu-base-ci:latest
 
-
+    
     # attach to build container
     docker exec -it psi-dev-$(whoami) bash
 

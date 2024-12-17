@@ -19,9 +19,9 @@ To measure the performance of APSI protocols under different data scales, we nee
 
 
 ```python
-# one million key-value pairs, each value's length is 32-byte,
+# one million key-value pairs, each value's length is 32-byte, 
 python examples/pir/apsi/test_data_creator.py --sender_size=1000000 --receiver_size=1 --intersection_size=1 --label_byte_count=32
-# 16 million key-value pairs, each value's length is 32-byte,
+# 16 million key-value pairs, each value's length is 32-byte, 
 python examples/pir/apsi/test_data_creator.py --sender_size=16000000 --receiver_size=1 --intersection_size=1 --label_byte_count=32
 ```
 
@@ -134,10 +134,10 @@ docker start apsi_sender
 docker exec -it apsi_sender bash
 ```
 
-Then run:
+Then run: 
 
 ```bash
-# offline
+# offline 
 ./main --config $(pwd)/examples/pir/config/apsi_sender_setup.json
 # online
 ./main --config $(pwd)/examples/pir/config/apsi_sender_online.json
@@ -216,3 +216,5 @@ If you wish to measure the APSI performance for a specific data scale and label 
 
 
 Note that the above data does not represent the optimal performance of APSI. Under fixed data scale conditions, the query performance of APSI is highly correlated with the corresponding parameters. Additionally, if you want to support larger datasets, such as one billion data entries, we also offer a bucket mode. However, this mode requires consideration of more parameters, so it is not displayed in this benchmark.
+
+

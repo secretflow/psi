@@ -122,7 +122,7 @@ In the first terminal, run the following command
 docker run -it  --rm  --network host --mount type=bind,source=/tmp/receiver,target=/root/receiver --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest --config receiver/receiver.config
 ```
 
-In the other terminal, run the following command simultaneously.
+In the other terminal, run the following command simultaneously. 
 
 ```bash
 docker run -it  --rm  --network host --mount type=bind,source=/tmp/sender,target=/root/sender  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest --config sender/sender.config
@@ -213,3 +213,4 @@ Please refer to [PSI V2 Benchmark](docs/user_guide/psi_v2_benchmark.md)
 ## APSI Benchmark
 
 Please refer to [APSI Benchmark](docs/user_guide/apsi_benchmark.md)
+

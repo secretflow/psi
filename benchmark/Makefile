@@ -35,5 +35,5 @@ analysis:
 	docker logs $(DOCKER_PROJ_NAME)-psi-sender-1 > $(PWD)/docker-compose/logs/sender/psi.log
 	docker logs $(DOCKER_PROJ_NAME)-psi-receiver-1 > $(PWD)/docker-compose/logs/receiver/psi.log
 
-start-docker:
+start-docker: 
 	@(cd $(PWD)/docker-compose && docker compose -p ${DOCKER_PROJ_NAME} up -d)

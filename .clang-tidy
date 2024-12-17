@@ -76,3 +76,4 @@ CheckOptions:
 
   - key:   performance-unnecessary-value-param.AllowedTypes
     value: PtBufferView
+

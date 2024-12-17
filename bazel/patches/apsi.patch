@@ -22,11 +22,11 @@ index e683045..067d244 100644
 @@ -30,7 +30,7 @@ namespace apsi {
                  return item_count_;
              }
-
+ 
 -        private:
 +            // private:
              IndexTranslationTable() = default;
-
+ 
              std::unordered_map<std::size_t, std::size_t> table_idx_to_item_idx_;
 diff --git a/receiver/apsi/CMakeLists.txt b/receiver/apsi/CMakeLists.txt
 index afce298..1790b30 100644
@@ -45,12 +45,12 @@ index 850ac47..aef52a4 100644
 --- a/common/apsi/network/sender_operation.cpp
 +++ b/common/apsi/network/sender_operation.cpp
 @@ -135,7 +135,7 @@ namespace apsi {
-
+ 
              auto oprf_data = fbs_builder.CreateVector(
                  reinterpret_cast<const uint8_t *>(data.data()), data.size());
 -            auto req = fbs::CreateOPRFRequest(fbs_builder, oprf_data);
 +            auto req = fbs::CreateOPRFRequest(fbs_builder, oprf_data, bucket_idx);
-
+ 
              fbs::SenderOperationBuilder sop_builder(fbs_builder);
              sop_builder.add_request_type(fbs::Request_OPRFRequest);
 @@ -180,6 +180,7 @@ namespace apsi {
@@ -58,7 +58,7 @@ index 850ac47..aef52a4 100644
              data.resize(oprf_data.size());
              copy_bytes(oprf_data.data(), oprf_data.size(), data.data());
 +            bucket_idx = sop->request_as_OPRFRequest()->bucket_idx();
-
+ 
              return in_data.size();
          }
 @@ -231,7 +232,8 @@ namespace apsi {
@@ -68,13 +68,13 @@ index 850ac47..aef52a4 100644
 -                query_request_parts);
 +                query_request_parts,
 +                bucket_idx);
-
+ 
              fbs::SenderOperationBuilder sop_builder(fbs_builder);
              sop_builder.add_request_type(fbs::Request_QueryRequest);
 @@ -346,6 +348,8 @@ namespace apsi {
                  data.emplace(exponent, move(cts_vec));
              }
-
+ 
 +            bucket_idx = req.bucket_idx();
 +
              return in_data.size();
@@ -91,7 +91,7 @@ index a9cc4df..ce3769c 100644
 +
 +            std::uint32_t bucket_idx = 0;
          }; // class SenderOperationOPRF
-
+ 
          /**
 @@ -140,6 +142,8 @@ namespace apsi {
              ciphertext and the vector holds the ciphertext data for different bundle indices.
@@ -108,12 +108,12 @@ index 4c4e116..8eb34fc 100644
 --- a/common/apsi/network/sop.fbs
 +++ b/common/apsi/network/sop.fbs
 @@ -10,6 +10,7 @@ table ParmsRequest {
-
+ 
  table OPRFRequest {
      data:[ubyte] (required);
 +    bucket_idx:uint32;
  }
-
+ 
  table QueryRequestPart {
 @@ -21,6 +22,7 @@ table QueryRequest {
      compression_type:ubyte;
@@ -121,5 +121,5 @@ index 4c4e116..8eb34fc 100644
      query:[QueryRequestPart] (required);
 +    bucket_idx:uint32;
  }
-
+ 
  union Request { ParmsRequest, OPRFRequest, QueryRequest }

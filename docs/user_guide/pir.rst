@@ -113,7 +113,7 @@ PIR Config
 """"""""""
 
 1. Sender: Setup Stage. In this stage, sender generates sender db file with csv file. This stage is offline.
-Since version **0.4.0b0**, the source csv file for db generating should be specified as **source_file**, and **db_file**
+Since version **0.4.0b0**, the source csv file for db generating should be specified as **source_file**, and **db_file** 
 is used to specify db file.
 
 .. code-block::
@@ -145,7 +145,7 @@ is used to specify db file.
                 {
                     "id": "receiver",
                     "host": "127.0.0.1:5400"
-
+                
 
 .. code-block::
    :caption: apsi_sender_setup.json

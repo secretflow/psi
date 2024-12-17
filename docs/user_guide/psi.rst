@@ -27,11 +27,11 @@ PSI :psi_code_host:`KKRT-PSI </blob/master/psi/algorithm/kkrt/kkrt_psi.h>`.
 | `DP-PSI`_     | Semi-Honest  | 2P           |   -          |
 +---------------+--------------+--------------+--------------+
 
-MPC and PSI protocols are designed for specific Security model (or Threat Models).
+MPC and PSI protocols are designed for specific Security model (or Threat Models). 
 
-Security model are widely considered to capture the capabilities of adversaries.
+Security model are widely considered to capture the capabilities of adversaries. 
 Adversaries of semi-honest model and malicious model are Semi-honest Adversary and
-Malicious Adversary.
+Malicious Adversary. 
 
 - `Semi-honest Adversary <https://wiki.mpcalliance.org/semi_honest_adversary.html>`_
 - `Malicious Adversary <https://wiki.mpcalliance.org/malicious_adversary.html>`_
@@ -92,7 +92,7 @@ Then use binary with::
 Benchmark
 ----------
 
-benchmark result without data load time
+benchmark result without data load time 
 
 ECDH PSI Benchmark
 >>>>>>>>>>>>>>>>>>
@@ -127,7 +127,7 @@ cpu limited by docker(--cpu)
 KKRT PSI Benchmark
 >>>>>>>>>>>>>>>>>>>
 
-All of our experiments use a single thread for each party.
+All of our experiments use a single thread for each party. 
 
 If the bandwidth is enough, the upstream could try to perform multi-threading optimizations
 
@@ -161,6 +161,6 @@ Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
 Security Tips
 -------------
 
-Warning:  `KKRT16 <https://eprint.iacr.org/2016/799.pdf>`_ is semi-honest PSI protocols,
+Warning:  `KKRT16 <https://eprint.iacr.org/2016/799.pdf>`_ is semi-honest PSI protocols, 
 and may be attacked in malicious model.
 We recommend using KKRT16 PSI protocol as one-way PSI, i.e., one party gets the final intersection result.

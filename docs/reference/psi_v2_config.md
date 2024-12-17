@@ -16,7 +16,7 @@
     - [RecoveryConfig](#recoveryconfig)
     - [Rr22Config](#rr22config)
     - [UbPsiConfig](#ubpsiconfig)
-
+  
 
 
 - Enums
@@ -26,7 +26,7 @@
     - [RecoveryCheckpoint.Stage](#recoverycheckpointstage)
     - [Role](#role)
     - [UbPsiConfig.Mode](#ubpsiconfigmode)
-
+  
 
 
 - [Scalar Value Types](#scalar-value-types)
@@ -466,3 +466,4 @@ Role of parties.
 | <div><h4 id="bool" /></div><a name="bool" /> bool |  | bool | boolean | boolean |
 | <div><h4 id="string" /></div><a name="string" /> string | A string must always contain UTF-8 encoded or 7-bit ASCII text. | string | String | str/unicode |
 | <div><h4 id="bytes" /></div><a name="bytes" /> bytes | May contain any arbitrary sequence of bytes. | string | ByteString | str |
+

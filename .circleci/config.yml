@@ -69,6 +69,7 @@ workflows:
           mapping: |
             psi/.* build-and-run true
             bazel/.* build-and-run true
+            MODULE.bazel build-and-run true
             .bazelrc build-and-run true
             .circleci/test.yml build-and-run true
       - lint

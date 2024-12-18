@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("//bazel:psi.bzl", "psi_cc_library", "psi_cc_test")
+load(":copts.bzl", "spiral_copts")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -64,7 +65,7 @@ psi_cc_library(
     name = "poly_matrix",
     srcs = ["poly_matrix.cc"],
     hdrs = ["poly_matrix.h"],
-    copts = ["-mavx2"],
+    copts = spiral_copts(),
     deps = [
         ":params",
         ":util",
@@ -90,7 +91,7 @@ psi_cc_library(
     name = "poly_matrix_utils",
     srcs = ["poly_matrix_utils.cc"],
     hdrs = ["poly_matrix_utils.h"],
-    copts = ["-mavx2"],
+    copts = spiral_copts(),
     deps = [
         "poly_matrix",
         ":params",
@@ -111,7 +112,7 @@ psi_cc_library(
 psi_cc_test(
     name = "poly_matrix_test",
     srcs = ["poly_matrix_test.cc"],
-    copts = ["-mavx2"],
+    copts = spiral_copts(),
     deps = [
         "poly_matrix",
         "poly_matrix_utils",

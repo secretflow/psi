@@ -1,4 +1,5 @@
 load("//bazel:psi.bzl", "psi_cc_library", "psi_cc_test")
+load("//psi/algorithm/spiral:copts.bzl", "spiral_copts")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -58,7 +59,7 @@ psi_cc_library(
     name = "ntt",
     srcs = ["ntt.cc"],
     hdrs = ["ntt.h"],
-    copts = ["-mavx2"],
+    copts = spiral_copts(),
     deps = [
         ":arith",
         ":ntt_table",
@@ -100,7 +101,7 @@ psi_cc_test(
 psi_cc_test(
     name = "ntt_table_test",
     srcs = ["ntt_table_test.cc"],
-    copts = ["-mavx2"],
+    copts = spiral_copts(),
     deps = [
         ":ntt",
         ":ntt_table",

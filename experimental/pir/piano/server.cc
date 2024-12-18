@@ -3,96 +3,84 @@
 namespace pir::piano {
 
 QueryServiceServer::QueryServiceServer(
-    std::vector<uint8_t>& db, std::shared_ptr<yacl::link::Context> context,
-    const uint64_t set_size, const uint64_t chunk_size,
-    const uint64_t entry_size)
-    : db_(std::move(db)),
-      context_(std::move(context)),
-      set_size_(set_size),
-      chunk_size_(chunk_size),
-      entry_size_(entry_size) {}
+    std::shared_ptr<yacl::link::Context> context, std::vector<uint8_t>& db,
+    const uint64_t entry_num, const uint64_t entry_size)
+    : context_(std::move(context)),
+      db_(std::move(db)),
+      entry_num_(entry_num),
+      entry_size_(entry_size) {
+  std::tie(chunk_size_, set_size_) = GenChunkParams(entry_num_);
+  AlignDBToChunkBoundary();
+}
 
-void QueryServiceServer::Start(const std::future<void>& stop_signal) {
-  while (stop_signal.wait_for(std::chrono::milliseconds(1)) ==
-         std::future_status::timeout) {
-    auto request_data = context_->Recv(context_->NextRank(), "request_data");
-    HandleRequest(request_data);
+void QueryServiceServer::AlignDBToChunkBoundary() {
+  if (entry_num_ < chunk_size_ * set_size_) {
+    const uint64_t padding_num = (chunk_size_ * set_size_) - entry_num_;
+    const uint64_t seed = yacl::crypto::FastRandU64();
+
+    db_.reserve(db_.size() + (padding_num * entry_size_));
+    for (uint64_t i = 0; i < padding_num; ++i) {
+      auto padding_entry = DBEntry::GenDBEntry(entry_size_, seed, i, FNVHash);
+      db_.insert(db_.end(), padding_entry.GetData().begin(),
+                 padding_entry.GetData().end());
+    }
+    entry_num_ += padding_num;
   }
 }
 
-void QueryServiceServer::HandleRequest(const yacl::Buffer& request_data) {
-  QueryRequest proto;
-  proto.ParseFromArray(request_data.data(), request_data.size());
-
-  switch (proto.request_case()) {
-    case QueryRequest::kFetchFullDb: {
-      // uint64_t dummy = DeserializeFetchFullDBMsg(request_data);
-      ProcessFetchFullDB();
-      break;
-    }
-    case QueryRequest::kSetParityQuery: {
-      const auto parityQuery = DeserializeSetParityQueryMsg(request_data);
-      const auto& indices = std::get<1>(parityQuery);
-
-      auto [parity, server_compute_time] = ProcessSetParityQuery(indices);
-      const auto response_buf =
-          SerializeSetParityQueryResponse(parity, server_compute_time);
-      context_->SendAsync(context_->NextRank(), response_buf,
-                          "SetParityQueryResponse");
-      break;
-    }
-    default:
-      SPDLOG_ERROR("Unknown request type.");
-  }
-}
-
-void QueryServiceServer::ProcessFetchFullDB() {
+void QueryServiceServer::HandleFetchFullDB() {
+  DeserializeFetchFullDB(context_->Recv(context_->NextRank(), "FetchFullDB"));
   for (uint64_t i = 0; i < set_size_; ++i) {
     const uint64_t down = i * chunk_size_;
-    uint64_t up = (i + 1) * chunk_size_;
-    up = std::min(up, db_.size() / entry_size_);
+    const uint64_t up = (i + 1) * chunk_size_;
     std::vector<uint8_t> chunk(db_.begin() + down * entry_size_,
                                db_.begin() + up * entry_size_);
-    auto chunk_buf = SerializeDBChunk(i, chunk.size(), chunk);
 
     try {
-      context_->SendAsync(context_->NextRank(), chunk_buf, "FetchFullDBChunk");
+      context_->SendAsync(context_->NextRank(), SerializeDBChunk(chunk),
+                          "DBChunk");
     } catch (const std::exception& e) {
-      SPDLOG_ERROR("Failed to send a chunk.");
+      SPDLOG_ERROR("Failed to send a chunk: {}", e.what());
       return;
     }
   }
 }
 
-std::pair<std::vector<uint8_t>, uint64_t>
-QueryServiceServer::ProcessSetParityQuery(
-    const std::vector<uint64_t>& indices) {
-  const auto start = std::chrono::high_resolution_clock::now();
-  std::vector<uint8_t> parity = HandleSetParityQuery(indices);
-  const auto end = std::chrono::high_resolution_clock::now();
-  const auto duration =
-      std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-  return {parity, duration};
+void QueryServiceServer::HandleMultipleQueries(
+    const std::future<void>& stop_signal) {
+  while (stop_signal.wait_for(std::chrono::milliseconds(5)) ==
+         std::future_status::timeout) {
+    HandleQueryRequest();
+  }
 }
 
-std::vector<uint8_t> QueryServiceServer::HandleSetParityQuery(
+void QueryServiceServer::HandleQueryRequest() {
+  const auto indices = DeserializeSetParityQuery(
+      context_->Recv(context_->NextRank(), "SetParityQuery"));
+
+  const std::vector<uint8_t> parity = ProcessSetParityQuery(indices);
+  context_->SendAsync(context_->NextRank(), SerializeSetParityResponse(parity),
+                      "SetParityResponse");
+}
+
+std::vector<uint8_t> QueryServiceServer::ProcessSetParityQuery(
     const std::vector<uint64_t>& indices) {
   DBEntry parity = DBEntry::ZeroEntry(entry_size_);
   for (const auto& index : indices) {
     DBEntry entry = DBAccess(index);
     parity.Xor(entry);
   }
-  return parity.data();
+  return parity.GetData();
 }
 
-DBEntry QueryServiceServer::DBAccess(const uint64_t id) {
-  if (const size_t num_entries = db_.size() / entry_size_; id < num_entries) {
+DBEntry QueryServiceServer::DBAccess(const uint64_t idx) {
+  if (idx < entry_num_) {
     std::vector<uint8_t> slice(entry_size_);
-    std::copy(db_.begin() + id * entry_size_,
-              db_.begin() + (id + 1) * entry_size_, slice.begin());
+    std::copy(db_.begin() + idx * entry_size_,
+              db_.begin() + (idx + 1) * entry_size_, slice.begin());
     return DBEntry::DBEntryFromSlice(slice);
   }
-  SPDLOG_ERROR("DBAccess: id {} out of range", id);
+  SPDLOG_ERROR("DBAccess: idx {} out of range", idx);
   return DBEntry::ZeroEntry(entry_size_);
 }
 

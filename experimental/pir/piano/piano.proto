@@ -2,29 +2,18 @@ syntax = "proto3";
 
 package pir.piano;
 
-message FetchFullDbMsg {
+message FetchFullDbProto {
   uint64 dummy = 1;
 }
 
-message DbChunk {
-  uint64 chunk_id = 1;
-  uint64 chunk_size = 2;
-  bytes chunks = 3;
+message DbChunkProto {
+  bytes chunks = 1;
 }
 
-message SetParityQueryMsg {
-  uint64 set_size = 1;
-  repeated uint64 indices = 2;
+message SetParityQueryProto {
+  repeated uint64 indices = 1;
 }
 
-message SetParityQueryResponse {
+message SetParityResponseProto {
   bytes parity = 1;
-  uint64 server_compute_time = 2;
-}
-
-message QueryRequest {
-  oneof request {
-    FetchFullDbMsg fetch_full_db = 1;
-    SetParityQueryMsg set_parity_query = 2;
-  }
 }

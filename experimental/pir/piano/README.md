@@ -1,28 +1,59 @@
-Piano: Extremely Simple, Single-server PIR with Sublinear Server Computation
+# Piano PIR: Single-Server Private Information Retrieval with Sublinear Computation
 
-论文地址：https://eprint.iacr.org/2023/452
+## Scheme Parameters and Notation
 
-论文开源实现：https://github.com/wuwuz/Piano-PIR-new
+- $\kappa$: Statistical security parameter
+- $\lambda$: Computational security parameter
+- $\alpha(\kappa)$: Arbitrarily small super-constant function
+- $n$: Database size
+- $Q = \sqrt{n} \log \kappa \cdot \alpha(\kappa)$: Total number of queries
 
-**方案概括**
+## Preprocessing Phase
 
-1. 采用特定于客户端的预处理模型（也称为订阅模型），让每个客户端在预处理期间下载并存储来自服务器的“提示”
+### Client-Side Initialization
 
-2. 实现了O(√n)的客户端存储，和O(√n)的在线通信与计算开销（平均到每个查询上）
-3. 服务器是诚实且好奇的，恶意服务器也无法侵害隐私，但会导致查询结果出错
-4. 方案包括两个阶段：预处理阶段和在线查询阶段
+1. **Primary Table Generation**
+   - Sample $M_1 = \sqrt{n} \log \kappa \cdot \alpha(\kappa)$ PRF keys, $\{sk_1, \ldots, sk_{M_1}\} \in \{0,1\}^{\lambda}$
+   - Initialize parities $\{p_1, \ldots, p_{M_1}\}$ to zeros
 
-**预处理阶段**
+2. **Backup Table Generation**
+   - For each chunk $j \in \{0, 1, \ldots, \sqrt{n} - 1\}$:
+      - Sample $M_2 = \log \kappa \cdot \alpha(\kappa)$ PRF keys $\{sk_{j,1}, \ldots, sk_{j,M_2}\}$
+      - Initialize chunk-specific parities $\{p_{j,1}, \ldots, p_{j,M_2}\}$ to zeros
 
-1. 服务器将数据库划分为O(√n)个块，客户端**流式**的从服务器获取每块数据，并每次只处理当前块中的元素，包括记录部分数据和计算奇偶校验位
-2. 客户端要存储的“提示”包括三类：主表，替换条目和备份表，主表共有O(√n)个，替换条目和备份表在每个块上要存储
-   O(1)个
+### Streaming Database Preprocessing
 
-**在线查询阶段**
-1. 客户端查询包含x的主表，将主表中的x替换为替换条目中该块的下一个可用元素，发送序列给服务器。服务器计算序列的奇偶校验位并返回，客户端在本地通过异或操作恢复出DB[x]
-2. 主表使用一次后就要丢弃，使用备份表进行替换，同时为了负载均衡，要保留(x，DB[x])
+For each database chunk $DB[j \sqrt{n} : (j+1) \sqrt{n}]$:
+- Update primary table parity: for $i \in [M_1]$, $p_i \leftarrow p_i \oplus DB[\text{Set}(sk_i)[j]]$
+- Store replacement entries: sample $M_2$ tuples $(r, DB[r])$ where $r$ is a random index from the current chunk
+- Update backup table parity: for $i \in \{0, 1, \ldots, \sqrt{n} - 1\} \setminus \{j\}$ and $k \in [M_2]$, $p_{i,k} \leftarrow p_{i,k} \oplus DB[\text{Set}(sk_{i,k})[j]]$
+- Delete current chunk from local storage
 
-**具体实现**
-1. 客户端不存储完整的序列，而是只存储tag，通过msk和PRF扩展出完整的序列
-2. 每个块都有O(1)个备份表，备份表中该块对应的DB[x]没有参与计算奇偶校验位，以实现快速替换
-3. 本地保存查询记录，当有重复查询时在本地查询，并发送随机序列给服务器
+## Online Query Phase
+
+Query Protocol for Index $x \in \{0, 1, \ldots, n-1\}$
+
+1. **Query Execution**
+   - Find primary table hint $T_i = ((sk_i, x^{\prime}), p_i)$ where $x \in \text{Set}(sk_i, x^{\prime})$
+   - Locate chunk $j^* = \text{chunk}(x)$
+   - Find first unused replacement entry $(r, DB[r])$
+   - Send set $S' = S \setminus \{j^* \to r\}$ to server
+   - Server returns $q = \bigoplus_{k \in S'} DB[k]$
+   - Compute answer $\beta = q \oplus p_i \oplus DB[r]$
+
+2. **Table Refresh Mechanism**
+   - Locate next unused backup entry $(sk_{j^*,k}, p_{j^*,k})$
+   - If no entry exists, generate random $sk_{j^*,k}$ with $p_{j^*,k} = 0$
+   - Update primary table with new entry: $((sk_{j^*,k}, x), p_{j^*,k} \oplus \beta)$
+
+## Theoretical Guarantees
+
+- **Client Storage**: $O(\sqrt{n})$
+- **Server Computation**: $O(\sqrt{n})$
+- **Communication Overhead**: $O(\sqrt{n})$
+- **Query Complexity**: $O(\sqrt{n})$
+
+## References
+
+- **Paper**: [Piano PIR](https://eprint.iacr.org/2023/452)
+- **Implementation**: [GitHub Repository](https://github.com/wuwuz/Piano-PIR-new)

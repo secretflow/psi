@@ -27,7 +27,7 @@ cmake(
         "APSI_USE_LOG4CPLUS": "ON",
         "APSI_USE_ZMQ": "ON",
         "CMAKE_INSTALL_LIBDIR": "lib",
-        "EXT_BUILD_DEPS": "$$EXT_BUILD_DEPS",
+        "EXT_BUILD_DEPS": "$EXT_BUILD_DEPS",
     },
     generate_args = ["-GNinja"],
     lib_source = "@apsi//:all",

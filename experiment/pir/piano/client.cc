@@ -1,4 +1,4 @@
-#include "experimental/pir/piano/client.h"
+#include "experiment/pir/piano/client.h"
 
 namespace pir::piano {
 
@@ -22,9 +22,9 @@ void QueryServiceClient::Initialize() {
   // Maximum number of queries supported by a single preprocessing
   // Let α(κ) be any super-constant function, i.e., α(κ) = w(1)
   // Chosen log(log(κ)): grows slowly but surely > any constant as κ → ∞
-  total_query_num_ =
-      static_cast<uint64_t>(std::sqrt(static_cast<double>(entry_num_)) *
-                            natural_log_k_ * std::log(natural_log_k_));
+  total_query_num_ = static_cast<uint64_t>(
+      std::sqrt(static_cast<double>(entry_num_)) * kStatisticalSecurityLn *
+      std::log(kStatisticalSecurityLn));
 
   std::tie(chunk_size_, set_size_) = GenChunkParams(entry_num_);
 
@@ -42,7 +42,8 @@ void QueryServiceClient::Initialize() {
   // The probability that the client runs out of hints in a backup group is
   // negligible in κ
   backup_set_num_per_chunk_ = static_cast<uint64_t>(
-      static_cast<double>(log2_k_) * natural_log_k_ * std::log(natural_log_k_));
+      static_cast<double>(kStatisticalSecurityLog2) * kStatisticalSecurityLn *
+      std::log(kStatisticalSecurityLn));
 
   backup_set_num_per_chunk_ =
       (backup_set_num_per_chunk_ + thread_num_ - 1) / thread_num_ * thread_num_;
@@ -112,9 +113,9 @@ void QueryServiceClient::FetchFullDB() {
 
     // Make sure all sets are covered
     const uint64_t primary_set_per_thread =
-        ((primary_set_num_ + thread_num_ - 1) / thread_num_) + 1;
+        (primary_set_num_ + thread_num_ - 1) / thread_num_;
     const uint64_t backup_set_per_thread =
-        ((total_backup_set_num_ + thread_num_ - 1) / thread_num_) + 1;
+        (total_backup_set_num_ + thread_num_ - 1) / thread_num_;
 
     for (uint64_t tid = 0; tid < thread_num_; tid++) {
       uint64_t start_index = tid * primary_set_per_thread;
@@ -141,11 +142,15 @@ void QueryServiceClient::FetchFullDB() {
 
         // Update the parities for the backup hints
         for (uint64_t j = start_index_backup; j < end_index_backup; j++) {
-          const auto tmp =
-              PRFEvalWithLongKeyAndTag(long_key_, local_backup_sets_[j].tag, i);
-          const auto offset = tmp & (chunk_size_ - 1);
-          local_backup_sets_[j].parity_after_puncture.XorFromRaw(
-              &db_chunk[offset * entry_size_]);
+          // Skip if backup set belongs to chunk i
+          if (j < i * backup_set_num_per_chunk_ ||
+              j >= (i + 1) * backup_set_num_per_chunk_) {
+            const auto tmp = PRFEvalWithLongKeyAndTag(
+                long_key_, local_backup_sets_[j].tag, i);
+            const auto offset = tmp & (chunk_size_ - 1);
+            local_backup_sets_[j].parity_after_puncture.XorFromRaw(
+                &db_chunk[offset * entry_size_]);
+          }
         }
       });
     }
@@ -167,18 +172,6 @@ void QueryServiceClient::FetchFullDB() {
         const auto entry = DBEntry::DBEntryFromSlice(entry_slice);
         local_miss_elements_[j + (i * chunk_size_)] = entry;
       }
-    }
-
-    // For the i-th group of backups, leave the i-th chunk as blank
-    // To do that, we just XOR the i-th chunk's value again
-    for (uint64_t k = 0; k < backup_set_num_per_chunk_; k++) {
-      const auto tag = local_backup_set_groups_[i].sets[k].get().tag;
-      const auto tmp = PRFEvalWithLongKeyAndTag(long_key_, tag, i);
-      const auto offset = tmp & (chunk_size_ - 1);
-      local_backup_set_groups_[i]
-          .sets[k]
-          .get()
-          .parity_after_puncture.XorFromRaw(&db_chunk[offset * entry_size_]);
     }
 
     // Store the replacement

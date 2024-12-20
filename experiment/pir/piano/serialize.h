@@ -2,10 +2,10 @@
 
 #include <vector>
 
-#include "experimental/pir/piano/util.h"
+#include "experiment/pir/piano/util.h"
 #include "yacl/base/buffer.h"
 
-#include "experimental/pir/piano/piano.pb.h"
+#include "experiment/pir/piano/piano.pb.h"
 
 namespace pir::piano {
 

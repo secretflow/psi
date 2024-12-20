@@ -7,8 +7,8 @@
 #include <memory>
 #include <vector>
 
-#include "experimental/pir/piano/serialize.h"
-#include "experimental/pir/piano/util.h"
+#include "experiment/pir/piano/serialize.h"
+#include "experiment/pir/piano/util.h"
 #include "yacl/link/context.h"
 
 namespace pir::piano {

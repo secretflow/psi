@@ -6,9 +6,9 @@
 #include <vector>
 
 #include "benchmark/benchmark.h"
-#include "experimental/pir/piano/client.h"
-#include "experimental/pir/piano/server.h"
-#include "experimental/pir/piano/util.h"
+#include "experiment/pir/piano/client.h"
+#include "experiment/pir/piano/server.h"
+#include "experiment/pir/piano/util.h"
 #include "yacl/link/context.h"
 #include "yacl/link/test_util.h"
 

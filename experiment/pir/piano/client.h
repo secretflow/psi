@@ -5,12 +5,19 @@
 #include <cstdint>
 #include <utility>
 
-#include "experimental/pir/piano/serialize.h"
-#include "experimental/pir/piano/util.h"
+#include "experiment/pir/piano/serialize.h"
+#include "experiment/pir/piano/util.h"
 #include "yacl/crypto/tools/prg.h"
 #include "yacl/link/context.h"
 
 namespace pir::piano {
+
+// Statistical security parameter as log base 2
+constexpr uint64_t kStatisticalSecurityLog2 = 40;
+
+// Natural logarithm of the security parameter, ln(x) = log2(x) * ln(2)
+constexpr double kStatisticalSecurityLn =
+    std::log(2) * static_cast<double>(kStatisticalSecurityLog2);
 
 struct LocalSet {
   /**
@@ -108,12 +115,6 @@ class QueryServiceClient {
   uint64_t GetTotalQueryNumber() const { return total_query_num_; };
 
  private:
-  // Statistical security parameter, representing log base 2
-  const uint64_t log2_k_ = 40;
-  // Converts log2_k_ from base-2 to natural logarithm using the change of base
-  // formula
-  const double natural_log_k_ = std::log(2) * static_cast<double>(log2_k_);
-
   std::shared_ptr<yacl::link::Context> context_;
   uint64_t total_query_num_{};
   uint64_t entry_num_{};

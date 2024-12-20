@@ -1,4 +1,4 @@
-#include "experimental/pir/piano/server.h"
+#include "experiment/pir/piano/server.h"
 
 namespace pir::piano {
 

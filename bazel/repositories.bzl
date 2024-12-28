@@ -27,7 +27,6 @@ def psi_deps():
     _com_github_zeromq_libzmq()
     _com_github_open_source_parsers_jsoncpp()
 
-
 def _com_github_microsoft_apsi():
     maybe(
         http_archive,

@@ -34,7 +34,7 @@ cmake(
     out_include_dir = "include/APSI-0.11",
     out_static_libs = ["libapsi-0.11.a"],
     deps = [
-        "@com_github_log4cplus_log4cplus//:log4cplus",
+        "@log4cplus//:log4cplus",
         "@microsoft_gsl//:Microsoft.GSL",
         "@com_github_open_source_parsers_jsoncpp//:jsoncpp",
         "@com_github_zeromq_cppzmq//:cppzmq",

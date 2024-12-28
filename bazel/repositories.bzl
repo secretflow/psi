@@ -16,10 +16,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 
 def psi_deps():
-    _com_github_facebook_zstd()
-    _com_github_microsoft_seal()
     _com_github_microsoft_apsi()
-    _com_github_microsoft_gsl()
     _com_github_microsoft_kuku()
     _com_google_flatbuffers()
 
@@ -31,33 +28,6 @@ def psi_deps():
     _com_github_log4cplus_log4cplus()
     _com_github_open_source_parsers_jsoncpp()
 
-def _com_github_facebook_zstd():
-    maybe(
-        http_archive,
-        name = "zstd",
-        build_file = "//bazel:zstd.BUILD",
-        strip_prefix = "zstd-1.5.5",
-        sha256 = "98e9c3d949d1b924e28e01eccb7deed865eefebf25c2f21c702e5cd5b63b85e1",
-        type = ".tar.gz",
-        urls = [
-            "https://github.com/facebook/zstd/archive/refs/tags/v1.5.5.tar.gz",
-        ],
-    )
-
-def _com_github_microsoft_seal():
-    maybe(
-        http_archive,
-        name = "seal",
-        sha256 = "af9bf0f0daccda2a8b7f344f13a5692e0ee6a45fea88478b2b90c35648bf2672",
-        strip_prefix = "SEAL-4.1.1",
-        type = "tar.gz",
-        patch_args = ["-p1"],
-        patches = ["@psi//bazel/patches:seal.patch"],
-        urls = [
-            "https://github.com/microsoft/SEAL/archive/refs/tags/v4.1.1.tar.gz",
-        ],
-        build_file = "@psi//bazel:seal.BUILD",
-    )
 
 def _com_github_microsoft_apsi():
     maybe(
@@ -77,19 +47,6 @@ def _com_github_microsoft_apsi():
         patch_cmds = [
             "rm -rf common/apsi/fourq",
         ],
-    )
-
-def _com_github_microsoft_gsl():
-    maybe(
-        http_archive,
-        name = "com_github_microsoft_gsl",
-        sha256 = "f0e32cb10654fea91ad56bde89170d78cfbf4363ee0b01d8f097de2ba49f6ce9",
-        strip_prefix = "GSL-4.0.0",
-        type = "tar.gz",
-        urls = [
-            "https://github.com/microsoft/GSL/archive/refs/tags/v4.0.0.tar.gz",
-        ],
-        build_file = "@psi//bazel:microsoft_gsl.BUILD",
     )
 
 def _com_github_microsoft_kuku():

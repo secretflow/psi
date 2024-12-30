@@ -50,6 +50,10 @@ bazel_dep(name = "libdivide", version = "5.0")
 bazel_dep(name = "emp-tool", version = "0.2.5")
 bazel_dep(name = "sparsehash", version = "2.0.4")
 bazel_dep(name = "sse2neon", version = "1.7.0-20240330-8df2f48")
+bazel_dep(name = "zstd", version = "1.5.6")
+bazel_dep(name = "gsl", version = "4.0.0")
+bazel_dep(name = "log4cplus", version = "2.1.1")
+bazel_dep(name = "seal", version = "4.1.1")
 
 # non mododule dependencies
 non_module_dependencies = use_extension("//bazel:defs.bzl", "non_module_dependencies")
@@ -59,8 +63,6 @@ use_repo(
     "curve25519-donna",
     "kuku",
     "perfetto",
-    "seal",
-    "zstd",
 )
 
 new_local_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:local.bzl", "new_local_repository")

@@ -33,5 +33,5 @@ cmake(
     lib_source = "@kuku//:all",
     out_include_dir = "include/Kuku-2.1",
     out_static_libs = ["libkuku-2.1.a"],
-    deps = ["@microsoft_gsl//:Microsoft.GSL"],
+    deps = ["@gsl//:Microsoft.GSL"],
 )

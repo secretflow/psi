@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package pir.piano;
+
+message FetchFullDbProto {
+  uint64 dummy = 1;
+}
+
+message DbChunkProto {
+  bytes chunks = 1;
+}
+
+message SetParityQueryProto {
+  repeated uint64 indices = 1;
+}
+
+message SetParityResponseProto {
+  bytes parity = 1;
+}

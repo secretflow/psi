@@ -150,6 +150,10 @@ class Params {
   Params() = default;
 
   Params(const Params& other) = default;
+  Params& operator=(const Params& other) = default;
+
+  Params(Params&& other) = default;
+  Params& operator=(Params&& other) = default;
 
   static Params ParamsWithModuli(const Params& params,
                                  std::vector<uint64_t> moduli);

@@ -88,8 +88,7 @@ SpiralQuery SpiralQuery::DeserializeRng(const Params& params,
 
 void SpiralClient::Init() {
   // first init q2_params_
-  q2_params_ = std::move(
-      Params::ParamsWithModuli(params_, {kQ2Values[params_.Q2Bits()]}));
+  q2_params_ = Params::ParamsWithModuli(params_, {kQ2Values[params_.Q2Bits()]});
 
   auto [sk_gsw_rows, sk_gsw_cols] = params_.GetSkGswDims();
   auto [sk_regev_rows, sk_regev_cols] = params_.GetSkRegDims();

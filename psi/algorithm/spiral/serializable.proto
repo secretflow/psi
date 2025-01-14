@@ -19,9 +19,9 @@ package psi.spiral;
 
 // for Raw and Ntt
 message PolyMatrixProto {
-  uint64 rows = 1; 
+  uint64 rows = 1;
   uint64 cols = 2;
-  repeated uint64 data = 3; 
+  repeated uint64 data = 3;
 }
 
 message SpiralQueryProto {
@@ -30,7 +30,6 @@ message SpiralQueryProto {
 }
 
 message PublicKeysProto {
-
   repeated PolyMatrixProto v_packing = 1;
 
   repeated PolyMatrixProto v_expansion_left = 2;

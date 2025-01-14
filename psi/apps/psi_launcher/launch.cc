@@ -184,6 +184,9 @@ PirResultReport RunPir(const ApsiReceiverConfig& apsi_receiver_config,
       apsi_receiver_config.experimental_enable_bucketize();
   options.experimental_bucket_cnt =
       apsi_receiver_config.experimental_bucket_cnt();
+  options.query_batch_size = apsi_receiver_config.query_batch_size()
+                                 ? apsi_receiver_config.query_batch_size()
+                                 : 1;
 
   int* match_cnt = new int(0);
 

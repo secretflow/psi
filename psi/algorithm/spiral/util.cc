@@ -25,11 +25,10 @@ Params GetLargerParam() {
   double noise_width{6.4};
 
   PolyMatrixParams poly_matrix_params(2, 256, 22, 3, 5, 5, 7);
-  QueryParams query_params(9, 6, 4, 32768);
-  std::size_t version{0};
+  QueryParams query_params(9, 6, 4);
+
   return Params(poly_len, std::move(moduli), noise_width,
-                std::move(poly_matrix_params), std::move(query_params),
-                version);
+                std::move(poly_matrix_params), std::move(query_params));
 }
 
 Params GetTestParam() {
@@ -38,11 +37,10 @@ Params GetTestParam() {
   double noise_width{6.4};
 
   PolyMatrixParams poly_matrix_params(2, 256, 20, 4, 8, 56, 8);
-  QueryParams query_params(9, 6, 1, 2048);
-  std::size_t version{0};
+  QueryParams query_params(9, 6, 1);
+
   return Params(poly_len, std::move(moduli), noise_width,
-                std::move(poly_matrix_params), std::move(query_params),
-                version);
+                std::move(poly_matrix_params), std::move(query_params));
 }
 
 Params GetPerformanceImproveParam() {
@@ -51,12 +49,11 @@ Params GetPerformanceImproveParam() {
 
   double noise_width{6.4};
 
-  PolyMatrixParams poly_matrix_params(2, 256, 21, 4, 8, 8, 8);
-  QueryParams query_params(9, 6, 1, 2048);
-  std::size_t version{0};
+  PolyMatrixParams poly_matrix_params(2, 256, 21, 4, 8, 8, 4);
+  QueryParams query_params(9, 6, 1);
+
   return Params(poly_len, std::move(moduli), noise_width,
-                std::move(poly_matrix_params), std::move(query_params),
-                version);
+                std::move(poly_matrix_params), std::move(query_params));
 }
 
 Params GetFastExpansionTestingParam() {
@@ -64,15 +61,12 @@ Params GetFastExpansionTestingParam() {
   std::vector<std::uint64_t> moduli{268369921, 249561089};
   double noise_width{6.4};
 
-  PolyMatrixParams poly_matrix_params(2, 256, 20, 4, 8, 8, 8);
+  PolyMatrixParams poly_matrix_params(2, 256, 20, 4, 8, 8, 6);
 
-  QueryParams query_params(6, 2, 1, 8192);
-
-  std::size_t version{0};
+  QueryParams query_params(6, 2, 1);
 
   return Params(poly_len, std::move(moduli), noise_width,
-                std::move(poly_matrix_params), std::move(query_params),
-                version);
+                std::move(poly_matrix_params), std::move(query_params));
 }
 
 std::size_t CalcIndex(const std::vector<std::size_t>& indices,

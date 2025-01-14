@@ -106,7 +106,7 @@ size_t EcdhOprfPsiServer::FullEvaluate(
   std::vector<size_t> shuffle_indices;
   PsiDataBatch batch;
   size_t i;
-  size_t local_batch_count;
+  size_t local_batch_count = 0;
   while (!stop_flag) {
     if (stop_flag) {
       break;

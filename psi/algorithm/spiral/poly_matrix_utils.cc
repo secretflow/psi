@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "psi/algorithm/spiral/poly_matrix_utils.h"
+
 #ifdef __x86_64__
 #include <immintrin.h>
 #elif defined(__aarch64__)
@@ -25,6 +27,7 @@
 
 #include "psi/algorithm/spiral/arith/arith_params.h"
 #include "psi/algorithm/spiral/arith/ntt.h"
+#include "psi/algorithm/spiral/discrete_gaussian.h"
 #include "psi/algorithm/spiral/poly_matrix.h"
 #include "psi/algorithm/spiral/util.h"
 
@@ -155,6 +158,36 @@ void ReducePoly(const Params& params, absl::Span<uint64_t> res) {
     for (size_t i = 0; i < params.PolyLen(); ++i) {
       size_t idx = c * params.PolyLen() + i;
       res[idx] = arith::BarrettCoeffU64(params, res[idx], c);
+    }
+  }
+}
+
+PolyMatrixRaw Noise(const Params& params, size_t rows, size_t cols,
+                    const DiscreteGaussian& dg,
+                    yacl::crypto::Prg<uint64_t>& prg) {
+  PolyMatrixRaw out = PolyMatrixRaw::Zero(params.PolyLen(), rows, cols);
+  dg.SampleMatrix(params, out, prg);
+  return out;
+}
+
+void GenTernaryMatrix(const Params& params, PolyMatrixRaw& mat, size_t hamming,
+                      yacl::crypto::Prg<uint64_t>& prg) {
+  auto modulus = params.Modulus();
+
+  uint128_t mt_seed;
+  prg.Fill(
+      absl::MakeSpan(reinterpret_cast<uint8_t*>(&mt_seed), sizeof(mt_seed)));
+  std::mt19937 rng(mt_seed);
+  // todo: change the style
+  for (size_t i = 0; i < mat.Rows(); ++i) {
+    for (size_t j = 0; j < mat.Cols(); ++j) {
+      auto poly = mat.Poly(i, j);
+      for (size_t k = 0; k < hamming; ++k) {
+        poly[k] = 1;
+        poly[k + hamming] = modulus - 1;
+      }
+      // shuffle
+      std::shuffle(poly.begin(), poly.end(), rng);
     }
   }
 }

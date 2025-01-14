@@ -1,0 +1,48 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2024, SecretFlow authors
+# This file is distributed under the same license as the SecretFlow PSI
+# Library package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: SecretFlow PSI Library \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-11-27 20:55+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.15.0\n"
+
+#: ../../index.rst:7
+msgid "Welcome to SecretFlow PSI Library's documentation!"
+msgstr "欢迎查看SecretFlow PSI的相关文档"
+
+#: ../../index.rst:9
+msgid ""
+"This is the repo of Private Set Intersection(PSI) and Private Information"
+" Retrieval(PIR) from SecretFlow team, which provides PSI and PIR "
+"functionality for `SecretFlow "
+"<https://www.secretflow.org.cn/docs/secretflow>`_ , `SCQL "
+"<https://www.secretflow.org.cn/docs/scql/latest/zh-Hans>`_  and "
+"`SecretPad <https://www.secretflow.org.cn/docs/quickstart/mvp-"
+"platform>`_."
+msgstr ""
+"该仓包含SecretFlow项目中隐私求交（PSI）和隐匿查询（PIR）相关的代码, "
+"`SecretFlow "
+"<https://www.secretflow.org.cn/docs/secretflow>`_ , `SCQL "
+"<https://www.secretflow.org.cn/docs/scql/latest/zh-Hans>`_  和 "
+"`SecretPad <https://www.secretflow.org.cn/docs/quickstart/mvp-"
+"platform>`_ 的PSI功能都是通过本仓实现的。"
+
+#: ../../index.rst:11
+msgid ""
+"This repo is formerly psi/pir part from `secretflow/spu "
+"<https://github.com/secretflow/spu>`_ repo."
+msgstr ""
+"本仓之前是 `secretflow/spu "
+"<https://github.com/secretflow/spu>`_ 的一部分。"
+

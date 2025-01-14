@@ -1,0 +1,836 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2024, SecretFlow authors
+# This file is distributed under the same license as the SecretFlow PSI
+# Library package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: SecretFlow PSI Library \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-12-26 20:09+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.15.0\n"
+
+#: ../../reference/launch_config.md:1
+msgid "Launch Configuration"
+msgstr ""
+
+#: ../../reference/launch_config.md:3
+msgid ""
+"Please check psi.BucketPsiConfig at **PSI v1 Configuration**. Please "
+"check psi.v2.PsiConfig and psi.v2.UbPsiConfig at **PSI v2 "
+"Configuration**."
+msgstr ""
+
+#: ../../reference/launch_config.md:6
+msgid "Table of Contents"
+msgstr ""
+
+#: ../../reference/launch_config.md:10 ../../reference/launch_config.md:18
+#: ../../reference/launch_config.md:32 ../../reference/launch_config.md:47
+#: ../../reference/launch_config.md:73 ../../reference/launch_config.md:168
+msgid "Messages"
+msgstr ""
+
+#: ../../reference/launch_config.md:11
+msgid "[LaunchConfig](#launchconfig)"
+msgstr ""
+
+#: ../../reference/launch_config.md:19
+msgid "[AllocatedPorts](#allocatedports)"
+msgstr ""
+
+#: ../../reference/launch_config.md:20
+msgid "[ClusterDefine](#clusterdefine)"
+msgstr ""
+
+#: ../../reference/launch_config.md:21
+msgid "[Party](#party)"
+msgstr ""
+
+#: ../../reference/launch_config.md:22
+msgid "[Port](#port)"
+msgstr ""
+
+#: ../../reference/launch_config.md:23
+msgid "[Service](#service)"
+msgstr ""
+
+#: ../../reference/launch_config.md:24
+msgid "[TaskInputConfig](#taskinputconfig)"
+msgstr ""
+
+#: ../../reference/launch_config.md:25
+msgid "[TaskInputConfig.SfPsiConfigMapEntry](#taskinputconfigsfpsiconfigmapentry)"
+msgstr ""
+
+#: ../../reference/launch_config.md:33
+msgid "[ContextDescProto](#contextdescproto)"
+msgstr ""
+
+#: ../../reference/launch_config.md:34
+msgid "[PartyProto](#partyproto)"
+msgstr ""
+
+#: ../../reference/launch_config.md:35
+msgid "[RetryOptionsProto](#retryoptionsproto)"
+msgstr ""
+
+#: ../../reference/launch_config.md:36
+msgid "[SSLOptionsProto](#ssloptionsproto)"
+msgstr ""
+
+#: ../../reference/launch_config.md:41
+msgid "[Scalar Value Types](#scalar-value-types)"
+msgstr ""
+
+#: ../../reference/launch_config.md:50
+msgid "LaunchConfig"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "Field"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "Type"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "Description"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "link_config"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "[ yacl.link.ContextDescProto](#yacllinkcontextdescproto)"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "Configs for network."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "self_link_party"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "[ string](#string)"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "With link_config."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid ""
+"[**oneof**](https://developers.google.com/protocol-"
+"buffers/docs/proto3#oneof) runtime_config.legacy_psi_config"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "[ BucketPsiConfig](#bucketpsiconfig)"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "Please check at psi.proto."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid ""
+"[**oneof**](https://developers.google.com/protocol-"
+"buffers/docs/proto3#oneof) runtime_config.psi_config"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "[ v2.PsiConfig](#v2psiconfig)"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "Please check at psi_v2.proto."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid ""
+"[**oneof**](https://developers.google.com/protocol-"
+"buffers/docs/proto3#oneof) runtime_config.ub_psi_config"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "[ v2.UbPsiConfig](#v2ubpsiconfig)"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid ""
+"[**oneof**](https://developers.google.com/protocol-"
+"buffers/docs/proto3#oneof) runtime_config.apsi_sender_config"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "[ ApsiSenderConfig](#apsisenderconfig)"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "Please check at pir.proto."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid ""
+"[**oneof**](https://developers.google.com/protocol-"
+"buffers/docs/proto3#oneof) runtime_config.apsi_receiver_config"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "[ ApsiReceiverConfig](#apsireceiverconfig)"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "none"
+msgstr ""
+
+#: ../../reference/launch_config.md:67 ../../reference/launch_config.md:162
+#: ../../reference/launch_config.md:251
+msgid "Enums"
+msgstr ""
+
+#: ../../reference/launch_config.md:76
+msgid "AllocatedPorts"
+msgstr ""
+
+#: ../../reference/launch_config.md:77
+msgid "AllocatedPorts represents allocated ports for pod."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "ports"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "[repeated Port](#port)"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "Allocated ports."
+msgstr ""
+
+#: ../../reference/launch_config.md:87
+msgid "ClusterDefine"
+msgstr ""
+
+#: ../../reference/launch_config.md:88
+msgid "ClusterDefine represents the information of all parties."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "parties"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "[repeated Party](#party)"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "Basic information of all parties."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "self_party_idx"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "[ int32](#int32)"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "index of self party."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "self_endpoint_idx"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "index of self endpoint."
+msgstr ""
+
+#: ../../reference/launch_config.md:100
+msgid "Party"
+msgstr ""
+
+#: ../../reference/launch_config.md:101
+msgid "Party represents the basic information of the party."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "name"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "Name of party."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "role"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "role carried by party. Examples: client, server..."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "services"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "[repeated Service](#service)"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "List of services exposed by pod."
+msgstr ""
+
+#: ../../reference/launch_config.md:113
+msgid "Port"
+msgstr ""
+
+#: ../../reference/launch_config.md:114
+msgid "Port represents an allocated port for pod."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "Each named port in a pod must have a unique name."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "port"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "Number of port allocated for pod."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "scope"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid ""
+"Scope of port. Must be Cluster,Domain,Local. Defaults to \"Local\". "
+"+optional"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "protocol"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "Protocol for port. Must be HTTP,GRPC. Defaults to \"HTTP\". +optional"
+msgstr ""
+
+#: ../../reference/launch_config.md:127
+msgid "Service"
+msgstr ""
+
+#: ../../reference/launch_config.md:128
+msgid "Service represents the service address corresponding to the port."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "port_name"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "Name of port."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "endpoints"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "[repeated string](#string)"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "Endpoint list corresponding to the port."
+msgstr ""
+
+#: ../../reference/launch_config.md:139
+msgid "TaskInputConfig"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "sf_psi_config_map"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid ""
+"[map "
+"TaskInputConfig.SfPsiConfigMapEntry](#taskinputconfigsfpsiconfigmapentry)"
+msgstr ""
+
+#: ../../reference/launch_config.md:150
+msgid "TaskInputConfig.SfPsiConfigMapEntry"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "key"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "value"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "[ psi.LaunchConfig](#psilaunchconfig)"
+msgstr ""
+
+#: ../../reference/launch_config.md:171
+msgid "ContextDescProto"
+msgstr ""
+
+#: ../../reference/launch_config.md:172
+msgid "Configuration for link config."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "id"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "the UUID of this communication. optional"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "[repeated PartyProto](#partyproto)"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "party description, describes the world."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "connect_retry_times"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "[ uint32](#uint32)"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "connect to mesh retry time."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "connect_retry_interval_ms"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "connect to mesh retry interval."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "recv_timeout_ms"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "[ uint64](#uint64)"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "recv timeout in milliseconds."
+msgstr ""
+
+#: ../../reference/launch_config.md:183
+msgid ""
+"'recv time' is the max time that a party will wait for a given event. for"
+" example:"
+msgstr ""
+
+#: ../../reference/launch_config.md:185
+msgid ""
+"begin recv end recv |--------|-------recv-"
+"time----------|------------------| alice's timeline"
+msgstr ""
+
+#: ../../reference/launch_config.md:187
+msgid ""
+"begin send end send |-----busy-"
+"work-------------|-------------|------------| bob's timeline"
+msgstr ""
+
+#: ../../reference/launch_config.md:189
+msgid ""
+"in above case, when alice begins recv for a specific event, bob is still "
+"busy doing its job, when alice's wait time exceed wait_timeout_ms, it "
+"raise exception, although bob now is starting to send data."
+msgstr ""
+
+#: ../../reference/launch_config.md:191
+msgid ""
+"so for long time work(that one party may wait for the others for very "
+"long time), this value should be changed accordingly. | | "
+"http_max_payload_size | [ uint32](#uint32) | http max payload size, if a "
+"single http request size is greater than this limit, it will be unpacked "
+"into small chunks then reassembled."
+msgstr ""
+
+#: ../../reference/launch_config.md:194
+msgid ""
+"This field does affect performance. Please choose wisely. | | "
+"http_timeout_ms | [ uint32](#uint32) | a single http request timetout. | "
+"| throttle_window_size | [ uint32](#uint32) | throttle window size for "
+"channel. if there are more than limited size messages are flying, "
+"`SendAsync` will block until messages are processed or throw exception "
+"after wait for `recv_timeout_ms` | | brpc_channel_protocol | [ "
+"string](#string) | BRPC client channel protocol. | | "
+"brpc_channel_connection_type | [ string](#string) | BRPC client channel "
+"connection type. | | enable_ssl | [ bool](#bool) | ssl options for link "
+"channel. | | client_ssl_opts | [ SSLOptionsProto](#ssloptionsproto) | ssl"
+" configs for channel this config is ignored if enable_ssl == false; | | "
+"server_ssl_opts | [ SSLOptionsProto](#ssloptionsproto) | ssl configs for "
+"service this config is ignored if enable_ssl == false; | | "
+"chunk_parallel_send_size | [ uint32](#uint32) | chunk parallel send size "
+"for channel. if need chunked send when send message, the max paralleled "
+"send size is chunk_parallel_send_size | | retry_opts | [ "
+"RetryOptionsProto](#retryoptionsproto) | retry options |"
+msgstr ""
+
+#: ../../reference/launch_config.md:208
+msgid "PartyProto"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "host"
+msgstr ""
+
+#: ../../reference/launch_config.md:220
+msgid "RetryOptionsProto"
+msgstr ""
+
+#: ../../reference/launch_config.md:221
+msgid "Retry options."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "max_retry"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "max retry count default 3"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "retry_interval_ms"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "time between retries at first retry default 1 second"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "retry_interval_incr_ms"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "The amount of time to increase the interval between retries default 2s"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "max_retry_interval_ms"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "The maximum interval between retries default 10s"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "error_codes"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "[repeated uint32](#uint32)"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "retry on these brpc error codes, if empty, retry on all codes"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "http_codes"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "retry on these http codes, if empty, retry on all http codes"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "aggressive_retry"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "[ bool](#bool)"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid ""
+"do aggressive retry， this means that retries will be made on additional "
+"error codes"
+msgstr ""
+
+#: ../../reference/launch_config.md:237
+msgid "SSLOptionsProto"
+msgstr ""
+
+#: ../../reference/launch_config.md:238
+msgid "SSL options."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "certificate_path"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "Certificate file path"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "private_key_path"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "Private key file path"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "verify_depth"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid ""
+"Set the maximum depth of the certificate chain for verification If 0, "
+"turn off the verification"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "ca_file_path"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid ""
+"Set the trusted CA file to verify the peer's certificate If empty, use "
+"the system default CA files"
+msgstr ""
+
+#: ../../reference/launch_config.md:255
+msgid "Scalar Value Types"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid ".proto Type"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "Notes"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "C++ Type"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "Java Type"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "Python Type"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "<div><h4 id=\"double\" /></div><a name=\"double\" /> double"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "double"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "float"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "<div><h4 id=\"float\" /></div><a name=\"float\" /> float"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "<div><h4 id=\"int32\" /></div><a name=\"int32\" /> int32"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid ""
+"Uses variable-length encoding. Inefficient for encoding negative numbers "
+"– if your field is likely to have negative values, use sint32 instead."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "int32"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "int"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "<div><h4 id=\"int64\" /></div><a name=\"int64\" /> int64"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid ""
+"Uses variable-length encoding. Inefficient for encoding negative numbers "
+"– if your field is likely to have negative values, use sint64 instead."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "int64"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "long"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "int/long"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "<div><h4 id=\"uint32\" /></div><a name=\"uint32\" /> uint32"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "Uses variable-length encoding."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "uint32"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "<div><h4 id=\"uint64\" /></div><a name=\"uint64\" /> uint64"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "uint64"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "<div><h4 id=\"sint32\" /></div><a name=\"sint32\" /> sint32"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid ""
+"Uses variable-length encoding. Signed int value. These more efficiently "
+"encode negative numbers than regular int32s."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "<div><h4 id=\"sint64\" /></div><a name=\"sint64\" /> sint64"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid ""
+"Uses variable-length encoding. Signed int value. These more efficiently "
+"encode negative numbers than regular int64s."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "<div><h4 id=\"fixed32\" /></div><a name=\"fixed32\" /> fixed32"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid ""
+"Always four bytes. More efficient than uint32 if values are often greater"
+" than 2^28."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "<div><h4 id=\"fixed64\" /></div><a name=\"fixed64\" /> fixed64"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid ""
+"Always eight bytes. More efficient than uint64 if values are often "
+"greater than 2^56."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "<div><h4 id=\"sfixed32\" /></div><a name=\"sfixed32\" /> sfixed32"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "Always four bytes."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "<div><h4 id=\"sfixed64\" /></div><a name=\"sfixed64\" /> sfixed64"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "Always eight bytes."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "<div><h4 id=\"bool\" /></div><a name=\"bool\" /> bool"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "bool"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "boolean"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "<div><h4 id=\"string\" /></div><a name=\"string\" /> string"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "A string must always contain UTF-8 encoded or 7-bit ASCII text."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "string"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "String"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "str/unicode"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "<div><h4 id=\"bytes\" /></div><a name=\"bytes\" /> bytes"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "May contain any arbitrary sequence of bytes."
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "ByteString"
+msgstr ""
+
+#: ../../reference/launch_config.md
+msgid "str"
+msgstr ""
+

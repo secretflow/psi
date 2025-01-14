@@ -26,7 +26,6 @@
 
 #include "absl/types/span.h"
 #include "spdlog/spdlog.h"
-#include "yacl/base/aligned_vector.h"
 #include "yacl/base/exception.h"
 #include "yacl/utils/parallel.h"
 

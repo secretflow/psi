@@ -4,17 +4,18 @@ PSI v2 QuickStart
 Release Docker
 --------------
 
-Check official release docker image at `dockerhub <https://hub.docker.com/r/secretflow/psi-anolis8>`_. We also have mirrors at Alibaba Cloud: secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8.
+Check official release docker image at `dockerhub <https://hub.docker.com/r/secretflow/psi-anolis8>`_. We also have mirrors at Alibaba Cloud: `secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8`.
 
 
 Prepare data and config
 -----------------------
 
-Please check details of configs at :doc:`/reference/psi_v2_config`.
+Please check details of configs at :ref:`here <PsiConfig>`.
 
-To launch PSI, please check LaunchConfig at :doc:`/reference/launch_config` and fillin **runtime_config.psi_config**.
+To launch PSI, please check LaunchConfig at :doc:`/reference/launch_config`.
 
-.. code-block::
+
+.. code-block:: json
    :caption: receiver.config
 
         {
@@ -64,7 +65,7 @@ To launch PSI, please check LaunchConfig at :doc:`/reference/launch_config` and 
         }
 
 
-.. code-block::
+.. code-block:: json
    :caption: sender.config
 
         {
@@ -117,7 +118,7 @@ To launch PSI, please check LaunchConfig at :doc:`/reference/launch_config` and 
 You need to prepare following files:
 
 +------------------------+------------------------------------------------+-------------------------------------------------------------------------------+
-| File Name              | Location                                       | Description                                                                   | 
+| File Name              | Location                                       | Description                                                                   |
 +========================+================================================+===============================================================================+
 | receiver.config        | /tmp/receiver/receiver.config                  | Config for receiver.                                                          |
 +------------------------+------------------------------------------------+-------------------------------------------------------------------------------+
@@ -134,12 +135,12 @@ Run PSI
 
 In the first terminal, run the following command::
 
-    docker run -it  --rm  --network host --mount type=bind,source=/tmp/receiver,target=/root/receiver --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:0.1.0beta --config receiver/receiver.config
+    docker run -it  --rm  --network host --mount type=bind,source=/tmp/receiver,target=/root/receiver --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest --config receiver/receiver.config
 
 
 In the other terminal, run the following command simultaneously::
 
-    docker run -it  --rm  --network host --mount type=bind,source=/tmp/sender,target=/root/sender --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:0.1.0beta --config sender/sender.config
+    docker run -it  --rm  --network host --mount type=bind,source=/tmp/sender,target=/root/sender --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8:latest --config sender/sender.config
 
 
 Building from source
@@ -147,25 +148,25 @@ Building from source
 
 You could build psi binary with bazel::
 
-    bazel build psi/psi:main -c opt
+    bazel build //psi/apps/psi_launcher:main -c opt
 
 
 Then use binary with::
 
-    ./bazel-bin/psi/psi/main --config <config JSON file path>
+    ./bazel-bin/psi/apps/psi_launcher/main --config <config JSON file path>
 
 More examples
 -------------
 
-Please read https://github.com/secretflow/psi/tree/main/examples/psi/README.md
-Please check more demo configs at https://github.com/secretflow/psi/tree/main/examples/psi/config
+Please read `README <https://github.com/secretflow/psi/tree/main/examples/psi/README.md>`_,
+Please check more demo configs at `psi config <https://github.com/secretflow/psi/tree/main/examples/psi/config>`_.
 
 Ub PSI
 ------
 
-To launch PSI, please check LaunchConfig at :doc:`/reference/launch_config` and fillin **runtime_config.ub_psi_config**.
+To launch PSI, please check LaunchConfig at :doc:`/reference/launch_config` and :ref:`here <UbPsiConfig>`.
 
-Please read https://github.com/secretflow/psi/tree/main/examples/psi/README.md
+Please read `examples <https://github.com/secretflow/psi/tree/main/examples/psi/README.md>`_.
 
 Example configs are:
 

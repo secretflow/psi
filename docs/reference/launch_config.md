@@ -9,7 +9,21 @@ Please check psi.v2.PsiConfig and psi.v2.UbPsiConfig at **PSI v2 Configuration**
 
 - Messages
     - [LaunchConfig](#launchconfig)
-  
+
+
+
+
+
+
+- Messages
+    - [AllocatedPorts](#allocatedports)
+    - [ClusterDefine](#clusterdefine)
+    - [Party](#party)
+    - [Port](#port)
+    - [Service](#service)
+    - [TaskInputConfig](#taskinputconfig)
+    - [TaskInputConfig.SfPsiConfigMapEntry](#taskinputconfigsfpsiconfigmapentry)
+
 
 
 
@@ -20,7 +34,7 @@ Please check psi.v2.PsiConfig and psi.v2.UbPsiConfig at **PSI v2 Configuration**
     - [PartyProto](#partyproto)
     - [RetryOptionsProto](#retryoptionsproto)
     - [SSLOptionsProto](#ssloptionsproto)
-  
+
 
 
 
@@ -59,21 +73,103 @@ Please check psi.v2.PsiConfig and psi.v2.UbPsiConfig at **PSI v2 Configuration**
 ## Messages
 
 
+### AllocatedPorts
+AllocatedPorts represents allocated ports for pod.
+
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| ports | [repeated Port](#port) | Allocated ports. |
+ <!-- end Fields -->
+ <!-- end HasFields -->
+
+
+### ClusterDefine
+ClusterDefine represents the information of all parties.
+
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| parties | [repeated Party](#party) | Basic information of all parties. |
+| self_party_idx | [ int32](#int32) | index of self party. |
+| self_endpoint_idx | [ int32](#int32) | index of self endpoint. |
+ <!-- end Fields -->
+ <!-- end HasFields -->
+
+
+### Party
+Party represents the basic information of the party.
+
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| name | [ string](#string) | Name of party. |
+| role | [ string](#string) | role carried by party. Examples: client, server... |
+| services | [repeated Service](#service) | List of services exposed by pod. |
+ <!-- end Fields -->
+ <!-- end HasFields -->
+
+
+### Port
+Port represents an allocated port for pod.
+
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| name | [ string](#string) | Each named port in a pod must have a unique name. |
+| port | [ int32](#int32) | Number of port allocated for pod. |
+| scope | [ string](#string) | Scope of port. Must be Cluster,Domain,Local. Defaults to "Local". +optional |
+| protocol | [ string](#string) | Protocol for port. Must be HTTP,GRPC. Defaults to "HTTP". +optional |
+ <!-- end Fields -->
+ <!-- end HasFields -->
+
+
+### Service
+Service represents the service address corresponding to the port.
+
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| port_name | [ string](#string) | Name of port. |
+| endpoints | [repeated string](#string) | Endpoint list corresponding to the port. |
+ <!-- end Fields -->
+ <!-- end HasFields -->
+
+
+### TaskInputConfig
+
+
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| sf_psi_config_map | [map TaskInputConfig.SfPsiConfigMapEntry](#taskinputconfigsfpsiconfigmapentry) | none |
+ <!-- end Fields -->
+ <!-- end HasFields -->
+
+
+### TaskInputConfig.SfPsiConfigMapEntry
+
+
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| key | [ string](#string) | none |
+| value | [ psi.LaunchConfig](#psilaunchconfig) | none |
+ <!-- end Fields -->
+ <!-- end HasFields -->
+ <!-- end messages -->
+
+## Enums
+ <!-- end Enums -->
+
+
+ <!-- end services -->
+
+## Messages
+
+
 ### ContextDescProto
 Configuration for link config.
-
-'recv time' is the max time that a party will wait for a given event.
-for example:
-```
-     begin recv                 end recv
-|--------|-------recv-time----------|------------------| alice's timeline
-
-                        begin send     end send
-|-----busy-work-------------|-------------|------------| bob's timeline
-```
-in above case, when alice begins recv for a specific event, bob is still
-busy doing its job, when alice's wait time exceed wait_timeout_ms, it raise
-exception, although bob now is starting to send data.
 
 
 | Field | Type | Description |
@@ -82,8 +178,20 @@ exception, although bob now is starting to send data.
 | parties | [repeated PartyProto](#partyproto) | party description, describes the world. |
 | connect_retry_times | [ uint32](#uint32) | connect to mesh retry time. |
 | connect_retry_interval_ms | [ uint32](#uint32) | connect to mesh retry interval. |
-| recv_timeout_ms | [ uint64](#uint64) | recv timeout in milliseconds. so for long time work(that one party may wait for the others for very long time), this value should be changed accordingly. |
-| http_max_payload_size | [ uint32](#uint32) | http max payload size, if a single http request size is greater than this limit, it will be unpacked into small chunks then reassembled. This field does affect performance. Please choose wisely. |
+| recv_timeout_ms | [ uint64](#uint64) | recv timeout in milliseconds.
+
+'recv time' is the max time that a party will wait for a given event. for example:
+
+ begin recv end recv |--------|-------recv-time----------|------------------| alice's timeline
+
+ begin send end send |-----busy-work-------------|-------------|------------| bob's timeline
+
+in above case, when alice begins recv for a specific event, bob is still busy doing its job, when alice's wait time exceed wait_timeout_ms, it raise exception, although bob now is starting to send data.
+
+so for long time work(that one party may wait for the others for very long time), this value should be changed accordingly. |
+| http_max_payload_size | [ uint32](#uint32) | http max payload size, if a single http request size is greater than this limit, it will be unpacked into small chunks then reassembled.
+
+This field does affect performance. Please choose wisely. |
 | http_timeout_ms | [ uint32](#uint32) | a single http request timetout. |
 | throttle_window_size | [ uint32](#uint32) | throttle window size for channel. if there are more than limited size messages are flying, `SendAsync` will block until messages are processed or throw exception after wait for `recv_timeout_ms` |
 | brpc_channel_protocol | [ string](#string) | BRPC client channel protocol. |

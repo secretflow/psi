@@ -20,7 +20,6 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "yacl/base/aligned_vector.h"
 
 #include "psi/algorithm/spiral/arith/ntt.h"
 #include "psi/algorithm/spiral/params.h"

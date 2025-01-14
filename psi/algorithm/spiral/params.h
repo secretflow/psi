@@ -68,7 +68,6 @@ struct CrtParams {
 
   CrtParams() = default;
 
-  // 构造函数
   CrtParams(std::size_t crt_count, std::uint64_t mod0_inv_mod1,
             std::uint64_t mod1_inv_mod0, std::vector<seal::Modulus> moduli,
             seal::Modulus modulus, std::uint64_t modulus_log2)
@@ -119,9 +118,6 @@ struct PolyMatrixParams {
 };
 
 struct QueryParams {
-  // default true
-  bool expand_queries_ = true;
-
   // use the rng_pub related seed to compress the SpiralQuery size
   bool query_seed_compressed_ = true;
 
@@ -135,34 +131,25 @@ struct QueryParams {
   // in our kernel level, we only process the case T = 1
   std::size_t instances_ = 1;
 
-  // seem no usage? consider remove it
-  std::size_t db_item_size_ = 1;
-
   QueryParams() = default;
 
   QueryParams(std::size_t db_dim_1, std::size_t db_dim_2, std::size_t instances,
-              std::size_t db_item_size, bool expand_queries = true,
               bool query_seed_compressed = true)
-      : expand_queries_(expand_queries),
-        query_seed_compressed_(query_seed_compressed),
+      : query_seed_compressed_(query_seed_compressed),
         db_dim1_(db_dim_1),
         db_dim2_(db_dim_2),
-        instances_(instances),
-        db_item_size_(db_item_size) {}
+        instances_(instances) {}
 };
 
 class Params {
  public:
   Params(std::size_t poly_len, std::vector<std::uint64_t> moduli,
          double noise_width, PolyMatrixParams poly_matrix_params,
-         QueryParams query_params, std::size_t version);
+         QueryParams query_params);
 
-  void UpdateByDatabaseInfo(const DatabaseMetaInfo& database_info);
+  Params() = default;
 
-  [[nodiscard]] bool IsValid() const {
-    return G() <= poly_len_log2_ && DbDim1() <= kMaxDbDim &&
-           DbDim2() <= kMaxDbDim;
-  }
+  Params(const Params& other) = default;
 
   static Params ParamsWithModuli(const Params& params,
                                  std::vector<uint64_t> moduli);
@@ -170,6 +157,13 @@ class Params {
   bool operator==(const Params& other) const { return id_ == other.id_; }
 
   bool operator!=(const Params& other) const { return !(*this == other); }
+
+  void UpdateByDatabaseInfo(const DatabaseMetaInfo& database_info);
+
+  [[nodiscard]] bool IsValid() const {
+    return G() <= poly_len_log2_ && DbDim1() <= kMaxDbDim &&
+           DbDim2() <= kMaxDbDim;
+  }
 
   [[nodiscard]] const std::vector<std::uint64_t>& GetNttForwardTable(
       std::size_t i) const {
@@ -245,10 +239,6 @@ class Params {
     return poly_matrix_params_.n_ * poly_matrix_params_.n_ * poly_len_;
   }
 
-  [[nodiscard]] bool ExpandQuery() const {
-    return query_params_.expand_queries_;
-  }
-
   [[nodiscard]] size_t N() const { return poly_matrix_params_.n_; };
 
   [[nodiscard]] size_t Q2Bits() const { return poly_matrix_params_.q2_bits_; };
@@ -301,7 +291,7 @@ class Params {
   std::uint64_t CrtCompose(const std::vector<std::uint64_t>& a,
                            std::size_t idx) const;
 
-  /// other util methods
+  // other util methods
 
   [[nodiscard]] std::string ToString();
 
@@ -311,6 +301,19 @@ class Params {
 
   // the number of raw data rows that one Pt can hold
   std::size_t ElementSizeOfPt(size_t element_byte_len);
+
+  // one Pt can hold how many bytes
+  // in spiral, one Pt is Rp^{n*n}
+  std::size_t MaxByteLenOfPt() const {
+    size_t max_bits = poly_len_ * N() * N() * PtModulusBitLen();
+    // floor
+    return max_bits / 8;
+  }
+
+  // one Pt can hold how many bits
+  std::size_t MaxBitLenOfPt() const {
+    return poly_len_ * N() * N() * PtModulusBitLen();
+  }
 
   std::size_t PolyLen() const { return poly_len_; }
 
@@ -339,8 +342,6 @@ class Params {
   }
 
   double NoiseWidth() const { return noise_width_; }
-
-  std::size_t Version() const { return version_; }
 
   std::uint64_t Mod0InvMod1() const { return crt_params_.mod0_inv_mod1_; }
 
@@ -373,9 +374,6 @@ class Params {
 
   // Query related params
   QueryParams query_params_;
-
-  // seem no usage? consider remove it
-  std::size_t version_ = 0;
 
   ParamsId id_ = 0;
 };

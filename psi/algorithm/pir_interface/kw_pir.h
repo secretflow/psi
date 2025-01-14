@@ -24,10 +24,10 @@
 #include "yacl/base/byte_container_view.h"
 #include "yacl/crypto/rand/rand.h"
 
-#include "psi/algorithm/kwpir/index_pir.h"
+#include "psi/algorithm/pir_interface/index_pir.h"
 #include "psi/utils/cuckoo_index.h"
 
-namespace psi::kwpir {
+namespace psi::pir {
 
 struct KwPirOptions {
   CuckooIndex::Options cuckoo_options_{1 << 16, 0, 3, 1.3};
@@ -61,9 +61,11 @@ class KwPirServer : public KwPir {
   void SetDatabase(
       const std::vector<
           std::pair<yacl::ByteContainerView, yacl::ByteContainerView>>& db_vec);
-  std::vector<yacl::Buffer> GenerateReply(
-      const std::vector<yacl::Buffer>& query_vec);
-  yacl::Buffer GenerateReply(const yacl::Buffer& query_vec);
+
+  std::vector<yacl::Buffer> GenerateResponse(
+      const std::vector<yacl::Buffer>& query_vec) const;
+
+  yacl::Buffer GenerateResponse(const yacl::Buffer& query_vec) const;
 
  private:
   psi::CuckooIndex cuckoo_index_;
@@ -77,15 +79,16 @@ class KwPirClient : public KwPir {
       : KwPir(options), pir_client_(std::move(pir_client)) {}
   ~KwPirClient() override = default;
 
-  std::vector<yacl::Buffer> GenerateQuery(yacl::ByteContainerView keyword,
-                                          std::vector<uint64_t>& offset);
+  std::pair<std::vector<yacl::Buffer>, std::vector<uint64_t>> GenerateQuery(
+      yacl::ByteContainerView keyword) const;
 
-  std::vector<std::vector<uint8_t>> DecodeReply(
-      const std::vector<yacl::Buffer>& reply,
-      const std::vector<uint64_t>& offset);
-  std::vector<uint8_t> DecodeReply(const yacl::Buffer& reply, uint64_t offset);
+  std::vector<std::vector<uint8_t>> DecodeResponse(
+      const std::vector<yacl::Buffer>& response,
+      const std::vector<uint64_t>& raw_idxs) const;
+  std::vector<uint8_t> DecodeResponse(const yacl::Buffer& response,
+                                      uint64_t raw_idx) const;
 
  private:
   std::unique_ptr<IndexPirClient> pir_client_;
 };
-}  // namespace psi::kwpir
+}  // namespace psi::pir

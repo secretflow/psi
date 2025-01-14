@@ -1,0 +1,588 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2024, SecretFlow authors
+# This file is distributed under the same license as the SecretFlow PSI
+# Library package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: SecretFlow PSI Library \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-12-26 20:09+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.15.0\n"
+
+#: ../../user_guide/psi.rst:2
+msgid "PSI v1 QuickStart (Deprecated)"
+msgstr ""
+
+#: ../../user_guide/psi.rst:4
+msgid "Quick start with Private Set Intersection (PSI) V1 APIs."
+msgstr ""
+
+#: ../../user_guide/psi.rst:8
+msgid "Supported Protocols"
+msgstr ""
+
+#: ../../user_guide/psi.rst:10
+msgid ""
+"The :psi_code_host:`ECDH-PSI "
+"</blob/master/psi/algorithm/ecdh/ecdh_psi.h>` is favorable if the "
+"bandwidth is the bottleneck. If the computing is the bottleneck, you "
+"should try the BaRK-OPRF based PSI :psi_code_host:`KKRT-PSI "
+"</blob/master/psi/algorithm/kkrt/kkrt_psi.h>`."
+msgstr ""
+
+#: ../../user_guide/psi.rst:15
+msgid "PSI protocols"
+msgstr ""
+
+#: ../../user_guide/psi.rst:15
+msgid "Threat Model"
+msgstr ""
+
+#: ../../user_guide/psi.rst:15
+msgid "Party Number"
+msgstr ""
+
+#: ../../user_guide/psi.rst:15
+msgid "PsiTypeCode"
+msgstr ""
+
+#: ../../user_guide/psi.rst:17
+msgid "ECDH-PSI"
+msgstr ""
+
+#: ../../user_guide/psi.rst:17 ../../user_guide/psi.rst:19
+#: ../../user_guide/psi.rst:21 ../../user_guide/psi.rst:23
+#: ../../user_guide/psi.rst:27
+msgid "Semi-Honest"
+msgstr ""
+
+#: ../../user_guide/psi.rst:17 ../../user_guide/psi.rst:19
+#: ../../user_guide/psi.rst:21 ../../user_guide/psi.rst:23
+#: ../../user_guide/psi.rst:25 ../../user_guide/psi.rst:27
+msgid "2P"
+msgstr ""
+
+#: ../../user_guide/psi.rst:17
+msgid "1"
+msgstr ""
+
+#: ../../user_guide/psi.rst:19
+msgid "ECDH-OPRF-PSI"
+msgstr ""
+
+#: ../../user_guide/psi.rst:21
+msgid "`KKRT`_"
+msgstr ""
+
+#: ../../user_guide/psi.rst:21
+msgid "2"
+msgstr ""
+
+#: ../../user_guide/psi.rst:23
+msgid "`PCG_PSI`_"
+msgstr ""
+
+#: ../../user_guide/psi.rst:23
+msgid "3"
+msgstr ""
+
+#: ../../user_guide/psi.rst:25
+msgid "`Mini-PSI`_"
+msgstr ""
+
+#: ../../user_guide/psi.rst:25
+msgid "Malicious"
+msgstr ""
+
+#: ../../user_guide/psi.rst:27
+msgid "`DP-PSI`_"
+msgstr ""
+
+#: ../../user_guide/psi.rst:30
+msgid ""
+"MPC and PSI protocols are designed for specific Security model (or Threat"
+" Models)."
+msgstr ""
+
+#: ../../user_guide/psi.rst:32
+msgid ""
+"Security model are widely considered to capture the capabilities of "
+"adversaries. Adversaries of semi-honest model and malicious model are "
+"Semi-honest Adversary and Malicious Adversary."
+msgstr ""
+
+#: ../../user_guide/psi.rst:36
+msgid ""
+"`Semi-honest Adversary "
+"<https://wiki.mpcalliance.org/semi_honest_adversary.html>`_"
+msgstr ""
+
+#: ../../user_guide/psi.rst:37
+msgid ""
+"`Malicious Adversary "
+"<https://wiki.mpcalliance.org/malicious_adversary.html>`_"
+msgstr ""
+
+#: ../../user_guide/psi.rst:39
+msgid ""
+"Semi-Honest PSI Must not be used in Malicious environment, may be "
+"attacked and leak information."
+msgstr ""
+
+#: ../../user_guide/psi.rst:41
+msgid "Our implementation of ECDH-PSI protocol supports multiple ECC curves:"
+msgstr ""
+
+#: ../../user_guide/psi.rst:43
+msgid "`Curve25519 <https://en.wikipedia.org/wiki/Curve25519>`_"
+msgstr ""
+
+#: ../../user_guide/psi.rst:44
+msgid "`Secp256k1 <https://en.bitcoin.it/wiki/Secp256k1>`_"
+msgstr ""
+
+#: ../../user_guide/psi.rst:45
+msgid "`FourQ <https://en.wikipedia.org/wiki/FourQ>`_"
+msgstr ""
+
+#: ../../user_guide/psi.rst:46
+msgid "`SM2 <https://www.cryptopp.com/wiki/SM2>`_"
+msgstr ""
+
+#: ../../user_guide/psi.rst:53
+msgid "Please check :doc:`/development/psi_protocol_intro` for details."
+msgstr ""
+
+#: ../../user_guide/psi.rst:56
+msgid "Prepare data and config"
+msgstr ""
+
+#: ../../user_guide/psi.rst:58
+msgid "Please check details of configs at :doc:`/reference/psi_config`."
+msgstr ""
+
+#: ../../user_guide/psi.rst:60
+msgid ""
+"To launch PSI, please check LaunchConfig at "
+":doc:`/reference/launch_config` and fillin "
+"**runtime_config.legacy_psi_config**."
+msgstr ""
+
+#: ../../user_guide/psi.rst:63
+msgid "Release Docker"
+msgstr ""
+
+#: ../../user_guide/psi.rst:65
+msgid ""
+"Check official release docker image at `dockerhub "
+"<https://hub.docker.com/r/secretflow/psi-anolis8>`_. We also have mirrors"
+" at Alibaba Cloud: secretflow-registry.cn-"
+"hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8."
+msgstr ""
+
+#: ../../user_guide/psi.rst:68
+msgid "Run PSI"
+msgstr ""
+
+#: ../../user_guide/psi.rst:70
+msgid "In the first terminal, run the following command::"
+msgstr ""
+
+#: ../../user_guide/psi.rst:75
+msgid "In the other terminal, run the following command simultaneously::"
+msgstr ""
+
+#: ../../user_guide/psi.rst:81
+msgid "Building from source"
+msgstr ""
+
+#: ../../user_guide/psi.rst:83
+msgid "You could build psi binary with bazel::"
+msgstr ""
+
+#: ../../user_guide/psi.rst:88
+msgid "Then use binary with::"
+msgstr ""
+
+#: ../../user_guide/psi.rst:93
+msgid "Benchmark"
+msgstr ""
+
+#: ../../user_guide/psi.rst:95
+msgid "benchmark result without data load time"
+msgstr ""
+
+#: ../../user_guide/psi.rst:98
+msgid "ECDH PSI Benchmark"
+msgstr ""
+
+#: ../../user_guide/psi.rst:100
+msgid ""
+":psi_code_host:`DH-PSI benchmark code "
+"<blob/main/psi/algorithm/ecdh/ecdh_psi_benchmark.cc>`"
+msgstr ""
+
+#: ../../user_guide/psi.rst:102
+msgid "cpu limited by docker(--cpu)"
+msgstr ""
+
+#: ../../user_guide/psi.rst:105 ../../user_guide/psi.rst:118
+msgid "Intel(R) Xeon(R) Platinum"
+msgstr ""
+
+#: ../../user_guide/psi.rst:105 ../../user_guide/psi.rst:118
+msgid "cpu"
+msgstr ""
+
+#: ../../user_guide/psi.rst:105 ../../user_guide/psi.rst:118
+#: ../../user_guide/psi.rst:145
+msgid "2^20"
+msgstr ""
+
+#: ../../user_guide/psi.rst:105 ../../user_guide/psi.rst:118
+msgid "2^21"
+msgstr ""
+
+#: ../../user_guide/psi.rst:105 ../../user_guide/psi.rst:118
+#: ../../user_guide/psi.rst:145
+msgid "2^22"
+msgstr ""
+
+#: ../../user_guide/psi.rst:105 ../../user_guide/psi.rst:118
+msgid "2^23"
+msgstr ""
+
+#: ../../user_guide/psi.rst:105 ../../user_guide/psi.rst:118
+#: ../../user_guide/psi.rst:145
+msgid "2^24"
+msgstr ""
+
+#: ../../user_guide/psi.rst:108
+msgid "8269CY CPU @ 2.50GHz"
+msgstr ""
+
+#: ../../user_guide/psi.rst:110
+msgid "with curve25519-donna"
+msgstr ""
+
+#: ../../user_guide/psi.rst:107 ../../user_guide/psi.rst:120
+msgid "4c"
+msgstr ""
+
+#: ../../user_guide/psi.rst:107
+msgid "40.181s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:107
+msgid "81.227s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:107
+msgid "163.509s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:107
+msgid "330.466s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:107
+msgid "666.807s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:109 ../../user_guide/psi.rst:122
+msgid "8c"
+msgstr ""
+
+#: ../../user_guide/psi.rst:109
+msgid "20.682s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:109
+msgid "42.054s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:109
+msgid "85.272s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:109
+msgid "173.836s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:109
+msgid "354.842s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:111 ../../user_guide/psi.rst:124
+msgid "16c"
+msgstr ""
+
+#: ../../user_guide/psi.rst:111
+msgid "11.639s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:111
+msgid "23.670s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:111
+msgid "48.965s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:111
+msgid "100.903s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:111
+msgid "208.156s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:114
+msgid ""
+"`ipp-crypto Multi-buffer Functions "
+"<https://www.intel.com/content/www/us/en/develop/documentation/ipp-"
+"crypto-reference/top/multi-buffer-cryptography-functions/montgomery-"
+"curve25519-elliptic-curve-functions.html>`_"
+msgstr ""
+
+#: ../../user_guide/psi.rst:121
+msgid "8369B CPU @ 2.70GHz"
+msgstr ""
+
+#: ../../user_guide/psi.rst:123
+msgid "curve25519(ipp-crypto)"
+msgstr ""
+
+#: ../../user_guide/psi.rst:120
+msgid "7.37s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:120
+msgid "15.32s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:120
+msgid "31.932s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:120
+msgid "66.802s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:120
+msgid "139.994s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:122
+msgid "4.3s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:122
+msgid "9.095s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:122
+msgid "18.919s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:122
+msgid "40.828s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:122
+msgid "87.649s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:124
+msgid "2.921s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:124
+msgid "6.081s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:124
+msgid "13.186s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:124
+msgid "29.614s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:124
+msgid "65.186s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:128
+msgid "KKRT PSI Benchmark"
+msgstr ""
+
+#: ../../user_guide/psi.rst:130
+msgid "All of our experiments use a single thread for each party."
+msgstr ""
+
+#: ../../user_guide/psi.rst:132
+msgid ""
+"If the bandwidth is enough, the upstream could try to perform multi-"
+"threading optimizations"
+msgstr ""
+
+#: ../../user_guide/psi.rst:134
+msgid ""
+"bandwidth limited by `wondershaper "
+"<https://github.com/magnific0/wondershaper/>`_."
+msgstr ""
+
+#: ../../user_guide/psi.rst:136
+msgid "10Mbps = 10240Kbps, 100Mbps = 102400Kbps, 1000Mbps = 1024000Kbps"
+msgstr ""
+
+#: ../../user_guide/psi.rst:142
+msgid "Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz"
+msgstr ""
+
+#: ../../user_guide/psi.rst:145
+msgid "bandwidth"
+msgstr ""
+
+#: ../../user_guide/psi.rst:145
+msgid "phase"
+msgstr ""
+
+#: ../../user_guide/psi.rst:145
+msgid "2^18"
+msgstr ""
+
+#: ../../user_guide/psi.rst:148
+msgid "LAN"
+msgstr ""
+
+#: ../../user_guide/psi.rst:147 ../../user_guide/psi.rst:151
+#: ../../user_guide/psi.rst:155
+msgid "offline"
+msgstr ""
+
+#: ../../user_guide/psi.rst:147 ../../user_guide/psi.rst:151
+msgid "0.012s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:147 ../../user_guide/psi.rst:151
+msgid "0.014s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:149 ../../user_guide/psi.rst:153
+#: ../../user_guide/psi.rst:157
+msgid "online"
+msgstr ""
+
+#: ../../user_guide/psi.rst:149
+msgid "0.495s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:149
+msgid "2.474s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:149
+msgid "10.765s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:149
+msgid "44.368s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:152
+msgid "100Mbps"
+msgstr ""
+
+#: ../../user_guide/psi.rst:151
+msgid "0.024s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:153
+msgid "2.694s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:153
+msgid "11.048s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:153
+msgid "46.983s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:153
+msgid "192.37s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:156
+msgid "10Mbps"
+msgstr ""
+
+#: ../../user_guide/psi.rst:155
+msgid "0.016s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:155
+msgid "0.019s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:155
+msgid "0.0312s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:155
+msgid "0.018s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:157
+msgid "25.434s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:157
+msgid "100.68s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:157
+msgid "415.94s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:157
+msgid "1672.21s"
+msgstr ""
+
+#: ../../user_guide/psi.rst:162
+msgid "Security Tips"
+msgstr ""
+
+#: ../../user_guide/psi.rst:164
+msgid ""
+"Warning:  `KKRT16 <https://eprint.iacr.org/2016/799.pdf>`_ is semi-honest"
+" PSI protocols, and may be attacked in malicious model. We recommend "
+"using KKRT16 PSI protocol as one-way PSI, i.e., one party gets the final "
+"intersection result."
+msgstr ""
+
+#~ msgid ""
+#~ "The :psi_code_host:`ECDH-PSI "
+#~ "</blob/master/psi/ecdh/ecdh_psi.h>` is favorable if"
+#~ " the bandwidth is the bottleneck. If"
+#~ " the computing is the bottleneck, you"
+#~ " should try the BaRK-OPRF based "
+#~ "PSI :psi_code_host:`KKRT-PSI "
+#~ "</blob/master/psi/kkrt/kkrt_psi.h>`."
+#~ msgstr ""
+
+#~ msgid ""
+#~ ":psi_code_host:`DH-PSI benchmark code "
+#~ "<blob/main/psi/ecdh/ecdh_psi_benchmark.cc>`"
+#~ msgstr ""
+

@@ -1,0 +1,1185 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2024, SecretFlow authors
+# This file is distributed under the same license as the SecretFlow PSI
+# Library package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: SecretFlow PSI Library \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-12-30 15:39+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.15.0\n"
+
+#: ../../reference/psi_v2_config.md:1
+msgid "PSI v2 Configuration"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:3
+msgid "Table of Contents"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:7 ../../reference/psi_v2_config.md:40
+msgid "Messages"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:8
+msgid "[DebugOptions](#debugoptions)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:9
+msgid "[EcdhConfig](#ecdhconfig)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:10
+msgid "[InputAttr](#inputattr)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:11
+msgid "[InternalRecoveryRecord](#internalrecoveryrecord)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:12
+msgid "[IoConfig](#ioconfig)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:13
+msgid "[KkrtConfig](#kkrtconfig)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:14
+msgid "[OutputAttr](#outputattr)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:15
+msgid "[ProtocolConfig](#protocolconfig)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:16
+msgid "[PsiConfig](#psiconfig)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:17
+msgid "[RecoveryCheckpoint](#recoverycheckpoint)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:18
+msgid "[RecoveryConfig](#recoveryconfig)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:19
+msgid "[Rr22Config](#rr22config)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:20
+msgid "[UbPsiConfig](#ubpsiconfig)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:24 ../../reference/psi_v2_config.md:388
+msgid "Enums"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:25
+msgid "[IoType](#iotype)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:26
+msgid "[Protocol](#protocol)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:27
+msgid "[PsiConfig.AdvancedJoinType](#psiconfigadvancedjointype)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:28
+msgid "[RecoveryCheckpoint.Stage](#recoverycheckpointstage)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:29
+msgid "[Role](#role)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:30
+msgid "[UbPsiConfig.Mode](#ubpsiconfigmode)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:34
+msgid "[Scalar Value Types](#scalar-value-types)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:43
+msgid "DebugOptions"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:44
+msgid "Logging level for default logger. Default to info. Supports:"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:48
+msgid "trace: SPDLOG_LEVEL_TRACE"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:49
+msgid "debug: SPDLOG_LEVEL_DEBUG"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:50
+msgid "info: SPDLOG_LEVEL_INFO"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:51
+msgid "warn: SPDLOG_LEVEL_WARN"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:52
+msgid "err: SPDLOG_LEVEL_ERROR"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:53
+msgid "critical: SPDLOG_LEVEL_CRITICAL"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:54
+msgid "off: SPDLOG_LEVEL_OFF"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Field"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Type"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Description"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "logging_level"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "[ string](#string)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "none"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "trace_path"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "The path of trace. Deafult to /tmp/psi.trace"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:65
+msgid "EcdhConfig"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:66
+msgid "Configs for ECDH protocol."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "curve"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "[ psi.CurveType](#psicurvetype)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "batch_size"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "[ uint64](#uint64)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "If not set, use default value: 4096."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:77
+msgid "InputAttr"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "keys_unique"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "[ bool](#bool)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Keys in input file are unique. If not set, use default value: false."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:88
+msgid "InternalRecoveryRecord"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "stage"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "[ RecoveryCheckpoint.Stage](#recoverycheckpointstage)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "ecdh_dual_masked_item_peer_count"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "parsed_bucket_count"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:101
+msgid "IoConfig"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:102
+msgid "IO configuration."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "type"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "[ IoType](#iotype)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "path"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Required for FILE."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:113
+msgid "KkrtConfig"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:114
+msgid "Configs for KKRT protocol"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "bucket_size"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid ""
+"Since the total input may not fit in memory, the input may be splitted "
+"into buckets. bucket_size indicate the number of items in each bucket. If"
+" the memory of host is limited, you should set a smaller bucket size. "
+"Otherwise, you should use a larger one. If not set, use default value: 1 "
+"<< 20."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:124
+msgid "OutputAttr"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "csv_null_rep"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid ""
+"Null representation in output csv file. If not set, use default value: "
+"\"NULL\"."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:135
+msgid "ProtocolConfig"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:136
+msgid "Any items related to PSI protocols."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "protocol"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "[ Protocol](#protocol)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "role"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "[ Role](#role)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "broadcast_result"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Reveal result to sender."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "ecdh_config"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "[ EcdhConfig](#ecdhconfig)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "For ECDH protocol."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "kkrt_config"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "[ KkrtConfig](#kkrtconfig)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "For KKRT protocol."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "rr22_config"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "[ Rr22Config](#rr22config)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "For RR22 protocol."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:151
+msgid "PsiConfig"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:152
+msgid "The top level of Configs. run(PsiConfig)->PsiReport"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:155
+msgid "Advanced Joins Type: Inner Join e.g. If input of receiver is"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:166
+msgid "and input of sender is"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:175
+msgid "After inner join. The output of receiver is:"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:187
+msgid "The output of sender is"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:199
+msgid "Type: Left Join After left join. The output of left side is:"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:213 ../../reference/psi_v2_config.md:240
+#: ../../reference/psi_v2_config.md:268 ../../reference/psi_v2_config.md:291
+msgid "The output of right side is"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:226
+msgid "Type: Right Join After right join. The output of left side is:"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:253
+msgid "Type: Full Join After full join. The output of left side is:"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:282
+msgid "Type: Difference After difference. The output of left side is:"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "protocol_config"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "[ ProtocolConfig](#protocolconfig)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Configs for protocols."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "input_config"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "[ IoConfig](#ioconfig)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Configs for input."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "output_config"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Configs for output."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "keys"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "[repeated string](#string)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "keys for intersection."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "debug_options"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "[ DebugOptions](#debugoptions)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Logging level."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "skip_duplicates_check"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "If true, the check of duplicated items will be skiped."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "disable_alignment"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "It true, output is not promised to be aligned."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "recovery_config"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "[ RecoveryConfig](#recoveryconfig)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Configs for recovery."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "advanced_join_type"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "[ PsiConfig.AdvancedJoinType](#psiconfigadvancedjointype)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "left_side"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid ""
+"Required if advanced_join_type is ADVANCED_JOIN_TYPE_LEFT_JOIN or "
+"ADVANCED_JOIN_TYPE_RIGHT_JOIN."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "check_hash_digest"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid ""
+"Check if hash digest of keys from parties are equal to determine whether "
+"to early-stop."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "input_attr"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "[ InputAttr](#inputattr)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Input attributes."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "output_attr"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "[ OutputAttr](#outputattr)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Output attributes."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:319
+msgid "RecoveryCheckpoint"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:320
+msgid "Save some critical information for future recovery."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Stage of PSI."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "config"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "[ PsiConfig](#psiconfig)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "A copy of origin PSI config."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "input_hash_digest"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "[ bytes](#bytes)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Hash digest of input keys."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "ecdh_dual_masked_item_self_count"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Saved dual masked item count from self originally. PROTOCOL_ECDH only."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Saved dual masked item count from peer originally. PROTOCOL_ECDH only."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Saved parsed bucket count. PROTOCOL_KKRT and PROTOCOL_RR22 only."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:335
+msgid "RecoveryConfig"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:336
+msgid ""
+"Configuration for recovery. If a PSI task failed unexpectedly, e.g. "
+"network failures and restart, the task can resume to the latest "
+"checkpoint to save time. However, enabling recovery would due in extra "
+"disk IOs and disk space occupation."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "enabled"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "folder"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Stores status and checkpoint files."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:351
+msgid "Rr22Config"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:352
+msgid "Configs for RR22 protocol."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "low_comm_mode"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:363
+msgid "UbPsiConfig"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:364
+msgid "config for unbalanced psi."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "mode"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "[ UbPsiConfig.Mode](#ubpsiconfigmode)"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Required."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Required for all modes except MODE_OFFLINE_GEN_CACHE."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid ""
+"Config for origin input. Servers: Required for MODE_OFFLINE_GEN_CACHE, "
+"MODE_OFFLINE, MODE_FULL. Clients: Required for MODE_ONLINE and MODE_FULL."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid ""
+"Join keys. Servers: Required for MODE_OFFLINE_GEN_CACHE, MODE_OFFLINE, "
+"MODE_FULL. Clients: Required for MODE_ONLINE and MODE_FULL."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "server_secret_key_path"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid ""
+"Servers: Required for MODE_OFFLINE_GEN_CACHE, MODE_OFFLINE, MODE_ONLINE "
+"and MODE_FULL."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "cache_path"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "server_get_result"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "client_get_result"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid ""
+"It true, output is not promised to be aligned. Valid if both "
+"server_get_result and client_get_result are true."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Required for MODE_ONLINE and MODE_FULL."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:391
+msgid "IoType"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:392
+msgid "TODO(junfeng): support more io types including oss, sql, etc."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Name"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Number"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "IO_TYPE_UNSPECIFIED"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "0"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "IO_TYPE_FILE_CSV"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "1"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Local csv file."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:402
+msgid "Protocol"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:403
+msgid "PSI protocols."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "PROTOCOL_UNSPECIFIED"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "PROTOCOL_ECDH"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid ""
+"[Mea86]C. Meadows, \"A More Efficient Cryptographic Matchmaking Protocol "
+"for Use in the Absence of a Continuously Available Third Party,\" 1986 "
+"IEEE Symposium on Security and Privacy, Oakland, CA, USA, 1986, pp. "
+"134-134, doi: 10.1109/SP.1986.10022."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "PROTOCOL_KKRT"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "2"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid ""
+"Efficient Batched Oblivious PRF with Applications to Private Set "
+"Intersection https://eprint.iacr.org/2016/799.pdf"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "PROTOCOL_RR22"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "3"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Blazing Fast PSI https://eprint.iacr.org/2022/320.pdf"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:415
+msgid "PsiConfig.AdvancedJoinType"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:416
+msgid "Advanced Join allow duplicate keys."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:417
+msgid "If selected, duplicates_check is skipped."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:418
+msgid "If selected, both parties are allowed to contain duplicate keys."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:419
+msgid ""
+"If use left join, full join or difference, the size of difference set of "
+"left party is revealed to right party."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:421
+msgid ""
+"If use right join, full join or difference, the size of difference set of"
+" right party is revealed to left party."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "ADVANCED_JOIN_TYPE_UNSPECIFIED"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "ADVANCED_JOIN_TYPE_INNER_JOIN"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "ADVANCED_JOIN_TYPE_LEFT_JOIN"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "ADVANCED_JOIN_TYPE_RIGHT_JOIN"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "ADVANCED_JOIN_TYPE_FULL_JOIN"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "4"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "ADVANCED_JOIN_TYPE_DIFFERENCE"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "5"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:436
+msgid "RecoveryCheckpoint.Stage"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "STAGE_UNSPECIFIED"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "STAGE_INIT_END"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "STAGE_PRE_PROCESS_END"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "STAGE_ONLINE_START"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "STAGE_ONLINE_END"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "STAGE_POST_PROCESS_END"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:451
+msgid "Role"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:452
+msgid "Role of parties."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "ROLE_UNSPECIFIED"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "ROLE_RECEIVER"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid ""
+"receiver In 2P symmetric PSI, receivers would always receive the result "
+"in the origin protocol."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "ROLE_SENDER"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid ""
+"sender In 2P symmetric PSI, senders are the other participants apart from"
+" receiver."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "ROLE_SERVER"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "server In 2P unbalanced PSI, servers own a much larger dataset."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "ROLE_CLIENT"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "server In 2P unbalanced PSI, clients own a much smaller dataset."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:465
+msgid "UbPsiConfig.Mode"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "MODE_UNSPECIFIED"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "MODE_OFFLINE_GEN_CACHE"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Servers generate cache only. First part of offline stage."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "MODE_OFFLINE_TRANSFER_CACHE"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Servers send cache to clients only. Second part of offline stage."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "MODE_OFFLINE"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Run offline stage."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "MODE_ONLINE"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Run online stage."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "MODE_FULL"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Run all stages."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md:481
+msgid "Scalar Value Types"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid ".proto Type"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Notes"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "C++ Type"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Java Type"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Python Type"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "<div><h4 id=\"double\" /></div><a name=\"double\" /> double"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "double"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "float"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "<div><h4 id=\"float\" /></div><a name=\"float\" /> float"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "<div><h4 id=\"int32\" /></div><a name=\"int32\" /> int32"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid ""
+"Uses variable-length encoding. Inefficient for encoding negative numbers "
+"– if your field is likely to have negative values, use sint32 instead."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "int32"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "int"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "<div><h4 id=\"int64\" /></div><a name=\"int64\" /> int64"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid ""
+"Uses variable-length encoding. Inefficient for encoding negative numbers "
+"– if your field is likely to have negative values, use sint64 instead."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "int64"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "long"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "int/long"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "<div><h4 id=\"uint32\" /></div><a name=\"uint32\" /> uint32"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Uses variable-length encoding."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "uint32"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "<div><h4 id=\"uint64\" /></div><a name=\"uint64\" /> uint64"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "uint64"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "<div><h4 id=\"sint32\" /></div><a name=\"sint32\" /> sint32"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid ""
+"Uses variable-length encoding. Signed int value. These more efficiently "
+"encode negative numbers than regular int32s."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "<div><h4 id=\"sint64\" /></div><a name=\"sint64\" /> sint64"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid ""
+"Uses variable-length encoding. Signed int value. These more efficiently "
+"encode negative numbers than regular int64s."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "<div><h4 id=\"fixed32\" /></div><a name=\"fixed32\" /> fixed32"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid ""
+"Always four bytes. More efficient than uint32 if values are often greater"
+" than 2^28."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "<div><h4 id=\"fixed64\" /></div><a name=\"fixed64\" /> fixed64"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid ""
+"Always eight bytes. More efficient than uint64 if values are often "
+"greater than 2^56."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "<div><h4 id=\"sfixed32\" /></div><a name=\"sfixed32\" /> sfixed32"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Always four bytes."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "<div><h4 id=\"sfixed64\" /></div><a name=\"sfixed64\" /> sfixed64"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "Always eight bytes."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "<div><h4 id=\"bool\" /></div><a name=\"bool\" /> bool"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "bool"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "boolean"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "<div><h4 id=\"string\" /></div><a name=\"string\" /> string"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "A string must always contain UTF-8 encoded or 7-bit ASCII text."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "string"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "String"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "str/unicode"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "<div><h4 id=\"bytes\" /></div><a name=\"bytes\" /> bytes"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "May contain any arbitrary sequence of bytes."
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "ByteString"
+msgstr ""
+
+#: ../../reference/psi_v2_config.md
+msgid "str"
+msgstr ""
+

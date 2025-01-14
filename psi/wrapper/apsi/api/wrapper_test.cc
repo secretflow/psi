@@ -18,13 +18,11 @@
 #include <iostream>
 #include <string>
 
-#include "boost/uuid/uuid.hpp"
-#include "boost/uuid/uuid_generators.hpp"
-#include "boost/uuid/uuid_io.hpp"
 #include "fmt/format.h"
 #include "gtest/gtest.h"
 #include "spdlog/spdlog.h"
 
+#include "psi/utils/random_str.h"
 #include "psi/wrapper/apsi/api/receiver_c_wrapper.h"
 #include "psi/wrapper/apsi/api/sender_c_wrapper.h"
 #include "psi/wrapper/apsi/utils/csv_reader.h"
@@ -48,8 +46,7 @@ TEST(ApiTest, Works) {
   bool compress = false;
   std::string receiver_query_file = "examples/pir/apsi/data/query.csv";
 
-  boost::uuids::random_generator uuid_generator;
-  auto uuid_str = boost::uuids::to_string(uuid_generator());
+  auto uuid_str = GetRandomString();
 
   std::filesystem::path tmp_folder{std::filesystem::temp_directory_path() /
                                    uuid_str};

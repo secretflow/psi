@@ -25,14 +25,14 @@ message CiphertextsProto {
   repeated bytes ciphers = 1;
 }
 
+message SealPirReplyProto {
+  repeated CiphertextsProto reply_cipher = 1;
+}
+
 message SealPirQueryProto {
-  int32 ind_degree = 1;
-  int32 start_pos = 2;
-  repeated CiphertextsProto query_cipher = 3;
+  repeated CiphertextsProto query_cipher = 1;
 }
 
 message SealPirAnswerProto {
-  int32 ind_degree = 1;
-  int32 start_pos = 2;
-  CiphertextsProto answer = 3;
+  CiphertextsProto answer = 1;
 }

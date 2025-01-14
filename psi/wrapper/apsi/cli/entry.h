@@ -50,7 +50,8 @@ struct ReceiverOptions {
 
   // experimental bucketize
   bool experimental_enable_bucketize = false;
-  size_t experimental_bucket_cnt;
+  size_t experimental_bucket_cnt = 10;
+  size_t query_batch_size = 1;
 };
 
 struct SenderOptions {
@@ -88,7 +89,7 @@ struct SenderOptions {
   size_t experimental_bucket_cnt;
   std::string experimental_bucket_folder;
   int experimental_db_generating_process_num = 8;
-  int experimental_bucket_group_cnt = 1024;
+  int experimental_bucket_group_cnt = 512;
 };
 
 int RunReceiver(const ReceiverOptions& options,

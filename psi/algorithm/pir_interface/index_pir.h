@@ -12,26 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
+
 #include <vector>
 
 #include "yacl/base/byte_container_view.h"
 
-namespace psi::kwpir {
+#include "psi/algorithm/pir_interface/pir_db.h"
 
-class IndexPirServer {
- public:
-  virtual ~IndexPirServer() = default;
-  virtual void SetDatabase(
-      const std::vector<yacl::ByteContainerView>& db_vec) = 0;
-  virtual yacl::Buffer GenerateIndexReply(const yacl::Buffer& query_buffer) = 0;
-};
+namespace psi::pir {
 
 class IndexPirClient {
  public:
   virtual ~IndexPirClient() = default;
-  virtual yacl::Buffer GenerateIndexQuery(uint64_t ele_index,
-                                          uint64_t& offset) = 0;
-  virtual std::vector<uint8_t> DecodeIndexReply(
-      const yacl::Buffer& reply_buffer, uint64_t offset) = 0;
+
+  virtual yacl::Buffer GenerateIndexQuery(uint64_t raw_idx) const = 0;
+
+  virtual std::vector<uint8_t> DecodeIndexResponse(
+      const yacl::Buffer& response_buffer, uint64_t raw_idx) const = 0;
 };
-}  // namespace psi::kwpir
+
+class IndexPirServer {
+ public:
+  virtual ~IndexPirServer() = default;
+  virtual void SetDatabase(const psi::pir_utils::RawDatabase& raw_database) = 0;
+  virtual yacl::Buffer GenerateIndexResponse(
+      const yacl::Buffer& query_buffer) const = 0;
+};
+
+}  // namespace psi::pir

@@ -22,6 +22,8 @@
 
 #include "psi/algorithm/spiral/params.h"
 
+#include "psi/algorithm/spiral/serializable.pb.h"
+
 namespace psi::spiral {
 
 // forward declaration
@@ -144,6 +146,16 @@ class PolyMatrixRaw {
                uint64_t out_modulus);
 
   PolyMatrixRaw operator-() = delete;
+
+  // seralize related methods
+  PolyMatrixProto ToProto() const;
+  PolyMatrixProto ToProtoRng() const;
+
+  static PolyMatrixRaw FromProto(const PolyMatrixProto& proto,
+                                 const Params& params);
+  static PolyMatrixRaw FromProtoRng(const PolyMatrixProto& proto,
+                                    const Params& params,
+                                    yacl::crypto::Prg<uint64_t>& rng);
 
   // static methods without params
   static PolyMatrixRaw Zero(size_t poly_len, size_t rows, size_t cols) {

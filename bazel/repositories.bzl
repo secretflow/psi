@@ -36,11 +36,11 @@ def _com_github_microsoft_apsi():
         urls = [
             "https://github.com/microsoft/APSI/archive/refs/tags/v0.11.0.tar.gz",
         ],
-        build_file = "@psi//bazel:microsoft_apsi.BUILD",
+        build_file = "//bazel:microsoft_apsi.BUILD",
         patch_args = ["-p1"],
         patches = [
-            "@psi//bazel/patches:apsi.patch",
-            "@psi//bazel/patches:apsi-fourq.patch",
+            "//bazel/patches:apsi.patch",
+            "//bazel/patches:apsi-fourq.patch",
         ],
         patch_cmds = [
             "rm -rf common/apsi/fourq",
@@ -57,7 +57,7 @@ def _com_github_microsoft_kuku():
         urls = [
             "https://github.com/microsoft/Kuku/archive/refs/tags/v2.1.0.tar.gz",
         ],
-        build_file = "@psi//bazel:microsoft_kuku.BUILD",
+        build_file = "//bazel:microsoft_kuku.BUILD",
     )
 
 def _com_google_flatbuffers():
@@ -75,7 +75,7 @@ def _com_google_flatbuffers():
             "rm grpc/src/compiler/BUILD.bazel",
             "rm src/BUILD.bazel",
         ],
-        build_file = "@psi//bazel:flatbuffers.BUILD",
+        build_file = "//bazel:flatbuffers.BUILD",
     )
 
 def _com_github_google_perfetto():
@@ -88,8 +88,8 @@ def _com_github_google_perfetto():
         sha256 = "4c8fe8a609fcc77ca653ec85f387ab6c3a048fcd8df9275a1aa8087984b89db8",
         strip_prefix = "perfetto-41.0",
         patch_args = ["-p1"],
-        patches = ["@psi//bazel/patches:perfetto.patch"],
-        build_file = "@psi//bazel:perfetto.BUILD",
+        patches = ["//bazel/patches:perfetto.patch"],
+        build_file = "//bazel:perfetto.BUILD",
     )
 
 def _com_github_floodyberry_curve25519_donna():
@@ -99,7 +99,7 @@ def _com_github_floodyberry_curve25519_donna():
         strip_prefix = "curve25519-donna-2fe66b65ea1acb788024f40a3373b8b3e6f4bbb2",
         sha256 = "ba57d538c241ad30ff85f49102ab2c8dd996148456ed238a8c319f263b7b149a",
         type = "tar.gz",
-        build_file = "@psi//bazel:curve25519-donna.BUILD",
+        build_file = "//bazel:curve25519-donna.BUILD",
         urls = [
             "https://github.com/floodyberry/curve25519-donna/archive/2fe66b65ea1acb788024f40a3373b8b3e6f4bbb2.tar.gz",
         ],
@@ -109,7 +109,7 @@ def _com_github_zeromq_cppzmq():
     maybe(
         http_archive,
         name = "com_github_zeromq_cppzmq",
-        build_file = "@psi//bazel:cppzmq.BUILD",
+        build_file = "//bazel:cppzmq.BUILD",
         strip_prefix = "cppzmq-4.10.0",
         sha256 = "c81c81bba8a7644c84932225f018b5088743a22999c6d82a2b5f5cd1e6942b74",
         type = ".tar.gz",
@@ -122,7 +122,7 @@ def _com_github_zeromq_libzmq():
     maybe(
         http_archive,
         name = "com_github_zeromq_libzmq",
-        build_file = "@psi//bazel:libzmq.BUILD",
+        build_file = "//bazel:libzmq.BUILD",
         strip_prefix = "libzmq-4.3.5",
         sha256 = "6c972d1e6a91a0ecd79c3236f04cf0126f2f4dfbbad407d72b4606a7ba93f9c6",
         type = ".tar.gz",
@@ -135,7 +135,7 @@ def _com_github_open_source_parsers_jsoncpp():
     maybe(
         http_archive,
         name = "com_github_open_source_parsers_jsoncpp",
-        build_file = "@psi//bazel:jsoncpp.BUILD",
+        build_file = "//bazel:jsoncpp.BUILD",
         strip_prefix = "jsoncpp-1.9.6",
         sha256 = "f93b6dd7ce796b13d02c108bc9f79812245a82e577581c4c9aabe57075c90ea2",
         type = ".tar.gz",

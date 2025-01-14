@@ -20,7 +20,9 @@
 #include "seal/modulus.h"
 #include "yacl/crypto/tools/prg.h"
 
+#include "psi/algorithm/spiral/discrete_gaussian.h"
 #include "psi/algorithm/spiral/params.h"
+#include "psi/algorithm/spiral/poly_matrix.h"
 
 namespace psi::spiral {
 
@@ -56,6 +58,13 @@ void ReduceCopy(const Params& params, absl::Span<uint64_t> res,
 void ReducePoly(const Params& params, absl::Span<uint64_t> res);
 
 // matrix operator
+
+PolyMatrixRaw Noise(const Params& params, size_t rows, size_t cols,
+                    const DiscreteGaussian& dg,
+                    yacl::crypto::Prg<uint64_t>& prg);
+
+void GenTernaryMatrix(const Params& params, PolyMatrixRaw& mat, size_t hamming,
+                      yacl::crypto::Prg<uint64_t>& prg);
 
 PolyMatrixNtt ShiftRowsByOne(const PolyMatrixNtt& in);
 

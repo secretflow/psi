@@ -1,0 +1,503 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2024, SecretFlow authors
+# This file is distributed under the same license as the SecretFlow PSI
+# Library package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: SecretFlow PSI Library \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-12-30 15:39+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.15.0\n"
+
+#: ../../reference/pir_config.md:1
+msgid "PIR Configuration"
+msgstr ""
+
+#: ../../reference/pir_config.md:3
+msgid "Table of Contents"
+msgstr ""
+
+#: ../../reference/pir_config.md:7 ../../reference/pir_config.md:21
+msgid "Messages"
+msgstr ""
+
+#: ../../reference/pir_config.md:8
+msgid "[ApsiReceiverConfig](#apsireceiverconfig)"
+msgstr ""
+
+#: ../../reference/pir_config.md:9
+msgid "[ApsiSenderConfig](#apsisenderconfig)"
+msgstr ""
+
+#: ../../reference/pir_config.md:10
+msgid "[PirResultReport](#pirresultreport)"
+msgstr ""
+
+#: ../../reference/pir_config.md:15
+msgid "[Scalar Value Types](#scalar-value-types)"
+msgstr ""
+
+#: ../../reference/pir_config.md:24
+msgid "ApsiReceiverConfig"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "Field"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "Type"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "Description"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "threads"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "[ uint32](#uint32)"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "Number of threads to use"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "log_file"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "[ string](#string)"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "Log file path. For APSI only."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "silent"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "[ bool](#bool)"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "Do not write output to console. For APSI only."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "log_level"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid ""
+"One of 'all', 'debug', 'info' (default), 'warning', 'error', 'off'. For "
+"APSI only."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "query_file"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid ""
+"Path to a text file containing query data (one per line). Header is not "
+"needed."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "output_file"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "Path to a file where intersection result will be written."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "params_file"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid ""
+"Path to a JSON file describing the parameters to be used by the sender. "
+"If not set, receiver will ask sender, which results in additional "
+"communication."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "experimental_enable_bucketize"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "Must be same as sender config."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "experimental_bucket_cnt"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "query_batch_size"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "The number of query in a batch. default 1."
+msgstr ""
+
+#: ../../reference/pir_config.md:44
+msgid "ApsiSenderConfig"
+msgstr ""
+
+#: ../../reference/pir_config.md:45
+msgid ""
+"NOTE(junfeng): We provide a config identical to original APSI CLI. Please"
+" check https://github.com/microsoft/APSI?tab=readme-ov-file#command-line-"
+"interface-cli for details."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "db_file"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid ""
+"Path to a CSV file describing the sender's dataset (an item-label pair on"
+" each row) or a file containing a serialized SenderDB; the CLI will first"
+" attempt to load the data as a serialized SenderDB, and – upon failure – "
+"will proceed to attempt to read it as a CSV file For CSV File: 1. the "
+"first col is processed as item while the second col as label. OTHER COLS "
+"ARE IGNORED. 2. NO HEADERS ARE ALLOWED."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid ""
+"Path to a JSON file describing the parameters to be used by the sender. "
+"Not required if db_file points to a serialized SenderDB."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "sdb_out_file"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid ""
+"Save the SenderDB in the given file. Required if gen_db_only is set true."
+" Use experimental_bucket_folder instead if you turn "
+"experimental_enable_bucketize on."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "nonce_byte_count"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "Number of bytes used for the nonce in labeled mode (default is 16)"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "compress"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid ""
+"Whether to compress the SenderDB in memory; this will make the memory "
+"footprint smaller at the cost of increased computation."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "save_db_only"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "Whether to save sender db only."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid ""
+"[experimental] Whether to split data in buckets and Each bucket would be "
+"a seperate SenderDB. If set, experimental_bucket_folder must be a valid "
+"folder."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "[experimental] The number of bucket to fit data."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "experimental_bucket_folder"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "[experimental] Folder to save bucketized small csv files and db files."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "experimental_db_generating_process_num"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "[ int32](#int32)"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "[experimental] The number of processes to use for generating db."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "source_file"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "Source file used to genenerate sender db. Currently only support csv file."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "experimental_bucket_group_cnt"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid ""
+"[experimental] The number of group of bucket, each group has a db_file, "
+"default 1024."
+msgstr ""
+
+#: ../../reference/pir_config.md:73
+msgid "PirResultReport"
+msgstr ""
+
+#: ../../reference/pir_config.md:74
+msgid "The report of pir task."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "match_cnt"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "[ int64](#int64)"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "none"
+msgstr ""
+
+#: ../../reference/pir_config.md:84
+msgid "Enums"
+msgstr ""
+
+#: ../../reference/pir_config.md:88
+msgid "Scalar Value Types"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid ".proto Type"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "Notes"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "C++ Type"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "Java Type"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "Python Type"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "<div><h4 id=\"double\" /></div><a name=\"double\" /> double"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "double"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "float"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "<div><h4 id=\"float\" /></div><a name=\"float\" /> float"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "<div><h4 id=\"int32\" /></div><a name=\"int32\" /> int32"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid ""
+"Uses variable-length encoding. Inefficient for encoding negative numbers "
+"– if your field is likely to have negative values, use sint32 instead."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "int32"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "int"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "<div><h4 id=\"int64\" /></div><a name=\"int64\" /> int64"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid ""
+"Uses variable-length encoding. Inefficient for encoding negative numbers "
+"– if your field is likely to have negative values, use sint64 instead."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "int64"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "long"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "int/long"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "<div><h4 id=\"uint32\" /></div><a name=\"uint32\" /> uint32"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "Uses variable-length encoding."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "uint32"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "<div><h4 id=\"uint64\" /></div><a name=\"uint64\" /> uint64"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "uint64"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "<div><h4 id=\"sint32\" /></div><a name=\"sint32\" /> sint32"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid ""
+"Uses variable-length encoding. Signed int value. These more efficiently "
+"encode negative numbers than regular int32s."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "<div><h4 id=\"sint64\" /></div><a name=\"sint64\" /> sint64"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid ""
+"Uses variable-length encoding. Signed int value. These more efficiently "
+"encode negative numbers than regular int64s."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "<div><h4 id=\"fixed32\" /></div><a name=\"fixed32\" /> fixed32"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid ""
+"Always four bytes. More efficient than uint32 if values are often greater"
+" than 2^28."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "<div><h4 id=\"fixed64\" /></div><a name=\"fixed64\" /> fixed64"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid ""
+"Always eight bytes. More efficient than uint64 if values are often "
+"greater than 2^56."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "<div><h4 id=\"sfixed32\" /></div><a name=\"sfixed32\" /> sfixed32"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "Always four bytes."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "<div><h4 id=\"sfixed64\" /></div><a name=\"sfixed64\" /> sfixed64"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "Always eight bytes."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "<div><h4 id=\"bool\" /></div><a name=\"bool\" /> bool"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "bool"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "boolean"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "<div><h4 id=\"string\" /></div><a name=\"string\" /> string"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "A string must always contain UTF-8 encoded or 7-bit ASCII text."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "string"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "String"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "str/unicode"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "<div><h4 id=\"bytes\" /></div><a name=\"bytes\" /> bytes"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "May contain any arbitrary sequence of bytes."
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "ByteString"
+msgstr ""
+
+#: ../../reference/pir_config.md
+msgid "str"
+msgstr ""
+

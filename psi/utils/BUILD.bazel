@@ -68,6 +68,7 @@ psi_cc_library(
     deps = [
         ":io",
         "@yacl//yacl/base:exception",
+        "@protobuf",
     ],
 )
 

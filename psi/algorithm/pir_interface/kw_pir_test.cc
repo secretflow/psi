@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "psi/algorithm/kwpir/kw_pir.h"
+#include "psi/algorithm/pir_interface/kw_pir.h"
 
 #include <random>
 #include <utility>
@@ -23,7 +23,7 @@
 
 #include "psi/algorithm/sealpir/seal_pir.h"
 
-namespace psi::kwpir {
+namespace psi::pir {
 
 struct TestParams {
   uint64_t num_input = 1000;
@@ -76,13 +76,10 @@ TEST_P(KwpirTest, Works) {
   }
 
   psi::sealpir::SealPirOptions seal_options{params.N, params.NumBins(),
-                                            key_size + value_size,
-                                            params.ind_degree, params.d};
-  std::shared_ptr<psi::sealpir::IDbPlaintextStore> plaintext_store =
-      std::make_shared<psi::sealpir::MemoryDbPlaintextStore>();
+                                            key_size + value_size, params.d};
 
   std::unique_ptr<psi::sealpir::SealPirServer> seal_server(
-      new psi::sealpir::SealPirServer(seal_options, plaintext_store));
+      new psi::sealpir::SealPirServer(seal_options));
   std::unique_ptr<psi::sealpir::SealPirClient> seal_client(
       new psi::sealpir::SealPirClient(seal_options));
 
@@ -102,15 +99,14 @@ TEST_P(KwpirTest, Works) {
   yacl::ByteContainerView query_key = db_vec[ele_index].first;
   yacl::ByteContainerView query_value = db_vec[ele_index].second;
 
-  std::vector<uint64_t> offset_vec;
+  // std::vector<uint64_t> offset_vec;
   SPDLOG_INFO("generating query...\n");
-  std::vector<yacl::Buffer> query_vec =
-      client.GenerateQuery(query_key, offset_vec);
+  auto [query_vec, offset_vec] = client.GenerateQuery(query_key);
   SPDLOG_INFO("generating reply...\n");
-  std::vector<yacl::Buffer> reply_vec = server.GenerateReply(query_vec);
+  std::vector<yacl::Buffer> reply_vec = server.GenerateResponse(query_vec);
   SPDLOG_INFO("decoding reply...\n");
   std::vector<std::vector<uint8_t>> decoded_vec =
-      client.DecodeReply(reply_vec, offset_vec);
+      client.DecodeResponse(reply_vec, offset_vec);
 
   EXPECT_EQ(decoded_vec.size(), num_hash);
   bool success = false;
@@ -134,6 +130,7 @@ INSTANTIATE_TEST_SUITE_P(
     Works_Instances, KwpirTest,
     testing::Values(TestParams{1000, 3, 1.3, 16, 256, 128, 4096, 2, 0},
                     TestParams{1000, 2, 2.4, 16, 256, 128, 4096, 2, 0},
+                    TestParams{1000, 2, 2.4, 16, 20000, 128, 4096, 2, 0},
                     TestParams{1000, 3, 1.3, 16, 128, 128, 4096, 1, 400},
                     TestParams{1000, 2, 2.4, 16, 128, 128, 4096, 1, 400},
                     TestParams{203, 3, 1.3, 16, 8, 128, 4096, 1, 0},
@@ -142,6 +139,7 @@ INSTANTIATE_TEST_SUITE_P(
                     // N = 8192
                     TestParams{1000, 3, 1.3, 16, 256, 128, 8192, 1, 0},
                     TestParams{1000, 2, 2.4, 16, 256, 128, 8192, 1, 0},
+                    // TestParams{1000, 2, 2.4, 16, 20000, 128, 8192, 1, 0},
                     TestParams{3000, 3, 1.3, 16, 256, 128, 8192, 2, 1000},
                     TestParams{1000, 3, 1.3, 16, 16, 128, 8192, 2, 400},
 
@@ -152,4 +150,4 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{(1 << 22) - (1 << 10), 3, 1.3, 16, 64, 128, 4096,
                                2, 0}));
 
-}  // namespace psi::kwpir
+}  // namespace psi::pir

@@ -1,0 +1,46 @@
+// Copyright 2024 Ant Group Co., Ltd.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+syntax = "proto3";
+
+import "psi/apps/pir/apis/common.proto";
+
+package pir;
+
+option cc_generic_services = true;
+
+// Pir client -> [Pir server]
+service PirServerService {
+  rpc Query(QueryRequest) returns (QueryResponse);
+}
+
+message QueryRequest {
+  Header header = 1;
+  RequestInfo info = 2;
+
+  reserved 3 to 9;
+
+  string step = 10;
+  repeated bytes query = 11;
+}
+
+message QueryResponse {
+  Header header = 1;
+  Status status = 2;
+
+  reserved 3 to 9;
+
+  repeated bytes reply = 10;
+}

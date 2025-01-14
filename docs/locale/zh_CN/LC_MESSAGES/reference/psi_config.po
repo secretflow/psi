@@ -1,0 +1,1808 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2024, SecretFlow authors
+# This file is distributed under the same license as the SecretFlow PSI
+# Library package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: SecretFlow PSI Library \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-12-30 15:59+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.15.0\n"
+
+#: ../../reference/psi_config.md:1
+msgid "PSI v1 Configuration"
+msgstr ""
+
+#: ../../reference/psi_config.md:3
+msgid "Table of Contents"
+msgstr ""
+
+#: ../../reference/psi_config.md:7 ../../reference/psi_config.md:29
+msgid "Messages"
+msgstr ""
+
+#: ../../reference/psi_config.md:8
+msgid "[BucketPsiConfig](#bucketpsiconfig)"
+msgstr ""
+
+#: ../../reference/psi_config.md:9
+msgid "[DpPsiParams](#dppsiparams)"
+msgstr ""
+
+#: ../../reference/psi_config.md:10
+msgid "[InputParams](#inputparams)"
+msgstr ""
+
+#: ../../reference/psi_config.md:11
+msgid "[MemoryPsiConfig](#memorypsiconfig)"
+msgstr ""
+
+#: ../../reference/psi_config.md:12
+msgid "[OutputParams](#outputparams)"
+msgstr ""
+
+#: ../../reference/psi_config.md:13
+msgid "[PsiResultReport](#psiresultreport)"
+msgstr ""
+
+#: ../../reference/psi_config.md:17 ../../reference/psi_config.md:160
+msgid "Enums"
+msgstr ""
+
+#: ../../reference/psi_config.md:18
+msgid "[CurveType](#curvetype)"
+msgstr ""
+
+#: ../../reference/psi_config.md:19
+msgid "[PsiType](#psitype)"
+msgstr ""
+
+#: ../../reference/psi_config.md:23
+msgid "[Scalar Value Types](#scalar-value-types)"
+msgstr ""
+
+#: ../../reference/psi_config.md:32
+msgid "BucketPsiConfig"
+msgstr ""
+
+#: ../../reference/psi_config.md:39
+msgid "The Bucket-psi configuration."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "Field"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "Type"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "Description"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "psi_type"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "[ PsiType](#psitype)"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "The psi type."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "receiver_rank"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "[ uint32](#uint32)"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "Specified the receiver rank. Receiver can get psi result."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "broadcast_result"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "[ bool](#bool)"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "Whether to broadcast psi result to all parties."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "input_params"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "[ InputParams](#inputparams)"
+msgstr ""
+
+#: ../../reference/psi_config.md ../../reference/psi_config.md:87
+msgid "The input parameters of psi."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "output_params"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "[ OutputParams](#outputparams)"
+msgstr ""
+
+#: ../../reference/psi_config.md ../../reference/psi_config.md:135
+msgid "The output parameters of psi."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "curve_type"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "[ CurveType](#curvetype)"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "Optional, specified elliptic curve cryptography used in psi when needed."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "bucket_size"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "Optional, specified the hash bucket size used in psi."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "preprocess_path"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "[ string](#string)"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "Optional，the path of offline preprocess file."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "ecdh_secret_key_path"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "Optional，secret key path of ecdh_oprf, 256bit/32bytes binary file."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "dppsi_params"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "[ DpPsiParams](#dppsiparams)"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "Optional，params for dp-psi"
+msgstr ""
+
+#: ../../reference/psi_config.md:70
+msgid "DpPsiParams"
+msgstr ""
+
+#: ../../reference/psi_config.md:71
+msgid "The input parameters of dp-psi."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "bob_sub_sampling"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "[ double](#double)"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "bob sub-sampling bernoulli_distribution probability."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "epsilon"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "dp epsilon"
+msgstr ""
+
+#: ../../reference/psi_config.md:82
+msgid "InputParams"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "path"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "The path of input csv file."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "select_fields"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "[repeated string](#string)"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "The select fields of input data."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "precheck"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "Whether to check select fields duplicate."
+msgstr ""
+
+#: ../../reference/psi_config.md:99
+msgid "MemoryPsiConfig"
+msgstr ""
+
+#: ../../reference/psi_config.md:105
+msgid "The In-memory psi configuration."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "Optional，Params for dp-psi"
+msgstr ""
+
+#: ../../reference/psi_config.md:130
+msgid "OutputParams"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "The path of output csv file."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "need_sort"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "Whether to sort output file by select fields."
+msgstr ""
+
+#: ../../reference/psi_config.md:146
+msgid "PsiResultReport"
+msgstr ""
+
+#: ../../reference/psi_config.md:147
+msgid "The report of psi result."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "original_count"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "[ int64](#int64)"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "The data count of input."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "intersection_count"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "The count of intersection. Get `-1` when self party can not get result."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "original_key_count"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "none"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "intersection_key_count"
+msgstr ""
+
+#: ../../reference/psi_config.md:163
+msgid "CurveType"
+msgstr ""
+
+#: ../../reference/psi_config.md:164
+msgid "The specified elliptic curve cryptography used in psi."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "Name"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "Number"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "CURVE_INVALID_TYPE"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "0"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "CURVE_25519"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "1"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "Daniel J. Bernstein. Curve25519: new diffie-hellman speed records"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "CURVE_FOURQ"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "2"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid ""
+"FourQ: four-dimensional decompositions on a Q-curve over the Mersenne "
+"prime"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "CURVE_SM2"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "3"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid ""
+"SM2 is an elliptic curve based cryptosystem (ECC) published as a Chinese "
+"National Standard as GBT.32918.1-2016 and published in ISO/IEC "
+"14888-3:2018"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "CURVE_SECP256K1"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "4"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid ""
+"parameters of the elliptic curve defined in Standards for Efficient "
+"Cryptography (SEC) http://www.secg.org/sec2-v2.pdf"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "CURVE_25519_ELLIGATOR2"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "5"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "Curve25519 with rfc9380 elligator2 hash_to_curve"
+msgstr ""
+
+#: ../../reference/psi_config.md:178
+msgid "PsiType"
+msgstr ""
+
+#: ../../reference/psi_config.md:185
+msgid "The algorithm type of psi."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "INVALID_PSI_TYPE"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "ECDH_PSI_2PC"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "``` NOTICED: No longer supported ``` DDH based PSI"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "KKRT_PSI_2PC"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid ""
+"``` NOTICED: No longer supported ``` Efficient Batched Oblivious PRF with"
+" Applications to Private Set Intersection "
+"https://eprint.iacr.org/2016/799.pdf"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "ECDH_PSI_3PC"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid ""
+"Multi-party PSI based on ECDH (Say A, B, C (receiver)) notice: two-party "
+"intersection cardinarlity leak ("
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "ECDH_PSI_NPC"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid ""
+"Iterative running 2-party ecdh psi to get n-party PSI. Notice: two-party "
+"intersection leak"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "KKRT_PSI_NPC"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "6"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid ""
+"Iterative running 2-party kkrt psi to get n-party PSI. Notice: two-party "
+"intersection leak"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "ECDH_OPRF_UB_PSI_2PC_GEN_CACHE"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "7"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid ""
+"``` NOTICED: No longer supported ``` ecdh-oprf 2-party Unbalanced-PSI "
+"Generate CACHE."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "ECDH_OPRF_UB_PSI_2PC_TRANSFER_CACHE"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "8"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid ""
+"``` NOTICED: No longer supported ``` ecdh-oprf 2-party Unbalanced-PSI "
+"transfer CACHE."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "ECDH_OPRF_UB_PSI_2PC_OFFLINE"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "9"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid ""
+"``` NOTICED: No longer supported ``` ecdh-oprf 2-party Unbalanced-PSI "
+"offline phase."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "ECDH_OPRF_UB_PSI_2PC_ONLINE"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "10"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid ""
+"``` NOTICED: No longer supported ``` ecdh-oprf 2-party Unbalanced-PSI "
+"online phase."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "ECDH_OPRF_UB_PSI_2PC_SHUFFLE_ONLINE"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "11"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid ""
+"``` NOTICED: No longer supported ``` ecdh-oprf 2-party Unbalanced-PSI "
+"with shuffling online phase. large set party get intersection result"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "DP_PSI_2PC"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "12"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid ""
+"Differentially-Private PSI https://arxiv.org/pdf/2208.13249.pdf bases on "
+"ECDH-PSI, and provides: Differentially private PSI results."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "RR22_FAST_PSI_2PC"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "13"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid ""
+"``` NOTICED: No longer supported ``` Blazing Fast PSI "
+"https://eprint.iacr.org/2022/320.pdf two mode: fast mode or low "
+"communication mode"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "RR22_LOWCOMM_PSI_2PC"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "14"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "RR22_MALICIOUS_PSI_2PC"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "15"
+msgstr ""
+
+#: ../../reference/psi_config.md:209
+msgid "Scalar Value Types"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid ".proto Type"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "Notes"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "C++ Type"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "Java Type"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "Python Type"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "<div><h4 id=\"double\" /></div><a name=\"double\" /> double"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "double"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "float"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "<div><h4 id=\"float\" /></div><a name=\"float\" /> float"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "<div><h4 id=\"int32\" /></div><a name=\"int32\" /> int32"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid ""
+"Uses variable-length encoding. Inefficient for encoding negative numbers "
+"– if your field is likely to have negative values, use sint32 instead."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "int32"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "int"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "<div><h4 id=\"int64\" /></div><a name=\"int64\" /> int64"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid ""
+"Uses variable-length encoding. Inefficient for encoding negative numbers "
+"– if your field is likely to have negative values, use sint64 instead."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "int64"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "long"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "int/long"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "<div><h4 id=\"uint32\" /></div><a name=\"uint32\" /> uint32"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "Uses variable-length encoding."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "uint32"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "<div><h4 id=\"uint64\" /></div><a name=\"uint64\" /> uint64"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "uint64"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "<div><h4 id=\"sint32\" /></div><a name=\"sint32\" /> sint32"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid ""
+"Uses variable-length encoding. Signed int value. These more efficiently "
+"encode negative numbers than regular int32s."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "<div><h4 id=\"sint64\" /></div><a name=\"sint64\" /> sint64"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid ""
+"Uses variable-length encoding. Signed int value. These more efficiently "
+"encode negative numbers than regular int64s."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "<div><h4 id=\"fixed32\" /></div><a name=\"fixed32\" /> fixed32"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid ""
+"Always four bytes. More efficient than uint32 if values are often greater"
+" than 2^28."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "<div><h4 id=\"fixed64\" /></div><a name=\"fixed64\" /> fixed64"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid ""
+"Always eight bytes. More efficient than uint64 if values are often "
+"greater than 2^56."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "<div><h4 id=\"sfixed32\" /></div><a name=\"sfixed32\" /> sfixed32"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "Always four bytes."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "<div><h4 id=\"sfixed64\" /></div><a name=\"sfixed64\" /> sfixed64"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "Always eight bytes."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "<div><h4 id=\"bool\" /></div><a name=\"bool\" /> bool"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "bool"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "boolean"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "<div><h4 id=\"string\" /></div><a name=\"string\" /> string"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "A string must always contain UTF-8 encoded or 7-bit ASCII text."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "string"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "String"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "str/unicode"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "<div><h4 id=\"bytes\" /></div><a name=\"bytes\" /> bytes"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "May contain any arbitrary sequence of bytes."
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "ByteString"
+msgstr ""
+
+#: ../../reference/psi_config.md
+msgid "str"
+msgstr ""
+
+#~ msgid "DDH based PSI"
+#~ msgstr ""
+
+#~ msgid "ecdh-oprf 2-party Unbalanced-PSI Generate CACHE."
+#~ msgstr ""
+
+#~ msgid "ecdh-oprf 2-party Unbalanced-PSI transfer CACHE."
+#~ msgstr ""
+
+#~ msgid "ecdh-oprf 2-party Unbalanced-PSI offline phase."
+#~ msgstr ""
+
+#~ msgid "ecdh-oprf 2-party Unbalanced-PSI online phase."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "ecdh-oprf 2-party Unbalanced-PSI with"
+#~ " shuffling online phase. large set "
+#~ "party get intersection result"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Blazing Fast PSI "
+#~ "https://eprint.iacr.org/2022/320.pdf two mode: fast"
+#~ " mode or low communication mode"
+#~ msgstr ""
+
+#~ msgid "[ApsiReceiverConfig](#apsireceiverconfig)"
+#~ msgstr ""
+
+#~ msgid "[ApsiSenderConfig](#apsisenderconfig)"
+#~ msgstr ""
+
+#~ msgid "[PirResultReport](#pirresultreport)"
+#~ msgstr ""
+
+#~ msgid "[DebugOptions](#debugoptions)"
+#~ msgstr ""
+
+#~ msgid "[EcdhConfig](#ecdhconfig)"
+#~ msgstr ""
+
+#~ msgid "[InputAttr](#inputattr)"
+#~ msgstr ""
+
+#~ msgid "[InternalRecoveryRecord](#internalrecoveryrecord)"
+#~ msgstr ""
+
+#~ msgid "[IoConfig](#ioconfig)"
+#~ msgstr ""
+
+#~ msgid "[KkrtConfig](#kkrtconfig)"
+#~ msgstr ""
+
+#~ msgid "[OutputAttr](#outputattr)"
+#~ msgstr ""
+
+#~ msgid "[ProtocolConfig](#protocolconfig)"
+#~ msgstr ""
+
+#~ msgid "[PsiConfig](#psiconfig)"
+#~ msgstr ""
+
+#~ msgid "[RecoveryCheckpoint](#recoverycheckpoint)"
+#~ msgstr ""
+
+#~ msgid "[RecoveryConfig](#recoveryconfig)"
+#~ msgstr ""
+
+#~ msgid "[Rr22Config](#rr22config)"
+#~ msgstr ""
+
+#~ msgid "[UbPsiConfig](#ubpsiconfig)"
+#~ msgstr ""
+
+#~ msgid "[IoType](#iotype)"
+#~ msgstr ""
+
+#~ msgid "[Protocol](#protocol)"
+#~ msgstr ""
+
+#~ msgid "[PsiConfig.AdvancedJoinType](#psiconfigadvancedjointype)"
+#~ msgstr ""
+
+#~ msgid "[RecoveryCheckpoint.Stage](#recoverycheckpointstage)"
+#~ msgstr ""
+
+#~ msgid "[Role](#role)"
+#~ msgstr ""
+
+#~ msgid "[UbPsiConfig.Mode](#ubpsiconfigmode)"
+#~ msgstr ""
+
+#~ msgid "ApsiReceiverConfig"
+#~ msgstr ""
+
+#~ msgid "threads"
+#~ msgstr ""
+
+#~ msgid "Number of threads to use"
+#~ msgstr ""
+
+#~ msgid "log_file"
+#~ msgstr ""
+
+#~ msgid "Log file path. For APSI only."
+#~ msgstr ""
+
+#~ msgid "silent"
+#~ msgstr ""
+
+#~ msgid "Do not write output to console. For APSI only."
+#~ msgstr ""
+
+#~ msgid "log_level"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "One of 'all', 'debug', 'info' (default),"
+#~ " 'warning', 'error', 'off'. For APSI "
+#~ "only."
+#~ msgstr ""
+
+#~ msgid "query_file"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Path to a text file containing "
+#~ "query data (one per line). Header "
+#~ "is not needed."
+#~ msgstr ""
+
+#~ msgid "output_file"
+#~ msgstr ""
+
+#~ msgid "Path to a file where intersection result will be written."
+#~ msgstr ""
+
+#~ msgid "params_file"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Path to a JSON file describing the"
+#~ " parameters to be used by the "
+#~ "sender. If not set, receiver will "
+#~ "ask sender, which results in additional"
+#~ " communication."
+#~ msgstr ""
+
+#~ msgid "experimental_enable_bucketize"
+#~ msgstr ""
+
+#~ msgid "Must be same as sender config."
+#~ msgstr ""
+
+#~ msgid "experimental_bucket_cnt"
+#~ msgstr ""
+
+#~ msgid "query_batch_size"
+#~ msgstr ""
+
+#~ msgid "The number of query in a batch. default 1."
+#~ msgstr ""
+
+#~ msgid "ApsiSenderConfig"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "NOTE(junfeng): We provide a config "
+#~ "identical to original APSI CLI. Please"
+#~ " check https://github.com/microsoft/APSI?tab=readme-"
+#~ "ov-file#command-line-interface-cli for "
+#~ "details."
+#~ msgstr ""
+
+#~ msgid "db_file"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Path to a CSV file describing the"
+#~ " sender's dataset (an item-label pair"
+#~ " on each row) or a file "
+#~ "containing a serialized SenderDB; the "
+#~ "CLI will first attempt to load the"
+#~ " data as a serialized SenderDB, and"
+#~ " – upon failure – will proceed "
+#~ "to attempt to read it as a "
+#~ "CSV file For CSV File: 1. the "
+#~ "first col is processed as item "
+#~ "while the second col as label. "
+#~ "OTHER COLS ARE IGNORED. 2. NO "
+#~ "HEADERS ARE ALLOWED."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Path to a JSON file describing the"
+#~ " parameters to be used by the "
+#~ "sender. Not required if db_file points"
+#~ " to a serialized SenderDB."
+#~ msgstr ""
+
+#~ msgid "sdb_out_file"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Save the SenderDB in the given "
+#~ "file. Required if gen_db_only is set "
+#~ "true. Use experimental_bucket_folder instead "
+#~ "if you turn experimental_enable_bucketize on."
+#~ msgstr ""
+
+#~ msgid "nonce_byte_count"
+#~ msgstr ""
+
+#~ msgid "Number of bytes used for the nonce in labeled mode (default is 16)"
+#~ msgstr ""
+
+#~ msgid "compress"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Whether to compress the SenderDB in "
+#~ "memory; this will make the memory "
+#~ "footprint smaller at the cost of "
+#~ "increased computation."
+#~ msgstr ""
+
+#~ msgid "save_db_only"
+#~ msgstr ""
+
+#~ msgid "Whether to save sender db only."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "[experimental] Whether to split data in"
+#~ " buckets and Each bucket would be "
+#~ "a seperate SenderDB. If set, "
+#~ "experimental_bucket_folder must be a valid "
+#~ "folder."
+#~ msgstr ""
+
+#~ msgid "[experimental] The number of bucket to fit data."
+#~ msgstr ""
+
+#~ msgid "experimental_bucket_folder"
+#~ msgstr ""
+
+#~ msgid "[experimental] Folder to save bucketized small csv files and db files."
+#~ msgstr ""
+
+#~ msgid "experimental_db_generating_process_num"
+#~ msgstr ""
+
+#~ msgid "[ int32](#int32)"
+#~ msgstr ""
+
+#~ msgid "[experimental] The number of processes to use for generating db."
+#~ msgstr ""
+
+#~ msgid "source_file"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Source file used to genenerate sender"
+#~ " db. Currently only support csv file."
+#~ msgstr ""
+
+#~ msgid "experimental_bucket_group_cnt"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "[experimental] The number of group of"
+#~ " bucket, each group has a db_file,"
+#~ " default 1024."
+#~ msgstr ""
+
+#~ msgid "PirResultReport"
+#~ msgstr ""
+
+#~ msgid "The report of pir task."
+#~ msgstr ""
+
+#~ msgid "match_cnt"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Deprecation notice** This enum is "
+#~ "scheduled for removal in a future "
+#~ "release. Use psi.v2.ProtocolConfig instead."
+#~ msgstr ""
+
+#~ msgid "DebugOptions"
+#~ msgstr ""
+
+#~ msgid "Logging level for default logger. Default to info. Supports:"
+#~ msgstr ""
+
+#~ msgid "trace: SPDLOG_LEVEL_TRACE"
+#~ msgstr ""
+
+#~ msgid "debug: SPDLOG_LEVEL_DEBUG"
+#~ msgstr ""
+
+#~ msgid "info: SPDLOG_LEVEL_INFO"
+#~ msgstr ""
+
+#~ msgid "warn: SPDLOG_LEVEL_WARN"
+#~ msgstr ""
+
+#~ msgid "err: SPDLOG_LEVEL_ERROR"
+#~ msgstr ""
+
+#~ msgid "critical: SPDLOG_LEVEL_CRITICAL"
+#~ msgstr ""
+
+#~ msgid "off: SPDLOG_LEVEL_OFF"
+#~ msgstr ""
+
+#~ msgid "logging_level"
+#~ msgstr ""
+
+#~ msgid "trace_path"
+#~ msgstr ""
+
+#~ msgid "The path of trace. Deafult to /tmp/psi.trace"
+#~ msgstr ""
+
+#~ msgid "EcdhConfig"
+#~ msgstr ""
+
+#~ msgid "Configs for ECDH protocol."
+#~ msgstr ""
+
+#~ msgid "curve"
+#~ msgstr ""
+
+#~ msgid "[ psi.CurveType](#psicurvetype)"
+#~ msgstr ""
+
+#~ msgid "batch_size"
+#~ msgstr ""
+
+#~ msgid "[ uint64](#uint64)"
+#~ msgstr ""
+
+#~ msgid "If not set, use default value: 4096."
+#~ msgstr ""
+
+#~ msgid "InputAttr"
+#~ msgstr ""
+
+#~ msgid "keys_unique"
+#~ msgstr ""
+
+#~ msgid "Keys in input file are unique. If not set, use default value: false."
+#~ msgstr ""
+
+#~ msgid "InternalRecoveryRecord"
+#~ msgstr ""
+
+#~ msgid "stage"
+#~ msgstr ""
+
+#~ msgid "[ RecoveryCheckpoint.Stage](#recoverycheckpointstage)"
+#~ msgstr ""
+
+#~ msgid "ecdh_dual_masked_item_peer_count"
+#~ msgstr ""
+
+#~ msgid "parsed_bucket_count"
+#~ msgstr ""
+
+#~ msgid "IoConfig"
+#~ msgstr ""
+
+#~ msgid "IO configuration."
+#~ msgstr ""
+
+#~ msgid "type"
+#~ msgstr ""
+
+#~ msgid "[ IoType](#iotype)"
+#~ msgstr ""
+
+#~ msgid "Required for FILE."
+#~ msgstr ""
+
+#~ msgid "KkrtConfig"
+#~ msgstr ""
+
+#~ msgid "Configs for KKRT protocol"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Since the total input may not fit"
+#~ " in memory, the input may be "
+#~ "splitted into buckets. bucket_size indicate"
+#~ " the number of items in each "
+#~ "bucket. If the memory of host is"
+#~ " limited, you should set a smaller"
+#~ " bucket size. Otherwise, you should "
+#~ "use a larger one. If not set, "
+#~ "use default value: 1 << 20."
+#~ msgstr ""
+
+#~ msgid "OutputAttr"
+#~ msgstr ""
+
+#~ msgid "csv_null_rep"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Null representation in output csv file."
+#~ " If not set, use default value: "
+#~ "\"NULL\"."
+#~ msgstr ""
+
+#~ msgid "ProtocolConfig"
+#~ msgstr ""
+
+#~ msgid "Any items related to PSI protocols."
+#~ msgstr ""
+
+#~ msgid "protocol"
+#~ msgstr ""
+
+#~ msgid "[ Protocol](#protocol)"
+#~ msgstr ""
+
+#~ msgid "role"
+#~ msgstr ""
+
+#~ msgid "[ Role](#role)"
+#~ msgstr ""
+
+#~ msgid "Reveal result to sender."
+#~ msgstr ""
+
+#~ msgid "ecdh_config"
+#~ msgstr ""
+
+#~ msgid "[ EcdhConfig](#ecdhconfig)"
+#~ msgstr ""
+
+#~ msgid "For ECDH protocol."
+#~ msgstr ""
+
+#~ msgid "kkrt_config"
+#~ msgstr ""
+
+#~ msgid "[ KkrtConfig](#kkrtconfig)"
+#~ msgstr ""
+
+#~ msgid "For KKRT protocol."
+#~ msgstr ""
+
+#~ msgid "rr22_config"
+#~ msgstr ""
+
+#~ msgid "[ Rr22Config](#rr22config)"
+#~ msgstr ""
+
+#~ msgid "For RR22 protocol."
+#~ msgstr ""
+
+#~ msgid "PsiConfig"
+#~ msgstr ""
+
+#~ msgid "The top level of Configs. run(PsiConfig)->PsiReport"
+#~ msgstr ""
+
+#~ msgid "Advanced Joins Type: Inner Join e.g. If input of receiver is"
+#~ msgstr ""
+
+#~ msgid "and input of sender is"
+#~ msgstr ""
+
+#~ msgid "After inner join. The output of receiver is:"
+#~ msgstr ""
+
+#~ msgid "The output of sender is"
+#~ msgstr ""
+
+#~ msgid "Type: Left Join After left join. The output of left side is:"
+#~ msgstr ""
+
+#~ msgid "The output of right side is"
+#~ msgstr ""
+
+#~ msgid "Type: Right Join After right join. The output of left side is:"
+#~ msgstr ""
+
+#~ msgid "Type: Full Join After full join. The output of left side is:"
+#~ msgstr ""
+
+#~ msgid "Type: Difference After difference. The output of left side is:"
+#~ msgstr ""
+
+#~ msgid "protocol_config"
+#~ msgstr ""
+
+#~ msgid "[ ProtocolConfig](#protocolconfig)"
+#~ msgstr ""
+
+#~ msgid "Configs for protocols."
+#~ msgstr ""
+
+#~ msgid "input_config"
+#~ msgstr ""
+
+#~ msgid "[ IoConfig](#ioconfig)"
+#~ msgstr ""
+
+#~ msgid "Configs for input."
+#~ msgstr ""
+
+#~ msgid "output_config"
+#~ msgstr ""
+
+#~ msgid "Configs for output."
+#~ msgstr ""
+
+#~ msgid "keys"
+#~ msgstr ""
+
+#~ msgid "keys for intersection."
+#~ msgstr ""
+
+#~ msgid "debug_options"
+#~ msgstr ""
+
+#~ msgid "[ DebugOptions](#debugoptions)"
+#~ msgstr ""
+
+#~ msgid "Logging level."
+#~ msgstr ""
+
+#~ msgid "skip_duplicates_check"
+#~ msgstr ""
+
+#~ msgid "If true, the check of duplicated items will be skiped."
+#~ msgstr ""
+
+#~ msgid "disable_alignment"
+#~ msgstr ""
+
+#~ msgid "It true, output is not promised to be aligned."
+#~ msgstr ""
+
+#~ msgid "recovery_config"
+#~ msgstr ""
+
+#~ msgid "[ RecoveryConfig](#recoveryconfig)"
+#~ msgstr ""
+
+#~ msgid "Configs for recovery."
+#~ msgstr ""
+
+#~ msgid "advanced_join_type"
+#~ msgstr ""
+
+#~ msgid "[ PsiConfig.AdvancedJoinType](#psiconfigadvancedjointype)"
+#~ msgstr ""
+
+#~ msgid "left_side"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Required if advanced_join_type is "
+#~ "ADVANCED_JOIN_TYPE_LEFT_JOIN or "
+#~ "ADVANCED_JOIN_TYPE_RIGHT_JOIN."
+#~ msgstr ""
+
+#~ msgid "check_hash_digest"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Check if hash digest of keys from"
+#~ " parties are equal to determine "
+#~ "whether to early-stop."
+#~ msgstr ""
+
+#~ msgid "input_attr"
+#~ msgstr ""
+
+#~ msgid "[ InputAttr](#inputattr)"
+#~ msgstr ""
+
+#~ msgid "Input attributes."
+#~ msgstr ""
+
+#~ msgid "output_attr"
+#~ msgstr ""
+
+#~ msgid "[ OutputAttr](#outputattr)"
+#~ msgstr ""
+
+#~ msgid "Output attributes."
+#~ msgstr ""
+
+#~ msgid "RecoveryCheckpoint"
+#~ msgstr ""
+
+#~ msgid "Save some critical information for future recovery."
+#~ msgstr ""
+
+#~ msgid "Stage of PSI."
+#~ msgstr ""
+
+#~ msgid "config"
+#~ msgstr ""
+
+#~ msgid "[ PsiConfig](#psiconfig)"
+#~ msgstr ""
+
+#~ msgid "A copy of origin PSI config."
+#~ msgstr ""
+
+#~ msgid "input_hash_digest"
+#~ msgstr ""
+
+#~ msgid "[ bytes](#bytes)"
+#~ msgstr ""
+
+#~ msgid "Hash digest of input keys."
+#~ msgstr ""
+
+#~ msgid "ecdh_dual_masked_item_self_count"
+#~ msgstr ""
+
+#~ msgid "Saved dual masked item count from self originally. PROTOCOL_ECDH only."
+#~ msgstr ""
+
+#~ msgid "Saved dual masked item count from peer originally. PROTOCOL_ECDH only."
+#~ msgstr ""
+
+#~ msgid "Saved parsed bucket count. PROTOCOL_KKRT and PROTOCOL_RR22 only."
+#~ msgstr ""
+
+#~ msgid "RecoveryConfig"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Configuration for recovery. If a PSI "
+#~ "task failed unexpectedly, e.g. network "
+#~ "failures and restart, the task can "
+#~ "resume to the latest checkpoint to "
+#~ "save time. However, enabling recovery "
+#~ "would due in extra disk IOs and"
+#~ " disk space occupation."
+#~ msgstr ""
+
+#~ msgid "enabled"
+#~ msgstr ""
+
+#~ msgid "folder"
+#~ msgstr ""
+
+#~ msgid "Stores status and checkpoint files."
+#~ msgstr ""
+
+#~ msgid "Rr22Config"
+#~ msgstr ""
+
+#~ msgid "Configs for RR22 protocol."
+#~ msgstr ""
+
+#~ msgid "low_comm_mode"
+#~ msgstr ""
+
+#~ msgid "UbPsiConfig"
+#~ msgstr ""
+
+#~ msgid "config for unbalanced psi."
+#~ msgstr ""
+
+#~ msgid "mode"
+#~ msgstr ""
+
+#~ msgid "[ UbPsiConfig.Mode](#ubpsiconfigmode)"
+#~ msgstr ""
+
+#~ msgid "Required."
+#~ msgstr ""
+
+#~ msgid "Required for all modes except MODE_OFFLINE_GEN_CACHE."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Config for origin input. Servers: "
+#~ "Required for MODE_OFFLINE_GEN_CACHE, MODE_OFFLINE,"
+#~ " MODE_FULL. Clients: Required for "
+#~ "MODE_ONLINE and MODE_FULL."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Join keys. Servers: Required for "
+#~ "MODE_OFFLINE_GEN_CACHE, MODE_OFFLINE, MODE_FULL. "
+#~ "Clients: Required for MODE_ONLINE and "
+#~ "MODE_FULL."
+#~ msgstr ""
+
+#~ msgid "server_secret_key_path"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Servers: Required for MODE_OFFLINE_GEN_CACHE, "
+#~ "MODE_OFFLINE, MODE_ONLINE and MODE_FULL."
+#~ msgstr ""
+
+#~ msgid "cache_path"
+#~ msgstr ""
+
+#~ msgid "server_get_result"
+#~ msgstr ""
+
+#~ msgid "client_get_result"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "It true, output is not promised to"
+#~ " be aligned. Valid if both "
+#~ "server_get_result and client_get_result are "
+#~ "true."
+#~ msgstr ""
+
+#~ msgid "Required for MODE_ONLINE and MODE_FULL."
+#~ msgstr ""
+
+#~ msgid "IoType"
+#~ msgstr ""
+
+#~ msgid "TODO(junfeng): support more io types including oss, sql, etc."
+#~ msgstr ""
+
+#~ msgid "IO_TYPE_UNSPECIFIED"
+#~ msgstr ""
+
+#~ msgid "IO_TYPE_FILE_CSV"
+#~ msgstr ""
+
+#~ msgid "Local csv file."
+#~ msgstr ""
+
+#~ msgid "Protocol"
+#~ msgstr ""
+
+#~ msgid "PSI protocols."
+#~ msgstr ""
+
+#~ msgid "PROTOCOL_UNSPECIFIED"
+#~ msgstr ""
+
+#~ msgid "PROTOCOL_ECDH"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "[Mea86]C. Meadows, \"A More Efficient "
+#~ "Cryptographic Matchmaking Protocol for Use "
+#~ "in the Absence of a Continuously "
+#~ "Available Third Party,\" 1986 IEEE "
+#~ "Symposium on Security and Privacy, "
+#~ "Oakland, CA, USA, 1986, pp. 134-134, "
+#~ "doi: 10.1109/SP.1986.10022."
+#~ msgstr ""
+
+#~ msgid "PROTOCOL_KKRT"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Efficient Batched Oblivious PRF with "
+#~ "Applications to Private Set Intersection "
+#~ "https://eprint.iacr.org/2016/799.pdf"
+#~ msgstr ""
+
+#~ msgid "PROTOCOL_RR22"
+#~ msgstr ""
+
+#~ msgid "Blazing Fast PSI https://eprint.iacr.org/2022/320.pdf"
+#~ msgstr ""
+
+#~ msgid "PsiConfig.AdvancedJoinType"
+#~ msgstr ""
+
+#~ msgid "Advanced Join allow duplicate keys."
+#~ msgstr ""
+
+#~ msgid "If selected, duplicates_check is skipped."
+#~ msgstr ""
+
+#~ msgid "If selected, both parties are allowed to contain duplicate keys."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If use left join, full join or "
+#~ "difference, the size of difference set"
+#~ " of left party is revealed to "
+#~ "right party."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If use right join, full join or"
+#~ " difference, the size of difference "
+#~ "set of right party is revealed to"
+#~ " left party."
+#~ msgstr ""
+
+#~ msgid "ADVANCED_JOIN_TYPE_UNSPECIFIED"
+#~ msgstr ""
+
+#~ msgid "ADVANCED_JOIN_TYPE_INNER_JOIN"
+#~ msgstr ""
+
+#~ msgid "ADVANCED_JOIN_TYPE_LEFT_JOIN"
+#~ msgstr ""
+
+#~ msgid "ADVANCED_JOIN_TYPE_RIGHT_JOIN"
+#~ msgstr ""
+
+#~ msgid "ADVANCED_JOIN_TYPE_FULL_JOIN"
+#~ msgstr ""
+
+#~ msgid "ADVANCED_JOIN_TYPE_DIFFERENCE"
+#~ msgstr ""
+
+#~ msgid "RecoveryCheckpoint.Stage"
+#~ msgstr ""
+
+#~ msgid "STAGE_UNSPECIFIED"
+#~ msgstr ""
+
+#~ msgid "STAGE_INIT_END"
+#~ msgstr ""
+
+#~ msgid "STAGE_PRE_PROCESS_END"
+#~ msgstr ""
+
+#~ msgid "STAGE_ONLINE_START"
+#~ msgstr ""
+
+#~ msgid "STAGE_ONLINE_END"
+#~ msgstr ""
+
+#~ msgid "STAGE_POST_PROCESS_END"
+#~ msgstr ""
+
+#~ msgid "Role"
+#~ msgstr ""
+
+#~ msgid "Role of parties."
+#~ msgstr ""
+
+#~ msgid "ROLE_UNSPECIFIED"
+#~ msgstr ""
+
+#~ msgid "ROLE_RECEIVER"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "receiver In 2P symmetric PSI, receivers"
+#~ " would always receive the result in"
+#~ " the origin protocol."
+#~ msgstr ""
+
+#~ msgid "ROLE_SENDER"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "sender In 2P symmetric PSI, senders "
+#~ "are the other participants apart from"
+#~ " receiver."
+#~ msgstr ""
+
+#~ msgid "ROLE_SERVER"
+#~ msgstr ""
+
+#~ msgid "server In 2P unbalanced PSI, servers own a much larger dataset."
+#~ msgstr ""
+
+#~ msgid "ROLE_CLIENT"
+#~ msgstr ""
+
+#~ msgid "server In 2P unbalanced PSI, clients own a much smaller dataset."
+#~ msgstr ""
+
+#~ msgid "UbPsiConfig.Mode"
+#~ msgstr ""
+
+#~ msgid "MODE_UNSPECIFIED"
+#~ msgstr ""
+
+#~ msgid "MODE_OFFLINE_GEN_CACHE"
+#~ msgstr ""
+
+#~ msgid "Servers generate cache only. First part of offline stage."
+#~ msgstr ""
+
+#~ msgid "MODE_OFFLINE_TRANSFER_CACHE"
+#~ msgstr ""
+
+#~ msgid "Servers send cache to clients only. Second part of offline stage."
+#~ msgstr ""
+
+#~ msgid "MODE_OFFLINE"
+#~ msgstr ""
+
+#~ msgid "Run offline stage."
+#~ msgstr ""
+
+#~ msgid "MODE_ONLINE"
+#~ msgstr ""
+
+#~ msgid "Run online stage."
+#~ msgstr ""
+
+#~ msgid "MODE_FULL"
+#~ msgstr ""
+
+#~ msgid "Run all stages."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Deprecation notice* This enum is "
+#~ "**scheduled for removal** in a future"
+#~ " release. Use **psi.v2.ProtocolConfig** instead."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "<em>Deprecation notice</em> This enum is "
+#~ "**scheduled for removal** in a future"
+#~ " release. Use **psi.v2.ProtocolConfig** instead."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "<strong>Deprecation notice</strong> This enum "
+#~ "is **scheduled for removal** in a "
+#~ "future release. Use **psi.v2.ProtocolConfig** "
+#~ "instead."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Deprecation notice**. This message is "
+#~ "scheduled for removal in a future "
+#~ "release. Use psi.v2.PsiConfig instead."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Deprecation notice** This message is "
+#~ "scheduled for removal in a future "
+#~ "release."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Deprecation notice**. This message is "
+#~ "scheduled for removal in a future "
+#~ "release."
+#~ msgstr ""
+
+#~ msgid "NOTICED**: No longer supported DDH based PSI"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "NOTICED**: No longer supported Efficient "
+#~ "Batched Oblivious PRF with Applications "
+#~ "to Private Set Intersection "
+#~ "https://eprint.iacr.org/2016/799.pdf"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "NOTICED**: No longer supported ecdh-oprf"
+#~ " 2-party Unbalanced-PSI Generate CACHE."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "NOTICED**: No longer supported ecdh-oprf"
+#~ " 2-party Unbalanced-PSI transfer CACHE."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "NOTICED**: No longer supported ecdh-oprf"
+#~ " 2-party Unbalanced-PSI offline phase."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "NOTICED**: No longer supported ecdh-oprf"
+#~ " 2-party Unbalanced-PSI online phase."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "NOTICED**: No longer supported ecdh-oprf"
+#~ " 2-party Unbalanced-PSI with shuffling "
+#~ "online phase. large set party get "
+#~ "intersection result"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "NOTICED**: No longer supported Blazing "
+#~ "Fast PSI https://eprint.iacr.org/2022/320.pdf two"
+#~ " mode: fast mode or low communication"
+#~ " mode"
+#~ msgstr ""
+

@@ -25,7 +25,10 @@ Params GetFastExpansionTestingParam();
 
 Params GetTestParam();
 
+// this params has the best performance, but has smallest noise budget
 Params GetPerformanceImproveParam();
+
+Params GetDefaultParam();
 
 Params GetLargerParam();
 

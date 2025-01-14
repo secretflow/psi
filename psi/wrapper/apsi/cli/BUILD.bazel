@@ -45,7 +45,6 @@ psi_cc_library(
     deps = [
         ":common_utils",
         ":sender_dispatcher",
-        "//psi/proto:pir_cc_proto",
         "//psi/utils:resource_manager",
         "//psi/wrapper/apsi:receiver",
         "//psi/wrapper/apsi:sender",

@@ -20,9 +20,7 @@ namespace psi::sealpir {
 
 std::vector<uint8_t> MemoryDbElementProvider::ReadElement(size_t index) {
   YACL_ENFORCE(index < items_.size());
-
   std::vector<uint8_t> element(element_size_);
-
   std::memcpy(element.data(), &items_[index], element_size_);
   return element;
 }
@@ -30,9 +28,7 @@ std::vector<uint8_t> MemoryDbElementProvider::ReadElement(size_t index) {
 std::vector<uint8_t> MemoryDbElementProvider::ReadElement(size_t index,
                                                           size_t size) {
   YACL_ENFORCE((index + size) <= items_.size());
-
   std::vector<uint8_t> element(size);
-
   std::memcpy(element.data(), &items_[index], size);
   return element;
 }
@@ -53,9 +49,9 @@ void MemoryDbPlaintextStore::SavePlaintexts(
   }
 }
 
-std::vector<seal::Plaintext> MemoryDbPlaintextStore::ReadPlaintexts(
-    size_t sub_db_index) {
-  // return std::move(db_vec_[sub_db_index]);
+const std::vector<seal::Plaintext>& MemoryDbPlaintextStore::ReadPlaintexts(
+    size_t sub_db_index) const {
+  YACL_ENFORCE_LT(sub_db_index, db_vec_.size());
   return db_vec_[sub_db_index];
 }
 

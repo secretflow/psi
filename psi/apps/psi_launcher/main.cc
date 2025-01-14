@@ -25,7 +25,6 @@
 #include "psi/version.h"
 
 #include "psi/proto/entry.pb.h"
-#include "psi/proto/pir.pb.h"
 #include "psi/proto/psi.pb.h"
 #include "psi/proto/psi_v2.pb.h"
 

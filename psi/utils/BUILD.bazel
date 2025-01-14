@@ -67,6 +67,7 @@ psi_cc_library(
     hdrs = ["pb_helper.h"],
     deps = [
         ":io",
+        "@protobuf",
         "@yacl//yacl/base:exception",
     ],
 )

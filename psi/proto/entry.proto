@@ -16,8 +16,8 @@
 syntax = "proto3";
 
 import "psi/proto/psi.proto";
-import "psi/proto/pir.proto";
 import "psi/proto/psi_v2.proto";
+import "psi/proto/pir.proto";
 import "yacl/link/link.proto";
 
 package psi;

@@ -11,13 +11,13 @@
     - [MemoryPsiConfig](#memorypsiconfig)
     - [OutputParams](#outputparams)
     - [PsiResultReport](#psiresultreport)
-  
+
 
 
 - Enums
     - [CurveType](#curvetype)
     - [PsiType](#psitype)
-  
+
 
 
 - [Scalar Value Types](#scalar-value-types)
@@ -30,6 +30,12 @@
 
 
 ### BucketPsiConfig
+```
+ Deprecation notice.
+ This message is scheduled for removal in a future release.
+ Use psi.v2.PsiConfig instead.
+```
+
 The Bucket-psi configuration.
 
 ```python
@@ -74,6 +80,10 @@ The input parameters of dp-psi.
 
 
 ### InputParams
+```
+ Deprecation notice.
+ This message is scheduled for removal in a future release.
+```
 The input parameters of psi.
 
 
@@ -87,6 +97,11 @@ The input parameters of psi.
 
 
 ### MemoryPsiConfig
+```
+ Deprecation notice.
+ This message is scheduled for removal in a future release.
+```
+
 The In-memory psi configuration.
 
 ```python
@@ -113,6 +128,10 @@ The In-memory psi configuration.
 
 
 ### OutputParams
+```
+ Deprecation notice.
+ This message is scheduled for removal in a future release.
+```
 The output parameters of psi.
 
 
@@ -132,6 +151,8 @@ The report of psi result.
 | ----- | ---- | ----------- |
 | original_count | [ int64](#int64) | The data count of input. |
 | intersection_count | [ int64](#int64) | The count of intersection. Get `-1` when self party can not get result. |
+| original_key_count | [ int64](#int64) | none |
+| intersection_key_count | [ int64](#int64) | none |
  <!-- end Fields -->
  <!-- end HasFields -->
  <!-- end messages -->
@@ -155,23 +176,29 @@ The specified elliptic curve cryptography used in psi.
 
 
 ### PsiType
+```
+ Deprecation notice.
+ This enum is scheduled for removal in a future release.
+ Use psi.v2.ProtocolConfig instead.
+```
+
 The algorithm type of psi.
 
 | Name | Number | Description |
 | ---- | ------ | ----------- |
 | INVALID_PSI_TYPE | 0 | none |
-| ECDH_PSI_2PC | 1 | DDH based PSI |
-| KKRT_PSI_2PC | 2 | Efficient Batched Oblivious PRF with Applications to Private Set Intersection https://eprint.iacr.org/2016/799.pdf |
+| ECDH_PSI_2PC | 1 | ``` NOTICED: No longer supported ``` DDH based PSI |
+| KKRT_PSI_2PC | 2 | ``` NOTICED: No longer supported ``` Efficient Batched Oblivious PRF with Applications to Private Set Intersection https://eprint.iacr.org/2016/799.pdf |
 | ECDH_PSI_3PC | 4 | Multi-party PSI based on ECDH (Say A, B, C (receiver)) notice: two-party intersection cardinarlity leak (|A intersect B|) |
 | ECDH_PSI_NPC | 5 | Iterative running 2-party ecdh psi to get n-party PSI. Notice: two-party intersection leak |
 | KKRT_PSI_NPC | 6 | Iterative running 2-party kkrt psi to get n-party PSI. Notice: two-party intersection leak |
-| ECDH_OPRF_UB_PSI_2PC_GEN_CACHE | 7 | ecdh-oprf 2-party Unbalanced-PSI Generate CACHE. |
-| ECDH_OPRF_UB_PSI_2PC_TRANSFER_CACHE | 8 | ecdh-oprf 2-party Unbalanced-PSI transfer CACHE. |
-| ECDH_OPRF_UB_PSI_2PC_OFFLINE | 9 | ecdh-oprf 2-party Unbalanced-PSI offline phase. |
-| ECDH_OPRF_UB_PSI_2PC_ONLINE | 10 | ecdh-oprf 2-party Unbalanced-PSI online phase. |
-| ECDH_OPRF_UB_PSI_2PC_SHUFFLE_ONLINE | 11 | ecdh-oprf 2-party Unbalanced-PSI with shuffling online phase. large set party get intersection result |
+| ECDH_OPRF_UB_PSI_2PC_GEN_CACHE | 7 | ``` NOTICED: No longer supported ``` ecdh-oprf 2-party Unbalanced-PSI Generate CACHE. |
+| ECDH_OPRF_UB_PSI_2PC_TRANSFER_CACHE | 8 | ``` NOTICED: No longer supported ``` ecdh-oprf 2-party Unbalanced-PSI transfer CACHE. |
+| ECDH_OPRF_UB_PSI_2PC_OFFLINE | 9 | ``` NOTICED: No longer supported ``` ecdh-oprf 2-party Unbalanced-PSI offline phase. |
+| ECDH_OPRF_UB_PSI_2PC_ONLINE | 10 | ``` NOTICED: No longer supported ``` ecdh-oprf 2-party Unbalanced-PSI online phase. |
+| ECDH_OPRF_UB_PSI_2PC_SHUFFLE_ONLINE | 11 | ``` NOTICED: No longer supported ``` ecdh-oprf 2-party Unbalanced-PSI with shuffling online phase. large set party get intersection result |
 | DP_PSI_2PC | 12 | Differentially-Private PSI https://arxiv.org/pdf/2208.13249.pdf bases on ECDH-PSI, and provides: Differentially private PSI results. |
-| RR22_FAST_PSI_2PC | 13 | Blazing Fast PSI https://eprint.iacr.org/2022/320.pdf two mode: fast mode or low communication mode |
+| RR22_FAST_PSI_2PC | 13 | ``` NOTICED: No longer supported ``` Blazing Fast PSI https://eprint.iacr.org/2022/320.pdf two mode: fast mode or low communication mode |
 | RR22_LOWCOMM_PSI_2PC | 14 | none |
 | RR22_MALICIOUS_PSI_2PC | 15 | none |
 

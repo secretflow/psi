@@ -1,0 +1,27 @@
+[tool.black]
+skip-string-normalization = true
+
+[tool.isort]
+profile = "black"
+
+[tool.rstcheck]
+report_level = "ERROR"
+ignore_directives = [
+    "include",
+    "mermaid",
+    "autoclass",
+    "automodule",
+    "autofunction",
+]
+ignore_languages = [
+    "cpp"
+]
+ignore_roles = [
+    "psi_code_host"
+]
+
+reportMissingImports = true
+reportMissingTypeStubs = false
+
+pythonVersion = "3.10"
+pythonPlatform = "Linux"

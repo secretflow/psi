@@ -72,7 +72,7 @@ echo -e "Build psi binary ${GREEN}PSI ${PSI_VERSION}${NO_COLOR}..."
 SCRIPT_DIR="$(realpath $(dirname $0))"
 
 if [[ SKIP -eq 0 ]]; then
-    docker run -it  --rm   --mount type=bind,source="${SCRIPT_DIR}/../",target=/home/admin/dev/src -w /home/admin/dev  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow/release-ci:latest /home/admin/dev/src/docker/entry.sh
+    docker run -it  --rm   --mount type=bind,source="${SCRIPT_DIR}/../",target=/home/admin/dev/src -w /home/admin/dev  --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --cap-add=NET_ADMIN --privileged=true secretflow/release-ci:1.7 /home/admin/dev/src/docker/entry.sh
     echo -e "Finish building psi binary ${GREEN}${IMAGE_LITE_TAG}${NO_COLOR}"
 fi
 

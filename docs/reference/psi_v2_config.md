@@ -7,16 +7,18 @@
 - Messages
     - [DebugOptions](#debugoptions)
     - [EcdhConfig](#ecdhconfig)
+    - [InputAttr](#inputattr)
     - [InternalRecoveryRecord](#internalrecoveryrecord)
     - [IoConfig](#ioconfig)
     - [KkrtConfig](#kkrtconfig)
+    - [OutputAttr](#outputattr)
     - [ProtocolConfig](#protocolconfig)
     - [PsiConfig](#psiconfig)
     - [RecoveryCheckpoint](#recoverycheckpoint)
     - [RecoveryConfig](#recoveryconfig)
     - [Rr22Config](#rr22config)
     - [UbPsiConfig](#ubpsiconfig)
-  
+
 
 
 - Enums
@@ -26,7 +28,7 @@
     - [RecoveryCheckpoint.Stage](#recoverycheckpointstage)
     - [Role](#role)
     - [UbPsiConfig.Mode](#ubpsiconfigmode)
-  
+
 
 
 - [Scalar Value Types](#scalar-value-types)
@@ -67,6 +69,18 @@ Configs for ECDH protocol.
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | curve | [ psi.CurveType](#psicurvetype) | none |
+| batch_size | [ uint64](#uint64) | If not set, use default value: 4096. |
+ <!-- end Fields -->
+ <!-- end HasFields -->
+
+
+### InputAttr
+
+
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| keys_unique | [ bool](#bool) | Keys in input file are unique. If not set, use default value: false. |
  <!-- end Fields -->
  <!-- end HasFields -->
 
@@ -103,6 +117,17 @@ Configs for KKRT protocol
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | bucket_size | [ uint64](#uint64) | Since the total input may not fit in memory, the input may be splitted into buckets. bucket_size indicate the number of items in each bucket. If the memory of host is limited, you should set a smaller bucket size. Otherwise, you should use a larger one. If not set, use default value: 1 << 20. |
+ <!-- end Fields -->
+ <!-- end HasFields -->
+
+
+### OutputAttr
+
+
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| csv_null_rep | [ string](#string) | Null representation in output csv file. If not set, use default value: "NULL". |
  <!-- end Fields -->
  <!-- end HasFields -->
 
@@ -285,6 +310,8 @@ The output of right side is
 | advanced_join_type | [ PsiConfig.AdvancedJoinType](#psiconfigadvancedjointype) | none |
 | left_side | [ Role](#role) | Required if advanced_join_type is ADVANCED_JOIN_TYPE_LEFT_JOIN or ADVANCED_JOIN_TYPE_RIGHT_JOIN. |
 | check_hash_digest | [ bool](#bool) | Check if hash digest of keys from parties are equal to determine whether to early-stop. |
+| input_attr | [ InputAttr](#inputattr) | Input attributes. |
+| output_attr | [ OutputAttr](#outputattr) | Output attributes. |
  <!-- end Fields -->
  <!-- end HasFields -->
 
@@ -297,7 +324,7 @@ Save some critical information for future recovery.
 | ----- | ---- | ----------- |
 | stage | [ RecoveryCheckpoint.Stage](#recoverycheckpointstage) | Stage of PSI. |
 | config | [ PsiConfig](#psiconfig) | A copy of origin PSI config. |
-| input_hash_digest | [ string](#string) | Hash digest of input keys. |
+| input_hash_digest | [ bytes](#bytes) | Hash digest of input keys. |
 | ecdh_dual_masked_item_self_count | [ uint64](#uint64) | Saved dual masked item count from self originally. PROTOCOL_ECDH only. |
 | ecdh_dual_masked_item_peer_count | [ uint64](#uint64) | Saved dual masked item count from peer originally. PROTOCOL_ECDH only. |
 | parsed_bucket_count | [ uint64](#uint64) | Saved parsed bucket count. PROTOCOL_KKRT and PROTOCOL_RR22 only. |
@@ -350,6 +377,10 @@ config for unbalanced psi.
 | disable_alignment | [ bool](#bool) | It true, output is not promised to be aligned. Valid if both server_get_result and client_get_result are true. |
 | output_config | [ IoConfig](#ioconfig) | Required for MODE_ONLINE and MODE_FULL. |
 | debug_options | [ DebugOptions](#debugoptions) | Logging level. |
+| advanced_join_type | [ PsiConfig.AdvancedJoinType](#psiconfigadvancedjointype) | none |
+| left_side | [ Role](#role) | Required if advanced_join_type is ADVANCED_JOIN_TYPE_LEFT_JOIN or ADVANCED_JOIN_TYPE_RIGHT_JOIN. |
+| input_attr | [ InputAttr](#inputattr) | Input attributes. |
+| output_attr | [ OutputAttr](#outputattr) | Output attributes. |
  <!-- end Fields -->
  <!-- end HasFields -->
  <!-- end messages -->

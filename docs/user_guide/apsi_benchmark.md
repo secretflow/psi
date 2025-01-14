@@ -3,7 +3,7 @@ This document introduces the APSI Benchmark.
 
 ## Building from source
 ```bash
-git clone -b v0.4.3.dev240919 git@github.com:secretflow/psi.git
+git clone git@github.com:secretflow/psi.git
 cd psi
 bazel build //psi:main -c opt
 ```
@@ -19,10 +19,8 @@ To measure the performance of APSI protocols under different data scales, we nee
 
 
 ```python
-# one million key-value pairs, each value's length is 32-byte, 
+# one million key-value pairs, each value's length is 32-byte,
 python examples/pir/apsi/test_data_creator.py --sender_size=1000000 --receiver_size=1 --intersection_size=1 --label_byte_count=32
-# 16 million key-value pairs, each value's length is 32-byte, 
-python examples/pir/apsi/test_data_creator.py --sender_size=16000000 --receiver_size=1 --intersection_size=1 --label_byte_count=32
 ```
 
 
@@ -128,16 +126,16 @@ docker run -d -it --name "apsi_sender" \
          --privileged=true \
          --memory="64g" \
          --entrypoint="bash" \
-         secretflow/ubuntu-base-ci:latest
+         secretflow/release-ci:latest
 
 docker start apsi_sender
 docker exec -it apsi_sender bash
 ```
 
-Then run: 
+Then run:
 
 ```bash
-# offline 
+# offline
 ./main --config $(pwd)/examples/pir/config/apsi_sender_setup.json
 # online
 ./main --config $(pwd)/examples/pir/config/apsi_sender_online.json

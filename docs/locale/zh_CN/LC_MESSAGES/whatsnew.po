@@ -1,0 +1,285 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2024, SecretFlow authors
+# This file is distributed under the same license as the SecretFlow PSI
+# Library package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: SecretFlow PSI Library \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-12-26 20:09+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.15.0\n"
+
+#: ../../whatsnew.rst:2
+msgid "Release notes"
+msgstr ""
+
+#: ../../../RELEASE.md:1
+msgid "RELEASE"
+msgstr ""
+
+#: ../../../RELEASE.md:3
+msgid "NOTE:"
+msgstr ""
+
+#: ../../../RELEASE.md:5
+msgid "`[Feature]` prefix for new features."
+msgstr ""
+
+#: ../../../RELEASE.md:6
+msgid "`[Bugfix]` prefix for bug fixes."
+msgstr ""
+
+#: ../../../RELEASE.md:7
+msgid "`[API]` prefix for API changes."
+msgstr ""
+
+#: ../../../RELEASE.md:8
+msgid "`[Improvement]` prefix for implementation improvement."
+msgstr ""
+
+#: ../../../RELEASE.md:10
+msgid "v0.5.0.dev241107"
+msgstr ""
+
+#: ../../../RELEASE.md:12
+msgid "`[API]` delete legacy ub psi function."
+msgstr ""
+
+#: ../../../RELEASE.md:13
+msgid "`[API]` output csv null_rep can be specified."
+msgstr ""
+
+#: ../../../RELEASE.md:14
+msgid "`[Feature]` join can be done with one receiver."
+msgstr ""
+
+#: ../../../RELEASE.md:15
+msgid "`[Feature]` join can be done with ub psi protocol."
+msgstr ""
+
+#: ../../../RELEASE.md:17
+msgid "v0.4.0.dev240801"
+msgstr ""
+
+#: ../../../RELEASE.md:19
+msgid "[Bugfix] Fix MacOS and arm build."
+msgstr ""
+
+#: ../../../RELEASE.md:21
+msgid "v0.4.0.dev240731"
+msgstr ""
+
+#: ../../../RELEASE.md:23
+msgid "[Improvement] Port APSI again."
+msgstr ""
+
+#: ../../../RELEASE.md:24
+msgid "[Feature] Add Bucketized APSI."
+msgstr ""
+
+#: ../../../RELEASE.md:25
+msgid "[API] Remove SealPIR."
+msgstr ""
+
+#: ../../../RELEASE.md:27
+msgid "v0.4.0.dev240521"
+msgstr ""
+
+#: ../../../RELEASE.md:29
+msgid "[API] remove BC22 protocol"
+msgstr ""
+
+#: ../../../RELEASE.md:31
+msgid "v0.4.0.dev240517"
+msgstr ""
+
+#: ../../../RELEASE.md:33
+msgid "[Improvement] upgrade yacl to 0.4.5b0."
+msgstr ""
+
+#: ../../../RELEASE.md:35
+msgid "v0.4.0.dev240514"
+msgstr ""
+
+#: ../../../RELEASE.md:37
+msgid "[API] add entrypoint for docker file."
+msgstr ""
+
+#: ../../../RELEASE.md:38
+msgid "[API] allow passing config JSON directly to main."
+msgstr ""
+
+#: ../../../RELEASE.md:39
+msgid "[Bugfix] fix ic mode."
+msgstr ""
+
+#: ../../../RELEASE.md:40
+msgid "[Bugfix] fix RR22, SealPIR and APSI."
+msgstr ""
+
+#: ../../../RELEASE.md:42
+msgid "v0.4.0.dev240401"
+msgstr ""
+
+#: ../../../RELEASE.md:44
+msgid "[Improvement] upgrade download uri of xz."
+msgstr ""
+
+#: ../../../RELEASE.md:46
+msgid "v0.4.0.dev240329"
+msgstr ""
+
+#: ../../../RELEASE.md:48
+msgid "[Improvement] upgrade yacl to 0.4.4b3."
+msgstr ""
+
+#: ../../../RELEASE.md:50
+msgid "v0.3.0beta"
+msgstr ""
+
+#: ../../../RELEASE.md:52
+msgid "[Improvement] add uuid in system temp folder."
+msgstr ""
+
+#: ../../../RELEASE.md:53
+msgid "[Improvement] use arrow csv reader in pir."
+msgstr ""
+
+#: ../../../RELEASE.md:54
+msgid "[Bugfix] fix typo in psi config check."
+msgstr ""
+
+#: ../../../RELEASE.md:56
+msgid "v0.3.0.dev240304"
+msgstr ""
+
+#: ../../../RELEASE.md:58
+msgid "[API] expose ic_mode in RunLegacyPsi api"
+msgstr ""
+
+#: ../../../RELEASE.md:60
+msgid "v0.3.0.dev240222"
+msgstr ""
+
+#: ../../../RELEASE.md:62
+msgid "[API] expose PIR API."
+msgstr ""
+
+#: ../../../RELEASE.md:64
+msgid "v0.3.0.dev240219"
+msgstr ""
+
+#: ../../../RELEASE.md:66
+msgid "[Feature] add ecdh logger for debug purposes."
+msgstr ""
+
+#: ../../../RELEASE.md:67
+msgid "[API] modify repo structure."
+msgstr ""
+
+#: ../../../RELEASE.md:69
+msgid "v0.2.0.dev240123"
+msgstr ""
+
+#: ../../../RELEASE.md:71
+msgid "[Feature] add RFC9380 25519 elligator2 hash_to_curve."
+msgstr ""
+
+#: ../../../RELEASE.md:72
+msgid "[Feature] add malicious vole psi."
+msgstr ""
+
+#: ../../../RELEASE.md:73
+msgid "[API] expose ub psi in PSI v2 API."
+msgstr ""
+
+#: ../../../RELEASE.md:74
+msgid "[Improvement] Modify buffer size in sort cmd."
+msgstr ""
+
+#: ../../../RELEASE.md:75
+msgid "[Bugfix] Fix SimpleShuffledBatchProvider."
+msgstr ""
+
+#: ../../../RELEASE.md:76
+msgid "[Bugfix] Fix flakiness in psi_test."
+msgstr ""
+
+#: ../../../RELEASE.md:77
+msgid "[Bugfix] Fix race condition in rr22."
+msgstr ""
+
+#: ../../../RELEASE.md:79
+msgid "v0.2.0.dev231228"
+msgstr ""
+
+#: ../../../RELEASE.md:81
+msgid "[Bugfix] Fix RR22 race condition."
+msgstr ""
+
+#: ../../../RELEASE.md:82
+msgid "[Improvement] modify sort buffer size."
+msgstr ""
+
+#: ../../../RELEASE.md:84
+msgid "v0.2.0.dev231221"
+msgstr ""
+
+#: ../../../RELEASE.md:86
+msgid "[API] Rename check_duplicates to skip_duplicates_check."
+msgstr ""
+
+#: ../../../RELEASE.md:87
+msgid "[API] Rename sort_output to disable_alignment."
+msgstr ""
+
+#: ../../../RELEASE.md:88
+msgid ""
+"[Feature] Support left join, right join and full join. The behavior of "
+"difference is modified."
+msgstr ""
+
+#: ../../../RELEASE.md:89
+msgid "[Feature] Skip duplicate key check if recovery checkpoint exists."
+msgstr ""
+
+#: ../../../RELEASE.md:90
+msgid "[Bugfix] Fix duplicate key check."
+msgstr ""
+
+#: ../../../RELEASE.md:91
+msgid "[Bugfix] Fix SyncWait."
+msgstr ""
+
+#: ../../../RELEASE.md:93
+msgid "v0.1.0beta"
+msgstr ""
+
+#: ../../../RELEASE.md:95
+msgid "[API] Add PSI v2 API."
+msgstr ""
+
+#: ../../../RELEASE.md:96
+msgid "[Feature] Add RR22 protocol."
+msgstr ""
+
+#: ../../../RELEASE.md:97
+msgid "[Feature] Support recovery from failure in v2 API."
+msgstr ""
+
+#: ../../../RELEASE.md:98
+msgid "[Feature] Support inner join in v2 API."
+msgstr ""
+
+#: ../../../RELEASE.md:99
+msgid "[Feature] Migrate ECDH, KKRT, RR22 protocol in v2 API."
+msgstr ""
+

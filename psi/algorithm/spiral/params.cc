@@ -25,12 +25,11 @@ namespace psi::spiral {
 
 Params::Params(std::size_t poly_len, std::vector<std::uint64_t> moduli,
                double noise_width, PolyMatrixParams poly_matrix_params,
-               QueryParams query_params, std::size_t version)
+               QueryParams query_params)
     : poly_len_(poly_len),
       noise_width_(noise_width),
       poly_matrix_params_(std::move(poly_matrix_params)),
-      query_params_(std::move(query_params)),
-      version_(version) {
+      query_params_(std::move(query_params)) {
   YACL_ENFORCE(poly_matrix_params_.q2_bits_ >= kMinQ2Bits);
 
   poly_len_log2_ = arith::Log2(poly_len_);
@@ -77,8 +76,7 @@ Params::Params(std::size_t poly_len, std::vector<std::uint64_t> moduli,
 Params Params::ParamsWithModuli(const Params& params,
                                 std::vector<uint64_t> moduli) {
   return Params(params.PolyLen(), std::move(moduli), params.noise_width_,
-                params.poly_matrix_params_, params.query_params_,
-                params.version_);
+                params.poly_matrix_params_, params.query_params_);
 }
 
 void Params::ComputeId() {
@@ -104,7 +102,12 @@ std::size_t Params::ElementSizeOfPt(size_t element_byte_len) {
 void Params::UpdateByDatabaseInfo(const DatabaseMetaInfo& database_info) {
   // here, we only consider one row of raw data can be holded by one plaintext
   // in SpiralPIR
-  size_t element_byte_len = database_info.byte_size_per_row_;
+
+  // size_t element_byte_len = database_info.byte_size_per_row_;
+
+  // if the byte_size_per_row_ > MaxByteLenOfPt, we use the min
+  size_t element_byte_len =
+      std::min(database_info.byte_size_per_row_, MaxByteLenOfPt());
 
   // the number of one plaintext can hold the rows in raw database
   size_t element_size_of_pt = ElementSizeOfPt(element_byte_len);
@@ -179,8 +182,7 @@ std::uint64_t Params::CrtCompose(const std::vector<std::uint64_t>& a,
   ss << "t_conv: " << TConv() << ", t_exp_left: " << TExpLeft()
      << ", t_exp_right: " << TExpRight() << ", t_gsw: " << TGsw() << "\n";
 
-  ss << "expand_query: " << (ExpandQuery() ? "true" : "false")
-     << ", v1: " << DbDim1() << ", v2: " << DbDim2();
+  ss << "v1: " << DbDim1() << ", v2: " << DbDim2();
 
   return ss.str();
 }

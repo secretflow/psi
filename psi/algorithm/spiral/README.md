@@ -1,3 +1,4 @@
+# SPIRAL
 
 This is a C++ implementation of [Spiral Fast, High Rate Single Server PIR via FHE Composition](https://eprint.iacr.org/2022/368).
 

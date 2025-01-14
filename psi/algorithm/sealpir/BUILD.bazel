@@ -41,7 +41,8 @@ psi_cc_library(
     deps = [
         ":seal_pir_utils",
         ":serializable_cc_proto",
-        "//psi/algorithm/kwpir:kw_pir",
+        "//psi/algorithm/pir_interface:kw_pir",
+        "//psi/algorithm/pir_interface:pir_db",
         "@openssl",
         "@seal",
         "@yacl//yacl/base:byte_container_view",
@@ -67,5 +68,6 @@ psi_cc_test(
     deps = [
         ":seal_pir",
         "@seal",
+        "@yacl//yacl/crypto/tools:prg",
     ],
 )

@@ -27,7 +27,7 @@ class IDbElementProvider {
  public:
   virtual ~IDbElementProvider() = default;
 
-  // Read at  `index` item and return data. An empty returned vector
+  // Read at `index` item and return data. An empty returned vector
   // is treated as the end of stream.
   virtual std::vector<uint8_t> ReadElement(size_t index) = 0;
   virtual std::vector<uint8_t> ReadElement(size_t index, size_t size) = 0;
@@ -48,7 +48,8 @@ class IDbPlaintextStore {
 
   virtual void SavePlaintexts(const std::vector<seal::Plaintext>& plaintext,
                               size_t sub_db_index) = 0;
-  virtual std::vector<seal::Plaintext> ReadPlaintexts(size_t sub_db_index) = 0;
+  virtual const std::vector<seal::Plaintext>& ReadPlaintexts(
+      size_t sub_db_index) const = 0;
 };
 
 class MemoryDbElementProvider : public IDbElementProvider {
@@ -81,7 +82,8 @@ class MemoryDbPlaintextStore : public IDbPlaintextStore {
 
   void SavePlaintexts(const std::vector<seal::Plaintext>& plaintexts,
                       size_t sub_db_index) override;
-  std::vector<seal::Plaintext> ReadPlaintexts(size_t sub_db_index) override;
+  const std::vector<seal::Plaintext>& ReadPlaintexts(
+      size_t sub_db_index) const override;
 
  private:
   std::vector<std::vector<seal::Plaintext>> db_vec_;

@@ -8,7 +8,7 @@
     - [ApsiReceiverConfig](#apsireceiverconfig)
     - [ApsiSenderConfig](#apsisenderconfig)
     - [PirResultReport](#pirresultreport)
-  
+
 
 
 
@@ -36,6 +36,7 @@
 | params_file | [ string](#string) | Path to a JSON file describing the parameters to be used by the sender. If not set, receiver will ask sender, which results in additional communication. |
 | experimental_enable_bucketize | [ bool](#bool) | Must be same as sender config. |
 | experimental_bucket_cnt | [ uint32](#uint32) | Must be same as sender config. |
+| query_batch_size | [ uint32](#uint32) | The number of query in a batch. default 1. |
  <!-- end Fields -->
  <!-- end HasFields -->
 
@@ -62,6 +63,9 @@ for details.
 | experimental_enable_bucketize | [ bool](#bool) | [experimental] Whether to split data in buckets and Each bucket would be a seperate SenderDB. If set, experimental_bucket_folder must be a valid folder. |
 | experimental_bucket_cnt | [ uint32](#uint32) | [experimental] The number of bucket to fit data. |
 | experimental_bucket_folder | [ string](#string) | [experimental] Folder to save bucketized small csv files and db files. |
+| experimental_db_generating_process_num | [ int32](#int32) | [experimental] The number of processes to use for generating db. |
+| source_file | [ string](#string) | Source file used to genenerate sender db. Currently only support csv file. |
+| experimental_bucket_group_cnt | [ int32](#int32) | [experimental] The number of group of bucket, each group has a db_file, default 1024. |
  <!-- end Fields -->
  <!-- end HasFields -->
 

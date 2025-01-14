@@ -1,0 +1,425 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2024, SecretFlow authors
+# This file is distributed under the same license as the SecretFlow PSI
+# Library package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: SecretFlow PSI Library \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-12-26 20:09+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.15.0\n"
+
+#: ../../getting_started.rst:2
+msgid "Getting started"
+msgstr "开始教程"
+
+#: ../../getting_started.rst:4
+msgid ""
+"Welcome to SecretFlow PSI Library. There are multiple methods to use "
+"PSI/PIR."
+msgstr "欢迎使用SecretFlow PSI Library。有多种方式调用PSI、PIR功能。"
+
+#: ../../getting_started.rst:6
+msgid ""
+"C++ binaries, you could build the binary or with release docker image: "
+"`secretflow/release-ci:latest` (`secretflow/release-ci-aarch64:latest` "
+"for ARM)."
+msgstr ""
+"可以直接编译或者使用镜像 `secretflow/release-ci:latest` (`secretflow/release-ci-"
+"aarch64:latest` for ARM) 编译二进制。"
+
+#: ../../getting_started.rst:7 ../../getting_started.rst:57
+msgid "Python packages"
+msgstr "Python 包"
+
+#: ../../getting_started.rst:9
+msgid ""
+"`SPU <https://pypi.org/project/spu/>`_ warps the library as Python "
+"bindings. You could call PSI/PIR with spu."
+msgstr "`SPU <https://pypi.org/project/spu/>`_ 包含了PSI和PIR功能的python接口。"
+
+#: ../../getting_started.rst:10
+msgid ""
+"`SecretFlow <https://pypi.org/project/secretflow/>`_ warps SPU further "
+"with user-friendly APIs."
+msgstr "`SecretFlow <https://pypi.org/project/secretflow/>`_ 使用SPU的Python接口又包了一层。"
+
+#: ../../getting_started.rst:13 ../../getting_started.rst:91
+msgid "Applications"
+msgstr "应用"
+
+#: ../../getting_started.rst:15
+msgid ""
+"`SCQL <https://www.secretflow.org.cn/docs/scql/latest/zh-Hans>`_ "
+"integrates this library to do JOIN operations."
+msgstr ""
+"`SCQL <https://www.secretflow.org.cn/docs/scql/latest/zh-Hans>`_ "
+"集成了PSI来实现Join操作。"
+
+#: ../../getting_started.rst:16
+msgid ""
+"`SecretPad <https://www.secretflow.org.cn/docs/quickstart/mvp-platform>`_"
+" provides PSI component."
+msgstr ""
+"`SecretPad <https://www.secretflow.org.cn/docs/quickstart/mvp-platform>`_"
+" 提供了PSI相关的组件."
+
+#: ../../getting_started.rst:19
+msgid ""
+"For `PSI`, we have a developing :doc:`v2 PSI <reference/psi_v2_config>`, "
+"and we recommend using it."
+msgstr "对于 `PSI` 功能，我们新开发了 :doc:`v2 PSI <reference/psi_v2_config>` 配置，建议使用它。"
+
+#: ../../getting_started.rst:22
+msgid "PSI v1 APIs(Deprecated)"
+msgstr ""
+
+#: ../../getting_started.rst:22
+msgid "PSI v2 APIs"
+msgstr ""
+
+#: ../../getting_started.rst:24
+msgid "Supported Protocols"
+msgstr ""
+
+#: ../../getting_started.rst:24
+msgid "ECDH, KKRT, ECDH_OPRF_UB, DP_PSI, RR22"
+msgstr ""
+
+#: ../../getting_started.rst:24
+msgid "ECDH, KKRT, RR22, ECDH_OPRF_UB"
+msgstr ""
+
+#: ../../getting_started.rst:26
+msgid "CSV parser"
+msgstr ""
+
+#: ../../getting_started.rst:26
+msgid "Support a subset of csv files."
+msgstr ""
+
+#: ../../getting_started.rst:26
+msgid "Apache Arrow, support all legal csv files."
+msgstr ""
+
+#: ../../getting_started.rst:28
+msgid "Recovery after failure"
+msgstr ""
+
+#: ../../getting_started.rst:28 ../../getting_started.rst:30
+msgid "Unsupported"
+msgstr ""
+
+#: ../../getting_started.rst:28 ../../getting_started.rst:30
+msgid "Supported"
+msgstr ""
+
+#: ../../getting_started.rst:30
+msgid "Support duplicated keys"
+msgstr ""
+
+#: ../../getting_started.rst:32 ../../getting_started.rst:45
+msgid "Release Docker"
+msgstr ""
+
+#: ../../getting_started.rst:32
+msgid "Not provided"
+msgstr ""
+
+#: ../../getting_started.rst:32
+msgid "Provided"
+msgstr ""
+
+#: ../../getting_started.rst:34
+msgid "Python Binding"
+msgstr ""
+
+#: ../../getting_started.rst:34
+msgid "with SPU"
+msgstr ""
+
+#: ../../getting_started.rst:39
+msgid "Installation"
+msgstr ""
+
+#: ../../getting_started.rst:42
+msgid "C++ binaries"
+msgstr ""
+
+#: ../../getting_started.rst:47
+msgid ""
+"Please check official release docker image at `dockerhub "
+"<https://hub.docker.com/r/secretflow/psi-anolis8>`_. We also have mirrors"
+" at Alibaba Cloud: `secretflow-registry.cn-"
+"hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8`."
+msgstr ""
+"请查看官方发布镜像 `dockerhub <https://hub.docker.com/r/secretflow/psi-anolis8>`_."
+" 我们也提供了阿里云 镜像: `secretflow-registry.cn-"
+"hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8`."
+
+#: ../../getting_started.rst:51
+msgid "Building from Source"
+msgstr "源码构建"
+
+#: ../../getting_started.rst:53
+msgid "Please see :ref:`building`."
+msgstr "参考 :ref:`building`."
+
+#: ../../getting_started.rst:60
+msgid "SPU"
+msgstr ""
+
+#: ../../getting_started.rst:62
+msgid ""
+"Please check `SPU Installation Guidelines "
+"<https://www.secretflow.org.cn/docs/spu/latest/en-"
+"US/getting_started/install>`_."
+msgstr ""
+"请查看 `SPU Installation Guidelines "
+"<https://www.secretflow.org.cn/docs/spu/latest/en-"
+"US/getting_started/install>`_."
+
+#: ../../getting_started.rst:64
+msgid "APIs: https://www.secretflow.org.cn/docs/spu/latest/en-US/reference/py_api"
+msgstr ""
+
+#: ../../getting_started.rst:67
+msgid "SecretFlow"
+msgstr ""
+
+#: ../../getting_started.rst:69
+msgid ""
+"Please check `SecretFlow Installation page "
+"<https://www.secretflow.org.cn/docs/secretflow/latest/en-"
+"US/getting_started/installation>`_."
+msgstr ""
+"请查看 `SecretFlow Installation page "
+"<https://www.secretflow.org.cn/docs/secretflow/latest/en-"
+"US/getting_started/installation>`_."
+
+#: ../../getting_started.rst:71
+msgid "APIs:"
+msgstr ""
+
+#: ../../getting_started.rst:73
+msgid "PSI v1:"
+msgstr ""
+
+#: ../../getting_started.rst:74
+msgid ""
+"(Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-"
+"US/source/secretflow#secretflow.SPU.psi_df"
+msgstr ""
+
+#: ../../getting_started.rst:75
+msgid ""
+"(Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-"
+"US/source/secretflow#secretflow.SPU.psi_csv"
+msgstr ""
+
+#: ../../getting_started.rst:76
+msgid ""
+"(Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-"
+"US/source/secretflow#secretflow.SPU.psi_join_df"
+msgstr ""
+
+#: ../../getting_started.rst:77
+msgid ""
+"(Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-"
+"US/source/secretflow#secretflow.SPU.psi_join_csv"
+msgstr ""
+
+#: ../../getting_started.rst:79
+msgid "PSI v2:"
+msgstr ""
+
+#: ../../getting_started.rst:80
+msgid ""
+"https://www.secretflow.org.cn/docs/secretflow/latest/en-"
+"US/source/secretflow#secretflow.SPU.psi_v2"
+msgstr ""
+
+#: ../../getting_started.rst:82
+msgid "PIR:"
+msgstr ""
+
+#: ../../getting_started.rst:83
+msgid ""
+"(Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-"
+"US/source/secretflow#secretflow.SPU.pir_setup"
+msgstr ""
+
+#: ../../getting_started.rst:84
+msgid ""
+"(Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-"
+"US/source/secretflow#secretflow.SPU.pir_query"
+msgstr ""
+
+#: ../../getting_started.rst:85
+msgid ""
+"(Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-"
+"US/source/secretflow#secretflow.SPU.pir_memory_query"
+msgstr ""
+
+#: ../../getting_started.rst:86
+msgid ":doc:`pir config <reference/pir_config>`"
+msgstr ""
+
+#: ../../getting_started.rst:88
+msgid ""
+"Component: https://www.secretflow.org.cn/docs/secretflow/latest/en-"
+"US/component/comp_list#psi"
+msgstr ""
+
+#: ../../getting_started.rst:94
+msgid "SCQL"
+msgstr ""
+
+#: ../../getting_started.rst:96
+msgid ""
+"Please check `SCQL Quickstart tutorial "
+"<https://www.secretflow.org.cn/docs/scql/latest/en-US/intro/tutorial>`_."
+msgstr ""
+
+#: ../../getting_started.rst:98
+msgid "Featured operators using PSI:"
+msgstr ""
+
+#: ../../getting_started.rst:99
+msgid ""
+"https://www.secretflow.org.cn/docs/scql/latest/en-"
+"US/reference/operators#in"
+msgstr ""
+
+#: ../../getting_started.rst:100
+msgid ""
+"https://www.secretflow.org.cn/docs/scql/latest/en-"
+"US/reference/operators#join"
+msgstr ""
+
+#: ../../getting_started.rst:103
+msgid "SecretPad"
+msgstr ""
+
+#: ../../getting_started.rst:105
+msgid ""
+"Please check `SecretPad handbook "
+"<https://www.secretflow.org.cn/docs/quickstart/mvp-platform>`_."
+msgstr ""
+
+#: ../../getting_started.rst:108
+msgid "(Deprecated) Easy PSI"
+msgstr ""
+
+#: ../../getting_started.rst:110
+msgid ""
+"Please check `Easy PSI handbook "
+"<https://www.secretflow.org.cn/docs/quickstart/easy-psi>`_."
+msgstr ""
+"请查看 `Easy PSI handbook <https://www.secretflow.org.cn/docs/quickstart"
+"/easy-psi>`_."
+
+#: ../../getting_started.rst:116
+msgid "Building"
+msgstr "编译"
+
+#: ../../getting_started.rst:119
+msgid "System Setup"
+msgstr "系统设置"
+
+#: ../../getting_started.rst:122
+msgid "Dev Docker"
+msgstr "开发Docker镜像"
+
+#: ../../getting_started.rst:124
+msgid "You can use docker to compile::"
+msgstr "可以使用Docker来编译 ::"
+
+#: ../../getting_started.rst:141
+msgid "Linux"
+msgstr ""
+
+#: ../../getting_started.rst:143
+msgid "You need to install:"
+msgstr "需要安装："
+
+#: ../../getting_started.rst:145
+msgid "gcc>=11.2"
+msgstr ""
+
+#: ../../getting_started.rst:146
+msgid "cmake>=3.26"
+msgstr ""
+
+#: ../../getting_started.rst:147
+msgid "ninja"
+msgstr ""
+
+#: ../../getting_started.rst:148
+msgid "nasm>=2.15"
+msgstr ""
+
+#: ../../getting_started.rst:149
+msgid "python>=3.8"
+msgstr ""
+
+#: ../../getting_started.rst:150
+msgid "bazel"
+msgstr ""
+
+#: ../../getting_started.rst:151
+msgid "golang"
+msgstr ""
+
+#: ../../getting_started.rst:152
+msgid "xxd"
+msgstr ""
+
+#: ../../getting_started.rst:153
+msgid "lld"
+msgstr ""
+
+#: ../../getting_started.rst:154
+msgid "perl>=5.20.3.1"
+msgstr ""
+
+#: ../../getting_started.rst:156
+msgid ""
+"For bazel, please check version in `.bazeliskrc "
+"<https://github.com/secretflow/psi/blob/main/.bazeliskrc>`_ or use "
+"bazelisk instead."
+msgstr ""
+"对于bazel，请查看 `.bazeliskrc "
+"<https://github.com/secretflow/psi/blob/main/.bazelversion>`_ 中的版本，或者使用 "
+"bazelisk。"
+
+#: ../../getting_started.rst:159
+msgid "Build & UnitTest"
+msgstr "构建和单元测试"
+
+#: ../../getting_started.rst:161
+msgid "We use bazel for building and testing::"
+msgstr "我们使用bazel来构建和测试 ::"
+
+#: ../../getting_started.rst:173
+msgid "Reporting an Issue"
+msgstr "报告Issue"
+
+#: ../../getting_started.rst:175
+msgid ""
+"Please create an issue at `Github Issues "
+"<https://github.com/secretflow/psi/issues>`_."
+msgstr "请提交Issue到 `Github Issues <https://github.com/secretflow/psi/issues>`_ 。"
+
+#: ../../getting_started.rst:177
+msgid "We will look into issues and get back to you soon."
+msgstr "我们会尽快回复issues问题。"
+

@@ -17,13 +17,11 @@
 #include <iostream>
 #include <string>
 
-#include "boost/uuid/uuid.hpp"
-#include "boost/uuid/uuid_generators.hpp"
-#include "boost/uuid/uuid_io.hpp"
 #include "fmt/format.h"
 #include "gtest/gtest.h"
 #include "spdlog/spdlog.h"
 
+#include "psi/utils/random_str.h"
 #include "psi/wrapper/apsi/api/receiver.h"
 #include "psi/wrapper/apsi/api/sender.h"
 #include "psi/wrapper/apsi/sender.h"
@@ -60,8 +58,7 @@ TEST(ApiTest, Works) {
 
   std::filesystem::path tmp_dir = std::filesystem::temp_directory_path();
 
-  boost::uuids::random_generator uuid_generator;
-  auto uuid_str = boost::uuids::to_string(uuid_generator());
+  auto uuid_str = GetRandomString();
 
   std::string receiver_output_file =
       tmp_dir / fmt::format("result_{}.csv", uuid_str);

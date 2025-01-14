@@ -17,20 +17,17 @@
 #include <apsi/psi_params.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
-#include <condition_variable>
 #include <csignal>
 #include <cstddef>
 #include <filesystem>
 #include <fstream>
-#include <future>
-#include <memory>
-#include <mutex>
 #include <string>
-#include <unordered_map>
 #include <utility>
 
 #include "arrow/array.h"
@@ -38,9 +35,9 @@
 #include "google/protobuf/util/json_util.h"
 #include "sender_db.h"
 #include "spdlog/spdlog.h"
+#include "sys/sem.h"
 #include "yacl/base/exception.h"
 
-#include "psi/wrapper/apsi/utils/common.h"
 #include "psi/wrapper/apsi/utils/csv_reader.h"
 
 namespace psi::apsi_wrapper {
@@ -51,34 +48,103 @@ constexpr const char* kGroupLabel = "value";
 constexpr const char* kGroupKey = "key";
 constexpr const char* kGroupBucketId = "bucket_id";
 
-template <typename F, typename... Args>
-pid_t StartProcess(F&& f, Args&&... args) {
-  auto pid = fork();
-  switch (pid) {
-    case -1:
-      SPDLOG_ERROR("fork failed");
+union semun {
+  int val;
+  struct semid_ds* buf;
+  unsigned short int* array;
+  struct seminfo* __buf;
+};
+
+class GroupDBGenerator {
+ public:
+  GroupDBGenerator() {
+    semid_ = semget(IPC_PRIVATE, 1, S_IRUSR | S_IWUSR | IPC_CREAT);
+    if (semid_ == -1) {
+      SPDLOG_ERROR("failed to create semaphore");
       exit(1);
-    case 0:
-      try {
-        auto res = f(std::forward<Args&&>(args)...);
+    }
+    semun semctl_arg;
+    semctl_arg.val = 0;
+    int ret = semctl(semid_, 0, SETVAL, semctl_arg);
+    if (ret == -1) {
+      SPDLOG_ERROR("failed to set semaphore value to 0, errno: {} , str: {}",
+                   errno, strerror(errno));
+      exit(1);
+    }
+  }
+
+  template <typename F, typename... Args>
+  void Execute(F&& f, Args&&... args) {
+    auto pid = fork();
+    switch (pid) {
+      case -1:
+        SPDLOG_ERROR("fork failed");
+        exit(1);
+      case 0: {
+        int res = 0;
+        try {
+          res = std::forward<F>(f)(std::forward<Args&&>(args)...);
+        } catch (const std::exception& e) {
+          SPDLOG_ERROR("subprocess {} failed, error: {}", getpid(), e.what());
+          res = 1;
+        } catch (...) {
+          SPDLOG_ERROR("subprocess {} failed, unknown error", getpid());
+          res = 1;
+        }
+
+        SPDLOG_INFO("subprocess {} is finished.", getpid());
+
+        sembuf sem;
+        sem.sem_num = 0;
+        sem.sem_op = 1;
+        sem.sem_flg = 0;
+        if (semop(semid_, &sem, 1) == -1) {
+          SPDLOG_ERROR("failed to increase semaphore");
+          exit(1);
+        }
 
         if (res == 0) {
           exit(0);
         }
         exit(1);
-      } catch (const std::exception& ex) {
-        SPDLOG_ERROR("process failed: {}", ex.what());
-        exit(1);
       }
-    default:
-      return pid;
+      default:
+        SPDLOG_INFO("start subprocess {}.", pid);
+        childs_.push_back(pid);
+        break;
+    }
   }
-}
 
-std::string PidFileName(pid_t pid) {
-  return std::filesystem::temp_directory_path() /
-         fmt::format("apsi_process_{}", pid);
-}
+  void WaitToFinish() {
+    int child_num = childs_.size();
+    sembuf sem;
+    sem.sem_num = 0;
+    sem.sem_op = -1 * child_num;
+    sem.sem_flg = 0;
+    if (semop(semid_, &sem, 1) == -1) {
+      SPDLOG_ERROR("failed to increase semaphore");
+      exit(1);
+    }
+
+    for (auto pid : childs_) {
+      kill(pid, SIGKILL);
+      int status;
+      waitpid(pid, &status, 0);
+      SPDLOG_INFO("subprocess {} is reaped.", pid);
+    }
+    childs_.clear();
+
+    semun dummy;
+    if (semctl(semid_, 1, IPC_RMID, dummy) == -1) {
+      SPDLOG_ERROR("failed to remove semaphore");
+      exit(1);
+    }
+  }
+
+ private:
+  int semid_ = -1;
+  std::vector<pid_t> childs_;
+};
 
 }  // namespace
 
@@ -90,7 +156,7 @@ void ProcessGroupParallel(size_t process_num, GroupDB& group_db) {
 
   SPDLOG_INFO("{} process will be started", process_num);
 
-  std::vector<pid_t> pids;
+  GroupDBGenerator generator;
 
   // TODO: brpc has some issue with fork, the children process will not exit due
   // to some lock issues, one solution may be IPC, child process tell parent it
@@ -107,42 +173,13 @@ void ProcessGroupParallel(size_t process_num, GroupDB& group_db) {
       for (size_t i = beg; i != end; ++i) {
         group_db.GenerateGroup(i);
       }
-      std::ofstream pid_flag_file(PidFileName(getpid()));
-      if (!pid_flag_file.good()) {
-        return 1;
-      }
       return 0;
     };
 
-    pids.push_back(StartProcess(func));
+    generator.Execute(func);
   }
 
-  int status;
-  bool process_error = false;
-  for (auto& pid : pids) {
-    SPDLOG_INFO("wait for process {}", pid);
-    while (!std::filesystem::exists(PidFileName(pid))) {
-      // check process exists
-      if (kill(pid, 0) == 0) {
-        sleep(1);
-      } else {
-        SPDLOG_INFO("subprocess {} is done.", pid);
-        break;
-      }
-    }
-
-    if (!std::filesystem::exists(PidFileName(pid))) {
-      SPDLOG_ERROR("subprocess {} job is not accomplished.", pid);
-      process_error = true;
-    } else {
-      // normal exit is not necessary
-      kill(pid, SIGKILL);
-      waitpid(pid, &status, 0);
-      SPDLOG_INFO("subprocess {} is reaped.", pid);
-      std::filesystem::remove(PidFileName(pid));
-    }
-  }
-  YACL_ENFORCE(!process_error, "multi_process failed");
+  generator.WaitToFinish();
 }
 
 void GenerateGroupBucketDB(GroupDB& group_db, size_t process_num) {
@@ -356,7 +393,6 @@ void GroupDBItem::Generate() {
     bucket_dbs_.push_back(bucket_db);
   }
 
-  // future.get();
   flush_proc();
 
   std::ofstream meta_ofs(meta_filename_);

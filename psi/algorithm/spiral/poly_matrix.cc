@@ -31,6 +31,72 @@
 
 namespace psi::spiral {
 
+//-------PolyMatrixRaw
+
+PolyMatrixProto PolyMatrixRaw::ToProto() const {
+  PolyMatrixProto proto;
+  proto.set_rows(rows_);
+  proto.set_cols(cols_);
+
+  proto.mutable_data()->Reserve(data_.size());
+  proto.mutable_data()->Assign(data_.begin(), data_.end());
+  return proto;
+}
+
+PolyMatrixProto PolyMatrixRaw::ToProtoRng() const {
+  WEAK_ENFORCE(rows_ > 1);
+
+  PolyMatrixProto proto;
+  proto.set_rows(rows_ - 1);
+  proto.set_cols(cols_);
+  // skip the first row
+  size_t offset = cols_ * poly_len_;
+  proto.mutable_data()->Reserve(data_.size() - offset);
+  proto.mutable_data()->Assign(data_.begin() + offset, data_.end());
+  return proto;
+}
+
+PolyMatrixRaw PolyMatrixRaw::FromProto(const PolyMatrixProto& proto,
+                                       const Params& params) {
+  size_t rows = proto.rows();
+  size_t cols = proto.cols();
+
+  std::vector<uint64_t> data;
+  data.reserve(proto.data_size());
+  for (const auto& value : proto.data()) {
+    data.push_back(value);
+  }
+
+  YACL_ENFORCE_EQ(rows * cols * params.PolyLen(), data.size());
+
+  return PolyMatrixRaw(params.PolyLen(), rows, cols, std::move(data));
+}
+
+PolyMatrixRaw PolyMatrixRaw::FromProtoRng(const PolyMatrixProto& proto,
+                                          const Params& params,
+                                          yacl::crypto::Prg<uint64_t>& rng) {
+  size_t rows = proto.rows();
+  size_t cols = proto.cols();
+
+  YACL_ENFORCE_EQ(rows * cols * params.PolyLen(),
+                  static_cast<size_t>(proto.data_size()));
+
+  std::vector<uint64_t> data;
+  size_t first_row_coeffs = cols * params.PolyLen();
+  size_t rest_row_coeffs = proto.data_size();
+  data.reserve(first_row_coeffs + rest_row_coeffs);
+
+  // resconstruct the first row by rng
+  for (size_t i = 0; i < first_row_coeffs; ++i) {
+    data.push_back(params.Modulus() - (rng() % params.Modulus()));
+  }
+  // rest rows
+  for (const auto& value : proto.data()) {
+    data.push_back(value);
+  }
+  return PolyMatrixRaw(params.PolyLen(), rows + 1, cols, std::move(data));
+}
+
 // PolyMatrixRaw
 
 void PolyMatrixRaw::CopyInto(const PolyMatrixRaw& p, size_t target_row,

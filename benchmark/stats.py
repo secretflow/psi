@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import docker
-import json
 import csv
-import sys
+import json
 import os
+import sys
 import time
 from datetime import datetime
+
+import docker
 
 
 def stream_container_stats(container_name, output_file):

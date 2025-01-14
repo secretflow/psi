@@ -23,6 +23,8 @@
 
 #include "gtest/gtest.h"
 #include "spdlog/spdlog.h"
+#include "yacl/crypto/rand/rand.h"
+#include "yacl/crypto/tools/prg.h"
 
 using namespace std::chrono;
 using namespace std;
@@ -32,11 +34,8 @@ namespace psi::sealpir {
 namespace {
 struct TestParams {
   uint32_t N = 4096;
-  uint64_t num_of_items;
-  uint64_t size_per_item = 288;
-  uint64_t ind_degree = 0;
-  uint32_t d = 2;
-  uint32_t logt = 20;
+  uint64_t rows;
+  uint64_t row_byte_len = 256;
   bool isSerialized = false;
 };
 }  // namespace
@@ -44,44 +43,31 @@ class SealPirTest : public testing::TestWithParam<TestParams> {};
 
 TEST_P(SealPirTest, Works) {
   auto params = GetParam();
-  uint32_t num_of_items = params.num_of_items;
-  uint32_t size_per_item = params.size_per_item;
-  uint32_t N = params.N;
-  uint32_t d = params.d;
+  uint32_t rows = params.rows;
+  uint32_t row_byte_len = params.row_byte_len;
   bool isSerialized = params.isSerialized;
-  SPDLOG_INFO(
-      "N: {}, size_per_item: {} bytes, num_of_items: 2^{:.2f} = {}, "
-      "ind_degree(Indistinguishable degree) {}, dimension: {}",
-      N, size_per_item, std::log2(num_of_items), num_of_items,
-      params.ind_degree, d);
 
-  SealPirOptions options{params.N, params.num_of_items, params.size_per_item,
-                         params.ind_degree, params.d};
+  // default using d = 2
+  SealPirOptions options{params.N, params.rows, params.row_byte_len, 2};
 
   // Initialize PIR Server
   SPDLOG_INFO("Main: Initializing server and client");
   SealPirClient client(options);
 
-  std::shared_ptr<IDbPlaintextStore> plaintext_store =
-      std::make_shared<MemoryDbPlaintextStore>();
-  SealPirServer server(options, plaintext_store);
+  SealPirServer server(options);
 
   SPDLOG_INFO("Main: Initializing the database (this may take some time) ...");
 
-  vector<uint8_t> db_data(num_of_items * size_per_item);
-  random_device rd;
-  for (uint64_t i = 0; i < num_of_items; i++) {
-    for (uint64_t j = 0; j < size_per_item; j++) {
-      uint8_t val = rd() % 256;
-      db_data[(i * size_per_item) + j] = val;
-    }
+  vector<vector<uint8_t>> db_data(rows);
+  for (uint64_t i = 0; i < rows; ++i) {
+    db_data[i].resize(row_byte_len);
+    yacl::crypto::Prg<uint8_t> prg(yacl::crypto::SecureRandU128());
+    prg.Fill(absl::MakeSpan(db_data[i]));
   }
-  shared_ptr<IDbElementProvider> db_provider =
-      make_shared<MemoryDbElementProvider>(std::move(db_data),
-                                           params.size_per_item);
 
+  psi::pir_utils::RawDatabase raw_db(std::move(db_data));
   // Measure database setup
-  server.SetDatabaseByProvider(db_provider);
+  server.SetDatabase(raw_db);
   SPDLOG_INFO("Main: database pre processed ");
 
   // Set galois key for client with id 0
@@ -96,71 +82,52 @@ TEST_P(SealPirTest, Works) {
     server.SetGaloisKey(0, galois_keys);
   }
 
-  uint64_t ele_index = rd() % num_of_items;  // element in DB at random position
+  uint64_t ele_index =
+      yacl::crypto::RandU64() % rows;  // element in DB at random position
+  uint64_t target_raw_idx = ele_index;
 
-  uint64_t query_index = ele_index;
-  size_t start_pos = 0;
-  if (params.ind_degree > 0) {
-    query_index = ele_index % params.ind_degree;
-    start_pos = ele_index - query_index;
-  }
-
-  uint64_t index = client.GetFVIndex(query_index);    // index of FV plaintext
-  uint64_t offset = client.GetFVOffset(query_index);  // offset in FV plaintext
-  SPDLOG_INFO("Main: element index = {} from [0, {}]", ele_index,
-              num_of_items - 1);
-  SPDLOG_INFO("Main: FV index = {}, FV offset = {}", index, offset);
+  uint64_t pt_idx =
+      client.GetPtIndex(target_raw_idx);  // pt_idx of FV plaintext
+  uint64_t pt_offset =
+      client.GetPtOffset(target_raw_idx);  // pt_offset in FV plaintext
+  SPDLOG_INFO("Main: raw_idx = {} from [0, {}]", ele_index, rows - 1);
+  SPDLOG_INFO("Main: FV pt_idx = {}, FV pt_offset = {}", pt_idx, pt_offset);
 
   // Measure query generation
-
   vector<uint8_t> elems;
   if (isSerialized) {
-    uint64_t offset;
-    yacl::Buffer query_buffer = client.GenerateIndexQuery(ele_index, offset);
+    yacl::Buffer query_buffer = client.GenerateIndexQuery(target_raw_idx);
     SPDLOG_INFO("Main: query generated");
 
-    yacl::Buffer reply_buffer = server.GenerateIndexReply(query_buffer);
+    yacl::Buffer reply_buffer = server.GenerateIndexResponse(query_buffer);
     SPDLOG_INFO("Main: reply generated");
 
-    elems = client.DecodeIndexReply(reply_buffer, offset);
+    elems = client.DecodeIndexResponse(reply_buffer, target_raw_idx);
     SPDLOG_INFO("Main: reply decoded");
   } else {
-    SealPir::PirQuery query = client.GenerateQuery(index);
+    SealPir::PirQuery query = client.GenerateQuery(pt_idx);
     SPDLOG_INFO("Main: query generated");
 
-    SealPir::PirReply reply = server.GenerateReply(query, start_pos, 0);
+    SealPir::PirReply reply = server.GenerateResponse(query, 0);
     SPDLOG_INFO("Main: reply generated");
 
-    elems = client.DecodeReply(reply, offset);
+    elems = client.DecodeResponse(reply, target_raw_idx);
     SPDLOG_INFO("Main: reply decoded");
   }
   SPDLOG_INFO("Main: query finished");
-  EXPECT_EQ(elems.size(), size_per_item);
+  EXPECT_EQ(elems.size(), row_byte_len);
 
   // Check that we retrieved the correct element
-  EXPECT_EQ(elems, db_provider->ReadElement(ele_index * size_per_item));
+  EXPECT_EQ(elems, raw_db.At(ele_index));
   SPDLOG_INFO("Main: PIR result correct!");
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    Works_Instances, SealPirTest,
-    testing::Values(TestParams{4096, 1000}, TestParams{4096, 1000, 10},
-                    TestParams{4096, 1000, 20}, TestParams{4096, 1000, 400},
-                    TestParams{4096, 203, 288, 100},
-                    TestParams{4096, 3000, 288, 1000},
-                    // N = 8192
-                    TestParams{8192, 1000}, TestParams{8192, 1000, 10},
-                    TestParams{8192, 1000, 20}, TestParams{8192, 1000, 400},
-                    TestParams{8192, 203, 288, 100},
-                    TestParams{8192, 3000, 288, 1000},
-                    // large num items
-                    TestParams{4096, 1 << 16, 10, 0, 2},
-                    TestParams{4096, 1 << 18, 10, 0, 2},
-                    TestParams{4096, 1 << 20, 10, 0, 2},
-                    // corner case
-                    TestParams{4096, (1 << 22) - (1 << 10), 10},
-                    // serializing
-                    TestParams{4096, 1 << 18, 10, 0, 2, 20, true},
-                    TestParams{4096, 1000, 288, 100, 2, 20, true},
-                    TestParams{8192, 1000, 288, 0, 2, 20, true}));
+INSTANTIATE_TEST_SUITE_P(Works_Instances, SealPirTest,
+                         testing::Values(
+                             // large num items
+                             TestParams{4096, 1000000, 256},
+                             TestParams{4096, 100000, 256, true},
+                             // large value
+                             TestParams{4096, 10000, 10241, true},
+                             TestParams{4096, 1000, 10240 * 10, true}));
 }  // namespace psi::sealpir

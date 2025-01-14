@@ -61,7 +61,7 @@ jobs:
           name: "Copy binary"
           command: |
             mkdir -p /tmp/binary/x86
-            cp bazel-bin/psi/main /tmp/binary/x86
+            cp bazel-bin/psi/apps/psi_launcher/main /tmp/binary/x86
       - persist_to_workspace:
           root: "/tmp/binary"
           paths:
@@ -95,7 +95,7 @@ jobs:
           name: "Copy binary"
           command: |
             mkdir -p /tmp/binary/arm
-            cp bazel-bin/psi/main /tmp/binary/arm
+            cp bazel-bin/psi/apps/psi_launcher/main /tmp/binary/arm
       - persist_to_workspace:
           root: "/tmp/binary"
           paths:

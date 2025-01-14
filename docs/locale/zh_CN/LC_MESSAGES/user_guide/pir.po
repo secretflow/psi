@@ -1,0 +1,343 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2024, SecretFlow authors
+# This file is distributed under the same license as the SecretFlow PSI
+# Library package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: SecretFlow PSI Library \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-12-26 20:09+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.15.0\n"
+
+#: ../../user_guide/pir.rst:2
+msgid "PIR QuickStart"
+msgstr "PIR 快速入门"
+
+#: ../../user_guide/pir.rst:4
+msgid "Quick start with SPU Private Information Retrival (PIR)."
+msgstr "PIR 快速入门"
+
+#: ../../user_guide/pir.rst:7
+msgid "Supported Protocols"
+msgstr "支持的协议"
+
+#: ../../user_guide/pir.rst:10
+msgid "PIR protocols"
+msgstr ""
+
+#: ../../user_guide/pir.rst:10
+msgid "Type"
+msgstr ""
+
+#: ../../user_guide/pir.rst:10
+msgid "Server Number"
+msgstr ""
+
+#: ../../user_guide/pir.rst:12
+msgid "SealPIR(later)"
+msgstr ""
+
+#: ../../user_guide/pir.rst:12
+msgid "Index PIR"
+msgstr ""
+
+#: ../../user_guide/pir.rst:12 ../../user_guide/pir.rst:14
+msgid "Single Server"
+msgstr ""
+
+#: ../../user_guide/pir.rst:14
+msgid "APSI"
+msgstr ""
+
+#: ../../user_guide/pir.rst:14
+msgid "Keyword PIR"
+msgstr ""
+
+#: ../../user_guide/pir.rst:17
+msgid "At this moment, SealPIR is under development."
+msgstr "SealPIR 正在开发中。"
+
+#: ../../user_guide/pir.rst:21
+msgid "Release Docker"
+msgstr ""
+
+#: ../../user_guide/pir.rst:23
+msgid ""
+"Check official release docker image at `dockerhub "
+"<https://hub.docker.com/r/secretflow/psi-anolis8>`_. We also have mirrors"
+" at Alibaba Cloud: `secretflow-registry.cn-"
+"hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8`."
+msgstr ""
+"我们有Docker镜像 `dockerhub <https://hub.docker.com/r/secretflow/psi-"
+"anolis8>`_ ， 也有阿里云镜像: `secretflow-registry.cn-"
+"hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8`."
+
+#: ../../user_guide/pir.rst:27
+msgid "Keyword PIR (APSI)"
+msgstr ""
+
+#: ../../user_guide/pir.rst:30
+msgid "Before Start"
+msgstr "开始准备"
+
+#: ../../user_guide/pir.rst:32
+msgid ""
+"We provide a simple wrapper for famous `APSI "
+"<https://github.com/microsoft/APSI>`_ library. Please read the `README "
+"<https://github.com/microsoft/APSI?tab=readme-ov-file#introduction>`_ of "
+"the repo carefully. We are not going to discuss any content related to "
+"APSI further."
+msgstr ""
+"我们对 `APSI <https://github.com/microsoft/APSI>`_ 库提供了一个简单的封装. 请仔细阅读APSI仓的 "
+"`README <https://github.com/microsoft/APSI?tab=readme-ov-"
+"file#introduction>`_ 。 我们这里不再重复描述APSI文档中描述的东西。"
+
+#: ../../user_guide/pir.rst:36
+msgid ""
+"Please check details of configs at :doc:`/reference/pir_config`. You are "
+"supposed to be aware of that we provided the **EXACT** the same API to "
+"APSI. So you should read `APSI CLI arguments "
+"<https://github.com/microsoft/APSI?tab=readme-ov-file#command-line-"
+"interface-cli>`_ as well."
+msgstr ""
+"配置细节可以参考 :doc:`/reference/pir_config`。基本上我们和APSI的命令行参数保持一致。所以你可以阅读 `APSI "
+"CLI arguments <https://github.com/microsoft/APSI?tab=readme-ov-file"
+"#command-line-interface-cli>`_ 来作为参考。"
+
+#: ../../user_guide/pir.rst:39
+msgid "The extra features brought are:"
+msgstr "额外加的功能是："
+
+#: ../../user_guide/pir.rst:41
+msgid "Use Yacl Link as communication layer."
+msgstr "使用Yacl Link作为通信层。"
+
+#: ../../user_guide/pir.rst:42
+msgid "Experimental bucketized PIR."
+msgstr "试验性的分桶PIR"
+
+#: ../../user_guide/pir.rst:43
+msgid "Provide APIs for further integration."
+msgstr "提供了额外用来集成的API。"
+
+#: ../../user_guide/pir.rst:45
+msgid ""
+"If you want to try a similar CLI like APSI, you could compile the source "
+"code by"
+msgstr "如果你想要尝试一个类似APSI的CLI，你可以通过如下编译："
+
+#: ../../user_guide/pir.rst:54
+msgid "And get CLI parameters like this:"
+msgstr "获取命令行参数如下："
+
+#: ../../user_guide/pir.rst:65
+msgid "Prepare data and config"
+msgstr "准备数据和配置："
+
+#: ../../user_guide/pir.rst:67
+msgid ""
+"For Senders (Servers), you must provide a input csv or a sender db file. "
+"An input csv file could be turned into a sender db file after setup."
+msgstr "对于 Senders (Servers), 需要提供一个CSV文件或者一个sender db文件. CSV文件会被转换成sender db文件。"
+
+#: ../../user_guide/pir.rst:71
+msgid "CSV File"
+msgstr "CSV文件"
+
+#: ../../user_guide/pir.rst:73
+msgid "The csv file should looks like"
+msgstr "CSV文件格式如下："
+
+#: ../../user_guide/pir.rst:88
+msgid "Please make sure:"
+msgstr "要确保："
+
+#: ../../user_guide/pir.rst:90
+msgid "Since version **0.4.0b0**, headers line is required."
+msgstr "版本0.4.0b0开始，CSV文件必须有headers行。"
+
+#: ../../user_guide/pir.rst:91
+msgid "The first row must be headers, only **key** and **value** are allowed."
+msgstr "列名只允许 key 和 value 两列。"
+
+#: ../../user_guide/pir.rst:92
+msgid "The **key** column must be items(keys)"
+msgstr "**key** 列必须是ID列"
+
+#: ../../user_guide/pir.rst:93
+msgid "The **value** column must be labels(values), this column is optional."
+msgstr "**value** 列可选，是label列。"
+
+#: ../../user_guide/pir.rst:97
+msgid "APSI Params File"
+msgstr "APSI参数文件"
+
+#: ../../user_guide/pir.rst:99
+msgid ""
+"We use the original APSI params. For details, please check `APSI "
+"PSIParams <https://github.com/microsoft/APSI?tab=readme-ov-"
+"file#psiparams>`_ ."
+msgstr ""
+"我们使用了大多 `APSI PSIParams <https://github.com/microsoft/APSI?tab=readme-ov-"
+"file#psiparams>`_ 的参数。"
+
+#: ../../user_guide/pir.rst:101
+msgid ""
+"For senders: An APSI params file must be provided with CSV files. If a "
+"sender db file is provided, the APSI params is not required and would be "
+"ignored. For receivers: The APSI params file is optional. If not "
+"provided, receivers will ask for senders. If provided, please make sure "
+"receivers and senders share the same APSI params file, otherwise error "
+"occurred."
+msgstr ""
+"对 senders 而言: APSI 参数文件需要提供。如果是已经生成的DB文件， APSI参数文件会被忽略。对 receivers 而言: "
+"APSI参数文件是可选的。如果没有提供, receivers 会从 senders 处请求. 如果提供了，请确保receivers 和 "
+"senders 的 APSI参数文件一致。"
+
+#: ../../user_guide/pir.rst:105
+msgid ""
+"It's not easy to find a suitable APSI params file. So APSI provides some "
+"examples at `APSI parameters "
+"<https://github.com/microsoft/APSI/tree/main/parameters`_. We have a copy"
+" at `APSI parameters <blob/main/examples/pir/apsi/parameters>` as well. "
+"You can refer to `here <https://github.com/microsoft/APSI?tab=readme-ov-"
+"file#loading-from-json>`_ to choose the appropriate parameter file."
+msgstr ""
+"APSI的参数是不好定的。APSI预先调试好了一些参数 `APSI parameters "
+"<https://github.com/microsoft/APSI/tree/main/parameter>`_ . 我们的代码仓也拷贝了一份 "
+"`APSI parameters <blob/main/examples/pir/apsi/parameters>`_"
+" 。参考 `这里 <https://github.com/microsoft/APSI?tab=readme-ov-file#loading-"
+"from-json>`_ 选择合适的参数文件。 "
+
+#: ../../user_guide/pir.rst:110
+msgid ""
+"To launch PIR, please check LaunchConfig at "
+":doc:`/reference/launch_config`, and specific config: :ref:`sender config"
+" <ApsiSenderConfig>` and :ref:`receiver config <ApsiReceiverConfig>`."
+msgstr ""
+"要启动PIR，可以查看启动配置 :doc:`/reference/launch_config`, APSI配置: :ref:`sender "
+"config <ApsiSenderConfig>` 和 :ref:`receiver config <ApsiReceiverConfig>`."
+
+#: ../../user_guide/pir.rst:115
+msgid "PIR Config"
+msgstr "PIR 配置"
+
+#: ../../user_guide/pir.rst:117
+msgid ""
+"Sender: Setup Stage. In this stage, sender generates sender db file with "
+"csv file. This stage is offline. Since version **0.4.0b0**, the source "
+"csv file for db generating should be specified as **source_file**, and "
+"**db_file** is used to specify the generated db file."
+msgstr ""
+"Sender: 准备阶段，使用CSV输入生成DB文件。这个阶段是离线的。自 **0.4.0b0** 版本起, 用来生成DB文件的CSV文件使用 "
+"**source_file** 指定， 并且 **db_file** 用来指定生成DB文件的文件夹。"
+
+#: ../../user_guide/pir.rst:121
+msgid "apsi_sender_setup.json"
+msgstr ""
+
+#: ../../user_guide/pir.rst:133
+msgid ""
+"Sender: Online stage. In this stage, sender generates responses to "
+"receivers' queries. This stage is online."
+msgstr "Sender: 在线阶段。Sender接收Reciver的Query请求生成回复。"
+
+#: ../../user_guide/pir.rst:135
+msgid "apsi_sender_online.json"
+msgstr ""
+
+#: ../../user_guide/pir.rst:158
+msgid "Receiver: Online stage."
+msgstr "Receiver: 在线阶段"
+
+#: ../../user_guide/pir.rst:160
+msgid "apsi_receiver.json"
+msgstr ""
+
+#: ../../user_guide/pir.rst:184
+msgid ""
+"params_file field is optional. If not provided, receiver will ask sender "
+"for params. If provided, please make sure you provide the same one to "
+"sender's."
+msgstr "params_file 字段是可选的。如果没提供，Receiver会向Sender请求参数。如果提供了，请确保和Sender使用的一致。"
+
+#: ../../user_guide/pir.rst:188
+msgid "Full Examples"
+msgstr "完整的例子"
+
+#: ../../user_guide/pir.rst:190
+msgid ""
+"Please read `examples "
+"<https://github.com/secretflow/psi/tree/main/examples/pir/README.md>`_. "
+"For more demo configs, you can check `here "
+"<https://github.com/secretflow/psi/tree/main/examples/pir/config>`_."
+msgstr ""
+"请查看 `examples "
+"<https://github.com/secretflow/psi/tree/main/examples/pir/README.md>`_. "
+"示例配置，可以查看 `here "
+"<https://github.com/secretflow/psi/tree/main/examples/pir/config>`_."
+
+#: ../../user_guide/pir.rst:195
+msgid "Bucketized Mode"
+msgstr "分桶模式"
+
+#: ../../user_guide/pir.rst:197
+msgid ""
+"Searching in a large sender db is costly. So we can split data into "
+"buckets. The server knows which bucket the client is querying, but does "
+"not know which specific element:"
+msgstr "搜索一个很大的Sender DB是很耗时的。所以我们可以将数据分桶。Server知道client查询的是哪个桶，但是不知道具体元素:"
+
+#: ../../user_guide/pir.rst:200
+msgid ""
+"In the setup stage, sender split data into buckets. Each bucket will "
+"generate a sender db."
+msgstr "在准备阶段，Sender将数据分桶。每个桶会生成一个Sender DB。"
+
+#: ../../user_guide/pir.rst:202
+msgid ""
+"In the online stage, receiver split query into subqueries. Each subquery "
+"only contains items residing in the same bucket. When receivers sends a "
+"subquery to the sender, bucket idx is also provided."
+msgstr ""
+"在在线阶段，Receiver将Query分拆成子Query。每个子Query只包含在同一个桶里的元素。当Receiver发送一个子Query给Sender时，也会提供bucket"
+" idx。"
+
+#: ../../user_guide/pir.rst:205
+msgid ""
+"For each subquery, sender only search in the corresponding sender db for "
+"specific bucket."
+msgstr "对每个子Query，Sender只在对应的Sender DB的桶里里搜索。"
+
+#: ../../user_guide/pir.rst:207
+msgid ""
+"Assuming the query indindiscernibility degree is "
+":math:`\\text{ind_degree}`, and sender has "
+":math:`\\text{sender_data_rows}` rows, then the number of buckets should "
+"be :math:`\\text{bucket_num} = \\text{sender_data_rows} / "
+"\\text{ind_degree}`, you can set :ref:`experimental_bucket_cnt "
+"<ApsiSenderConfig>` with :math:`\\text{bucket_num}`. If the client has "
+":math:`\\text{query_rows}` rows of data, the we know client has "
+":math:`\\text{query_rows_per_bucket} = \\text{query_rows} / "
+"\\text{bucket_num}` rows per bucket, we can select "
+":math:`\\text{ind_degree}`-:math:`\\text{query_rows_per_bucket}`-xxx.json"
+" as :ref:`params_file <ApsiSenderConfig>`."
+msgstr ""
+"假设Query的不可区分度为 :math:`\\text{ind_degree}`，Sender有 "
+":math:`\\text{sender_data_rows}` 行数据。那么桶的数量应该为 :math:`\\text{bucket_num} "
+"= \\text{sender_data_rows} / \\text{ind_degree}`。你可以设置 "
+":ref:`experimental_bucket_cnt <ApsiSenderConfig>` 为 "
+":math:`\\text{bucket_num}`。如果Client有 :math:`\\text{query_rows}` "
+"行数据，那么每个桶里会有 :math:`\\text{query_rows_per_bucket} = \\text{query_rows} / "
+"\\text{bucket_num}` 行数据。你就可以选择 "
+":math:`\\text{ind_degree}`-:math:`\\text{query_rows_per_bucket}`-xxx.json作为"
+" :ref:`params_file <ApsiSenderConfig>`。"
+

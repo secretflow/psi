@@ -86,7 +86,6 @@ psi_cc_test(
     deps = [
         ":receiver_c_wrapper",
         ":sender_c_wrapper",
-        "@boost.uuid//:boost.uuid",
     ],
 )
 
@@ -101,7 +100,6 @@ psi_cc_test(
     deps = [
         ":receiver",
         ":sender",
-        "@boost.uuid//:boost.uuid",
     ],
 )
 
@@ -116,6 +114,5 @@ psi_cc_test(
     deps = [
         ":receiver",
         ":sender",
-        "@boost.uuid//:boost.uuid",
     ],
 )

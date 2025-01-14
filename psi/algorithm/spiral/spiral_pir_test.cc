@@ -75,7 +75,7 @@ TEST_P(SpiralPirTest, Works) {
   SPDLOG_INFO("GenRandomDatabase, time cost: {} ms", timer.CountMs());
 
   // get a SpiralParams
-  auto spiral_params = util::GetPerformanceImproveParam();
+  auto spiral_params = util::GetDefaultParam();
   spiral_params.UpdateByDatabaseInfo(database_info);
 
   SPDLOG_INFO("MaxByteLenofPt: {}, MaxBitLenOfPt: {}",

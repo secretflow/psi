@@ -56,6 +56,19 @@ Params GetPerformanceImproveParam() {
                 std::move(poly_matrix_params), std::move(query_params));
 }
 
+Params GetDefaultParam() {
+  std::size_t poly_len{2048};
+  std::vector<std::uint64_t> moduli{268369921, 249561089};
+
+  double noise_width{6.4};
+
+  PolyMatrixParams poly_matrix_params(2, 256, 21, 4, 8, 8, 6);
+  QueryParams query_params(9, 6, 1);
+
+  return Params(poly_len, std::move(moduli), noise_width,
+                std::move(poly_matrix_params), std::move(query_params));
+}
+
 Params GetFastExpansionTestingParam() {
   std::size_t poly_len{2048};
   std::vector<std::uint64_t> moduli{268369921, 249561089};

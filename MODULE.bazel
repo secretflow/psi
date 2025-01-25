@@ -11,7 +11,7 @@ module(
     compatibility_level = 1,
 )
 
-bazel_dep(name = "yacl", version = "0.4.5b10-nightly-20241224")
+bazel_dep(name = "yacl", version = "0.4.5b10-nightly-20250110")
 
 single_version_override(
     module_name = "grpc",

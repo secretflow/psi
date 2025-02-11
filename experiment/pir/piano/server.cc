@@ -1,22 +1,32 @@
+// Copyright 2024 The secretflow authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #include "experiment/pir/piano/server.h"
 
 namespace pir::piano {
 
-QueryServiceServer::QueryServiceServer(
-    std::shared_ptr<yacl::link::Context> context, std::vector<uint8_t>& db,
-    const uint64_t entry_num, const uint64_t entry_size)
-    : context_(std::move(context)),
-      db_(std::move(db)),
-      entry_num_(entry_num),
-      entry_size_(entry_size) {
+QueryServiceServer::QueryServiceServer(std::vector<uint8_t>& db,
+                                       uint64_t entry_num, uint64_t entry_size)
+    : db_(std::move(db)), entry_num_(entry_num), entry_size_(entry_size) {
   std::tie(chunk_size_, set_size_) = GenChunkParams(entry_num_);
   AlignDBToChunkBoundary();
 }
 
 void QueryServiceServer::AlignDBToChunkBoundary() {
   if (entry_num_ < chunk_size_ * set_size_) {
-    const uint64_t padding_num = (chunk_size_ * set_size_) - entry_num_;
-    const uint64_t seed = yacl::crypto::FastRandU64();
+    uint64_t padding_num = (chunk_size_ * set_size_) - entry_num_;
+    uint64_t seed = yacl::crypto::FastRandU64();
 
     db_.reserve(db_.size() + (padding_num * entry_size_));
     for (uint64_t i = 0; i < padding_num; ++i) {
@@ -28,52 +38,27 @@ void QueryServiceServer::AlignDBToChunkBoundary() {
   }
 }
 
-void QueryServiceServer::HandleFetchFullDB() {
-  DeserializeFetchFullDB(context_->Recv(context_->NextRank(), "FetchFullDB"));
-  for (uint64_t i = 0; i < set_size_; ++i) {
-    const uint64_t down = i * chunk_size_;
-    const uint64_t up = (i + 1) * chunk_size_;
-    std::vector<uint8_t> chunk(db_.begin() + down * entry_size_,
-                               db_.begin() + up * entry_size_);
-
-    try {
-      context_->SendAsync(context_->NextRank(), SerializeDBChunk(chunk),
-                          "DBChunk");
-    } catch (const std::exception& e) {
-      SPDLOG_ERROR("Failed to send a chunk: {}", e.what());
-      return;
-    }
-  }
+yacl::Buffer QueryServiceServer::GetDBChunk(uint64_t chunk_index) {
+  uint64_t down = chunk_index * chunk_size_;
+  uint64_t up = (chunk_index + 1) * chunk_size_;
+  std::vector<uint8_t> chunk(db_.begin() + down * entry_size_,
+                             db_.begin() + up * entry_size_);
+  yacl::Buffer chunk_buffer = SerializeDBChunk(chunk_index, chunk);
+  return chunk_buffer;
 }
 
-void QueryServiceServer::HandleMultipleQueries(
-    const std::future<void>& stop_signal) {
-  while (stop_signal.wait_for(std::chrono::milliseconds(5)) ==
-         std::future_status::timeout) {
-    HandleQueryRequest();
-  }
-}
-
-void QueryServiceServer::HandleQueryRequest() {
-  const auto indices = DeserializeSetParityQuery(
-      context_->Recv(context_->NextRank(), "SetParityQuery"));
-
-  const std::vector<uint8_t> parity = ProcessSetParityQuery(indices);
-  context_->SendAsync(context_->NextRank(), SerializeSetParityResponse(parity),
-                      "SetParityResponse");
-}
-
-std::vector<uint8_t> QueryServiceServer::ProcessSetParityQuery(
-    const std::vector<uint64_t>& indices) {
+yacl::Buffer QueryServiceServer::GenerateIndexReply(
+    const yacl::Buffer& query_buffer) {
+  const auto indices = DeserializeSetParityQuery(query_buffer);
   DBEntry parity = DBEntry::ZeroEntry(entry_size_);
   for (const auto& index : indices) {
     DBEntry entry = DBAccess(index);
     parity.Xor(entry);
   }
-  return parity.GetData();
+  return SerializeSetParityResponse(parity.GetData());
 }
 
-DBEntry QueryServiceServer::DBAccess(const uint64_t idx) {
+DBEntry QueryServiceServer::DBAccess(uint64_t idx) {
   if (idx < entry_num_) {
     std::vector<uint8_t> slice(entry_size_);
     std::copy(db_.begin() + idx * entry_size_,

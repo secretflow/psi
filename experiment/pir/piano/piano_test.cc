@@ -1,10 +1,20 @@
+// Copyright 2024 The secretflow authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #include <spdlog/spdlog.h>
 
-#include <array>
 #include <cstdint>
-#include <future>
-#include <iostream>
-#include <memory>
 #include <utility>
 #include <vector>
 
@@ -12,8 +22,6 @@
 #include "experiment/pir/piano/server.h"
 #include "experiment/pir/piano/util.h"
 #include "gtest/gtest.h"
-#include "yacl/link/context.h"
-#include "yacl/link/test_util.h"
 
 struct TestParams {
   uint64_t entry_size;
@@ -28,8 +36,8 @@ namespace pir::piano {
 
 // Generate a set of uniformly distributed random query indices within the
 // database entry range for testing purposes
-std::vector<uint64_t> GenTestQueries(const uint64_t query_num,
-                                     const uint64_t entry_num) {
+std::vector<uint64_t> GenerateTestQueries(uint64_t query_num,
+                                          uint64_t entry_num) {
   std::vector<uint64_t> queries;
   queries.reserve(query_num);
   yacl::crypto::Prg<uint64_t> prg(yacl::crypto::SecureRandU64());
@@ -56,9 +64,7 @@ class PianoTest : public testing::TestWithParam<TestParams> {};
 
 TEST_P(PianoTest, Works) {
   auto params = GetParam();
-  const int world_size = 2;
   uint64_t entry_num = params.db_size / params.entry_size / CHAR_BIT;
-  const auto contexts = yacl::link::test::SetupWorld(world_size);
 
   SPDLOG_INFO(
       "Database summary: total entries: {}, each entry size: {} bytes, total "
@@ -82,45 +88,34 @@ TEST_P(PianoTest, Works) {
   }
 
   SPDLOG_INFO("Initializing query service: server and client");
-  QueryServiceServer server(contexts[0], database, entry_num,
-                            params.entry_size);
-  QueryServiceClient client(contexts[1], entry_num, params.thread_num,
-                            params.entry_size);
+  QueryServiceServer server(database, entry_num, params.entry_size);
+  QueryServiceClient client(entry_num, params.thread_num, params.entry_size);
 
-  const auto actual_query_num = params.is_total_query_num
-                                    ? client.GetTotalQueryNumber()
-                                    : params.query_num;
+  auto actual_query_num = params.is_total_query_num
+                              ? client.GetTotalQueryNumber()
+                              : params.query_num;
   SPDLOG_INFO("Generating {} test queries", actual_query_num);
-  const auto queries = GenTestQueries(actual_query_num, entry_num);
+  const auto queries = GenerateTestQueries(actual_query_num, entry_num);
 
   SPDLOG_INFO("Starting preprocess phase");
-  auto client_preprocess_future =
-      std::async(std::launch::async, [&client]() { client.FetchFullDB(); });
-
-  auto server_preprocess_future = std::async(
-      std::launch::async, [&server]() { server.HandleFetchFullDB(); });
-
-  client_preprocess_future.get();
-  server_preprocess_future.get();
+  auto chunk_number = client.GetChunkNumber();
+  for (uint64_t chunk_index = 0; chunk_index < chunk_number; ++chunk_index) {
+    yacl::Buffer chunk_buffer = server.GetDBChunk(chunk_index);
+    client.PreprocessDBChunk(chunk_buffer);
+  }
 
   SPDLOG_INFO("Starting online query phase");
-  std::promise<void> stop_signal;
-  std::future<void> stop_future = stop_signal.get_future();
+  std::vector<DBEntry> pir_results;
+  for (auto query_index : queries) {
+    yacl::Buffer query_buffer = client.GenerateIndexQuery(query_index);
+    yacl::Buffer reply_buffer = server.GenerateIndexReply(query_buffer);
+    DBEntry result = client.RecoverIndexReply(reply_buffer);
+    pir_results.push_back(result);
+  }
 
-  auto client_query_future = std::async(
-      std::launch::async,
-      [&client, &queries]() { return client.OnlineMultipleQueries(queries); });
-
-  auto server_query_future = std::async(
-      std::launch::async,
-      [&server, &stop_future]() { server.HandleMultipleQueries(stop_future); });
-
-  const auto pir_results = client_query_future.get();
   const auto expected_results = GetPlainResults(queries, params);
-  stop_signal.set_value();
-  server_query_future.get();
-
   SPDLOG_INFO("Verifying {} query results", pir_results.size());
+  EXPECT_EQ(pir_results.size(), expected_results.size());
   for (size_t i = 0; i < pir_results.size(); ++i) {
     EXPECT_EQ(pir_results[i].GetData(), expected_results[i].GetData())
         << "Mismatch at index " << queries[i];

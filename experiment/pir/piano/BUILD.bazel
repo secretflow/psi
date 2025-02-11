@@ -1,4 +1,4 @@
-# Copyright 2023 Ant Group Co., Ltd.
+# Copyright 2024 The secretflow authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,7 +56,6 @@ psi_cc_library(
         ":piano_cc_proto",
         ":serialize",
         ":util",
-        "@yacl//yacl/link:context",
     ],
 )
 
@@ -68,20 +67,16 @@ psi_cc_library(
         ":piano_cc_proto",
         ":serialize",
         ":util",
-        "@yacl//yacl/link:context",
     ],
 )
 
 psi_cc_test(
     name = "piano_test",
-    timeout = "eternal",
     srcs = ["piano_test.cc"],
     deps = [
         ":client",
         ":server",
         ":util",
-        "@yacl//yacl/link:context",
-        "@yacl//yacl/link:test_util",
     ],
 )
 
@@ -93,7 +88,5 @@ psi_cc_binary(
         ":server",
         ":util",
         "@com_github_google_benchmark//:benchmark_main",
-        "@yacl//yacl/link:context",
-        "@yacl//yacl/link:test_util",
     ],
 )

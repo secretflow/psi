@@ -1,3 +1,17 @@
+// Copyright 2024 The secretflow authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #pragma once
 
 #include <spdlog/spdlog.h>
@@ -8,7 +22,6 @@
 #include "experiment/pir/piano/serialize.h"
 #include "experiment/pir/piano/util.h"
 #include "yacl/crypto/tools/prg.h"
-#include "yacl/link/context.h"
 
 namespace pir::piano {
 
@@ -17,7 +30,7 @@ constexpr uint64_t kStatisticalSecurityLog2 = 40;
 
 // Natural logarithm of the security parameter, ln(x) = log2(x) * ln(2)
 constexpr double kStatisticalSecurityLn =
-    std::log(2) * static_cast<double>(kStatisticalSecurityLog2);
+    std::log(2) * kStatisticalSecurityLog2;
 
 struct LocalSet {
   /**
@@ -30,8 +43,8 @@ struct LocalSet {
    * Ensures balanced distribution by preserving query index in specific chunk.
    * @param is_programmed Signals whether manual modification is needed.
    */
-  LocalSet(const uint32_t tag, DBEntry parity, const uint64_t programmed_point,
-           const bool is_programmed)
+  LocalSet(uint32_t tag, DBEntry parity, uint64_t programmed_point,
+           bool is_programmed)
       : tag(tag),
         parity(std::move(parity)),
         programmed_point(programmed_point),
@@ -55,7 +68,7 @@ struct LocalBackupSet {
    * excluding an element in a specific chunk. This is designed to reduce the
    * computation needed when refreshing sets in the primary table.
    */
-  LocalBackupSet(const uint32_t tag, DBEntry parity_after_puncture)
+  LocalBackupSet(uint32_t tag, DBEntry parity_after_puncture)
       : tag(tag), parity_after_puncture(std::move(parity_after_puncture)) {}
 
   uint32_t tag;
@@ -71,13 +84,11 @@ struct LocalBackupSetGroup {
    * @param sets Contains all backup sets related to a specific chunk, where
    * their parity_after_puncture values exclude elements from this chunk.
    */
-  LocalBackupSetGroup(
-      const uint64_t consumed,
-      const std::vector<std::reference_wrapper<LocalBackupSet>>& sets)
+  LocalBackupSetGroup(uint64_t consumed, absl::Span<LocalBackupSet> sets)
       : consumed(consumed), sets(sets) {}
 
   uint64_t consumed;
-  std::vector<std::reference_wrapper<LocalBackupSet>> sets;
+  absl::Span<LocalBackupSet> sets;
 };
 
 struct LocalReplacementGroup {
@@ -89,8 +100,7 @@ struct LocalReplacementGroup {
    * @param indices Randomly sampled indices generated from the current chunk.
    * @param values Values corresponding to the sampled indices.
    */
-  LocalReplacementGroup(const uint64_t consumed,
-                        const std::vector<uint64_t>& indices,
+  LocalReplacementGroup(uint64_t consumed, const std::vector<uint64_t>& indices,
                         const std::vector<DBEntry>& values)
       : consumed(consumed), indices(indices), values(values) {}
 
@@ -99,23 +109,81 @@ struct LocalReplacementGroup {
   std::vector<DBEntry> values;
 };
 
+struct QueryContext {
+  bool is_mask_query = false;
+  uint64_t current_query_index{};
+  uint64_t hit_set_id{};
+};
+
 class QueryServiceClient {
  public:
-  QueryServiceClient(std::shared_ptr<yacl::link::Context> context,
-                     uint64_t entry_num, uint64_t thread_num,
+  QueryServiceClient(uint64_t entry_num, uint64_t thread_num,
                      uint64_t entry_size);
-
-  void Initialize();
-  void InitializeLocalSets();
-  void FetchFullDB();
-  void SendDummySet() const;
-  DBEntry OnlineSingleQuery(uint64_t x);
-  std::vector<DBEntry> OnlineMultipleQueries(
-      const std::vector<uint64_t>& queries);
   uint64_t GetTotalQueryNumber() const { return total_query_num_; };
+  uint64_t GetChunkNumber() const { return set_size_; }
+
+  /**
+   * @brief Preprocess primary and backup set parities for a database chunk.
+   *
+   * This function processes a chunk of the database by:
+   * 1. Deserializing the chunk buffer into the chunk index and entries.
+   * 2. Using multiple threads to update primary and backup set parities based
+   * on PRF-generated offsets, skipping backup sets belonging to the current
+   * chunk.
+   * 3. Identifying unmatched elements (local misses) and caching them.
+   * 4. Sampling random replacement entries for the chunk's replacement groups.
+   *
+   * @param chunk_buffer The serialized buffer of the database chunk.
+   */
+  void PreprocessDBChunk(const yacl::Buffer& chunk_buffer);
+
+  /**
+   * @brief Generate a query request to fetch a database element by index.
+   *
+   * This function constructs a query for the specified `query_index`:
+   * 1. If the index is in the local cache, it generates a mask query directly.
+   * 2. Searches through primary sets to find a set that contains the index.
+   * 3. If no match is found, it generates a mask query and caches the miss if
+   * available.
+   * 4. Expands the matched set and replaces the element corresponding to the
+   * current chunk with a pre-sampled replacement value.
+   * 5. Serializes and returns the edited set as a query message.
+   *
+   * @param query_index The index of the database element to query.
+   * @return Serialized buffer containing the query message.
+   */
+  yacl::Buffer GenerateIndexQuery(uint64_t query_index);
+
+  /**
+   * @brief Recover the original database entry from the server's reply.
+   *
+   * Recover the original database entry by XORing the server's parity with:
+   *  - The parity of the matched primary set.
+   *  - The replacement value used in the query.
+   *
+   * Refreshe elements in the primary set using the backup set, updating the
+   * parity accordingly to ensure privacy and load balancing.
+   */
+  DBEntry RecoverIndexReply(const yacl::Buffer& reply_buffer);
 
  private:
-  std::shared_ptr<yacl::link::Context> context_;
+  /**
+   * @brief Initialize query parameters and cryptographic keys.
+   *
+   * Computes the maximum number of queries supported, chunk sizes, and the
+   * number of primary and backup sets, ensuring proper alignment with the
+   * thread count.
+   */
+  void Initialize();
+
+  // Initialize primary and backup sets along with their grouping structures
+  void InitializeLocalSets();
+
+  // Store results of sqrt(n) recent queries, serve duplicates locally while
+  // masking with a random distinct query
+  yacl::Buffer GenerateMaskQuery() const;
+
+  QueryContext ctx_{};
   uint64_t total_query_num_{};
   uint64_t entry_num_{};
   uint64_t thread_num_{};

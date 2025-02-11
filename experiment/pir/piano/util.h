@@ -1,3 +1,17 @@
+// Copyright 2024 The secretflow authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #pragma once
 
 #include <cstdint>
@@ -5,6 +19,7 @@
 #include <utility>
 #include <vector>
 
+#include "absl/types/span.h"
 #include "yacl/base/int128.h"
 #include "yacl/crypto/aes/aes_intrinsics.h"
 #include "yacl/crypto/rand/rand.h"
@@ -16,37 +31,33 @@ class DBEntry {
   DBEntry() = default;
 
   // Total byte size of the database entry, initializing all bytes to zero
-  explicit DBEntry(const size_t entry_size)
-      : k_length_(entry_size), data_(entry_size, 0) {}
-
-  explicit DBEntry(const std::vector<uint8_t>& data)
-      : k_length_(data.size()), data_(data) {}
+  explicit DBEntry(size_t entry_size) : data_(entry_size, 0) {}
+  explicit DBEntry(const std::vector<uint8_t>& data) : data_(data) {}
 
   // Accessor for the underlying data
-  std::vector<uint8_t>& GetData() { return data_; }
   [[nodiscard]] const std::vector<uint8_t>& GetData() const { return data_; }
 
   // XOR operations
   void Xor(const DBEntry& other) {
-    for (size_t i = 0; i < k_length_; ++i) {
+    YACL_ENFORCE_EQ(data_.size(), other.data_.size());
+    for (size_t i = 0; i < data_.size(); ++i) {
       data_[i] ^= other.data_[i];
     }
   }
 
-  void XorFromRaw(const uint8_t* src) {
-    for (size_t i = 0; i < k_length_; ++i) {
+  void XorFromRaw(absl::Span<const uint8_t> src) {
+    YACL_ENFORCE_EQ(data_.size(), src.size());
+    for (size_t i = 0; i < data_.size(); ++i) {
       data_[i] ^= src[i];
     }
   }
 
   // Static method to generate a zero-filled DBEntry
-  static DBEntry ZeroEntry(const size_t entry_size) {
-    return DBEntry(entry_size);
-  }
+  static DBEntry ZeroEntry(size_t entry_size) { return DBEntry(entry_size); }
 
   // Generate a DBEntry based on a seed and id using a custom hash function
   static DBEntry GenDBEntry(
-      const size_t entry_size, const uint64_t key, const uint64_t id,
+      size_t entry_size, uint64_t key, uint64_t id,
       const std::function<std::vector<uint8_t>(uint64_t)>& hash_func) {
     DBEntry entry(entry_size);
     const std::vector<uint8_t> hash = hash_func(key ^ id);
@@ -66,7 +77,6 @@ class DBEntry {
   }
 
  private:
-  size_t k_length_{};
   std::vector<uint8_t> data_;
 };
 

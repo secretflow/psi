@@ -9,7 +9,7 @@ jobs:
     steps:
       - name: secretflow-deploy
         id: secretflow-deploy
-        uses: CircleCI-Public/trigger-circleci-pipeline-action@v1.1.0
+        uses: CircleCI-Public/trigger-circleci-pipeline-action@v1.2.0
         with:
           GHA_Meta: "publish_docker_image"
         env:

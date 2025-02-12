@@ -102,7 +102,7 @@ jobs:
             - "arm/main"
   docker_image_publish:
     docker:
-      - image: cimg/deploy:2023.06.1
+      - image: cimg/deploy:2023.12.1
     steps:
       - checkout
       - setup_remote_docker

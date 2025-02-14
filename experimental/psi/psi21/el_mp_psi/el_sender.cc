@@ -17,7 +17,9 @@
 #include <algorithm>
 #include <cmath>
 #include <memory>
+// #include <libscapi/include/primitives/Matrix.hpp>
 
+#include "experimental/psi/psi21/el_mp_psi/Mersenne.h"
 #include "experimental/psi/psi21/el_mp_psi/el_hashing.h"
 #include "yacl/crypto/rand/rand.h"
 #include "yacl/crypto/tools/ro.h"
@@ -49,10 +51,10 @@ static auto ro = yc::RandomOracle::GetDefault();
 }  // namespace
 
 // Ref https://eprint.iacr.org/2017/799.pdf (Figure 6, 7)
+#define flag_print false
 
-std::vector<uint128_t> ElRecv(
-    const std::shared_ptr<yacl::link::Context>& ctx,
-    const std::vector<uint128_t>& queries) {
+std::vector<uint128_t> ElRecv(const std::shared_ptr<yacl::link::Context>& ctx,
+                              const std::vector<uint128_t>& queries) {
   const size_t size{queries.size()};
   const size_t bin_sizes[]{static_cast<size_t>(std::ceil(size * ZETA[0])),
                            static_cast<size_t>(std::ceil(size * ZETA[1]))};
@@ -72,7 +74,6 @@ std::vector<uint128_t> ElRecv(
   auto buf = ctx->Recv(ctx->NextRank(), "Receive OPPRF EncryptionTable");
   std::vector<uint128_t> table(xssize);
   std::memcpy(table.data(), buf.data(), table.size() * sizeof(uint128_t));
-  // todo
   for (size_t i{}; i != table.size(); ++i) {
     table[i] = table[i] + (nonce >> 10);
     // SPDLOG_INFO(" table[i] = {}, size{}",
@@ -83,8 +84,7 @@ std::vector<uint128_t> ElRecv(
 }
 
 void ElSend(const std::shared_ptr<yacl::link::Context>& ctx,
-                 const std::vector<uint128_t>& xs,
-                 const std::vector<uint64_t>& ys) {
+            const std::vector<uint128_t>& xs, const std::vector<uint64_t>& ys) {
   YACL_ENFORCE_EQ(xs.size(), ys.size(), "Sizes mismatch.");
   const size_t size{xs.size()};
   const size_t bin_sizes[]{static_cast<size_t>(std::ceil(size * ZETA[0])),

@@ -16,9 +16,11 @@ load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library", "psi_cc_test")
 
 package(default_visibility = ["//visibility:public"])
 
+WARNING_OPTS = ["-Wall"]
 psi_cc_binary(
     name = "el_mp_psi_benchmark",
     srcs = ["el_mp_psi_benchmark.cc"],
+    copts = WARNING_OPTS,
     deps = [
         ":el_mp_psi",
         "@com_github_google_benchmark//:benchmark_main",
@@ -31,11 +33,15 @@ psi_cc_library(
         "el_hashing.cc",
         "el_mp_psi.cc",
         "el_sender.cc",
+        "Mersenne.cc",
+        "el_protocol.cc",
     ],
     hdrs = [
         "el_hashing.h",
         "el_mp_psi.h",
         "el_sender.h",
+        "Mersenne.h",
+        "el_protocol.h",
     ],
     deps = [
         "//psi/utils:communication",

@@ -16,9 +16,10 @@
 
 #include <future>
 
+#include "experimental/psi/psi21/el_mp_psi/el_protocol.h"
 #include "experimental/psi/psi21/el_mp_psi/el_sender.h"
-#include "psi/psi/utils/communication.h"
-#include "psi/psi/utils/sync.h"
+#include "psi/utils/communication.h"
+#include "psi/utils/sync.h"
 #include "yacl/crypto/hash/hash_utils.h"
 #include "yacl/crypto/rand/rand.h"
 #include "yacl/utils/serialize.h"
@@ -42,8 +43,8 @@ NmpParty::NmpParty(const Options& options) : options_{options} {
   }
 }
 
-std::vector<std::string> NmpParty::Run(
-    const std::vector<std::string>& inputs) {
+// template <class FieldType>
+std::vector<std::string> NmpParty::Run(const std::vector<std::string>& inputs) {
   auto [ctx, wsize, me, leader] = CollectContext();
   auto counts = AllGatherItemsSize(ctx, inputs.size());
   size_t count{};
@@ -66,6 +67,9 @@ std::vector<std::string> NmpParty::Run(
     ss << recons[i];
     intersection.push_back(ss.str());
   }
+
+  randomParse(items, count, shares, p2p_, me, wsize, M, N);
+
   return intersection;
 }
 

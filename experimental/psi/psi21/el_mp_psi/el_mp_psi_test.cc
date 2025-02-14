@@ -19,7 +19,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "psi/psi/utils/test_utils.h"
+#include "psi/utils/test_utils.h"
 #include "yacl/link/test_util.h"
 
 namespace psi::psi {

@@ -23,13 +23,12 @@
 
 namespace psi::psi {
 
-// Table-based OPPRF, see https://eprint.iacr.org/2017/799.pdf (Figure 6)
-
 std::vector<uint128_t> ElRecv(const std::shared_ptr<yacl::link::Context>&,
-                                   const std::vector<uint128_t>& queries);
+                              const std::vector<uint128_t>& queries);
 
 void ElSend(const std::shared_ptr<yacl::link::Context>&,
-                 const std::vector<uint128_t>& xs,
-                 const std::vector<uint64_t>& ys);
+            const std::vector<uint128_t>& xs, const std::vector<uint64_t>& ys);
+
+// convert additive shares to T-threshold
 
 }  // namespace psi::psi

@@ -26,6 +26,7 @@ namespace psi::psi {
 // Practical Multi-party Private Set Intersection from Symmetric-Key Techniques
 // https://eprint.iacr.org/2017/799.pdf
 
+// template <class FieldType>
 class NmpParty {
  public:
   struct Options {

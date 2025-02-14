@@ -18,11 +18,12 @@
 
 #include "experimental/psi/psi21/el_mp_psi/el_protocol.h"
 #include "experimental/psi/psi21/el_mp_psi/el_sender.h"
-#include "psi/utils/communication.h"
-#include "psi/utils/sync.h"
 #include "yacl/crypto/hash/hash_utils.h"
 #include "yacl/crypto/rand/rand.h"
 #include "yacl/utils/serialize.h"
+
+#include "psi/utils/communication.h"
+#include "psi/utils/sync.h"
 
 namespace psi::psi {
 

@@ -19,8 +19,9 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "psi/utils/test_utils.h"
 #include "yacl/link/test_util.h"
+
+#include "psi/utils/test_utils.h"
 
 namespace psi::psi {
 

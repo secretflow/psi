@@ -40,7 +40,7 @@ std::vector<uint64_t> GenerateTestQueries(uint64_t query_num,
                                           uint64_t entry_num) {
   std::vector<uint64_t> queries;
   queries.reserve(query_num);
-  yacl::crypto::Prg<uint64_t> prg(yacl::crypto::SecureRandU64());
+  yacl::crypto::Prg<uint64_t> prg(yacl::crypto::SecureRandU128());
   for (uint64_t q = 0; q < query_num; ++q) {
     queries.push_back(prg() % entry_num);
   }

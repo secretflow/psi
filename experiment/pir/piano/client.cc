@@ -173,7 +173,7 @@ void QueryServiceClient::PreprocessDBChunk(const yacl::Buffer& chunk_buffer) {
   }
 
   // Store the replacement
-  yacl::crypto::Prg<uint64_t> prg(yacl::crypto::SecureRandU64());
+  yacl::crypto::Prg<uint64_t> prg(yacl::crypto::SecureRandU128());
   for (uint64_t k = 0; k < backup_set_num_per_chunk_; k++) {
     // Generate a random offset between 0 and chunk_size_ - 1
     auto offset = prg() & (chunk_size_ - 1);
@@ -188,7 +188,7 @@ void QueryServiceClient::PreprocessDBChunk(const yacl::Buffer& chunk_buffer) {
 }
 
 yacl::Buffer QueryServiceClient::GenerateMaskQuery() const {
-  yacl::crypto::Prg<uint64_t> prg(yacl::crypto::SecureRandU64());
+  yacl::crypto::Prg<uint64_t> prg(yacl::crypto::SecureRandU128());
   std::vector<uint64_t> rand_set(set_size_);
   for (uint64_t i = 0; i < set_size_; i++) {
     rand_set[i] = prg() % chunk_size_ + i * chunk_size_;

@@ -35,8 +35,7 @@ msgid ""
 " in the `bazel-bin/psi` directory. We will use `./main` file, combined "
 "with a config file, to run APSI protocol. For example:"
 msgstr "如果构建成功，你将在 bazel-bin/psi 目录下找到一个名为 main 的可执行文件。"
-"我们将使用 ./main 文件，并结合一个配置文件来运行近似私人集合交集（APSI）协议。"
-"例如："
+"我们将使用 ./main 文件，并结合一个配置文件来运行APSI协议。例如："
 
 
 #: ../../user_guide/apsi_benchmark.md:17

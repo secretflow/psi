@@ -19,7 +19,7 @@ msgstr ""
 
 #: ../../whatsnew.rst:2
 msgid "Release notes"
-msgstr "发行说明"
+msgstr "发版说明"
 
 #: ../../../RELEASE.md:1
 msgid "RELEASE"
@@ -243,7 +243,7 @@ msgstr "[API] 将sort_output重命名为disable_alignment。"
 
 #: ../../../RELEASE.md:88
 msgid "[Feature] Support left join, right join and full join. The behavior of difference is modified."
-msgstr "[Feature] 支持左连接、右连接和全连接。差集的行为已修改。"
+msgstr "[Feature] 支持左连接、右连接和全连接。修改了求差集的功能。"
 
 #: ../../../RELEASE.md:89
 msgid "[Feature] Skip duplicate key check if recovery checkpoint exists."

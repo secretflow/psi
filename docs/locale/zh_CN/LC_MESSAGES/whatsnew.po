@@ -245,6 +245,7 @@ msgstr ""
 msgid ""
 "[Feature] Support left join, right join and full join. The behavior of "
 "difference is modified."
+msgstr ""
 
 #: ../../../RELEASE.md:89
 msgid "[Feature] Skip duplicate key check if recovery checkpoint exists."

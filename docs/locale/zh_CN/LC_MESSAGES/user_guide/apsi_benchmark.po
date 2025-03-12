@@ -47,7 +47,7 @@ msgid ""
 "To measure the performance of APSI protocols under different data scales,"
 " we need to generate dummy data."
 msgstr ""
-"“为了衡量APSI协议在不同数据规模下的性能，我们需要生成模拟数据。”"
+"为了衡量APSI协议在不同数据规模下的性能，我们需要生成模拟数据。"
 
 #: ../../user_guide/apsi_benchmark.md:29
 msgid "Next, we need to copy the data and parameter files into /tmp:"

@@ -19,267 +19,265 @@ msgstr ""
 
 #: ../../whatsnew.rst:2
 msgid "Release notes"
-msgstr ""
+msgstr "发版说明"
 
 #: ../../../RELEASE.md:1
 msgid "RELEASE"
-msgstr ""
+msgstr "发布"
 
 #: ../../../RELEASE.md:3
 msgid "NOTE:"
-msgstr ""
+msgstr "注意："
 
 #: ../../../RELEASE.md:5
 msgid "`[Feature]` prefix for new features."
-msgstr ""
+msgstr "`[Feature]` 前缀表示新功能。"
 
 #: ../../../RELEASE.md:6
 msgid "`[Bugfix]` prefix for bug fixes."
-msgstr ""
+msgstr "`[Bugfix]` 前缀表示修复缺陷。"
 
 #: ../../../RELEASE.md:7
 msgid "`[API]` prefix for API changes."
-msgstr ""
+msgstr "`[API]` 前缀表示API变更。"
 
 #: ../../../RELEASE.md:8
 msgid "`[Improvement]` prefix for implementation improvement."
-msgstr ""
+msgstr "`[Improvement]` 前缀表示实现改进。"
 
 #: ../../../RELEASE.md:10
 msgid "v0.5.0.dev241107"
-msgstr ""
+msgstr "v0.5.0.dev241107"
 
 #: ../../../RELEASE.md:12
 msgid "`[API]` delete legacy ub psi function."
-msgstr ""
+msgstr "`[API]` 删除旧版ub psi函数。"
 
 #: ../../../RELEASE.md:13
 msgid "`[API]` output csv null_rep can be specified."
-msgstr ""
+msgstr "`[API]` 可以指定输出csv的空值表示。"
 
 #: ../../../RELEASE.md:14
 msgid "`[Feature]` join can be done with one receiver."
-msgstr ""
+msgstr "`[Feature]` 支持单接收方的连接操作。"
 
 #: ../../../RELEASE.md:15
 msgid "`[Feature]` join can be done with ub psi protocol."
-msgstr ""
+msgstr "`[Feature]` 支持使用ub psi协议进行连接操作。"
 
 #: ../../../RELEASE.md:17
 msgid "v0.4.0.dev240801"
-msgstr ""
+msgstr "v0.4.0.dev240801"
 
 #: ../../../RELEASE.md:19
 msgid "[Bugfix] Fix MacOS and arm build."
-msgstr ""
+msgstr "[Bugfix] 修复MacOS和arm构建问题。"
 
 #: ../../../RELEASE.md:21
 msgid "v0.4.0.dev240731"
-msgstr ""
+msgstr "v0.4.0.dev240731"
 
 #: ../../../RELEASE.md:23
 msgid "[Improvement] Port APSI again."
-msgstr ""
+msgstr "[Improvement] 重新移植APSI。"
 
 #: ../../../RELEASE.md:24
 msgid "[Feature] Add Bucketized APSI."
-msgstr ""
+msgstr "[Feature] 添加分桶APSI。"
 
 #: ../../../RELEASE.md:25
 msgid "[API] Remove SealPIR."
-msgstr ""
+msgstr "[API] 移除SealPIR。"
 
 #: ../../../RELEASE.md:27
 msgid "v0.4.0.dev240521"
-msgstr ""
+msgstr "v0.4.0.dev240521"
 
 #: ../../../RELEASE.md:29
 msgid "[API] remove BC22 protocol"
-msgstr ""
+msgstr "[API] 移除BC22协议"
 
 #: ../../../RELEASE.md:31
 msgid "v0.4.0.dev240517"
-msgstr ""
+msgstr "v0.4.0.dev240517"
 
 #: ../../../RELEASE.md:33
 msgid "[Improvement] upgrade yacl to 0.4.5b0."
-msgstr ""
+msgstr "[Improvement] 升级yacl至0.4.5b0版本。"
 
 #: ../../../RELEASE.md:35
 msgid "v0.4.0.dev240514"
-msgstr ""
+msgstr "v0.4.0.dev240514"
 
 #: ../../../RELEASE.md:37
 msgid "[API] add entrypoint for docker file."
-msgstr ""
+msgstr "[API] 为docker文件添加入口点。"
 
 #: ../../../RELEASE.md:38
 msgid "[API] allow passing config JSON directly to main."
-msgstr ""
+msgstr "[API] 允许直接向main传递配置JSON。"
 
 #: ../../../RELEASE.md:39
 msgid "[Bugfix] fix ic mode."
-msgstr ""
+msgstr "[Bugfix] 修复ic模式。"
 
 #: ../../../RELEASE.md:40
 msgid "[Bugfix] fix RR22, SealPIR and APSI."
-msgstr ""
+msgstr "[Bugfix] 修复RR22、SealPIR和APSI。"
 
 #: ../../../RELEASE.md:42
 msgid "v0.4.0.dev240401"
-msgstr ""
+msgstr "v0.4.0.dev240401"
 
 #: ../../../RELEASE.md:44
 msgid "[Improvement] upgrade download uri of xz."
-msgstr ""
+msgstr "[Improvement] 更新xz的下载链接。"
 
 #: ../../../RELEASE.md:46
 msgid "v0.4.0.dev240329"
-msgstr ""
+msgstr "v0.4.0.dev240329"
 
 #: ../../../RELEASE.md:48
 msgid "[Improvement] upgrade yacl to 0.4.4b3."
-msgstr ""
+msgstr "[Improvement] 升级yacl至0.4.4b3版本。"
 
 #: ../../../RELEASE.md:50
 msgid "v0.3.0beta"
-msgstr ""
+msgstr "v0.3.0beta"
 
 #: ../../../RELEASE.md:52
 msgid "[Improvement] add uuid in system temp folder."
-msgstr ""
+msgstr "[Improvement] 在系统临时文件夹中添加uuid。"
 
 #: ../../../RELEASE.md:53
 msgid "[Improvement] use arrow csv reader in pir."
-msgstr ""
+msgstr "[Improvement] 在pir中使用arrow csv读取器。"
 
 #: ../../../RELEASE.md:54
 msgid "[Bugfix] fix typo in psi config check."
-msgstr ""
+msgstr "[Bugfix] 修复psi配置检查中的拼写错误。"
 
 #: ../../../RELEASE.md:56
 msgid "v0.3.0.dev240304"
-msgstr ""
+msgstr "v0.3.0.dev240304"
 
 #: ../../../RELEASE.md:58
 msgid "[API] expose ic_mode in RunLegacyPsi api"
-msgstr ""
+msgstr "[API] 在RunLegacyPsi API中暴露ic_mode。"
 
 #: ../../../RELEASE.md:60
 msgid "v0.3.0.dev240222"
-msgstr ""
+msgstr "0.3.0.dev240222"
 
 #: ../../../RELEASE.md:62
 msgid "[API] expose PIR API."
-msgstr ""
+msgstr "[API] 暴露PIR API。"
 
 #: ../../../RELEASE.md:64
 msgid "v0.3.0.dev240219"
-msgstr ""
+msgstr "v0.3.0.dev240219"
 
 #: ../../../RELEASE.md:66
 msgid "[Feature] add ecdh logger for debug purposes."
-msgstr ""
+msgstr "[Feature] 添加用于调试的ecdh日志记录器。"
 
 #: ../../../RELEASE.md:67
 msgid "[API] modify repo structure."
-msgstr ""
+msgstr "[API] 修改仓库结构。"
 
 #: ../../../RELEASE.md:69
 msgid "v0.2.0.dev240123"
-msgstr ""
+msgstr "v0.2.0.dev240123"
 
 #: ../../../RELEASE.md:71
 msgid "[Feature] add RFC9380 25519 elligator2 hash_to_curve."
-msgstr ""
+msgstr "[Feature] 添加RFC9380 25519 elligator2 hash_to_curve。"
 
 #: ../../../RELEASE.md:72
 msgid "[Feature] add malicious vole psi."
-msgstr ""
+msgstr "[Feature] 添加恶意vole psi。"
 
 #: ../../../RELEASE.md:73
 msgid "[API] expose ub psi in PSI v2 API."
-msgstr ""
+msgstr "[API] 在PSI v2 API中暴露ub psi。"
 
 #: ../../../RELEASE.md:74
 msgid "[Improvement] Modify buffer size in sort cmd."
-msgstr ""
+msgstr "[Improvement] 修改排序命令中的缓冲区大小。"
 
 #: ../../../RELEASE.md:75
 msgid "[Bugfix] Fix SimpleShuffledBatchProvider."
-msgstr ""
+msgstr "[Bugfix] 修复SimpleShuffledBatchProvider。"
 
 #: ../../../RELEASE.md:76
 msgid "[Bugfix] Fix flakiness in psi_test."
-msgstr ""
+msgstr "[Bugfix] 修复psi_test中的不稳定性。"
 
 #: ../../../RELEASE.md:77
 msgid "[Bugfix] Fix race condition in rr22."
-msgstr ""
+msgstr "[Bugfix] 修复rr22中的竞态条件。"
 
 #: ../../../RELEASE.md:79
 msgid "v0.2.0.dev231228"
-msgstr ""
+msgstr "v0.2.0.dev231228"
 
 #: ../../../RELEASE.md:81
 msgid "[Bugfix] Fix RR22 race condition."
-msgstr ""
+msgstr "[Bugfix] 修复RR22竞态条件。"
 
 #: ../../../RELEASE.md:82
 msgid "[Improvement] modify sort buffer size."
-msgstr ""
+msgstr "[Improvement] 修改排序缓冲区大小。"
 
 #: ../../../RELEASE.md:84
 msgid "v0.2.0.dev231221"
-msgstr ""
+msgstr "v0.2.0.dev231221"
 
 #: ../../../RELEASE.md:86
 msgid "[API] Rename check_duplicates to skip_duplicates_check."
-msgstr ""
+msgstr "[API] 将check_duplicates重命名为skip_duplicates_check。"
 
 #: ../../../RELEASE.md:87
 msgid "[API] Rename sort_output to disable_alignment."
-msgstr ""
+msgstr "[API] 将sort_output重命名为disable_alignment。"
 
 #: ../../../RELEASE.md:88
-msgid ""
-"[Feature] Support left join, right join and full join. The behavior of "
-"difference is modified."
-msgstr ""
+msgid "[Feature] Support left join, right join and full join. The behavior of difference is modified."
+msgstr "[Feature] 支持左连接、右连接和全连接。修改了求差集的功能。"
 
 #: ../../../RELEASE.md:89
 msgid "[Feature] Skip duplicate key check if recovery checkpoint exists."
-msgstr ""
+msgstr "[Feature] 如果存在恢复检查点则跳过重复键检查。"
 
 #: ../../../RELEASE.md:90
 msgid "[Bugfix] Fix duplicate key check."
-msgstr ""
+msgstr "[Bugfix] 修复重复键检查。"
 
 #: ../../../RELEASE.md:91
 msgid "[Bugfix] Fix SyncWait."
-msgstr ""
+msgstr "[Bugfix] 修复SyncWait。"
 
 #: ../../../RELEASE.md:93
 msgid "v0.1.0beta"
-msgstr ""
+msgstr "v0.1.0beta"
 
 #: ../../../RELEASE.md:95
 msgid "[API] Add PSI v2 API."
-msgstr ""
+msgstr "[API] 添加PSI v2 API。"
 
 #: ../../../RELEASE.md:96
 msgid "[Feature] Add RR22 protocol."
-msgstr ""
+msgstr "[Feature] 添加RR22协议。"
 
 #: ../../../RELEASE.md:97
 msgid "[Feature] Support recovery from failure in v2 API."
-msgstr ""
+msgstr "[Feature] 在v2 API中支持故障恢复。"
 
 #: ../../../RELEASE.md:98
 msgid "[Feature] Support inner join in v2 API."
-msgstr ""
+msgstr "[Feature] 在v2 API中支持内连接。"
 
 #: ../../../RELEASE.md:99
 msgid "[Feature] Migrate ECDH, KKRT, RR22 protocol in v2 API."
-msgstr ""
+msgstr "[Feature] 在v2 API中迁移ECDH、KKRT、RR22协议。"
 

@@ -19,41 +19,40 @@ msgstr ""
 
 #: ../../user_guide/apsi_benchmark.md:1
 msgid "APSI Benchmark"
-msgstr ""
+msgstr "APSI 基准测试"
 
 #: ../../user_guide/apsi_benchmark.md:2
 msgid "This document introduces the APSI Benchmark."
-msgstr "本文档介绍APSI协议的benchmark"
+msgstr "本文档介绍APSI协议的基准测试"
 
 #: ../../user_guide/apsi_benchmark.md:4
 msgid "Building from source"
-msgstr "源码构建"
+msgstr "从源码进行构建"
 
 #: ../../user_guide/apsi_benchmark.md:11
 msgid ""
 "If the build is successful, you will find an executable file named `main`"
 " in the `bazel-bin/psi` directory. We will use `./main` file, combined "
-"with a config file, to run APSI protocol. For exampple:"
-msgstr ""
-"如果构建成功，在 `bazel-bin/psi` 目录能找到 `./main` 的可执行文件。"
-"传入配置文件名做参数，即可运行APSI协议。如下："
+"with a config file, to run APSI protocol. For example:"
+msgstr "如果构建成功，你将在 bazel-bin/psi 目录下找到一个名为 main 的可执行文件。"
+"我们将使用 ./main 文件，并结合一个配置文件来运行APSI协议。例如："
 
 
 #: ../../user_guide/apsi_benchmark.md:17
 msgid "Generate Data"
-msgstr "生成测试数据"
+msgstr "生成数据"
 
 #: ../../user_guide/apsi_benchmark.md:18
 msgid ""
 "To measure the performance of APSI protocols under different data scales,"
 " we need to generate dummy data."
 msgstr ""
-"要测量APSI在不同数据规模下的性能，首先需要生成一些测试数据。"
+"为了衡量APSI协议在不同数据规模下的性能，我们需要生成模拟数据。"
 
 #: ../../user_guide/apsi_benchmark.md:29
 msgid "Next, we need to copy the data and parameter files into /tmp:"
 msgstr ""
-"然后我们需要拷贝对一个的参数文件到/tmp目录。"
+"接下来，我们需要将数据文件和参数文件复制到 `/tmp` 目录中："
 
 #: ../../user_guide/apsi_benchmark.md:41
 msgid ""
@@ -62,9 +61,9 @@ msgid ""
 "length. Here, we directly use a set of default parameters provided by "
 "APSI, such as `1M-1-32.json`."
 msgstr ""
-"请注意，我们需要找一个和数据规模匹配的参数才能达到APSI的最佳性能。"
-"这里我们直接选APSI已经提供的参数文件 `1M-1-32.json` ，它的含义是sender方数据规模是1M条，"
-"query方的查询是一条，label的大小是32Byte。"
+"请注意，为了实现APSI的最佳性能，"
+"我们需要针对相应的数据规模和标签长度找到一组合适的参数，"
+"在这里，我们直接使用APSI提供的一组默认参数，例如 1M-1-32.json。"
 
 #: ../../user_guide/apsi_benchmark.md:45
 msgid "Prepare config file"
@@ -73,7 +72,7 @@ msgstr "准备配置文件"
 
 #: ../../user_guide/apsi_benchmark.md:46
 msgid "We use the config file to specify input data and parameter files."
-msgstr "我们使用配置文件来指定输入数据和参数文件。"
+msgstr "我们使用配置文件来指定输入数据文件和参数文件。"
 
 #: ../../user_guide/apsi_benchmark.md:48
 msgid "apsi_sender_setup.json"
@@ -83,7 +82,7 @@ msgstr ""
 msgid ""
 "Note that for different data scales, we need to use different "
 "`params_file`."
-msgstr "对不同的数据规模，选择合适的 `params_file` 。"
+msgstr "请注意，对于不同的数据规模，我们需要使用不同的 `params_file`。"
 
 #: ../../user_guide/apsi_benchmark.md:64
 msgid "apsi_sender_online.json"
@@ -102,8 +101,7 @@ msgid ""
 "To measure the APSI benchmark under different machine and network "
 "configurations, we use two Docker containers to act as sender and "
 "receiver, respectively."
-msgstr ""
-"要测量APSI在不同的机器和网络配置下的性能，我们使用两个Docker容器来作为sender和receiver。"
+msgstr "为了衡量APSI基准测试在不同机器和网络配置下的性能，我们使用两个Docker 容器分别充当发送方和接收方。"
 
 #: ../../user_guide/apsi_benchmark.md:119
 msgid "**apsi_sender（32C64G）**"
@@ -112,7 +110,7 @@ msgstr ""
 #: ../../user_guide/apsi_benchmark.md:137
 #: ../../user_guide/apsi_benchmark.md:163
 msgid "Then run:"
-msgstr "然后运行"
+msgstr "然后运行:"
 
 #: ../../user_guide/apsi_benchmark.md:146
 msgid "apsi_receiver（16C32G）"
@@ -120,7 +118,7 @@ msgstr ""
 
 #: ../../user_guide/apsi_benchmark.md:169
 msgid "Limit bandwidth and latency"
-msgstr "带宽和延时"
+msgstr "限制带宽和延迟"
 
 #: ../../user_guide/apsi_benchmark.md:180
 msgid "Benchmark"
@@ -132,7 +130,8 @@ msgid ""
 "note that we do not record the time taken during the server-side setup "
 "phase, as this process can always be completed offline."
 msgstr ""
-"注意我们不记录Setup阶段的时间，因为一般这个步骤是离线完成的。"
+"在此我们展示按照上述方法测量得到的APSI基准测试结果。"
+"请注意，我们没有记录服务器端设置阶段所花费的时间，因为这个过程总是可以离线完成。"
 
 #: ../../user_guide/apsi_benchmark.md:183
 msgid ""
@@ -142,9 +141,9 @@ msgid ""
 "finding a corresponding set of parameters to achieve optimal performance."
 " Therefore, the data settings here are intended to provide you with a "
 "rough reference."
-msgstr ""
-"而且，我们这里只是给出一个特定数据集上的性能数据。因为APSI的性能影响因素众多，不同的数据规模和不同的label长度"
-"都需要搭配不同的数据文件来获得最佳的性能。因此，我们这里只是给出一个参考。"
+msgstr "此外，这里仅展示了在特定数据设置下的少量性能数据。"
+"这是因为对APSI进行性能测试相当复杂；不同的数据规模和标签长度需要找到一组合适的相应参数，以实现最佳性能。"
+"因此，这里的数据设置旨在为您提供一个大致的参考。"
 
 #: ../../user_guide/apsi_benchmark.md:185
 msgid ""
@@ -153,9 +152,8 @@ msgid ""
 "results. Finally, to further optimize performance, a good understanding "
 "of the APSI algorithm principles is necessary. If you have any further "
 "inquiries related to PIR, please feel free to contact us."
-msgstr ""
-"如果你想测量不同数据规模和label长度下的性能，可以根据上述步骤测量。如果要得到最近的性能，"
-"可能需要对特定的场景调整对应的参数。如果需要更进一步的需求，可以联系我们。"
+msgstr "如果您希望测量特定数据规模和标签长度下的APSI性能，您可以按照上述步骤来复现结果。"
+"最后，为了进一步优化性能，深入理解APSI算法原理是很有必要的。如果您有任何与私密信息检索（PIR）相关的进一步疑问，请随时与我们联系。"
 
 #: ../../user_guide/apsi_benchmark.md:187
 msgid "`ms` represents millisecond."
@@ -170,5 +168,6 @@ msgid ""
 " also offer a bucket mode. However, this mode requires consideration of "
 "more parameters, so it is not displayed in this benchmark."
 msgstr ""
-"以上的数据并不代表APSI的最佳性能。APSI的查询性能在特定的场景下和使用的参数高度相关。"
-"并且对于超大数据集，我们提供分桶模式。"
+"请注意，上述数据并不代表APSI的最优性能。在固定的数据规模条件下，APSI 的查询性能与相应的参数高度相关。"
+"此外，如果你想支持更大的数据集，比如十亿条数据条目，我们还提供了一种分桶模式。"
+"不过，这种模式需要考虑更多参数，因此在本次基准测试中未展示。"

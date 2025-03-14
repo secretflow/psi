@@ -1,0 +1,17 @@
+{
+  "dk_pir_sender_config": {
+    "mode": "MODE_OFFLINE",
+    "source_file": "/temp/duplicate_key_db.csv",
+    "params_file": "/temp/100-1-300.json",
+    "tmp_folder": "/temp/tmp/",
+    "value_sdb_out_file": "/temp/tmp/value_sdb_out.db",
+    "count_sdb_out_file": "/temp/tmp/count_sdb_out.db",
+    "secret_key_file": "/temp/tmp/phe_secret_key.key",
+    "key": "id",
+    "labels": [
+      "label1", 
+      "label2", 
+      "label3"
+    ]
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "dk_pir_sender_config": {
+    "mode": "MODE_ONLINE",
+    "threads": 1,
+    "tmp_folder": "/temp/tmp/",
+    "value_sdb_out_file": "/temp/tmp/value_sdb_out.db",
+    "count_sdb_out_file": "/temp/tmp/count_sdb_out.db",
+    "secret_key_file": "/temp/tmp/phe_secret_key.key",
+    "result_file": "/temp/tmp/row_count.csv"
+  },
+  "link_config": {
+    "parties": [
+      {
+        "id": "sender",
+        "host": "127.0.0.1:5300"
+      },
+      {
+        "id": "receiver",
+        "host": "127.0.0.1:5400"
+      }
+    ]
+  },
+  "self_link_party": "sender"
+}

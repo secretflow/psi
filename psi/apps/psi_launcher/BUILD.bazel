@@ -43,6 +43,7 @@ psi_cc_library(
         "//psi/legacy:bucket_psi",
         "//psi/proto:pir_cc_proto",
         "//psi/wrapper/apsi/cli:entry",
+        "//psi/algorithm/dkpir:entry",
         "@boost.algorithm//:boost.algorithm",
     ],
 )

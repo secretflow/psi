@@ -1,0 +1,158 @@
+# Copyright 2025
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+load("@rules_proto//proto:defs.bzl", "proto_library")
+load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library", "psi_cc_test")
+
+package(default_visibility = ["//visibility:public"])
+
+psi_cc_library(
+  name = "entry",
+  srcs = ["entry.cc"],
+  hdrs = ["entry.h"],
+  deps = [
+    ":common",
+    ":sender",
+    ":receiver",
+    ":sender_cnt_db",
+    ":sender_dispatcher",
+    "//psi/utils:resource_manager",
+    "//psi/wrapper/apsi/utils:sender_db",
+    "//psi/utils:csv_converter",
+  ]
+)
+
+psi_cc_library(
+  name = "sender",
+  srcs = ["sender.cc"],
+  hdrs = ["sender.h"],
+  deps = [
+    ":query",
+    "//psi/wrapper/apsi:sender",
+    "//psi/wrapper/apsi:yacl_channel",
+  ]
+)
+
+psi_cc_library(
+  name = "receiver",
+  srcs = ["receiver.cc"],
+  hdrs = ["receiver.h"],
+  deps = [
+    ":oprf_receiver",
+    "//psi/wrapper/apsi:receiver",
+    "//psi/wrapper/apsi:yacl_channel",
+    "//psi/algorithm/dkpir/phe:phe",
+  ]
+)
+
+psi_cc_library(
+  name = "common",
+  srcs = ["common.cc"],
+  hdrs = ["common.h"],
+  deps = [
+    ":secret_key_cc_proto",
+    "//psi/algorithm/dkpir/phe:phe",
+    "//psi/wrapper/apsi/utils:common",
+    "//psi/wrapper/apsi/cli:common_utils",
+    "//psi/wrapper/apsi/utils:sender_db",
+    "//psi/wrapper/apsi:yacl_channel",
+    "@yacl//yacl/math/mpint:mpint",
+  ],
+)
+
+psi_cc_library(
+  name = "sender_dispatcher",
+  srcs = ["sender_dispatcher.cc"],
+  hdrs = ["sender_dispatcher.h"],
+  defines = [
+      "__LINUX__",
+  ] + select({
+      "@bazel_tools//src/conditions:linux_x86_64": [
+          "_AMD64_",
+          "_ASM_",
+      ],
+      "@bazel_tools//src/conditions:darwin_arm64": [
+          "_ARM64_",
+      ],
+      "//conditions:default": [
+          "_AMD64_",
+      ],
+  }),
+  deps = [
+    ":common",
+    ":sender",
+    "@apsi",
+    "@yacl//yacl/crypto/rand:rand",
+    "@yacl//yacl/crypto/ecc/FourQlib",
+    "//psi/algorithm/dkpir/phe:phe",
+    "//psi/wrapper/apsi:yacl_channel",
+  ]
+)
+
+psi_cc_library(
+  name = "query",
+  hdrs = ["query.h"],
+  deps = [
+    "@apsi",
+  ]
+)
+
+psi_cc_library(
+  name = "oprf_receiver",
+  srcs = ["oprf_receiver.cc"],
+  hdrs = ["oprf_receiver.h"],
+  deps = [
+    "@apsi",
+    "@seal",
+  ]
+)
+
+proto_library(
+    name = "secret_key_proto",
+    srcs = ["secret_key.proto"],
+)
+
+cc_proto_library(
+    name = "secret_key_cc_proto",
+    deps = [":secret_key_proto"],
+)
+
+psi_cc_library(
+  name = "sender_cnt_db",
+  srcs = ["sender_cnt_db.cc"],
+  hdrs = ["sender_cnt_db.h"],
+  defines = [
+      "__LINUX__",
+  ] + select({
+      "@bazel_tools//src/conditions:linux_x86_64": [
+          "_AMD64_",
+          "_ASM_",
+      ],
+      "@bazel_tools//src/conditions:darwin_arm64": [
+          "_ARM64_",
+      ],
+      "//conditions:default": [
+          "_AMD64_",
+      ],
+  }),
+  deps = [
+    ":common",
+    "//psi/wrapper/apsi/utils:common",
+    "//psi/wrapper/apsi/utils:sender_db",
+    "//psi/algorithm/dkpir/phe:phe",
+    "@yacl//yacl/crypto/ecc/FourQlib",
+    "@yacl//yacl/crypto/rand:rand",
+    "@yacl//yacl/utils:parallel",
+  ]
+)

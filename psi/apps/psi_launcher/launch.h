@@ -45,4 +45,10 @@ PirResultReport RunPir(const ApsiReceiverConfig& apsi_receiver_config,
 PirResultReport RunPir(const ApsiSenderConfig& apsi_sender_config,
                        const std::shared_ptr<yacl::link::Context>& lctx);
 
+PirResultReport RunDkPir(const DkPirReceiverConfig& dk_pir_receiver_config,
+                         const std::shared_ptr<yacl::link::Context>& lctx);
+
+PirResultReport RunDkPir(const DkPirSenderConfig& dk_pir_sender_config,
+                         const std::shared_ptr<yacl::link::Context>& lctx);
+
 }  // namespace psi

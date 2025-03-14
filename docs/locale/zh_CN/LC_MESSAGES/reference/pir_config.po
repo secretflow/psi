@@ -19,157 +19,157 @@ msgstr ""
 
 #: ../../reference/pir_config.md:1
 msgid "PIR Configuration"
-msgstr ""
+msgstr "PIR 配置"
 
 #: ../../reference/pir_config.md:3
 msgid "Table of Contents"
-msgstr ""
+msgstr "目录"
 
 #: ../../reference/pir_config.md:7 ../../reference/pir_config.md:21
 msgid "Messages"
-msgstr ""
+msgstr "消息"
 
 #: ../../reference/pir_config.md:8
 msgid "[ApsiReceiverConfig](#apsireceiverconfig)"
-msgstr ""
+msgstr "[Apsi接收方配置](#apsireceiverconfig)"
 
 #: ../../reference/pir_config.md:9
 msgid "[ApsiSenderConfig](#apsisenderconfig)"
-msgstr ""
+msgstr "[Apsi发送方配置](#apsisenderconfig)"
 
 #: ../../reference/pir_config.md:10
 msgid "[PirResultReport](#pirresultreport)"
-msgstr ""
+msgstr "[PIR 结果报告](#pirresultreport)"
 
 #: ../../reference/pir_config.md:15
 msgid "[Scalar Value Types](#scalar-value-types)"
-msgstr ""
+msgstr "[标量值类型](#scalar-value-types)"
 
 #: ../../reference/pir_config.md:24
 msgid "ApsiReceiverConfig"
-msgstr ""
+msgstr "Apsi接收方配置"
 
 #: ../../reference/pir_config.md
 msgid "Field"
-msgstr ""
+msgstr "字段"
 
 #: ../../reference/pir_config.md
 msgid "Type"
-msgstr ""
+msgstr "类型"
 
 #: ../../reference/pir_config.md
 msgid "Description"
-msgstr ""
+msgstr "描述"
 
 #: ../../reference/pir_config.md
 msgid "threads"
-msgstr ""
+msgstr "threads"
 
 #: ../../reference/pir_config.md
 msgid "[ uint32](#uint32)"
-msgstr ""
+msgstr "[ uint32](#uint32)"
 
 #: ../../reference/pir_config.md
 msgid "Number of threads to use"
-msgstr ""
+msgstr "使用的线程数"
 
 #: ../../reference/pir_config.md
 msgid "log_file"
-msgstr ""
+msgstr "log_file"
 
 #: ../../reference/pir_config.md
 msgid "[ string](#string)"
-msgstr ""
+msgstr "[ string](#string)"
 
 #: ../../reference/pir_config.md
 msgid "Log file path. For APSI only."
-msgstr ""
+msgstr "日志文件路径。仅适用于 APSI。"
 
 #: ../../reference/pir_config.md
 msgid "silent"
-msgstr ""
+msgstr "silent"
 
 #: ../../reference/pir_config.md
 msgid "[ bool](#bool)"
-msgstr ""
+msgstr "[ bool](#bool)"
 
 #: ../../reference/pir_config.md
 msgid "Do not write output to console. For APSI only."
-msgstr ""
+msgstr "不将输出写入控制台。仅适用于 APSI。"
 
 #: ../../reference/pir_config.md
 msgid "log_level"
-msgstr ""
+msgstr "log_level"
 
 #: ../../reference/pir_config.md
 msgid ""
 "One of 'all', 'debug', 'info' (default), 'warning', 'error', 'off'. For "
 "APSI only."
-msgstr ""
+msgstr "可选值为 'all', 'debug', 'info'（默认）, 'warning', 'error', 'off'。仅适用于 APSI。"
 
 #: ../../reference/pir_config.md
 msgid "query_file"
-msgstr ""
+msgstr "query_file"
 
 #: ../../reference/pir_config.md
 msgid ""
 "Path to a text file containing query data (one per line). Header is not "
 "needed."
-msgstr ""
+msgstr "包含查询数据的文本文件路径（每行一个）。不需要标题。"
 
 #: ../../reference/pir_config.md
 msgid "output_file"
-msgstr ""
+msgstr "output_file"
 
 #: ../../reference/pir_config.md
 msgid "Path to a file where intersection result will be written."
-msgstr ""
+msgstr "交集结果将写入的文件路径。"
 
 #: ../../reference/pir_config.md
 msgid "params_file"
-msgstr ""
+msgstr "params_file"
 
 #: ../../reference/pir_config.md
 msgid ""
 "Path to a JSON file describing the parameters to be used by the sender. "
 "If not set, receiver will ask sender, which results in additional "
 "communication."
-msgstr ""
+msgstr "描述发送方使用的参数的 JSON 文件路径。如果未设置，接收方将询问发送方，这会导致额外的通信。"
 
 #: ../../reference/pir_config.md
 msgid "experimental_enable_bucketize"
-msgstr ""
+msgstr "experimental_enable_bucketize"
 
 #: ../../reference/pir_config.md
 msgid "Must be same as sender config."
-msgstr ""
+msgstr "必须与发送方配置相同。"
 
 #: ../../reference/pir_config.md
 msgid "experimental_bucket_cnt"
-msgstr ""
+msgstr "experimental_bucket_cnt"
 
 #: ../../reference/pir_config.md
 msgid "query_batch_size"
-msgstr ""
+msgstr "query_batch_size"
 
 #: ../../reference/pir_config.md
 msgid "The number of query in a batch. default 1."
-msgstr ""
+msgstr "每批次的查询数量。默认为 1。"
 
 #: ../../reference/pir_config.md:44
 msgid "ApsiSenderConfig"
-msgstr ""
+msgstr "Apsi发送方配置"
 
 #: ../../reference/pir_config.md:45
 msgid ""
 "NOTE(junfeng): We provide a config identical to original APSI CLI. Please"
 " check https://github.com/microsoft/APSI?tab=readme-ov-file#command-line-"
 "interface-cli for details."
-msgstr ""
+msgstr "注意（junfeng）：我们提供了一个与原始 APSI CLI 相同的配置。详情请查看 https://github.com/microsoft/APSI?tab=readme-ov-file#command-line-interface-cli。"
 
 #: ../../reference/pir_config.md
 msgid "db_file"
-msgstr ""
+msgstr "db_file"
 
 #: ../../reference/pir_config.md
 msgid ""
@@ -179,325 +179,325 @@ msgid ""
 "will proceed to attempt to read it as a CSV file For CSV File: 1. the "
 "first col is processed as item while the second col as label. OTHER COLS "
 "ARE IGNORED. 2. NO HEADERS ARE ALLOWED."
-msgstr ""
+msgstr "描述发送方数据集的 CSV 文件路径（每行一个项目-标签对）或包含序列化 SenderDB 的文件；CLI 将首先尝试将数据加载为序列化的 SenderDB，如果失败，则尝试将其作为 CSV 文件读取。对于 CSV 文件：1. 第一列作为项目处理，第二列作为标签。其他列将被忽略。2. 不允许有标题。"
 
 #: ../../reference/pir_config.md
 msgid ""
 "Path to a JSON file describing the parameters to be used by the sender. "
 "Not required if db_file points to a serialized SenderDB."
-msgstr ""
+msgstr "描述发送方使用的参数的 JSON 文件路径。如果 db_file 指向序列化的 SenderDB，则不需要。"
 
 #: ../../reference/pir_config.md
 msgid "sdb_out_file"
-msgstr ""
+msgstr "sdb_out_file"
 
 #: ../../reference/pir_config.md
 msgid ""
 "Save the SenderDB in the given file. Required if gen_db_only is set true."
 " Use experimental_bucket_folder instead if you turn "
 "experimental_enable_bucketize on."
-msgstr ""
+msgstr "将 SenderDB 保存在给定文件中。如果 gen_db_only 设置为 true，则必须提供。如果启用了 experimental_enable_bucketize，请改用 experimental_bucket_folder。"
 
 #: ../../reference/pir_config.md
 msgid "nonce_byte_count"
-msgstr ""
+msgstr "nonce_byte_count"
 
 #: ../../reference/pir_config.md
 msgid "Number of bytes used for the nonce in labeled mode (default is 16)"
-msgstr ""
+msgstr "在标签模式下用于随机数的字节数（默认为 16）"
 
 #: ../../reference/pir_config.md
 msgid "compress"
-msgstr ""
+msgstr "compress"
 
 #: ../../reference/pir_config.md
 msgid ""
 "Whether to compress the SenderDB in memory; this will make the memory "
 "footprint smaller at the cost of increased computation."
-msgstr ""
+msgstr "是否在内存中压缩 SenderDB；这将减少内存占用，但会增加计算成本。"
 
 #: ../../reference/pir_config.md
 msgid "save_db_only"
-msgstr ""
+msgstr "save_db_only"
 
 #: ../../reference/pir_config.md
 msgid "Whether to save sender db only."
-msgstr ""
+msgstr "是否仅保存发送方数据库。"
 
 #: ../../reference/pir_config.md
 msgid ""
 "[experimental] Whether to split data in buckets and Each bucket would be "
 "a seperate SenderDB. If set, experimental_bucket_folder must be a valid "
 "folder."
-msgstr ""
+msgstr "[实验性] 是否将数据分桶，每个桶将是一个独立的 SenderDB。如果设置，experimental_bucket_folder 必须是一个有效的文件夹。"
 
 #: ../../reference/pir_config.md
 msgid "[experimental] The number of bucket to fit data."
-msgstr ""
+msgstr "[实验性] 适合数据的分桶数量。"
 
 #: ../../reference/pir_config.md
 msgid "experimental_bucket_folder"
-msgstr ""
+msgstr "experimental_bucket_folder"
 
 #: ../../reference/pir_config.md
 msgid "[experimental] Folder to save bucketized small csv files and db files."
-msgstr ""
+msgstr "[实验性] 保存分桶后的小型 CSV 文件和数据库文件的文件夹。"
 
 #: ../../reference/pir_config.md
 msgid "experimental_db_generating_process_num"
-msgstr ""
+msgstr "experimental_db_generating_process_num"
 
 #: ../../reference/pir_config.md
 msgid "[ int32](#int32)"
-msgstr ""
+msgstr "[ int32](#int32)"
 
 #: ../../reference/pir_config.md
 msgid "[experimental] The number of processes to use for generating db."
-msgstr ""
+msgstr "[实验性] 用于生成数据库的进程数。"
 
 #: ../../reference/pir_config.md
 msgid "source_file"
-msgstr ""
+msgstr "source_file"
 
 #: ../../reference/pir_config.md
 msgid "Source file used to genenerate sender db. Currently only support csv file."
-msgstr ""
+msgstr "用于生成发送方数据库的源文件。目前仅支持 CSV 文件。"
 
 #: ../../reference/pir_config.md
 msgid "experimental_bucket_group_cnt"
-msgstr ""
+msgstr "experimental_bucket_group_cnt"
 
 #: ../../reference/pir_config.md
 msgid ""
 "[experimental] The number of group of bucket, each group has a db_file, "
 "default 1024."
-msgstr ""
+msgstr "[实验性] 分桶组的数量，每组有一个 db_file，默认为 1024。"
 
 #: ../../reference/pir_config.md:73
 msgid "PirResultReport"
-msgstr ""
+msgstr "PIR 结果报告"
 
 #: ../../reference/pir_config.md:74
 msgid "The report of pir task."
-msgstr ""
+msgstr "PIR 任务的报告。"
 
 #: ../../reference/pir_config.md
 msgid "match_cnt"
-msgstr ""
+msgstr "match_cnt"
 
 #: ../../reference/pir_config.md
 msgid "[ int64](#int64)"
-msgstr ""
+msgstr "[ int64](#int64)"
 
 #: ../../reference/pir_config.md
 msgid "none"
-msgstr ""
+msgstr "无"
 
 #: ../../reference/pir_config.md:84
 msgid "Enums"
-msgstr ""
+msgstr "枚举"
 
 #: ../../reference/pir_config.md:88
 msgid "Scalar Value Types"
-msgstr ""
+msgstr "标量值类型"
 
 #: ../../reference/pir_config.md
 msgid ".proto Type"
-msgstr ""
+msgstr ".proto 类型"
 
 #: ../../reference/pir_config.md
 msgid "Notes"
-msgstr ""
+msgstr "备注"
 
 #: ../../reference/pir_config.md
 msgid "C++ Type"
-msgstr ""
+msgstr "C++ 类型"
 
 #: ../../reference/pir_config.md
 msgid "Java Type"
-msgstr ""
+msgstr "Java 类型"
 
 #: ../../reference/pir_config.md
 msgid "Python Type"
-msgstr ""
+msgstr "Python 类型"
 
 #: ../../reference/pir_config.md
 msgid "<div><h4 id=\"double\" /></div><a name=\"double\" /> double"
-msgstr ""
+msgstr "<div><h4 id=\"double\" /></div><a name=\"double\" /> double"
 
 #: ../../reference/pir_config.md
 msgid "double"
-msgstr ""
+msgstr "double"
 
 #: ../../reference/pir_config.md
 msgid "float"
-msgstr ""
+msgstr "float"
 
 #: ../../reference/pir_config.md
 msgid "<div><h4 id=\"float\" /></div><a name=\"float\" /> float"
-msgstr ""
+msgstr "<div><h4 id=\"float\" /></div><a name=\"float\" /> float"
 
 #: ../../reference/pir_config.md
 msgid "<div><h4 id=\"int32\" /></div><a name=\"int32\" /> int32"
-msgstr ""
+msgstr "<div><h4 id=\"int32\" /></div><a name=\"int32\" /> int32"
 
 #: ../../reference/pir_config.md
 msgid ""
 "Uses variable-length encoding. Inefficient for encoding negative numbers "
 "– if your field is likely to have negative values, use sint32 instead."
-msgstr ""
+msgstr "使用变长编码。对负数编码效率低——如果字段可能有负值，请改用 sint32。"
 
 #: ../../reference/pir_config.md
 msgid "int32"
-msgstr ""
+msgstr "int32"
 
 #: ../../reference/pir_config.md
 msgid "int"
-msgstr ""
+msgstr "int"
 
 #: ../../reference/pir_config.md
 msgid "<div><h4 id=\"int64\" /></div><a name=\"int64\" /> int64"
-msgstr ""
+msgstr "<div><h4 id=\"int64\" /></div><a name=\"int64\" /> int64"
 
 #: ../../reference/pir_config.md
 msgid ""
 "Uses variable-length encoding. Inefficient for encoding negative numbers "
 "– if your field is likely to have negative values, use sint64 instead."
-msgstr ""
+msgstr "使用变长编码。对负数编码效率低——如果字段可能有负值，请改用 sint64。"
 
 #: ../../reference/pir_config.md
 msgid "int64"
-msgstr ""
+msgstr "int64"
 
 #: ../../reference/pir_config.md
 msgid "long"
-msgstr ""
+msgstr "long"
 
 #: ../../reference/pir_config.md
 msgid "int/long"
-msgstr ""
+msgstr "int/long"
 
 #: ../../reference/pir_config.md
 msgid "<div><h4 id=\"uint32\" /></div><a name=\"uint32\" /> uint32"
-msgstr ""
+msgstr "<div><h4 id=\"uint32\" /></div><a name=\"uint32\" /> uint32"
 
 #: ../../reference/pir_config.md
 msgid "Uses variable-length encoding."
-msgstr ""
+msgstr "使用变长编码。"
 
 #: ../../reference/pir_config.md
 msgid "uint32"
-msgstr ""
+msgstr "uint32"
 
 #: ../../reference/pir_config.md
 msgid "<div><h4 id=\"uint64\" /></div><a name=\"uint64\" /> uint64"
-msgstr ""
+msgstr "<div><h4 id=\"uint64\" /></div><a name=\"uint64\" /> uint64"
 
 #: ../../reference/pir_config.md
 msgid "uint64"
-msgstr ""
+msgstr "uint64"
 
 #: ../../reference/pir_config.md
 msgid "<div><h4 id=\"sint32\" /></div><a name=\"sint32\" /> sint32"
-msgstr ""
+msgstr "<div><h4 id=\"sint32\" /></div><a name=\"sint32\" /> sint32"
 
 #: ../../reference/pir_config.md
 msgid ""
 "Uses variable-length encoding. Signed int value. These more efficiently "
 "encode negative numbers than regular int32s."
-msgstr ""
+msgstr "使用变长编码。有符号整数值。这些比常规的 int32 更有效地编码负数。"
 
 #: ../../reference/pir_config.md
 msgid "<div><h4 id=\"sint64\" /></div><a name=\"sint64\" /> sint64"
-msgstr ""
+msgstr "<div><h4 id=\"sint64\" /></div><a name=\"sint64\" /> sint64"
 
 #: ../../reference/pir_config.md
 msgid ""
 "Uses variable-length encoding. Signed int value. These more efficiently "
 "encode negative numbers than regular int64s."
-msgstr ""
+msgstr "使用变长编码。有符号整数值。这些比常规的 int64 更有效地编码负数。"
 
 #: ../../reference/pir_config.md
 msgid "<div><h4 id=\"fixed32\" /></div><a name=\"fixed32\" /> fixed32"
-msgstr ""
+msgstr "<div><h4 id=\"fixed32\" /></div><a name=\"fixed32\" /> fixed32"
 
 #: ../../reference/pir_config.md
 msgid ""
 "Always four bytes. More efficient than uint32 if values are often greater"
 " than 2^28."
-msgstr ""
+msgstr "始终为四个字节。如果值经常大于 2^28，则比 uint32 更高效。"
 
 #: ../../reference/pir_config.md
 msgid "<div><h4 id=\"fixed64\" /></div><a name=\"fixed64\" /> fixed64"
-msgstr ""
+msgstr "<div><h4 id=\"fixed64\" /></div><a name=\"fixed64\" /> fixed64"
 
 #: ../../reference/pir_config.md
 msgid ""
 "Always eight bytes. More efficient than uint64 if values are often "
 "greater than 2^56."
-msgstr ""
+msgstr "始终为八个字节。如果值经常大于 2^56，则比 uint64 更高效。"
 
 #: ../../reference/pir_config.md
 msgid "<div><h4 id=\"sfixed32\" /></div><a name=\"sfixed32\" /> sfixed32"
-msgstr ""
+msgstr "<div><h4 id=\"sfixed32\" /></div><a name=\"sfixed32\" /> sfixed32"
 
 #: ../../reference/pir_config.md
 msgid "Always four bytes."
-msgstr ""
+msgstr "始终为四个字节。"
 
 #: ../../reference/pir_config.md
 msgid "<div><h4 id=\"sfixed64\" /></div><a name=\"sfixed64\" /> sfixed64"
-msgstr ""
+msgstr "<div><h4 id=\"sfixed64\" /></div><a name=\"sfixed64\" /> sfixed64"
 
 #: ../../reference/pir_config.md
 msgid "Always eight bytes."
-msgstr ""
+msgstr "始终为八个字节。"
 
 #: ../../reference/pir_config.md
 msgid "<div><h4 id=\"bool\" /></div><a name=\"bool\" /> bool"
-msgstr ""
+msgstr "<div><h4 id=\"bool\" /></div><a name=\"bool\" /> bool"
 
 #: ../../reference/pir_config.md
 msgid "bool"
-msgstr ""
+msgstr "bool"
 
 #: ../../reference/pir_config.md
 msgid "boolean"
-msgstr ""
+msgstr "boolean"
 
 #: ../../reference/pir_config.md
 msgid "<div><h4 id=\"string\" /></div><a name=\"string\" /> string"
-msgstr ""
+msgstr "<div><h4 id=\"string\" /></div><a name=\"string\" /> string"
 
 #: ../../reference/pir_config.md
 msgid "A string must always contain UTF-8 encoded or 7-bit ASCII text."
-msgstr ""
+msgstr "字符串必须始终包含 UTF-8 编码或 7 位 ASCII 文本。"
 
 #: ../../reference/pir_config.md
 msgid "string"
-msgstr ""
+msgstr "string"
 
 #: ../../reference/pir_config.md
 msgid "String"
-msgstr ""
+msgstr "String"
 
 #: ../../reference/pir_config.md
 msgid "str/unicode"
-msgstr ""
+msgstr "str/unicode"
 
 #: ../../reference/pir_config.md
 msgid "<div><h4 id=\"bytes\" /></div><a name=\"bytes\" /> bytes"
-msgstr ""
+msgstr "<div><h4 id=\"bytes\" /></div><a name=\"bytes\" /> bytes"
 
 #: ../../reference/pir_config.md
 msgid "May contain any arbitrary sequence of bytes."
-msgstr ""
+msgstr "可以包含任意字节序列。"
 
 #: ../../reference/pir_config.md
 msgid "ByteString"
-msgstr ""
+msgstr "ByteString"
 
 #: ../../reference/pir_config.md
 msgid "str"
-msgstr ""
+msgstr "str"
 

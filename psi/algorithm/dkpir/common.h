@@ -23,20 +23,20 @@
 
 namespace psi::dkpir {
 // Compute the value of the linear function p(x)=ax+b
-yacl::math::MPInt ComputePoly(const std::vector<uint32_t> &poly,
-                              const uint32_t &data);
+yacl::math::MPInt ComputePoly(const std::vector<uint64_t> &poly,
+                              const uint64_t &data);
 
 // Compute the value of the function p(x,y)=ax+by, this function can prevent
 // n*b from exceeding the range of uint32_t
-yacl::math::MPInt ComputePoly(const std::vector<uint32_t> &poly,
-                              const uint32_t &data1, const uint32_t &data2);
+yacl::math::MPInt ComputePoly(const std::vector<uint64_t> &poly,
+                              const uint64_t &data1, const uint64_t &data2);
 
 // Save the linear function and the private key of phe
-void Save(const std::vector<uint32_t> &poly,
+void Save(const std::vector<uint64_t> &poly,
           const psi::dkpir::phe::SecretKey &secret_key, std::ostream &out);
 
 // Load the linear function and the private key of phe
-void Load(std::vector<uint32_t> &poly, yacl::math::MPInt &x, std::istream &in);
+void Load(std::vector<uint64_t> &poly, yacl::math::MPInt &x, std::istream &in);
 
 // Receiver can match the key with the label using the shuffle seed
 void PrintIntersectionResults(

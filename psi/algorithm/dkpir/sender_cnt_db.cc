@@ -26,11 +26,11 @@ namespace psi::dkpir {
 namespace {
 // Parse the count from the label, which requires the label to be composed only
 // of '0' ~ '9'
-uint32_t GetCount(const std::vector<unsigned char> &label) {
+uint64_t GetCount(const std::vector<unsigned char> &label) {
   std::string str(label.begin(), label.end());
 
   try {
-    uint32_t count = static_cast<uint32_t>(std::stoi(str));
+    uint64_t count = static_cast<uint64_t>(std::stoi(str));
     return count;
   } catch (const std::exception &ex) {
     SPDLOG_WARN("Row count read error: {}", ex.what());
@@ -57,14 +57,14 @@ void EncryptCount(psi::apsi_wrapper::LabeledData &data,
   psi::dkpir::phe::Encryptor encryptor(public_key);
 
   // Generate a random linear function p(x)=ax+b
-  std::vector<uint32_t> polynomial(2);
-  polynomial[0] = yacl::crypto::SecureRandU32();
-  polynomial[1] = yacl::crypto::SecureRandU32();
+  std::vector<uint64_t> polynomial(2);
+  polynomial[0] = yacl::crypto::SecureRandU64();
+  polynomial[1] = yacl::crypto::SecureRandU64();
 
   // Replace {(item, count)} with {(item, Enc(p(count)))}
   yacl::parallel_for(0, data.size(), [&](int64_t begin, int64_t end) {
     for (int64_t idx = begin; idx < end; ++idx) {
-      uint32_t count = GetCount(data[idx].second);
+      uint64_t count = GetCount(data[idx].second);
       yacl::math::MPInt count_poly = psi::dkpir::ComputePoly(polynomial, count);
 
       data[idx].second.resize(point_size * 2);

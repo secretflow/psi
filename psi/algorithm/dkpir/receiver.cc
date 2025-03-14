@@ -265,7 +265,7 @@ void DkPirReceiver::SendRowCountCt(
 void DkPirReceiver::SendRowCount(
     const std::vector<::apsi::receiver::MatchRecord> &intersection,
     const std::shared_ptr<yacl::link::Context> &lctx) {
-  uint32_t row_count = 0;
+  uint64_t row_count = 0;
   // Compute the total row count
   for (auto &mr : intersection) {
     if (mr.found) {
@@ -276,7 +276,7 @@ void DkPirReceiver::SendRowCount(
   }
 
   lctx->SendAsync(lctx->NextRank(),
-                  yacl::ByteContainerView(&row_count, sizeof(uint32_t)),
+                  yacl::ByteContainerView(&row_count, sizeof(uint64_t)),
                   "Send total row count");
 
   SPDLOG_INFO("Sent the plaintext of the total row count");

@@ -45,7 +45,7 @@ class DkPirSenderDispatcher {
       const psi::dkpir::phe::Ciphertext &row_count_ct,
       const std::shared_ptr<yacl::link::Context> &lctx);
 
-  void SaveResult(uint32_t row_count);
+  void SaveResult(uint64_t row_count);
 
  private:
   std::shared_ptr<::apsi::sender::SenderDB> sender_db_;
@@ -58,14 +58,14 @@ class DkPirSenderDispatcher {
   ::apsi::oprf::OPRFKey oprf_key_;
 
   // A random linear function
-  std::vector<uint32_t> polynomial_;
+  std::vector<uint64_t> polynomial_;
 
   // The seed that's used for shuffling the oprf results.
   uint64_t shuffle_seed_;
 
   // The count of items in the oprf query. Keep in mind, this isn't the final
   // row count, as the row count related to a certain item could exceed one.
-  uint32_t query_count_;
+  uint64_t query_count_;
 
   // Store the total row count
   std::string result_file_;

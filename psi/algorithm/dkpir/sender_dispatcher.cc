@@ -158,11 +158,11 @@ void DkPirSenderDispatcher::CheckRowCountAndSendShuffleSeed(
     const std::shared_ptr<yacl::link::Context> &lctx) {
   auto curve = public_key_.GetCurve();
 
-  uint32_t row_count = 0;
+  uint64_t row_count = 0;
   yacl::Buffer row_count_buf =
       lctx->Recv(lctx->NextRank(), "Recv total row count");
-  YACL_ENFORCE(row_count_buf.size() == sizeof(uint32_t));
-  std::memcpy(&row_count, row_count_buf.data(), sizeof(uint32_t));
+  YACL_ENFORCE(row_count_buf.size() == sizeof(uint64_t));
+  std::memcpy(&row_count, row_count_buf.data(), sizeof(uint64_t));
 
   // poly_row_count = a * row_count + b * query_count_
   yacl::math::MPInt poly_row_count =
@@ -184,7 +184,7 @@ void DkPirSenderDispatcher::CheckRowCountAndSendShuffleSeed(
   SPDLOG_INFO("Sent the shuffle seed");
 }
 
-void DkPirSenderDispatcher::SaveResult(uint32_t row_count) {
+void DkPirSenderDispatcher::SaveResult(uint64_t row_count) {
   std::ofstream fs(result_file_);
   fs << "count" << std::endl;
   fs << row_count;

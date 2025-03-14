@@ -37,8 +37,8 @@ const std::string Colors::RedBold = "\033[1;31m";
 const std::string Colors::GreenBold = "\033[1;32m";
 const std::string Colors::Reset = "\033[0m";
 
-yacl::math::MPInt ComputePoly(const std::vector<uint32_t> &poly,
-                              const uint32_t &data) {
+yacl::math::MPInt ComputePoly(const std::vector<uint64_t> &poly,
+                              const uint64_t &data) {
   YACL_ENFORCE(poly.size() == 2, "This is a linear function.");
   yacl::math::MPInt a(poly[0]);
   yacl::math::MPInt b(poly[1]);
@@ -47,8 +47,8 @@ yacl::math::MPInt ComputePoly(const std::vector<uint32_t> &poly,
   return a * x + b;
 }
 
-yacl::math::MPInt ComputePoly(const std::vector<uint32_t> &poly,
-                              const uint32_t &data1, const uint32_t &data2) {
+yacl::math::MPInt ComputePoly(const std::vector<uint64_t> &poly,
+                              const uint64_t &data1, const uint64_t &data2) {
   YACL_ENFORCE(poly.size() == 2, "This is a linear function.");
   yacl::math::MPInt a(poly[0]);
   yacl::math::MPInt b(poly[1]);
@@ -58,7 +58,7 @@ yacl::math::MPInt ComputePoly(const std::vector<uint32_t> &poly,
   return a * x + b * y;
 }
 
-void Save(const std::vector<uint32_t> &poly,
+void Save(const std::vector<uint64_t> &poly,
           const psi::dkpir::phe::SecretKey &secret_key, std::ostream &out) {
   YACL_ENFORCE(poly.size() == 2, "This should be a linear function.");
   psi::dkpir::SecretKeyProto secret_key_proto;
@@ -75,7 +75,7 @@ void Save(const std::vector<uint32_t> &poly,
   }
 }
 
-void Load(std::vector<uint32_t> &poly, yacl::math::MPInt &x, std::istream &in) {
+void Load(std::vector<uint64_t> &poly, yacl::math::MPInt &x, std::istream &in) {
   psi::dkpir::SecretKeyProto secret_key_proto;
 
   if (!secret_key_proto.ParsePartialFromIstream(&in)) {

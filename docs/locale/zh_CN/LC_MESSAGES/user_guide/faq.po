@@ -25,7 +25,7 @@ msgstr "常见问题（FAQ）"
 msgid ""
 "We will collect some popular questions from users and update this part "
 "promptly."
-msgstr "我们会定期收集常见的问题"
+msgstr "我们将收集用户的一些常见问题，并及时更新此部分内容。"
 
 #: ../../user_guide/faq.rst:7
 msgid "Config Issues"
@@ -36,8 +36,7 @@ msgid ""
 "In PSI config, what is difference of **broadcast_result** and "
 "**receiver**? Is it safe to turn on **broadcast_result**?"
 msgstr ""
-"在PSI配置里， **broadcast_result** 和 **receiver** 的差异是什么？打开 "
-"**broadcast_result** 安全吗？"
+"在PSI配置中，**broadcast_result**和**receiver**的区别是什么？开启**broadcast_result**是否安全？"
 
 #: ../../user_guide/faq.rst:11
 msgid ""
@@ -47,8 +46,8 @@ msgid ""
 "receive the intersection. Both parties must agree on the value of "
 "**broadcast_result**, otherwise the program will stop."
 msgstr ""
-"在PSI协议里，接收结果的一方被称为 **receiver** ，另一方是 **sender** 。当 **broadcast_result** "
-"打开，所有参与方都会接收到交集结果。但是该功能需要参与方都打开该功能才可以，不然的话协议会终止。"
+"在PSI协议中，承诺接收交集的一方称为**receiver**（接收方），另一方称为**sender**（发送方）。"
+"当**broadcast_result**开启时，**sender**也会收到交集。双方必须就**broadcast_result**的值达成一致，否则程序将停止运行。"
 
 #: ../../user_guide/faq.rst:14
 msgid ""
@@ -57,9 +56,8 @@ msgid ""
 "safe to set **broadcast_result** to true, if both **receiver**s and "
 "**sender**s wish to get the result."
 msgstr ""
-"如果 **broadcast_result** "
-"打开，只有参与协议的才能获取结果，不代表其他方能获取结果。所以，**broadcast_result** "
-"是安全的，在需要参与方都获取结果的场景下可以打开。"
+"如果**broadcast_result**开启，只有**receiver**（接收方）和**sender**（发送方）能够接收结果，而任何第三方都无法看到。"
+"因此，如果**receiver**和**sender**都希望获取结果，将**broadcast_result**设置为true是安全的。"
 
 #: ../../user_guide/faq.rst:16
 msgid "What is :ref:`IO_TYPE_UNSPECIFIED <IO_TYPE_UNSPECIFIED>`?"
@@ -72,9 +70,8 @@ msgid ""
 "which is meaningless. At this moment, we only support "
 ":ref:`IO_TYPE_FILE_CSV <IO_TYPE_FILE_CSV>`."
 msgstr ""
-"我们要求必须指定一个输入类型 :ref:`IoType <IoType>`，如果不指定，就是 :ref:`IO_TYPE_UNSPECIFIED "
-"<IO_TYPE_UNSPECIFIED>` 。当前我们只支持 :ref:`IO_TYPE_FILE_CSV "
-"<IO_TYPE_FILE_CSV>`。不过后续我们会考虑把csv作为默认。"
+"您必须选择一种类型作为IoType。:ref:`IO_TYPE_UNSPECIFIED <IO_TYPE_UNSPECIFIED>`是:ref:`IoType <IoType>`的默认值，但它没有实际意义。"
+"目前，我们仅支持:ref:`IO_TYPE_FILE_CSV <IO_TYPE_FILE_CSV>`。"
 
 #: ../../user_guide/faq.rst:20
 msgid ""
@@ -91,8 +88,8 @@ msgid ""
 "RIGHT / FULL join following rules of SQL. This is called "
 ":ref:`AdvancedJoinType <AdvancedJoinType>`."
 msgstr ""
-"PSI协议本身是不支持有重复的ID的，但是我们有时候需要类似SQL的LEFT /RIGHT / FULL join操作。也就是所谓的 "
-":ref:`AdvancedJoinType <AdvancedJoinType>`。"
+"PSI协议不允许输入ID中存在重复值。然而，有时我们可能希望在ID中保留重复值，并按照SQL规则执行LEFT / RIGHT / FULL连接。"
+"这被称为:ref:`AdvancedJoinType <AdvancedJoinType>`。"
 
 #: ../../user_guide/faq.rst:24
 msgid ""
@@ -105,13 +102,13 @@ msgstr ""
 
 #: ../../user_guide/faq.rst:26
 msgid "What is the recommendation value of bucket size?"
-msgstr "推荐的桶大小是多少？"
+msgstr "桶大小的推荐值是多少？"
 
 #: ../../user_guide/faq.rst:28
 msgid ""
 "The default value is 2^20. You shouldn't set this value unless you have "
 "very limited computation resource."
-msgstr "默认是2^20。一般保持默认值就好。"
+msgstr "默认值为2^20。除非您的计算资源非常有限，否则不应更改此值。"
 
 #: ../../user_guide/faq.rst:30
 msgid "What is :ref:`disable_alignment <disable_alignment>`?"
@@ -122,7 +119,8 @@ msgid ""
 "If :ref:`disable_alignment <disable_alignment>` turns on, the "
 "intersection received by **receiver**s and **sender**s are not promised "
 "to be aligned(the order doesn't match) and save time."
-msgstr "如果 :ref:`disable_alignment <disable_alignment>` 为真, 求交结果在各方的输出是不会对齐的。"
+msgstr "如果开启:ref:`disable_alignment <disable_alignment>`，**receiver**（接收方）和**sender**（发送方）"
+"收到的交集不保证对齐（顺序不匹配），但可以节省时间。"
 
 #: ../../user_guide/faq.rst:35
 msgid ""
@@ -139,8 +137,8 @@ msgid ""
 "`here "
 "<https://github.com/secretflow/yacl/blob/main/yacl/link/link.proto>`_."
 msgstr ""
-"一般保持默认值就好。具体定义可以看 ` 这里 "
-"<https://github.com/secretflow/yacl/blob/main/yacl/link/link.proto>`_ 。"
+"我们为所有字段提供了合适的默认值。除非网络状况非常差，否则您不应更改任何值。"
+"如需更多信息，您可以查看`此处 <https://github.com/secretflow/yacl/blob/main/yacl/link/link.proto>`_。"
 
 #: ../../user_guide/faq.rst:41
 msgid "Feature Issues"
@@ -155,7 +153,7 @@ msgid ""
 "We support mTLS and you should provide proper :ref:`ContextDescProto "
 "<ContextDescProto>`:"
 msgstr ""
-"我们支持mTLS, 配置 :ref:`ContextDescProto <ContextDescProto>` 的"
+"我们支持mTLS，您应提供合适的:ref:`ContextDescProto <ContextDescProto>`："
 
 #: ../../user_guide/faq.rst:47
 msgid "**enable_ssl** is enabled."
@@ -165,23 +163,22 @@ msgstr "**enable_ssl** 为真。"
 msgid ""
 "In **client_ssl_opts**, set **verify_depth** and provide peer CA file "
 "with **ca_file_path**"
-msgstr "设置 **client_ssl_opts** 的 **verify_depth** ，并且设置CA文件  **ca_file_path** 。"
+msgstr "在**client_ssl_opts**中，设置**verify_depth**并通过**ca_file_path**提供对等方的CA文件。"
 
 #: ../../user_guide/faq.rst:49
 msgid ""
 "In **server_ssl_opts**, provide self certificate and private key file "
 "with **certificate_path** and **private_key_path**"
 msgstr ""
-"设置 **server_ssl_opts** 的 **certificate_path** 为自己的证书，**private_key_path**"
-" 为私钥。"
+"在**server_ssl_opts**中，通过**certificate_path**和**private_key_path**提供自身的证书和私钥文件。"
 
 #: ../../user_guide/faq.rst:50
 msgid "You must provide these settings at both sides."
-msgstr "两边都要设置。"
+msgstr "您必须在双方都提供这些设置。"
 
 #: ../../user_guide/faq.rst:52
 msgid "example.config"
-msgstr ""
+msgstr "example.config"
 
 #: ../../user_guide/faq.rst:81
 msgid "How to use recovery?"
@@ -189,11 +186,11 @@ msgstr "如何使用recovery?"
 
 #: ../../user_guide/faq.rst:83
 msgid "We provide recovery feature in PSI v2."
-msgstr "PSI v2提供了recovery特性，支持PSI可以保存检查点。"
+msgstr "我们在PSI v2中提供了恢复功能。"
 
 #: ../../user_guide/faq.rst:85
 msgid "You have to provide a proper:ref:`RecoveryConfig <RecoveryConfig>`:"
-msgstr "需要提供  :ref:`RecoveryConfig <RecoveryConfig>` 的"
+msgstr "您需要提供一个合适的:ref:`RecoveryConfig <RecoveryConfig>`："
 
 #: ../../user_guide/faq.rst:87
 msgid "**enabled** set to true."
@@ -201,11 +198,11 @@ msgstr "设置 **enabled** 为真。"
 
 #: ../../user_guide/faq.rst:88
 msgid "**folder** is provided to store checkpoints."
-msgstr "**folder** 为检查点的目录。"
+msgstr "**folder**用于存储检查点。"
 
 #: ../../user_guide/faq.rst:90
 msgid ""
 "If a PSI task fails, just restart the task with the same config, the "
 "progress will resume."
-msgstr "如果PSI任务失败了，可以从检查点重启。"
+msgstr "如果PSI任务失败，只需使用相同的配置重新启动任务，进度将会恢复。"
 

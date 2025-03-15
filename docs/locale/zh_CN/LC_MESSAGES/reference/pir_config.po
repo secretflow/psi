@@ -27,7 +27,7 @@ msgstr "目录"
 
 #: ../../reference/pir_config.md:7 ../../reference/pir_config.md:21
 msgid "Messages"
-msgstr "消息"
+msgstr "说明"
 
 #: ../../reference/pir_config.md:8
 msgid "[ApsiReceiverConfig](#apsireceiverconfig)"

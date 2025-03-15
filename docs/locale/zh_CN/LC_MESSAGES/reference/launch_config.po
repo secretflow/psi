@@ -19,460 +19,477 @@ msgstr ""
 
 #: ../../reference/launch_config.md:1
 msgid "Launch Configuration"
-msgstr ""
+msgstr "启动配置"
 
 #: ../../reference/launch_config.md:3
 msgid ""
 "Please check psi.BucketPsiConfig at **PSI v1 Configuration**. Please "
 "check psi.v2.PsiConfig and psi.v2.UbPsiConfig at **PSI v2 "
 "Configuration**."
-msgstr ""
+msgstr "请在PSI v1配置中查看psi.BucketPsiConfig。"
+"请在PSI v2配置中查看psi.v2.PsiConfig和psi.v2.UbPsiConfig。"
 
 #: ../../reference/launch_config.md:6
 msgid "Table of Contents"
-msgstr ""
+msgstr "目录"
 
 #: ../../reference/launch_config.md:10 ../../reference/launch_config.md:18
 #: ../../reference/launch_config.md:32 ../../reference/launch_config.md:47
 #: ../../reference/launch_config.md:73 ../../reference/launch_config.md:168
 msgid "Messages"
-msgstr ""
+msgstr "说明"
 
 #: ../../reference/launch_config.md:11
 msgid "[LaunchConfig](#launchconfig)"
-msgstr ""
+msgstr "[启动配置](#launchconfig)"
 
 #: ../../reference/launch_config.md:19
 msgid "[AllocatedPorts](#allocatedports)"
-msgstr ""
+msgstr "[已分配端口](#allocatedports)"
 
 #: ../../reference/launch_config.md:20
 msgid "[ClusterDefine](#clusterdefine)"
-msgstr ""
+msgstr "[集群定义](#clusterdefine)"
 
 #: ../../reference/launch_config.md:21
 msgid "[Party](#party)"
-msgstr ""
+msgstr "[参与方](#party)"
 
 #: ../../reference/launch_config.md:22
 msgid "[Port](#port)"
-msgstr ""
+msgstr "[端口](#port)"
 
 #: ../../reference/launch_config.md:23
 msgid "[Service](#service)"
-msgstr ""
+msgstr "[服务](#service)"
 
 #: ../../reference/launch_config.md:24
 msgid "[TaskInputConfig](#taskinputconfig)"
-msgstr ""
+msgstr "[任务输入配置](#taskinputconfig)"
 
 #: ../../reference/launch_config.md:25
 msgid "[TaskInputConfig.SfPsiConfigMapEntry](#taskinputconfigsfpsiconfigmapentry)"
-msgstr ""
+msgstr "[任务输入配置.SfPsi配置映射项](#taskinputconfigsfpsiconfigmapentry)"
 
 #: ../../reference/launch_config.md:33
 msgid "[ContextDescProto](#contextdescproto)"
-msgstr ""
+msgstr "[上下文描述协议](#contextdescproto)"
 
 #: ../../reference/launch_config.md:34
 msgid "[PartyProto](#partyproto)"
-msgstr ""
+msgstr "[参与方协议](#partyproto)"
 
 #: ../../reference/launch_config.md:35
 msgid "[RetryOptionsProto](#retryoptionsproto)"
-msgstr ""
+msgstr "[重试选项协议](#retryoptionsproto)"
 
 #: ../../reference/launch_config.md:36
 msgid "[SSLOptionsProto](#ssloptionsproto)"
-msgstr ""
+msgstr "[SSL选项协议](#ssloptionsproto)"
 
 #: ../../reference/launch_config.md:41
 msgid "[Scalar Value Types](#scalar-value-types)"
-msgstr ""
+msgstr "[标量值类型](#scalar-value-types)"
 
 #: ../../reference/launch_config.md:50
 msgid "LaunchConfig"
-msgstr ""
+msgstr "启动配置"
 
 #: ../../reference/launch_config.md
 msgid "Field"
-msgstr ""
+msgstr "字段"
 
 #: ../../reference/launch_config.md
 msgid "Type"
-msgstr ""
+msgstr "类型"
 
 #: ../../reference/launch_config.md
 msgid "Description"
-msgstr ""
+msgstr "描述"
 
 #: ../../reference/launch_config.md
 msgid "link_config"
-msgstr ""
+msgstr "link_config"
 
 #: ../../reference/launch_config.md
 msgid "[ yacl.link.ContextDescProto](#yacllinkcontextdescproto)"
-msgstr ""
+msgstr "[ yacl.link.ContextDescProto](#yacllinkcontextdescproto)"
 
 #: ../../reference/launch_config.md
 msgid "Configs for network."
-msgstr ""
+msgstr "网络配置"
 
 #: ../../reference/launch_config.md
 msgid "self_link_party"
-msgstr ""
+msgstr "self_link_party"
 
 #: ../../reference/launch_config.md
 msgid "[ string](#string)"
-msgstr ""
+msgstr "[ string](#string)"
 
 #: ../../reference/launch_config.md
 msgid "With link_config."
-msgstr ""
+msgstr "使用链路配置"
 
 #: ../../reference/launch_config.md
 msgid ""
 "[**oneof**](https://developers.google.com/protocol-"
 "buffers/docs/proto3#oneof) runtime_config.legacy_psi_config"
-msgstr ""
+msgstr "[**oneof**](https://developers.google.com/protocol-"
+"buffers/docs/proto3#oneof) runtime_config.legacy_psi_config"
 
 #: ../../reference/launch_config.md
 msgid "[ BucketPsiConfig](#bucketpsiconfig)"
-msgstr ""
+msgstr "[ BucketPsiConfig](#bucketpsiconfig)"
 
 #: ../../reference/launch_config.md
 msgid "Please check at psi.proto."
-msgstr ""
+msgstr "请检查 psi.proto 文件"
 
 #: ../../reference/launch_config.md
 msgid ""
 "[**oneof**](https://developers.google.com/protocol-"
 "buffers/docs/proto3#oneof) runtime_config.psi_config"
-msgstr ""
+msgstr "[**oneof**](https://developers.google.com/protocol-"
+"buffers/docs/proto3#oneof) runtime_config.psi_config"
 
 #: ../../reference/launch_config.md
 msgid "[ v2.PsiConfig](#v2psiconfig)"
-msgstr ""
+msgstr "[ v2.PsiConfig](#v2psiconfig)"
 
 #: ../../reference/launch_config.md
 msgid "Please check at psi_v2.proto."
-msgstr ""
+msgstr "请检查 psi_v2.proto 文件"
 
 #: ../../reference/launch_config.md
 msgid ""
 "[**oneof**](https://developers.google.com/protocol-"
 "buffers/docs/proto3#oneof) runtime_config.ub_psi_config"
-msgstr ""
+msgstr "[**oneof**](https://developers.google.com/protocol-"
+"buffers/docs/proto3#oneof) runtime_config.ub_psi_config"
 
 #: ../../reference/launch_config.md
 msgid "[ v2.UbPsiConfig](#v2ubpsiconfig)"
-msgstr ""
+msgstr "[ v2.UbPsiConfig](#v2ubpsiconfig)"
 
 #: ../../reference/launch_config.md
 msgid ""
 "[**oneof**](https://developers.google.com/protocol-"
 "buffers/docs/proto3#oneof) runtime_config.apsi_sender_config"
-msgstr ""
+msgstr "[**oneof**](https://developers.google.com/protocol-"
+"buffers/docs/proto3#oneof) runtime_config.apsi_sender_config"
 
 #: ../../reference/launch_config.md
 msgid "[ ApsiSenderConfig](#apsisenderconfig)"
-msgstr ""
+msgstr "[ ApsiSenderConfig](#apsisenderconfig)"
 
 #: ../../reference/launch_config.md
 msgid "Please check at pir.proto."
-msgstr ""
+msgstr "请检查 psi.proto 文件"
 
 #: ../../reference/launch_config.md
 msgid ""
 "[**oneof**](https://developers.google.com/protocol-"
 "buffers/docs/proto3#oneof) runtime_config.apsi_receiver_config"
 msgstr ""
+"[**oneof**](https://developers.google.com/protocol-"
+"buffers/docs/proto3#oneof) runtime_config.apsi_receiver_config"
 
 #: ../../reference/launch_config.md
 msgid "[ ApsiReceiverConfig](#apsireceiverconfig)"
-msgstr ""
+msgstr "[ ApsiReceiverConfig](#apsireceiverconfig)"
 
 #: ../../reference/launch_config.md
 msgid "none"
-msgstr ""
+msgstr "无"
 
 #: ../../reference/launch_config.md:67 ../../reference/launch_config.md:162
 #: ../../reference/launch_config.md:251
 msgid "Enums"
-msgstr ""
+msgstr "枚举"
 
 #: ../../reference/launch_config.md:76
 msgid "AllocatedPorts"
-msgstr ""
+msgstr "已分配的端口"
 
 #: ../../reference/launch_config.md:77
 msgid "AllocatedPorts represents allocated ports for pod."
-msgstr ""
+msgstr "AllocatedPorts 表示 Pod 的已分配端口"
 
 #: ../../reference/launch_config.md
 msgid "ports"
-msgstr ""
+msgstr "ports"
 
 #: ../../reference/launch_config.md
 msgid "[repeated Port](#port)"
-msgstr ""
+msgstr "[repeated Port](#port)"
 
 #: ../../reference/launch_config.md
 msgid "Allocated ports."
-msgstr ""
+msgstr "已分配的端口"
 
 #: ../../reference/launch_config.md:87
 msgid "ClusterDefine"
-msgstr ""
+msgstr "集群定义"
 
 #: ../../reference/launch_config.md:88
 msgid "ClusterDefine represents the information of all parties."
-msgstr ""
+msgstr "ClusterDefine 代表所有参与方的信息"
 
 #: ../../reference/launch_config.md
 msgid "parties"
-msgstr ""
+msgstr "parties"
 
 #: ../../reference/launch_config.md
 msgid "[repeated Party](#party)"
-msgstr ""
+msgstr "[repeated Party](#party)"
 
 #: ../../reference/launch_config.md
 msgid "Basic information of all parties."
-msgstr ""
+msgstr "所有参与方的基本信息"
 
 #: ../../reference/launch_config.md
 msgid "self_party_idx"
-msgstr ""
+msgstr "self_party_idx"
 
 #: ../../reference/launch_config.md
 msgid "[ int32](#int32)"
-msgstr ""
+msgstr "[ int32](#int32)"
 
 #: ../../reference/launch_config.md
 msgid "index of self party."
-msgstr ""
+msgstr "自身参与方的索引"
 
 #: ../../reference/launch_config.md
 msgid "self_endpoint_idx"
-msgstr ""
+msgstr "self_endpoint_idx"
 
 #: ../../reference/launch_config.md
 msgid "index of self endpoint."
-msgstr ""
+msgstr "自身端点的索引"
 
 #: ../../reference/launch_config.md:100
 msgid "Party"
-msgstr ""
+msgstr "参与方"
 
 #: ../../reference/launch_config.md:101
 msgid "Party represents the basic information of the party."
-msgstr ""
+msgstr "Party 表示参与方的基本信息"
 
 #: ../../reference/launch_config.md
 msgid "name"
-msgstr ""
+msgstr "name"
 
 #: ../../reference/launch_config.md
 msgid "Name of party."
-msgstr ""
+msgstr "参与方名称"
 
 #: ../../reference/launch_config.md
 msgid "role"
-msgstr ""
+msgstr "role"
 
 #: ../../reference/launch_config.md
 msgid "role carried by party. Examples: client, server..."
-msgstr ""
+msgstr "与方承担的角色。例如：客户端、服务端..."
 
 #: ../../reference/launch_config.md
 msgid "services"
-msgstr ""
+msgstr "services"
 
 #: ../../reference/launch_config.md
 msgid "[repeated Service](#service)"
-msgstr ""
+msgstr "[repeated Service](#service)"
 
 #: ../../reference/launch_config.md
 msgid "List of services exposed by pod."
-msgstr ""
+msgstr "Pod 对外提供的服务列表"
 
 #: ../../reference/launch_config.md:113
 msgid "Port"
-msgstr ""
+msgstr "端口"
 
 #: ../../reference/launch_config.md:114
 msgid "Port represents an allocated port for pod."
-msgstr ""
+msgstr "Port 表示 Pod 的已分配端口"
 
 #: ../../reference/launch_config.md
 msgid "Each named port in a pod must have a unique name."
-msgstr ""
+msgstr "Pod 内每个命名的端口名称必须唯一"
 
 #: ../../reference/launch_config.md
 msgid "port"
-msgstr ""
+msgstr "port"
 
 #: ../../reference/launch_config.md
 msgid "Number of port allocated for pod."
-msgstr ""
+msgstr "Pod 分配的端口数"
 
 #: ../../reference/launch_config.md
 msgid "scope"
-msgstr ""
+msgstr "scope"
 
 #: ../../reference/launch_config.md
 msgid ""
 "Scope of port. Must be Cluster,Domain,Local. Defaults to \"Local\". "
 "+optional"
 msgstr ""
-
+"端口的作用范围。必须为 Cluster、Domain 或 Local。默认为 \"Local\". "
+"+optional"
 #: ../../reference/launch_config.md
 msgid "protocol"
-msgstr ""
+msgstr "protocol"
 
 #: ../../reference/launch_config.md
 msgid "Protocol for port. Must be HTTP,GRPC. Defaults to \"HTTP\". +optional"
-msgstr ""
-
+msgstr "端口的协议。必须为 HTTP 或 GRPC。默认为 \"HTTP\". "
+"+optional"
 #: ../../reference/launch_config.md:127
 msgid "Service"
-msgstr ""
+msgstr "服务"
 
 #: ../../reference/launch_config.md:128
 msgid "Service represents the service address corresponding to the port."
-msgstr ""
+msgstr "Service 表示与端口对应的服务地址"
 
 #: ../../reference/launch_config.md
 msgid "port_name"
-msgstr ""
+msgstr "port_name"
 
 #: ../../reference/launch_config.md
 msgid "Name of port."
-msgstr ""
+msgstr "端口名称"
 
 #: ../../reference/launch_config.md
 msgid "endpoints"
-msgstr ""
+msgstr "endpoints"
 
 #: ../../reference/launch_config.md
 msgid "[repeated string](#string)"
-msgstr ""
+msgstr "[repeated string](#string)"
 
 #: ../../reference/launch_config.md
 msgid "Endpoint list corresponding to the port."
-msgstr ""
+msgstr "与端口对应的端点列表"
 
 #: ../../reference/launch_config.md:139
 msgid "TaskInputConfig"
-msgstr ""
+msgstr "任务输入配置"
 
 #: ../../reference/launch_config.md
 msgid "sf_psi_config_map"
-msgstr ""
+msgstr "sf_psi_config_map"
 
 #: ../../reference/launch_config.md
 msgid ""
 "[map "
 "TaskInputConfig.SfPsiConfigMapEntry](#taskinputconfigsfpsiconfigmapentry)"
 msgstr ""
+"[map "
+"TaskInputConfig.SfPsiConfigMapEntry](#taskinputconfigsfpsiconfigmapentry)"
 
 #: ../../reference/launch_config.md:150
 msgid "TaskInputConfig.SfPsiConfigMapEntry"
-msgstr ""
+msgstr "任务输入配置.SfPsi配置映射项"
 
 #: ../../reference/launch_config.md
 msgid "key"
-msgstr ""
+msgstr "key"
 
 #: ../../reference/launch_config.md
 msgid "value"
-msgstr ""
+msgstr "value"
 
 #: ../../reference/launch_config.md
 msgid "[ psi.LaunchConfig](#psilaunchconfig)"
-msgstr ""
+msgstr "[ psi.LaunchConfig](#psilaunchconfig)"
 
 #: ../../reference/launch_config.md:171
 msgid "ContextDescProto"
-msgstr ""
+msgstr "上下文描述协议"
 
 #: ../../reference/launch_config.md:172
 msgid "Configuration for link config."
-msgstr ""
+msgstr "链路配置的设置"
 
 #: ../../reference/launch_config.md
 msgid "id"
-msgstr ""
+msgstr"id"
 
 #: ../../reference/launch_config.md
 msgid "the UUID of this communication. optional"
-msgstr ""
+msgstr "此次通信的 UUID"
 
 #: ../../reference/launch_config.md
 msgid "[repeated PartyProto](#partyproto)"
-msgstr ""
+msgstr "[repeated PartyProto](#partyproto)"
 
 #: ../../reference/launch_config.md
 msgid "party description, describes the world."
-msgstr ""
+msgstr "参与方描述，描述世界"
 
 #: ../../reference/launch_config.md
 msgid "connect_retry_times"
-msgstr ""
+msgstr "connect_retry_times"
 
 #: ../../reference/launch_config.md
 msgid "[ uint32](#uint32)"
-msgstr ""
+msgstr "[ uint32](#uint32)"""
 
 #: ../../reference/launch_config.md
 msgid "connect to mesh retry time."
-msgstr ""
+msgstr "连接到网格的重试时间"
 
 #: ../../reference/launch_config.md
 msgid "connect_retry_interval_ms"
-msgstr ""
+msgstr "connect_retry_interval_ms"
 
 #: ../../reference/launch_config.md
 msgid "connect to mesh retry interval."
-msgstr ""
+msgstr "连接到网格的重试间隔"
 
 #: ../../reference/launch_config.md
 msgid "recv_timeout_ms"
-msgstr ""
+msgstr "recv_timeout_ms"
 
 #: ../../reference/launch_config.md
 msgid "[ uint64](#uint64)"
-msgstr ""
+msgstr "[ uint64](#uint64)"
 
 #: ../../reference/launch_config.md
 msgid "recv timeout in milliseconds."
-msgstr ""
+msgstr "接收超时时间（单位为毫秒）。 "
 
 #: ../../reference/launch_config.md:183
 msgid ""
 "'recv time' is the max time that a party will wait for a given event. for"
 " example:"
 msgstr ""
+"‘接收时间’是一方等待某一特定事件的最长时间。例如："
 
 #: ../../reference/launch_config.md:185
 msgid ""
 "begin recv end recv |--------|-------recv-"
 "time----------|------------------| alice's timeline"
 msgstr ""
+"开始接收  结束接收 |--------|-------接收-"
+"时间----------|------------------| alice的时间线"
 
 #: ../../reference/launch_config.md:187
 msgid ""
 "begin send end send |-----busy-"
 "work-------------|-------------|------------| bob's timeline"
 msgstr ""
+"开始发送  结束发送 |-----忙碌-"
+"工作-------------|-------------|------------| bob的时间线"
 
-#: ../../reference/launch_config.md:189
+ #: ../../reference/launch_config.md:189
 msgid ""
 "in above case, when alice begins recv for a specific event, bob is still "
 "busy doing its job, when alice's wait time exceed wait_timeout_ms, it "
 "raise exception, although bob now is starting to send data."
 msgstr ""
+"在上述例子中，当爱丽丝开始为某个特定事件进行接收操作时，bob仍在忙着做自己的事情。"
+"当alice的等待时间超过了等待超时时间（以毫秒为单位），它就会抛出异常，尽管此时鲍勃刚开始发送数据。"
 
 #: ../../reference/launch_config.md:191
 msgid ""
@@ -482,6 +499,8 @@ msgid ""
 "single http request size is greater than this limit, it will be unpacked "
 "into small chunks then reassembled."
 msgstr ""
+"所以对于耗时较长的任务（在这种情况下一方可能需要等待另一方很长时间），这个值应该相应地进行调整。| | "
+"http最大负载大小” | [无符号32位整数（uint32）](#uint32) | 这是HTTP的最大负载大小。如果单个HTTP请求的大小超过了这个限制，它将被拆分成小的数据块，然后再重新组合起来。  "
 
 #: ../../reference/launch_config.md:194
 msgid ""
@@ -503,6 +522,14 @@ msgid ""
 "send size is chunk_parallel_send_size | | retry_opts | [ "
 "RetryOptionsProto](#retryoptionsproto) | retry options |"
 msgstr ""
+"This field does affect performance. Please choose wisely. | | "
+"http_timeout_ms | [ uint32](#uint32) | 单个HTTP请求的超时时间。 | "
+"| throttle_window_size | [ uint32](#uint32) | 通道的限流窗口大小。如果正在传输的消息数量超过了限制大小，`SendAsync` 将阻塞，直到消息被处理，或者在等待 `recv_timeout_ms` 后抛出异常 | | brpc_channel_protocol | [ "
+"string](#string) | BRPC客户端通道协议。 | | "
+"brpc_channel_connection_type | [ string](#string) | BRPC客户端通道连接类型。 | | enable_ssl | [ bool](#bool) | 链接通道的SSL选项。 | | client_ssl_opts | [ SSLOptionsProto](#ssloptionsproto) | 通道的SSL配置。如果 enable_ssl == false，则此配置将被忽略； | | "
+"server_ssl_opts | [ SSLOptionsProto](#ssloptionsproto) | 服务的SSL配置。如果 enable_ssl == false，则此配置将被忽略； | | "
+"chunk_parallel_send_size | [ uint32](#uint32) | 通道的分块并行发送大小。如果在发送消息时需要分块发送，最大并行发送大小为 chunk_parallel_send_size | | retry_opts | [ "
+"RetryOptionsProto](#retryoptionsproto) | 重试选项 |"
 
 #: ../../reference/launch_config.md:208
 msgid "PartyProto"
@@ -510,55 +537,55 @@ msgstr ""
 
 #: ../../reference/launch_config.md
 msgid "host"
-msgstr ""
+msgstr "host"
 
 #: ../../reference/launch_config.md:220
 msgid "RetryOptionsProto"
-msgstr ""
+msgstr "参与方协议"
 
 #: ../../reference/launch_config.md:221
 msgid "Retry options."
-msgstr ""
+msgstr "重试选项"
 
 #: ../../reference/launch_config.md
 msgid "max_retry"
-msgstr ""
+msgstr "max_retry"
 
 #: ../../reference/launch_config.md
 msgid "max retry count default 3"
-msgstr ""
+msgstr "最大重试次数，默认为 3"
 
 #: ../../reference/launch_config.md
 msgid "retry_interval_ms"
-msgstr ""
+msgstr "retry_interval_ms"
 
 #: ../../reference/launch_config.md
 msgid "time between retries at first retry default 1 second"
-msgstr ""
+msgstr "首次重试时，重试之间的时间间隔，默认值为 1 秒。"
 
 #: ../../reference/launch_config.md
 msgid "retry_interval_incr_ms"
-msgstr ""
+msgstr "retry_interval_incr_ms"
 
 #: ../../reference/launch_config.md
 msgid "The amount of time to increase the interval between retries default 2s"
-msgstr ""
+msgstr "重试间隔增加的时间默认值为 2 秒"
 
 #: ../../reference/launch_config.md
 msgid "max_retry_interval_ms"
-msgstr ""
+msgstr "max_retry_interval_ms"
 
 #: ../../reference/launch_config.md
 msgid "The maximum interval between retries default 10s"
-msgstr ""
+msgstr "重试间隔的最大值默认值为 10 秒"
 
 #: ../../reference/launch_config.md
 msgid "error_codes"
-msgstr ""
+msgstr "error_codes"
 
 #: ../../reference/launch_config.md
 msgid "[repeated uint32](#uint32)"
-msgstr ""
+msgstr "[repeated uint32](#uint32)"
 
 #: ../../reference/launch_config.md
 msgid "retry on these brpc error codes, if empty, retry on all codes"
@@ -566,271 +593,275 @@ msgstr ""
 
 #: ../../reference/launch_config.md
 msgid "http_codes"
-msgstr ""
+msgstr "http_codes"
 
 #: ../../reference/launch_config.md
 msgid "retry on these http codes, if empty, retry on all http codes"
-msgstr ""
+msgstr "针对这些 brpc 错误码进行重试，若为空，则对所有错误码重试"
 
 #: ../../reference/launch_config.md
 msgid "aggressive_retry"
-msgstr ""
+msgstr "aggressive_retry"
 
 #: ../../reference/launch_config.md
 msgid "[ bool](#bool)"
-msgstr ""
+msgstr "[ bool](#bool)"
 
 #: ../../reference/launch_config.md
 msgid ""
 "do aggressive retry， this means that retries will be made on additional "
 "error codes"
 msgstr ""
+"启用激进重试，即会在额外错误码上进行重试"
 
 #: ../../reference/launch_config.md:237
 msgid "SSLOptionsProto"
-msgstr ""
+msgstr "SSL选项协议"
 
 #: ../../reference/launch_config.md:238
 msgid "SSL options."
-msgstr ""
+msgstr "SSL 选项"
 
 #: ../../reference/launch_config.md
 msgid "certificate_path"
-msgstr ""
+msgstr "certificate_path"
 
 #: ../../reference/launch_config.md
 msgid "Certificate file path"
-msgstr ""
+msgstr "证书文件地址"
 
 #: ../../reference/launch_config.md
 msgid "private_key_path"
-msgstr ""
+msgstr "private_key_path"
 
 #: ../../reference/launch_config.md
 msgid "Private key file path"
-msgstr ""
+msgstr "私钥文件地址"
 
 #: ../../reference/launch_config.md
 msgid "verify_depth"
-msgstr ""
+msgstr "verify_depth"
 
 #: ../../reference/launch_config.md
 msgid ""
 "Set the maximum depth of the certificate chain for verification If 0, "
 "turn off the verification"
 msgstr ""
+"设置证书链验证的最大深度。如果为 0，则关闭验证"
 
 #: ../../reference/launch_config.md
 msgid "ca_file_path"
-msgstr ""
+msgstr "ca_file_path"
 
 #: ../../reference/launch_config.md
 msgid ""
 "Set the trusted CA file to verify the peer's certificate If empty, use "
 "the system default CA files"
 msgstr ""
+""
 
 #: ../../reference/launch_config.md:255
 msgid "Scalar Value Types"
-msgstr ""
+msgstr "标量值类型"
 
 #: ../../reference/launch_config.md
 msgid ".proto Type"
-msgstr ""
+msgstr ".proto 类型"
 
 #: ../../reference/launch_config.md
 msgid "Notes"
-msgstr ""
+msgstr "备注"
 
 #: ../../reference/launch_config.md
 msgid "C++ Type"
-msgstr ""
+msgstr "C++ 类型"
 
 #: ../../reference/launch_config.md
 msgid "Java Type"
-msgstr ""
+msgstr "Java 类型"
 
 #: ../../reference/launch_config.md
 msgid "Python Type"
-msgstr ""
+msgstr "Python 类型"
 
 #: ../../reference/launch_config.md
 msgid "<div><h4 id=\"double\" /></div><a name=\"double\" /> double"
-msgstr ""
+msgstr "<div><h4 id=\"double\" /></div><a name=\"double\" /> double"
 
 #: ../../reference/launch_config.md
 msgid "double"
-msgstr ""
+msgstr "double"
 
 #: ../../reference/launch_config.md
 msgid "float"
-msgstr ""
+msgstr "float"
 
 #: ../../reference/launch_config.md
 msgid "<div><h4 id=\"float\" /></div><a name=\"float\" /> float"
-msgstr ""
+msgstr "<div><h4 id=\"float\" /></div><a name=\"float\" /> float"
 
 #: ../../reference/launch_config.md
 msgid "<div><h4 id=\"int32\" /></div><a name=\"int32\" /> int32"
-msgstr ""
+msgstr "<div><h4 id=\"int32\" /></div><a name=\"int32\" /> int32"
 
 #: ../../reference/launch_config.md
 msgid ""
 "Uses variable-length encoding. Inefficient for encoding negative numbers "
 "– if your field is likely to have negative values, use sint32 instead."
-msgstr ""
+msgstr "使用变长编码。对负数编码效率较低——如果字段可能包含负值，请改用 sint32。"
 
 #: ../../reference/launch_config.md
 msgid "int32"
-msgstr ""
+msgstr "int32"
 
 #: ../../reference/launch_config.md
 msgid "int"
-msgstr ""
+msgstr "int"
 
 #: ../../reference/launch_config.md
 msgid "<div><h4 id=\"int64\" /></div><a name=\"int64\" /> int64"
-msgstr ""
+msgstr "<div><h4 id=\"int64\" /></div><a name=\"int64\" /> int64"
 
 #: ../../reference/launch_config.md
 msgid ""
 "Uses variable-length encoding. Inefficient for encoding negative numbers "
 "– if your field is likely to have negative values, use sint64 instead."
-msgstr ""
+msgstr "使用变长编码。对负数编码效率较低——如果字段可能包含负值，请改用 sint64。"
 
 #: ../../reference/launch_config.md
 msgid "int64"
-msgstr ""
+msgstr "int64"
 
 #: ../../reference/launch_config.md
 msgid "long"
-msgstr ""
+msgstr "long"
 
 #: ../../reference/launch_config.md
 msgid "int/long"
-msgstr ""
+msgstr "int/long"
 
 #: ../../reference/launch_config.md
 msgid "<div><h4 id=\"uint32\" /></div><a name=\"uint32\" /> uint32"
-msgstr ""
+msgstr "<div><h4 id=\"uint32\" /></div><a name=\"uint32\" /> uint32"
 
 #: ../../reference/launch_config.md
 msgid "Uses variable-length encoding."
-msgstr ""
+msgstr "使用可变长度编码。"
 
 #: ../../reference/launch_config.md
 msgid "uint32"
-msgstr ""
+msgstr "uint32"
 
 #: ../../reference/launch_config.md
 msgid "<div><h4 id=\"uint64\" /></div><a name=\"uint64\" /> uint64"
-msgstr ""
+msgstr "<div><h4 id=\"uint64\" /></div><a name=\"uint64\" /> uint64"
 
 #: ../../reference/launch_config.md
 msgid "uint64"
-msgstr ""
+msgstr "uint64"
 
 #: ../../reference/launch_config.md
 msgid "<div><h4 id=\"sint32\" /></div><a name=\"sint32\" /> sint32"
-msgstr ""
+msgstr "<div><h4 id=\"sint32\" /></div><a name=\"sint32\" /> sint32"
 
 #: ../../reference/launch_config.md
 msgid ""
 "Uses variable-length encoding. Signed int value. These more efficiently "
 "encode negative numbers than regular int32s."
-msgstr ""
+msgstr "使用变长编码。有符号整数值。相比常规的 int32，它能更高效地编码负数。"
 
 #: ../../reference/launch_config.md
 msgid "<div><h4 id=\"sint64\" /></div><a name=\"sint64\" /> sint64"
-msgstr ""
+msgstr "<div><h4 id=\"sint64\" /></div><a name=\"sint64\" /> sint64"
 
 #: ../../reference/launch_config.md
 msgid ""
 "Uses variable-length encoding. Signed int value. These more efficiently "
 "encode negative numbers than regular int64s."
-msgstr ""
+msgstr "使用变长编码。有符号整数值。相比常规的 int64，它能更高效地编码负数。"
 
 #: ../../reference/launch_config.md
 msgid "<div><h4 id=\"fixed32\" /></div><a name=\"fixed32\" /> fixed32"
-msgstr ""
+msgstr "<div><h4 id=\"fixed32\" /></div><a name=\"fixed32\" /> fixed32"
 
 #: ../../reference/launch_config.md
 msgid ""
 "Always four bytes. More efficient than uint32 if values are often greater"
 " than 2^28."
-msgstr ""
+msgstr "始终为四个字节。如果值经常大于 2^28，则比 uint32 更高效。” 或 “固定为四字节。若数值常大于 2^28，"
+"则比 uint32 效率更高。"
 
 #: ../../reference/launch_config.md
 msgid "<div><h4 id=\"fixed64\" /></div><a name=\"fixed64\" /> fixed64"
-msgstr ""
+msgstr "<div><h4 id=\"fixed64\" /></div><a name=\"fixed64\" /> fixed64"
 
 #: ../../reference/launch_config.md
 msgid ""
 "Always eight bytes. More efficient than uint64 if values are often "
 "greater than 2^56."
-msgstr ""
+msgstr "始终为八个字节。如果值经常大于 2^56，则比 uint64 更高效。"
 
 #: ../../reference/launch_config.md
 msgid "<div><h4 id=\"sfixed32\" /></div><a name=\"sfixed32\" /> sfixed32"
-msgstr ""
+msgstr "<div><h4 id=\"sfixed32\" /></div><a name=\"sfixed32\" /> sfixed32"
 
 #: ../../reference/launch_config.md
 msgid "Always four bytes."
-msgstr ""
+msgstr "始终为四个字节"
 
 #: ../../reference/launch_config.md
 msgid "<div><h4 id=\"sfixed64\" /></div><a name=\"sfixed64\" /> sfixed64"
-msgstr ""
+msgstr "<div><h4 id=\"sfixed64\" /></div><a name=\"sfixed64\" /> sfixed64"
 
 #: ../../reference/launch_config.md
 msgid "Always eight bytes."
-msgstr ""
-
-#: ../../reference/launch_config.md
-msgid "<div><h4 id=\"bool\" /></div><a name=\"bool\" /> bool"
-msgstr ""
-
-#: ../../reference/launch_config.md
-msgid "bool"
-msgstr ""
-
-#: ../../reference/launch_config.md
-msgid "boolean"
-msgstr ""
+msgstr "始终为八个字节"
 
 #: ../../reference/launch_config.md
 msgid "<div><h4 id=\"string\" /></div><a name=\"string\" /> string"
-msgstr ""
+msgstr "<div><h4 id=\"string\" /></div><a name=\"string\" /> string"
+
+#: ../../reference/launch_config.md
+msgid "bool"
+msgstr "bool"
+
+#: ../../reference/launch_config.md
+msgid "boolean"
+msgstr "boolean"
+
+#: ../../reference/launch_config.md
+msgid "<div><h4 id=\"string\" /></div><a name=\"string\" /> string"
+msgstr "<div><h4 id=\"string\" /></div><a name=\"string\" /> string"
 
 #: ../../reference/launch_config.md
 msgid "A string must always contain UTF-8 encoded or 7-bit ASCII text."
-msgstr ""
+msgstr "字符串必须始终包含UTF-8编码的文本或7位ASCII文本。 "
 
 #: ../../reference/launch_config.md
 msgid "string"
-msgstr ""
+msgstr "string"
 
 #: ../../reference/launch_config.md
 msgid "String"
-msgstr ""
+msgstr "String"
 
 #: ../../reference/launch_config.md
 msgid "str/unicode"
-msgstr ""
+msgstr "str/unicode"
 
 #: ../../reference/launch_config.md
 msgid "<div><h4 id=\"bytes\" /></div><a name=\"bytes\" /> bytes"
-msgstr ""
+msgstr "<div><h4 id=\"bytes\" /></div><a name=\"bytes\" /> bytes"
 
 #: ../../reference/launch_config.md
 msgid "May contain any arbitrary sequence of bytes."
-msgstr ""
+msgstr "May contain any arbitrary sequence of bytes."
 
 #: ../../reference/launch_config.md
 msgid "ByteString"
-msgstr ""
+msgstr "ByteString"
 
 #: ../../reference/launch_config.md
 msgid "str"
-msgstr ""
+msgstr "atr"
 

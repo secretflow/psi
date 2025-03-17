@@ -60,8 +60,9 @@ class DkPirSenderDispatcher {
   // A random linear function
   std::vector<uint64_t> polynomial_;
 
-  // The seed that's used for shuffling the oprf results.
-  uint64_t shuffle_seed_;
+  // The seed and counter that's used for shuffling the oprf results.
+  uint128_t shuffle_seed_;
+  uint64_t shuffle_counter_;
 
   // The count of items in the oprf query. Keep in mind, this isn't the final
   // row count, as the row count related to a certain item could exceed one.

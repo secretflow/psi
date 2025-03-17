@@ -175,9 +175,9 @@ std::vector<::apsi::receiver::MatchRecord> DkPirReceiver::ReceiveQuery(
 
 std::vector<::apsi::receiver::MatchRecord> DkPirReceiver::RequestQuery(
     const std::vector<::apsi::HashedItem> &items,
-    const std::vector<::apsi::LabelKey> &label_keys, uint64_t &shuffle_seed,
-    psi::apsi_wrapper::YaclChannel &chl, bool streaming_result,
-    uint32_t bucket_idx) {
+    const std::vector<::apsi::LabelKey> &label_keys, uint128_t &shuffle_seed,
+    uint64_t &shuffle_counter, psi::apsi_wrapper::YaclChannel &chl,
+    bool streaming_result, uint32_t bucket_idx) {
   // Create query and send to Sender
   auto query = create_query(items, bucket_idx);
   chl.send(std::move(query.first));
@@ -205,7 +205,7 @@ std::vector<::apsi::receiver::MatchRecord> DkPirReceiver::RequestQuery(
   SendRowCount(data_query_result, chl.get_lctx());
 
   // Receiver gets the shuffle seed
-  shuffle_seed = ReceiveShuffleSeed(chl.get_lctx());
+  ReceiveShuffleSeed(chl.get_lctx(), shuffle_seed, shuffle_counter);
 
   return data_query_result;
 }
@@ -282,16 +282,19 @@ void DkPirReceiver::SendRowCount(
   SPDLOG_INFO("Sent the plaintext of the total row count");
 }
 
-uint64_t DkPirReceiver::ReceiveShuffleSeed(
-    const std::shared_ptr<yacl::link::Context> &lctx) {
-  uint64_t shuffle_seed = 0;
+void DkPirReceiver::ReceiveShuffleSeed(
+    const std::shared_ptr<yacl::link::Context> &lctx, uint128_t &shuffle_seed,
+    uint64_t &shuffle_counter) {
   yacl::Buffer shuffle_seed_buf =
       lctx->Recv(lctx->NextRank(), "Recv shuffle seed");
-  YACL_ENFORCE(shuffle_seed_buf.size() == sizeof(uint64_t));
-  std::memcpy(&shuffle_seed, shuffle_seed_buf.data(), sizeof(uint64_t));
+  YACL_ENFORCE(shuffle_seed_buf.size() == sizeof(uint128_t));
+  std::memcpy(&shuffle_seed, shuffle_seed_buf.data(), sizeof(uint128_t));
 
-  SPDLOG_INFO("Received the shuffle seed");
+  yacl::Buffer shuffle_counter_buf =
+      lctx->Recv(lctx->NextRank(), "Recv shuffle counter");
+  YACL_ENFORCE(shuffle_counter_buf.size() == sizeof(uint64_t));
+  std::memcpy(&shuffle_counter, shuffle_counter_buf.data(), sizeof(uint64_t));
 
-  return shuffle_seed;
+  SPDLOG_INFO("Received the shuffle seed and shuffle counter");
 }
 }  // namespace psi::dkpir

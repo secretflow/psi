@@ -25,13 +25,14 @@ class DkPirSender : public psi::apsi_wrapper::Sender {
 
   static ::apsi::OPRFResponse GenerateOPRFResponse(
       const ::apsi::OPRFRequest &oprf_request, ::apsi::oprf::OPRFKey key,
-      const uint64_t &shuffle_seed);
+      const uint128_t &shuffle_seed, const uint64_t &shuffle_counter);
 
   // Generate and send a response to an OPRF request, which is a shuffled
   // result.
   static void RunOPRF(
       const ::apsi::OPRFRequest &oprf_request, ::apsi::oprf::OPRFKey key,
-      const uint64_t &shuffle_seed, ::apsi::network::Channel &chl,
+      const uint128_t &shuffle_seed, const uint64_t &shuffle_counter,
+      ::apsi::network::Channel &chl,
       std::function<void(::apsi::network::Channel &, ::apsi::Response)>
           send_fun = BasicSend<::apsi::Response::element_type>);
 

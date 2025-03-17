@@ -36,7 +36,8 @@ DkPirSenderDispatcher::DkPirSenderDispatcher(
     : sender_db_(std::move(sender_db)),
       sender_cnt_db_(std::move(sender_cnt_db)),
       oprf_key_(std::move(oprf_key)),
-      shuffle_seed_(yacl::crypto::SecureRandU64()),
+      shuffle_seed_(yacl::crypto::SecureRandSeed()),
+      shuffle_counter_(yacl::crypto::SecureRandU64()),
       query_count_(0),
       result_file_(result_file) {
   if (!sender_db_ || !sender_cnt_db_) {
@@ -179,9 +180,12 @@ void DkPirSenderDispatcher::CheckRowCountAndSendShuffleSeed(
       row_count, result_file_);
 
   lctx->SendAsync(lctx->NextRank(),
-                  yacl::ByteContainerView(&shuffle_seed_, sizeof(uint64_t)),
+                  yacl::ByteContainerView(&shuffle_seed_, sizeof(uint128_t)),
                   "Send shuffle seed");
-  SPDLOG_INFO("Sent the shuffle seed");
+  lctx->SendAsync(lctx->NextRank(),
+                  yacl::ByteContainerView(&shuffle_counter_, sizeof(uint64_t)),
+                  "Send shuffle counter");
+  SPDLOG_INFO("Sent the shuffle seed and counter");
 }
 
 void DkPirSenderDispatcher::SaveResult(uint64_t row_count) {
@@ -228,7 +232,8 @@ void DkPirSenderDispatcher::dispatch_oprf(
     query_count_ = oprf_request->data.size() / ::apsi::oprf::oprf_query_size;
     SPDLOG_INFO("Receiver queried a total of {} keys", query_count_);
 
-    DkPirSender::RunOPRF(oprf_request, oprf_key_, shuffle_seed_, chl);
+    DkPirSender::RunOPRF(oprf_request, oprf_key_, shuffle_seed_,
+                         shuffle_counter_, chl);
   } catch (const std::exception &ex) {
     APSI_LOG_ERROR("Sender threw an exception while processing OPRF request: "
                    << ex.what());

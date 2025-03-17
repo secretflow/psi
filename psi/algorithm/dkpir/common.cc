@@ -17,6 +17,8 @@
 #include <fstream>
 #include <sstream>
 
+#include "yacl/crypto/rand/rand.h"
+
 #include "psi/wrapper/apsi/utils/sender_db.h"
 
 #include "psi/algorithm/dkpir/secret_key.pb.h"
@@ -96,13 +98,13 @@ void PrintIntersectionResults(
     const std::vector<std::string> &orig_items,
     const std::vector<::apsi::Item> &items,
     const std::vector<::apsi::receiver::MatchRecord> &intersection,
-    const uint64_t &shuffle_seed, const std::string &out_file,
-    bool append_to_outfile) {
+    const uint128_t &shuffle_seed, const uint64_t &shuffle_counter,
+    const std::string &out_file, bool append_to_outfile) {
   if (orig_items.size() != items.size()) {
     throw std::invalid_argument("orig_items must have same size as items");
   }
 
-  std::mt19937 gen(shuffle_seed);
+  yacl::crypto::YaclReplayUrbg<uint32_t> gen(shuffle_seed, shuffle_counter);
   std::vector<uint64_t> shuffle_indexes(orig_items.size());
   for (uint64_t i = 0; i < orig_items.size(); ++i) {
     shuffle_indexes[i] = i;

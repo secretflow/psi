@@ -43,8 +43,8 @@ void PrintIntersectionResults(
     const std::vector<std::string> &orig_items,
     const std::vector<::apsi::Item> &items,
     const std::vector<::apsi::receiver::MatchRecord> &intersection,
-    const uint64_t &shuffle_seed, const std::string &out_file,
-    bool append_to_outfile = false);
+    const uint128_t &shuffle_seed, const uint64_t &shuffle_counter,
+    const std::string &out_file, bool append_to_outfile = false);
 
 void PrintTransmittedData(::apsi::network::Channel &channel);
 

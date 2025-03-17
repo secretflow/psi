@@ -210,11 +210,13 @@ int ReceiverOnline(const DkPirReceiverOptions &options,
   }
 
   std::vector<::apsi::receiver::MatchRecord> query_result;
-  uint64_t shuffle_seed = 0;
+  uint128_t shuffle_seed = 0;
+  uint64_t shuffle_counter = 0;
   try {
     SPDLOG_INFO("Sending DkPir query");
     query_result = receiver.RequestQuery(oprf_items, label_keys, shuffle_seed,
-                                         channel, options.streaming_result);
+                                         shuffle_counter, channel,
+                                         options.streaming_result);
     SPDLOG_INFO("Received DkPir query response");
   } catch (const std::exception &ex) {
     SPDLOG_WARN("Failed sending DkPir query: {}", ex.what());
@@ -222,7 +224,7 @@ int ReceiverOnline(const DkPirReceiverOptions &options,
   }
 
   PrintIntersectionResults(orig_items, items_vec, query_result, shuffle_seed,
-                           apsi_output_file);
+                           shuffle_counter, apsi_output_file);
 
   PrintTransmittedData(channel);
   psi::apsi_wrapper::cli::print_timing_report(::apsi::util::recv_stopwatch);

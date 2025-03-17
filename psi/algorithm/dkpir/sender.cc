@@ -14,12 +14,15 @@
 
 #include "psi/algorithm/dkpir/sender.h"
 
+#include "yacl/crypto/rand/rand.h"
+
 namespace psi::dkpir {
 
 namespace {
 std::vector<unsigned char> ProcessQueries(
     gsl::span<const unsigned char> oprf_queries,
-    const ::apsi::oprf::OPRFKey &oprf_key, const uint64_t &shuffle_seed) {
+    const ::apsi::oprf::OPRFKey &oprf_key, const uint128_t &shuffle_seed,
+    const uint64_t &shuffle_counter) {
   if (oprf_queries.size() % ::apsi::oprf::oprf_query_size) {
     throw std::invalid_argument("oprf_queries has invalid size");
   }
@@ -38,7 +41,7 @@ std::vector<unsigned char> ProcessQueries(
       std::min<uint64_t>(::apsi::ThreadPoolMgr::GetThreadCount(), query_count);
   std::vector<std::future<void>> futures(task_count);
 
-  std::mt19937 gen(shuffle_seed);
+  yacl::crypto::YaclReplayUrbg<uint32_t> gen(shuffle_seed, shuffle_counter);
   std::vector<uint64_t> shuffle_indexes(query_count);
   for (uint64_t i = 0; i < query_count; ++i) {
     shuffle_indexes[i] = i;
@@ -82,7 +85,7 @@ std::vector<unsigned char> ProcessQueries(
 
 ::apsi::OPRFResponse DkPirSender::GenerateOPRFResponse(
     const ::apsi::OPRFRequest &oprf_request, ::apsi::oprf::OPRFKey key,
-    const uint64_t &shuffle_seed) {
+    const uint128_t &shuffle_seed, const uint64_t &shuffle_counter) {
   STOPWATCH(sender_stopwatch, "DkPirSender::RunOPRF");
 
   if (!oprf_request) {
@@ -99,7 +102,8 @@ std::vector<unsigned char> ProcessQueries(
   }
 
   try {
-    response_oprf->data = ProcessQueries(oprf_request->data, key, shuffle_seed);
+    response_oprf->data =
+        ProcessQueries(oprf_request->data, key, shuffle_seed, shuffle_counter);
   } catch (const std::exception &ex) {
     // Something was wrong with the OPRF request. This can mean malicious
     // data being sent to the sender in an attempt to extract OPRF key.
@@ -113,11 +117,12 @@ std::vector<unsigned char> ProcessQueries(
 
 void DkPirSender::RunOPRF(
     const ::apsi::OPRFRequest &oprf_request, ::apsi::oprf::OPRFKey key,
-    const uint64_t &shuffle_seed, ::apsi::network::Channel &chl,
+    const uint128_t &shuffle_seed, const uint64_t &shuffle_counter,
+    ::apsi::network::Channel &chl,
     std::function<void(::apsi::network::Channel &, ::apsi::Response)>
         send_fun) {
   ::apsi::OPRFResponse response_oprf =
-      GenerateOPRFResponse(oprf_request, key, shuffle_seed);
+      GenerateOPRFResponse(oprf_request, key, shuffle_seed, shuffle_counter);
 
   if (response_oprf->data.empty()) {
     return;

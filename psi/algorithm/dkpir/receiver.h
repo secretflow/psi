@@ -62,9 +62,9 @@ class DkPirReceiver : public psi::apsi_wrapper::Receiver {
   // only be received once the row count verification has been successful.
   std::vector<::apsi::receiver::MatchRecord> RequestQuery(
       const std::vector<::apsi::HashedItem> &items,
-      const std::vector<::apsi::LabelKey> &label_keys, uint64_t &shuffle_seed,
-      psi::apsi_wrapper::YaclChannel &chl, bool streaming_result = true,
-      uint32_t bucket_idx = 0);
+      const std::vector<::apsi::LabelKey> &label_keys, uint128_t &shuffle_seed,
+      uint64_t &shuffle_counter, psi::apsi_wrapper::YaclChannel &chl,
+      bool streaming_result = true, uint32_t bucket_idx = 0);
 
   // Receive the public key of phe from sender
   psi::dkpir::phe::PublicKey ReceivePublicKey(
@@ -82,7 +82,8 @@ class DkPirReceiver : public psi::apsi_wrapper::Receiver {
       const std::shared_ptr<yacl::link::Context> &lctx);
 
   // Receive the shuffle seed used to restore the data
-  uint64_t ReceiveShuffleSeed(const std::shared_ptr<yacl::link::Context> &lctx);
+  void ReceiveShuffleSeed(const std::shared_ptr<yacl::link::Context> &lctx,
+                          uint128_t &shuffle_seed, uint64_t &shuffle_counter);
 };
 
 }  // namespace psi::dkpir

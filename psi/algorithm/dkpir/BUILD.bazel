@@ -41,6 +41,7 @@ psi_cc_library(
     ":query",
     "//psi/wrapper/apsi:sender",
     "//psi/wrapper/apsi:yacl_channel",
+    "@yacl//yacl/crypto/rand:rand",
   ]
 )
 
@@ -68,6 +69,7 @@ psi_cc_library(
     "//psi/wrapper/apsi/utils:sender_db",
     "//psi/wrapper/apsi:yacl_channel",
     "@yacl//yacl/math/mpint:mpint",
+    "@yacl//yacl/crypto/rand:rand",
   ],
 )
 

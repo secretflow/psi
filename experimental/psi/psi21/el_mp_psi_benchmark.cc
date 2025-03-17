@@ -1,4 +1,4 @@
-// Copyright 2022 Ant Group Co., Ltd.
+// Copyright 2024 The secretflow authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 #include <iostream>
 
 #include "benchmark/benchmark.h"
-#include "experimental/psi/psi21/el_mp_psi/el_mp_psi.h"
-#include "experimental/psi/psi21/el_mp_psi/el_sender.h"
+#include "experimental/psi/psi21/el_mp_psi.h"
+#include "experimental/psi/psi21/el_sender.h"
 #include "yacl/base/exception.h"
 #include "yacl/crypto/hash/hash_utils.h"
 #include "yacl/link/test_util.h"

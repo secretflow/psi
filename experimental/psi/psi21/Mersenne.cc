@@ -1,9 +1,3 @@
-// \author Avishay Yanay
-// \organization Bar-Ilan University
-// \email ay.yanay@gmail.com
-//
-// MIT License
-//
 // Copyright (c) 2018 AvishayYanay
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy

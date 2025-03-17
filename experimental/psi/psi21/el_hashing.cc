@@ -1,4 +1,4 @@
-// Copyright 2024 zhangwfjh
+// Copyright 2024 The secretflow authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "experimental/psi/psi21/el_mp_psi/el_hashing.h"
+#include "experimental/psi/psi21/el_hashing.h"
 
 #include <random>
 #include <utility>

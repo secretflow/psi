@@ -1,0 +1,113 @@
+# Copyright 2024 The secretflow authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library", "psi_cc_test")
+
+package(default_visibility = ["//visibility:public"])
+
+psi_cc_library(
+    name = "el_hashing",
+    srcs = ["el_hashing.cc"],
+    hdrs = ["el_hashing.h"],
+    deps = [
+        "@yacl//yacl/base:exception",
+        "@yacl//yacl/base:int128",
+        "@yacl//yacl/crypto/rand",
+    ],
+)
+
+psi_cc_library(
+    name = "Mersenne",
+    srcs = ["Mersenne.cc"],
+    hdrs = ["Mersenne.h"],
+    deps = [
+        ":el_hashing",
+    ],
+)
+
+psi_cc_library(
+    name = "el_sender",
+    srcs = ["el_sender.cc"],
+    hdrs = ["el_sender.h"],
+    deps = [
+        ":el_hashing",
+        ":Mersenne",
+        "@yacl//yacl/base:int128",
+        "@yacl//yacl/crypto/rand",
+        "@yacl//yacl/crypto/tools:ro",
+        "@yacl//yacl/utils:serialize",
+        "@yacl//yacl/link",
+        "@yacl//yacl/kernel/algorithms:base_ot",
+        "@yacl//yacl/kernel/algorithms:iknp_ote",
+        "@yacl//yacl/kernel/algorithms:kkrt_ote",
+    ],
+)
+
+psi_cc_library(
+    name = "el_protocol",
+    srcs = ["el_protocol.cc"],
+    hdrs = ["el_protocol.h"],
+    deps = [
+        ":Mersenne",
+        ":el_sender",
+        "@yacl//yacl/base:int128",
+        "@yacl//yacl/crypto/rand",
+        "@yacl//yacl/crypto/tools:ro",
+        "@yacl//yacl/utils:serialize",
+        "@yacl//yacl/link",
+        "@yacl//yacl/kernel/algorithms:base_ot",
+        "@yacl//yacl/kernel/algorithms:iknp_ote",
+        "@yacl//yacl/kernel/algorithms:kkrt_ote",
+    ],
+)
+
+psi_cc_library(
+    name = "el_mp_psi",
+    srcs = ["el_mp_psi.cc"],
+    hdrs = ["el_mp_psi.h"],
+    deps = [
+        ":el_protocol",
+        ":el_sender",
+        "@yacl//yacl/base:int128",
+        "@yacl//yacl/crypto/rand",
+        "@yacl//yacl/link",
+        "@yacl//yacl/utils:serialize",
+        "@yacl//yacl/crypto/hash:hash_utils",
+        "//psi/utils:communication",
+        "//psi/utils:sync",
+    ],
+)
+
+psi_cc_test(
+    name = "el_mp_psi_test",
+    srcs = ["el_mp_psi_test.cc"],
+    deps = [
+        ":el_mp_psi",
+        "//psi/utils:test_utils",
+        "@yacl//yacl/link:test_util",
+    ],
+)
+
+psi_cc_binary(
+    name = "el_mp_psi_benchmark",
+    srcs = ["el_mp_psi_benchmark.cc"],
+    deps = [
+        ":el_sender",
+        ":el_mp_psi",
+        "@com_github_google_benchmark//:benchmark_main",
+        "@yacl//yacl/base:exception",
+        "@yacl//yacl/crypto/hash:hash_utils",
+        "@yacl//yacl/link:test_util",
+    ],
+)

@@ -1,4 +1,4 @@
-// Copyright 2024 zhangwfjh
+// Copyright 2024 The secretflow authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "experimental/psi/psi21/el_mp_psi/el_sender.h"
+#include "experimental/psi/psi21/el_sender.h"
 
 #include <algorithm>
 #include <cmath>
 #include <memory>
 // #include <libscapi/include/primitives/Matrix.hpp>
 
-#include "experimental/psi/psi21/el_mp_psi/Mersenne.h"
-#include "experimental/psi/psi21/el_mp_psi/el_hashing.h"
+#include "experimental/psi/psi21/Mersenne.h"
+#include "experimental/psi/psi21/el_hashing.h"
 #include "yacl/crypto/rand/rand.h"
 #include "yacl/crypto/tools/ro.h"
 #include "yacl/kernel/algorithms/base_ot.h"

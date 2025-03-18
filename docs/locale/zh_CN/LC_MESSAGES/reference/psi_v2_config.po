@@ -19,11 +19,11 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md:1
 msgid "PSI v2 Configuration"
-msgstr ""
+msgstr "PSI v2 配置"
 
 #: ../../reference/psi_v2_config.md:3
 msgid "Table of Contents"
-msgstr ""
+msgstr "目录"
 
 #: ../../reference/psi_v2_config.md:7 ../../reference/psi_v2_config.md:40
 msgid "Messages"
@@ -119,7 +119,7 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md:44
 msgid "Logging level for default logger. Default to info. Supports:"
-msgstr ""
+msgstr "默认日志记录的等级，默认为 info，支持以下等级："
 
 #: ../../reference/psi_v2_config.md:48
 msgid "trace: SPDLOG_LEVEL_TRACE"
@@ -151,15 +151,15 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md
 msgid "Field"
-msgstr ""
+msgstr "数据域"
 
 #: ../../reference/psi_v2_config.md
 msgid "Type"
-msgstr ""
+msgstr "类型"
 
 #: ../../reference/psi_v2_config.md
 msgid "Description"
-msgstr ""
+msgstr "描述"
 
 #: ../../reference/psi_v2_config.md
 msgid "logging_level"
@@ -171,7 +171,7 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md
 msgid "none"
-msgstr ""
+msgstr "无"
 
 #: ../../reference/psi_v2_config.md
 msgid "trace_path"
@@ -179,7 +179,7 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md
 msgid "The path of trace. Deafult to /tmp/psi.trace"
-msgstr ""
+msgstr "追踪的路径，默认为 /tmp/psi.trace"
 
 #: ../../reference/psi_v2_config.md:65
 msgid "EcdhConfig"
@@ -187,7 +187,7 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md:66
 msgid "Configs for ECDH protocol."
-msgstr ""
+msgstr "为 ECDH 协议的配置"
 
 #: ../../reference/psi_v2_config.md
 msgid "curve"
@@ -207,7 +207,7 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md
 msgid "If not set, use default value: 4096."
-msgstr ""
+msgstr "如果未指定，则默认为 4096"
 
 #: ../../reference/psi_v2_config.md:77
 msgid "InputAttr"
@@ -223,7 +223,7 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md
 msgid "Keys in input file are unique. If not set, use default value: false."
-msgstr ""
+msgstr "指定输入文件中的键（key）是否唯一，如果未指定，则默认为 false"
 
 #: ../../reference/psi_v2_config.md:88
 msgid "InternalRecoveryRecord"
@@ -251,7 +251,7 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md:102
 msgid "IO configuration."
-msgstr ""
+msgstr "输入/输出配置"
 
 #: ../../reference/psi_v2_config.md
 msgid "type"
@@ -267,7 +267,7 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md
 msgid "Required for FILE."
-msgstr ""
+msgstr "FILE 的路径"
 
 #: ../../reference/psi_v2_config.md:113
 msgid "KkrtConfig"
@@ -275,7 +275,7 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md:114
 msgid "Configs for KKRT protocol"
-msgstr ""
+msgstr "KKRT 协议的配置"
 
 #: ../../reference/psi_v2_config.md
 msgid "bucket_size"
@@ -288,7 +288,7 @@ msgid ""
 " the memory of host is limited, you should set a smaller bucket size. "
 "Otherwise, you should use a larger one. If not set, use default value: 1 "
 "<< 20."
-msgstr ""
+msgstr "因为整个输入可能不能完全放入内存中，所以输入可能会被分成桶（bucket）。bucket_size 用于指定每个桶中的元素数量。如果内存有限，则应设置较小的值，否则应设置较大的值。如果未指定，默认值为 1 << 20。"
 
 #: ../../reference/psi_v2_config.md:124
 msgid "OutputAttr"
@@ -302,7 +302,7 @@ msgstr ""
 msgid ""
 "Null representation in output csv file. If not set, use default value: "
 "\"NULL\"."
-msgstr ""
+msgstr "CSV 输出文件中空值的表示。如果未指定，默认值为 \"NULL\"。"
 
 #: ../../reference/psi_v2_config.md:135
 msgid "ProtocolConfig"
@@ -310,7 +310,7 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md:136
 msgid "Any items related to PSI protocols."
-msgstr ""
+msgstr "所有与 PSI 协议相关的内容"
 
 #: ../../reference/psi_v2_config.md
 msgid "protocol"
@@ -334,7 +334,7 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md
 msgid "Reveal result to sender."
-msgstr ""
+msgstr "指定是否将结果发送给 sender"
 
 #: ../../reference/psi_v2_config.md
 msgid "ecdh_config"
@@ -346,7 +346,7 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md
 msgid "For ECDH protocol."
-msgstr ""
+msgstr "ECDH 协议的配置"
 
 #: ../../reference/psi_v2_config.md
 msgid "kkrt_config"
@@ -358,7 +358,7 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md
 msgid "For KKRT protocol."
-msgstr ""
+msgstr "KKRT 协议的配置"
 
 #: ../../reference/psi_v2_config.md
 msgid "rr22_config"
@@ -370,7 +370,7 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md
 msgid "For RR22 protocol."
-msgstr ""
+msgstr "RR22 协议的配置"
 
 #: ../../reference/psi_v2_config.md:151
 msgid "PsiConfig"
@@ -378,44 +378,45 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md:152
 msgid "The top level of Configs. run(PsiConfig)->PsiReport"
-msgstr ""
+msgstr "顶层配置。run(PsiConfig)->PsiReport"
 
 #: ../../reference/psi_v2_config.md:155
 msgid "Advanced Joins Type: Inner Join e.g. If input of receiver is"
-msgstr ""
+msgstr "advanced_join_type 有很多种\n"
+"类型：Inner Join，例如，若 receiver 的输入是"
 
 #: ../../reference/psi_v2_config.md:166
 msgid "and input of sender is"
-msgstr ""
+msgstr "sender 的输入是"
 
 #: ../../reference/psi_v2_config.md:175
 msgid "After inner join. The output of receiver is:"
-msgstr ""
+msgstr "在 inner join 后，receiver 的输出是"
 
 #: ../../reference/psi_v2_config.md:187
 msgid "The output of sender is"
-msgstr ""
+msgstr "sender 的输出是"
 
 #: ../../reference/psi_v2_config.md:199
 msgid "Type: Left Join After left join. The output of left side is:"
-msgstr ""
+msgstr "类型：Left Join After left join，左侧的输出是"
 
 #: ../../reference/psi_v2_config.md:213 ../../reference/psi_v2_config.md:240
 #: ../../reference/psi_v2_config.md:268 ../../reference/psi_v2_config.md:291
 msgid "The output of right side is"
-msgstr ""
+msgstr "右侧的输出是"
 
 #: ../../reference/psi_v2_config.md:226
 msgid "Type: Right Join After right join. The output of left side is:"
-msgstr ""
+msgstr "类型：Right Join After right join，左侧的输出是"
 
 #: ../../reference/psi_v2_config.md:253
 msgid "Type: Full Join After full join. The output of left side is:"
-msgstr ""
+msgstr "类型：Full Join After full join，左侧的输出是"
 
 #: ../../reference/psi_v2_config.md:282
 msgid "Type: Difference After difference. The output of left side is:"
-msgstr ""
+msgstr "类型：Difference After difference，左侧的输出是"
 
 #: ../../reference/psi_v2_config.md
 msgid "protocol_config"
@@ -427,7 +428,7 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md
 msgid "Configs for protocols."
-msgstr ""
+msgstr "协议的配置"
 
 #: ../../reference/psi_v2_config.md
 msgid "input_config"
@@ -439,7 +440,7 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md
 msgid "Configs for input."
-msgstr ""
+msgstr "输入的配置"
 
 #: ../../reference/psi_v2_config.md
 msgid "output_config"
@@ -447,7 +448,7 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md
 msgid "Configs for output."
-msgstr ""
+msgstr "输出的配置"
 
 #: ../../reference/psi_v2_config.md
 msgid "keys"
@@ -459,7 +460,7 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md
 msgid "keys for intersection."
-msgstr ""
+msgstr "求交所用的键（key）"
 
 #: ../../reference/psi_v2_config.md
 msgid "debug_options"
@@ -479,7 +480,7 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md
 msgid "If true, the check of duplicated items will be skiped."
-msgstr ""
+msgstr "如果设为 true，那么会跳过对重复项目的检查"
 
 #: ../../reference/psi_v2_config.md
 msgid "disable_alignment"
@@ -487,7 +488,7 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md
 msgid "It true, output is not promised to be aligned."
-msgstr ""
+msgstr "如果设为 true，那么输出不一定保证对齐"
 
 #: ../../reference/psi_v2_config.md
 msgid "recovery_config"
@@ -499,7 +500,7 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md
 msgid "Configs for recovery."
-msgstr ""
+msgstr "协议恢复配置"
 
 #: ../../reference/psi_v2_config.md
 msgid "advanced_join_type"
@@ -517,7 +518,7 @@ msgstr ""
 msgid ""
 "Required if advanced_join_type is ADVANCED_JOIN_TYPE_LEFT_JOIN or "
 "ADVANCED_JOIN_TYPE_RIGHT_JOIN."
-msgstr ""
+msgstr "如果 advanced_join_type 设置为了 ADVANCED_JOIN_TYPE_LEFT_JOIN 或 ADVANCED_JOIN_TYPE_RIGHT_JOIN，则该项必填"
 
 #: ../../reference/psi_v2_config.md
 msgid "check_hash_digest"
@@ -527,7 +528,7 @@ msgstr ""
 msgid ""
 "Check if hash digest of keys from parties are equal to determine whether "
 "to early-stop."
-msgstr ""
+msgstr "检查参与方的键的哈希值是否相等，来确定是否提前终止协议"
 
 #: ../../reference/psi_v2_config.md
 msgid "input_attr"
@@ -539,7 +540,7 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md
 msgid "Input attributes."
-msgstr ""
+msgstr "输入属性"
 
 #: ../../reference/psi_v2_config.md
 msgid "output_attr"
@@ -551,7 +552,7 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md
 msgid "Output attributes."
-msgstr ""
+msgstr "输出属性"
 
 #: ../../reference/psi_v2_config.md:319
 msgid "RecoveryCheckpoint"
@@ -559,11 +560,11 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md:320
 msgid "Save some critical information for future recovery."
-msgstr ""
+msgstr "保存将来用于恢复协议的关键信息"
 
 #: ../../reference/psi_v2_config.md
 msgid "Stage of PSI."
-msgstr ""
+msgstr "PSI 协议的阶段"
 
 #: ../../reference/psi_v2_config.md
 msgid "config"
@@ -575,7 +576,7 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md
 msgid "A copy of origin PSI config."
-msgstr ""
+msgstr "保存最初 PSI 配置的备份"
 
 #: ../../reference/psi_v2_config.md
 msgid "input_hash_digest"
@@ -587,7 +588,7 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md
 msgid "Hash digest of input keys."
-msgstr ""
+msgstr "输入的键的哈希值"
 
 #: ../../reference/psi_v2_config.md
 msgid "ecdh_dual_masked_item_self_count"
@@ -595,15 +596,15 @@ msgstr ""
 
 #: ../../reference/psi_v2_config.md
 msgid "Saved dual masked item count from self originally. PROTOCOL_ECDH only."
-msgstr ""
+msgstr "保存自己的双掩盖的元素数量，只有 PROTOCOL_ECDH 才会用到"
 
 #: ../../reference/psi_v2_config.md
 msgid "Saved dual masked item count from peer originally. PROTOCOL_ECDH only."
-msgstr ""
+msgstr "保存对方的双掩盖的元素数量，只有 PROTOCOL_ECDH 才会用到"
 
 #: ../../reference/psi_v2_config.md
 msgid "Saved parsed bucket count. PROTOCOL_KKRT and PROTOCOL_RR22 only."
-msgstr ""
+msgstr "保存已解析的桶的数量，只有 PROTOCOL_KKRT 和 PROTOCOL_RR22 才会用到"
 
 #: ../../reference/psi_v2_config.md:335
 msgid "RecoveryConfig"
@@ -615,7 +616,7 @@ msgid ""
 "network failures and restart, the task can resume to the latest "
 "checkpoint to save time. However, enabling recovery would due in extra "
 "disk IOs and disk space occupation."
-msgstr ""
+msgstr "协议恢复配置。如果 PSI 协议意外失败，如发生网络错误，协议可以恢复到最近的检查点。以此可以节省时间，但是会有额外的磁盘读写和占用。"
 
 #: ../../reference/psi_v2_config.md
 msgid "enabled"

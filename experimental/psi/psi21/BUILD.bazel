@@ -41,16 +41,16 @@ psi_cc_library(
     srcs = ["el_sender.cc"],
     hdrs = ["el_sender.h"],
     deps = [
-        ":el_hashing",
         ":Mersenne",
+        ":el_hashing",
         "@yacl//yacl/base:int128",
         "@yacl//yacl/crypto/rand",
         "@yacl//yacl/crypto/tools:ro",
-        "@yacl//yacl/utils:serialize",
-        "@yacl//yacl/link",
         "@yacl//yacl/kernel/algorithms:base_ot",
         "@yacl//yacl/kernel/algorithms:iknp_ote",
         "@yacl//yacl/kernel/algorithms:kkrt_ote",
+        "@yacl//yacl/link",
+        "@yacl//yacl/utils:serialize",
     ],
 )
 
@@ -64,11 +64,11 @@ psi_cc_library(
         "@yacl//yacl/base:int128",
         "@yacl//yacl/crypto/rand",
         "@yacl//yacl/crypto/tools:ro",
-        "@yacl//yacl/utils:serialize",
-        "@yacl//yacl/link",
         "@yacl//yacl/kernel/algorithms:base_ot",
         "@yacl//yacl/kernel/algorithms:iknp_ote",
         "@yacl//yacl/kernel/algorithms:kkrt_ote",
+        "@yacl//yacl/link",
+        "@yacl//yacl/utils:serialize",
     ],
 )
 
@@ -79,13 +79,13 @@ psi_cc_library(
     deps = [
         ":el_protocol",
         ":el_sender",
+        "//psi/utils:communication",
+        "//psi/utils:sync",
         "@yacl//yacl/base:int128",
+        "@yacl//yacl/crypto/hash:hash_utils",
         "@yacl//yacl/crypto/rand",
         "@yacl//yacl/link",
         "@yacl//yacl/utils:serialize",
-        "@yacl//yacl/crypto/hash:hash_utils",
-        "//psi/utils:communication",
-        "//psi/utils:sync",
     ],
 )
 
@@ -103,8 +103,8 @@ psi_cc_binary(
     name = "el_mp_psi_benchmark",
     srcs = ["el_mp_psi_benchmark.cc"],
     deps = [
-        ":el_sender",
         ":el_mp_psi",
+        ":el_sender",
         "@com_github_google_benchmark//:benchmark_main",
         "@yacl//yacl/base:exception",
         "@yacl//yacl/crypto/hash:hash_utils",

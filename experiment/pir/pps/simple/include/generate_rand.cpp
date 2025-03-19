@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "/root/pir/simple/include/generate_rand.h"
+#include "generate_rand.h"
 #include <limits>
 #include <vector>
 
@@ -30,7 +30,12 @@ __uint128_t generate_128bit_random(std::random_device &rd) {
 
 std::vector<__uint128_t> generate_random_vector(size_t size,
                                                 const size_t &modulus) {
-  assert(modulus > 0);
+  if (size == 0) {
+    return {};
+  }
+  if (modulus <= 0) {
+    throw std::invalid_argument("modulus must be greater than 0");
+  }
   std::random_device rd;
   std::vector<__uint128_t> result(size);
   for (size_t i = 0; i < size; i++) {

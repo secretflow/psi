@@ -12,13 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "/root/pir/simple/include/inner_product.h"
+#include "inner_product.h"
 
 namespace pir::simple {
 __uint128_t fast_inner_product_modq(const std::vector<__uint128_t> &row,
                                     const std::vector<__uint128_t> &col,
                                     const size_t &q) {
-  assert(row.size() == col.size());
+  if (row.size() != col.size()) {
+    throw std::invalid_argument("Row and column sizes do not match");
+  }
   const size_t len = row.size();
   const __uint128_t q128 = static_cast<__uint128_t>(q);
   __uint128_t result = 0;
@@ -51,4 +53,3 @@ __uint128_t fast_inner_product_modq(const std::vector<__uint128_t> &row,
   return result;
 }
 }  // namespace pir::simple
-

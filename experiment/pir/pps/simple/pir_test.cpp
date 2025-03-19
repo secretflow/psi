@@ -16,7 +16,6 @@
 #include <string>
 #include <thread>
 #include <vector>
-
 #include "/root/pir/simple/include/generate_rand.h"
 #include "/root/pir/simple/include/pir_client.h"
 #include "/root/pir/simple/include/pir_server.h"
@@ -31,6 +30,7 @@ int main() {
   int radius = 4;
   double sigma = 6.8;
 
+  try {
   std::vector<std::vector<__uint128_t>> A;
   A.resize(n);
   size_t row = static_cast<size_t>(sqrt(N));
@@ -64,5 +64,8 @@ int main() {
   client_thread.join();
 
   client.client_recover();
+} catch (const std::exception &e) {
+  std::cerr << e.what() << std::endl;
+}
   return 0;
 }

@@ -14,7 +14,6 @@
 
 #pragma once
 
-#include <cassert>
 #include <cstdint>
 #include <iomanip>
 #include <random>

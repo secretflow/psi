@@ -15,7 +15,6 @@
 #pragma once
 
 #include <algorithm>
-#include <cassert>
 #include <cmath>
 #include <cstdint>
 #include <iostream>
@@ -24,11 +23,9 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-
-#include "/root/SimplePIR/data_transmit.h"
-#include "/root/SimplePIR/generate_rand.h"
-#include "/root/SimplePIR/inner_product.h"
-#include "/root/SimplePIR/regev_lwe.h"
+#include "data_transmit.h"
+#include "generate_rand.h"
+#include "inner_product.h"
 
 namespace pir::simple {
 class PIRClient {
@@ -63,7 +60,9 @@ class PIRClient {
   int port_;
 
   std::vector<double> precompute_discrete_gaussian() {
-    assert(radius_ > 0 && sigma_ > 0);
+    if (radius_ <= 0 || sigma_ <= 0) {
+      throw std::invalid_argument("Invalid radius or sigma");
+    }
 
     const double range = radius_ * sigma_;
     const size_t max_k = static_cast<size_t>(floor(range));

@@ -15,8 +15,8 @@
 #pragma once
 
 #include <algorithm>
-#include <cassert>
 #include <cstdint>
+#include <stdexcept>
 #include <vector>
 
 namespace pir::simple {

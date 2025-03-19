@@ -14,11 +14,10 @@
 
 #pragma once
 
-#include <unistd.h>
-
 #include <arpa/inet.h>
-#include <cassert>
+#include <unistd.h>
 #include <cstdint>
+#include <cstdio>
 #include <cstring>
 #include <string>
 #include <vector>
@@ -42,7 +41,10 @@ class Sender {
     while (sent < size) {
       ssize_t res =
           send(sockfd, static_cast<const char *>(data) + sent, size - sent, 0);
-      assert(res >= 0);
+      if (res < 0) {
+        perror("send");
+        exit(1);
+      }
       sent += res;
     }
   }
@@ -65,7 +67,10 @@ class Receiver {
     while (received < size) {
       ssize_t res = recv(sockfd, static_cast<char *>(data) + received,
                          size - received, 0);
-      assert(res >= 0);
+      if (res < 0) {
+        perror("recv");
+        exit(1);
+      }
       received += res;
     }
   }

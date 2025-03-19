@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "/root/pir/simple/include/data_transmit.h"
-
+#include "data_transmit.h"
 #include <iomanip>
 #include <iostream>
 #include <string>
@@ -21,8 +20,9 @@
 
 namespace pir::simple {
 std::ostream &operator<<(std::ostream &os, const __uint128_t &value) {
-  if (value == 0)
+  if (value == 0) {
     return os << "0";
+  }
 
   uint64_t high = value >> 64;
   uint64_t low = static_cast<uint64_t>(value);
@@ -35,7 +35,10 @@ Sender::Sender(const std::string &ip, int port) : ip_(ip), port_(port) {}
 
 void Sender::sendData(const std::vector<__uint128_t> &data) {
   int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  assert(sockfd >= 0);
+  if (sockfd < 0) {
+    std::cerr << "Error: Failed to create socket" << std::endl;
+    exit(1);
+  }
 
   struct sockaddr_in serv_addr;
   serv_addr.sin_family = AF_INET;
@@ -43,7 +46,10 @@ void Sender::sendData(const std::vector<__uint128_t> &data) {
   inet_pton(AF_INET, ip_.c_str(), &serv_addr.sin_addr);
 
   int res = connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
-  assert(res >= 0);
+  if (res < 0) {
+    std::cerr << "Error: Failed to connect to server" << std::endl;
+    exit(1);
+  }
 
   // send data size
   size_t size = htonl(data.size());
@@ -59,7 +65,10 @@ void Sender::sendData(const std::vector<__uint128_t> &data) {
 
 Receiver::Receiver(int port) : port_(port) {
   sockfd_ = socket(AF_INET, SOCK_STREAM, 0);
-  assert(sockfd_ >= 0);
+  if (sockfd_ < 0) {
+    std::cerr << "Error: Failed to create socket" << std::endl;
+    exit(1);
+  }
 
   struct sockaddr_in serv_addr;
   serv_addr.sin_family = AF_INET;
@@ -67,10 +76,16 @@ Receiver::Receiver(int port) : port_(port) {
   serv_addr.sin_port = htons(port_);
 
   int res = bind(sockfd_, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
-  assert(res >= 0);
+  if (res < 0) {
+    std::cerr << "Error: Failed to bind socket" << std::endl;
+    exit(1);
+  }
 
   res = listen(sockfd_, 5);
-  assert(res >= 0);
+  if (res < 0) {
+    std::cerr << "Error: Failed to listen on socket" << std::endl;
+    exit(1);
+  }
   std::cout << "Waiting for connection..." << std::endl;
 }
 
@@ -80,7 +95,10 @@ std::vector<__uint128_t> Receiver::receiveData() {
   struct sockaddr_in cli_addr;
   socklen_t clilen = sizeof(cli_addr);
   int newsockfd = accept(sockfd_, (struct sockaddr *)&cli_addr, &clilen);
-  assert(newsockfd >= 0);
+  if (newsockfd < 0) {
+    std::cerr << "Error: Failed to accept connection" << std::endl;
+    exit(1);
+  }
 
   // receive data size
   size_t size;

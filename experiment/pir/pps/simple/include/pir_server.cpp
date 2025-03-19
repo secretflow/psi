@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "/root/pir/simple/include/pir_server.h"
+#include "pir_server.h"
 #include <iostream>
 #include <vector>
 

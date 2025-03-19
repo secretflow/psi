@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "/root/pir/simple/include/pir_client.h"
+#include "pir_client.h"
 #include <iostream>
 #include <vector>
-#include "/root/pir/simple/include/inner_product.h"
 
 namespace pir::simple {
 
@@ -33,7 +32,9 @@ PIRClient::PIRClient(size_t n, size_t q, size_t N, size_t p, int radius,
 
 void PIRClient::matrix_transpose_128(
     const std::vector<std::vector<__uint128_t>> &mat) {
-  assert(mat.size() > 0);
+  if (mat.empty()) {
+    throw std::invalid_argument("Empty matrix");
+  }
 
   const size_t row = mat.size();
   const size_t col = mat[0].size();

@@ -14,16 +14,14 @@
 
 #pragma once
 
-#include <cassert>
 #include <cmath>
 #include <cstdint>
 #include <iostream>
 #include <string>
 #include <vector>
-
-#include "/root/SimplePIR/data_transmit.h"
-#include "/root/SimplePIR/generate_rand.h"
-#include "/root/SimplePIR/inner_product.h"
+#include "data_transmit.h"
+#include "generate_rand.h"
+#include "inner_product.h"
 
 namespace pir::simple {
 class PIRServer {

@@ -69,23 +69,23 @@ msgstr "[任务输入配置](#taskinputconfig)"
 
 #: ../../reference/launch_config.md:25
 msgid "[TaskInputConfig.SfPsiConfigMapEntry](#taskinputconfigsfpsiconfigmapentry)"
-msgstr "[任务输入配置.SfPsi配置映射项](#taskinputconfigsfpsiconfigmapentry)"
+msgstr "[TaskInputConfig.SfPsiConfigMapEntry](#taskinputconfigsfpsiconfigmapentry)"
 
 #: ../../reference/launch_config.md:33
 msgid "[ContextDescProto](#contextdescproto)"
-msgstr "[上下文描述协议](#contextdescproto)"
+msgstr "[ContextDescProto](#contextdescproto)"
 
 #: ../../reference/launch_config.md:34
 msgid "[PartyProto](#partyproto)"
-msgstr "[参与方协议](#partyproto)"
+msgstr "[PartyProto](#partyproto)"
 
 #: ../../reference/launch_config.md:35
 msgid "[RetryOptionsProto](#retryoptionsproto)"
-msgstr "[重试选项协议](#retryoptionsproto)"
+msgstr "[RetryOptionsProto](#retryoptionsproto)"
 
 #: ../../reference/launch_config.md:36
 msgid "[SSLOptionsProto](#ssloptionsproto)"
-msgstr "[SSL选项协议](#ssloptionsproto)"
+msgstr "[SSLOptionsProto](#ssloptionsproto)"
 
 #: ../../reference/launch_config.md:41
 msgid "[Scalar Value Types](#scalar-value-types)"
@@ -389,7 +389,7 @@ msgstr ""
 
 #: ../../reference/launch_config.md:150
 msgid "TaskInputConfig.SfPsiConfigMapEntry"
-msgstr "任务输入配置.SfPsi配置映射项"
+msgstr "TaskInputConfig.SfPsiConfigMapEntry"
 
 #: ../../reference/launch_config.md
 msgid "key"
@@ -405,7 +405,7 @@ msgstr "[ psi.LaunchConfig](#psilaunchconfig)"
 
 #: ../../reference/launch_config.md:171
 msgid "ContextDescProto"
-msgstr "上下文描述协议"
+msgstr "ContextDescProto"
 
 #: ../../reference/launch_config.md:172
 msgid "Configuration for link config."
@@ -533,7 +533,7 @@ msgstr ""
 
 #: ../../reference/launch_config.md:208
 msgid "PartyProto"
-msgstr ""
+msgstr "PartyProto"
 
 #: ../../reference/launch_config.md
 msgid "host"
@@ -541,7 +541,7 @@ msgstr "host"
 
 #: ../../reference/launch_config.md:220
 msgid "RetryOptionsProto"
-msgstr "参与方协议"
+msgstr "RetryOptionsProto"
 
 #: ../../reference/launch_config.md:221
 msgid "Retry options."
@@ -616,7 +616,7 @@ msgstr ""
 
 #: ../../reference/launch_config.md:237
 msgid "SSLOptionsProto"
-msgstr "SSL选项协议"
+msgstr "SSLOptionsProto"
 
 #: ../../reference/launch_config.md:238
 msgid "SSL options."
@@ -658,7 +658,7 @@ msgid ""
 "Set the trusted CA file to verify the peer's certificate If empty, use "
 "the system default CA files"
 msgstr ""
-""
+"设置受信任的证书颁发机构（CA）文件以验证对等方的证书。如果为空，则使用系统默认的CA文件。"
 
 #: ../../reference/launch_config.md:255
 msgid "Scalar Value Types"

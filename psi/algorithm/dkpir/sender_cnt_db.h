@@ -18,16 +18,20 @@
 
 #include "psi/wrapper/apsi/utils/common.h"
 
+#include "psi/proto/psi.pb.h"
+
 namespace psi::dkpir {
 std::shared_ptr<::apsi::sender::SenderDB> GenerateSenderCntDB(
     const std::string &db_file, const std::string &params_file,
     const std::string &sk_file, size_t nonce_byte_count, bool compress,
-    ::apsi::oprf::OPRFKey &oprf_key, const std::vector<std::string> &keys = {},
+    CurveType curve_type, ::apsi::oprf::OPRFKey &oprf_key,
+    const std::vector<std::string> &keys = {},
     const std::vector<std::string> &labels = {});
 
 std::shared_ptr<::apsi::sender::SenderDB> CreateSenderCntDB(
     const psi::apsi_wrapper::DBData &db_data,
     std::unique_ptr<::apsi::PSIParams> psi_params, const std::string &sk_file,
-    ::apsi::oprf::OPRFKey &oprf_key, size_t nonce_byte_count, bool compress);
+    CurveType curve_type, ::apsi::oprf::OPRFKey &oprf_key,
+    size_t nonce_byte_count, bool compress);
 
 }  // namespace psi::dkpir

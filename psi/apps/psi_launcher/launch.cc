@@ -250,6 +250,7 @@ PirResultReport RunDkPir(const DkPirReceiverConfig& dk_pir_receiver_config,
   psi::dkpir::DkPirReceiverOptions options;
 
   options.threads = dk_pir_receiver_config.threads();
+  options.curve_type = dk_pir_receiver_config.curve_type();
   if (dk_pir_receiver_config.log_level() == "all" ||
       dk_pir_receiver_config.log_level() == "debug" ||
       dk_pir_receiver_config.log_level() == "info" ||
@@ -278,6 +279,7 @@ PirResultReport RunDkPir(const DkPirSenderConfig& dk_pir_sender_config,
   psi::dkpir::DkPirSenderOptions options;
 
   options.threads = dk_pir_sender_config.threads();
+  options.curve_type = dk_pir_sender_config.curve_type();
   if (dk_pir_sender_config.log_level() == "all" ||
       dk_pir_sender_config.log_level() == "debug" ||
       dk_pir_sender_config.log_level() == "info" ||

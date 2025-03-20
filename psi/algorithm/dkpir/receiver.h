@@ -15,9 +15,10 @@
 #pragma once
 
 #include "psi/algorithm/dkpir/oprf_receiver.h"
-#include "psi/algorithm/dkpir/phe/phe.h"
 #include "psi/wrapper/apsi/receiver.h"
 #include "psi/wrapper/apsi/yacl_channel.h"
+
+#include "psi/proto/psi.pb.h"
 
 namespace psi::dkpir {
 class DkPirReceiver : public psi::apsi_wrapper::Receiver {
@@ -64,15 +65,12 @@ class DkPirReceiver : public psi::apsi_wrapper::Receiver {
       const std::vector<::apsi::HashedItem> &items,
       const std::vector<::apsi::LabelKey> &label_keys, uint128_t &shuffle_seed,
       uint64_t &shuffle_counter, psi::apsi_wrapper::YaclChannel &chl,
-      bool streaming_result = true, uint32_t bucket_idx = 0);
-
-  // Receive the public key of phe from sender
-  psi::dkpir::phe::PublicKey ReceivePublicKey(
-      const std::shared_ptr<yacl::link::Context> &lctx);
+      CurveType curve_type, bool streaming_result = true,
+      uint32_t bucket_idx = 0);
 
   // Send the ciphertext of the total row count
   void SendRowCountCt(
-      const psi::dkpir::phe::PublicKey &public_key,
+      CurveType curve_type,
       const std::vector<::apsi::receiver::MatchRecord> &intersection,
       const std::shared_ptr<yacl::link::Context> &lctx);
 

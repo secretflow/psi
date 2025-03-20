@@ -15,11 +15,13 @@
 #pragma once
 #include <memory>
 
+#include "heu/library/algorithms/elgamal/elgamal.h"
 #include "yacl/math/mpint/mp_int.h"
 
-#include "psi/algorithm/dkpir/phe/phe.h"
 #include "psi/wrapper/apsi/utils/common.h"
 #include "psi/wrapper/apsi/yacl_channel.h"
+
+#include "psi/proto/psi.pb.h"
 
 namespace psi::dkpir {
 // Compute the value of the linear function p(x)=ax+b
@@ -33,7 +35,8 @@ yacl::math::MPInt ComputePoly(const std::vector<uint64_t> &poly,
 
 // Save the linear function and the private key of phe
 void Save(const std::vector<uint64_t> &poly,
-          const psi::dkpir::phe::SecretKey &secret_key, std::ostream &out);
+          const heu::lib::algorithms::elgamal::SecretKey &secret_key,
+          std::ostream &out);
 
 // Load the linear function and the private key of phe
 void Load(std::vector<uint64_t> &poly, yacl::math::MPInt &x, std::istream &in);
@@ -48,4 +51,6 @@ void PrintIntersectionResults(
 
 void PrintTransmittedData(::apsi::network::Channel &channel);
 
+// Obtain the string used to generate the curve according to the curve type
+std::string FetchCurveName(CurveType curve_type);
 }  // namespace psi::dkpir

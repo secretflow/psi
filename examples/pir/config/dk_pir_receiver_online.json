@@ -1,6 +1,7 @@
 {
   "dk_pir_receiver_config": {
     "threads": 1,
+    "curve_type": "CURVE_FOURQ",
     "query_file": "/temp/duplicate_key_query.csv",
     "params_file": "/temp/100-1-300.json",
     "tmp_folder": "/temp/tmp/",

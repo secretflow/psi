@@ -17,6 +17,9 @@
 #include <thread>
 
 #include "absl/strings/str_split.h"
+#include "heu/library/algorithms/elgamal/elgamal.h"
+
+#include "psi/algorithm/dkpir/common.h"
 
 using namespace std::chrono_literals;
 
@@ -177,7 +180,7 @@ std::vector<::apsi::receiver::MatchRecord> DkPirReceiver::RequestQuery(
     const std::vector<::apsi::HashedItem> &items,
     const std::vector<::apsi::LabelKey> &label_keys, uint128_t &shuffle_seed,
     uint64_t &shuffle_counter, psi::apsi_wrapper::YaclChannel &chl,
-    bool streaming_result, uint32_t bucket_idx) {
+    CurveType curve_type, bool streaming_result, uint32_t bucket_idx) {
   // Create query and send to Sender
   auto query = create_query(items, bucket_idx);
   chl.send(std::move(query.first));
@@ -190,12 +193,9 @@ std::vector<::apsi::receiver::MatchRecord> DkPirReceiver::RequestQuery(
   count_query_result = ReceiveQuery(label_keys, itt, chl, streaming_result);
   SPDLOG_INFO("Received the response for the row count query");
 
-  // Receiver gets the public key of phe
-  psi::dkpir::phe::PublicKey public_key = ReceivePublicKey(chl.get_lctx());
-
   // Receiver adds the ciphertexts of the row count and sends the result
   // to Sender
-  SendRowCountCt(public_key, count_query_result, chl.get_lctx());
+  SendRowCountCt(curve_type, count_query_result, chl.get_lctx());
 
   // Receiver processes the query result for the data
   data_query_result = ReceiveQuery(label_keys, itt, chl, streaming_result);
@@ -210,54 +210,46 @@ std::vector<::apsi::receiver::MatchRecord> DkPirReceiver::RequestQuery(
   return data_query_result;
 }
 
-psi::dkpir::phe::PublicKey DkPirReceiver::ReceivePublicKey(
-    const std::shared_ptr<yacl::link::Context> &lctx) {
-  std::shared_ptr<yacl::crypto::EcGroup> curve =
-      yacl::crypto::EcGroupFactory::Instance().Create(
-          "fourq", yacl::ArgLib = "FourQlib");
-  uint64_t point_size = curve->GetSerializeLength();
-
-  yacl::Buffer pk_buf = lctx->Recv(lctx->NextRank(), "Recv phe pk");
-  YACL_ENFORCE(static_cast<uint64_t>(pk_buf.size()) == point_size);
-  yacl::crypto::EcPoint pk_point = curve->DeserializePoint(pk_buf);
-
-  SPDLOG_INFO("Received the public key of phe");
-
-  return psi::dkpir::phe::PublicKey(pk_point, curve);
-}
-
 void DkPirReceiver::SendRowCountCt(
-    const psi::dkpir::phe::PublicKey &public_key,
+    CurveType curve_type,
     const std::vector<::apsi::receiver::MatchRecord> &intersection,
     const std::shared_ptr<yacl::link::Context> &lctx) {
-  auto curve = public_key.GetCurve();
-  uint64_t ciphertext_size = curve->GetSerializeLength() * 2;
-  psi::dkpir::phe::Encryptor encryptor(public_key);
-  psi::dkpir::phe::Ciphertext row_count_ct = encryptor.EncryptZero();
+  std::string curve_name = FetchCurveName(curve_type);
+  std::shared_ptr<yacl::crypto::EcGroup> curve =
+      yacl::crypto::EcGroupFactory::Instance().Create(curve_name);
+
+  // To generate an evaluator object, a public_key is required as a constructor
+  // argument, where only the curve is used, so it doesn't matter if the public
+  // key is randomly generated
+  yacl::math::MPInt x;
+  yacl::math::MPInt::RandomLtN(curve->GetOrder(), &x);
+  heu::lib::algorithms::elgamal::PublicKey public_key(curve, curve->MulBase(x));
+  heu::lib::algorithms::elgamal::Evaluator evaluator(public_key);
+  heu::lib::algorithms::elgamal::Ciphertext row_count_ct;
+
+  bool has_found = false;
 
   // Compute the ciphertext of the total row count
   for (auto &mr : intersection) {
     if (mr.found) {
       auto byte_span = mr.label.get_as<uint8_t>();
-      YACL_ENFORCE(byte_span.size() == ciphertext_size);
       std::vector<uint8_t> byte_vector(byte_span.begin(), byte_span.end());
+      yacl::Buffer ct_buf(byte_span.data(), byte_span.size());
 
-      psi::dkpir::phe::Ciphertext tmp_ct;
-      tmp_ct.DeserializeCiphertext(curve, byte_vector.data(), ciphertext_size);
-
-      row_count_ct =
-          psi::dkpir::phe::Evaluator::Add(row_count_ct, tmp_ct, curve);
+      if (has_found) {
+        heu::lib::algorithms::elgamal::Ciphertext tmp_ct;
+        tmp_ct.Deserialize(ct_buf);
+        evaluator.AddInplace(&row_count_ct, tmp_ct);
+      } else {
+        row_count_ct.Deserialize(ct_buf);
+        has_found = true;
+      }
     }
   }
 
   // Send the ciphertext of the total row count
-  std::vector<uint8_t> row_count_ct_buf(ciphertext_size);
-  row_count_ct.SerializeCiphertext(curve, row_count_ct_buf.data(),
-                                   ciphertext_size);
-
-  lctx->SendAsync(lctx->NextRank(),
-                  absl::MakeSpan(row_count_ct_buf.data(), ciphertext_size),
-                  "Send ct of total row count");
+  yacl::Buffer row_count_ct_buf = row_count_ct.Serialize(true);
+  lctx->Send(lctx->NextRank(), row_count_ct_buf, "Send ct of total row count");
 
   SPDLOG_INFO("Sent the ciphertext of the total row count");
 }

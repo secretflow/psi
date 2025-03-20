@@ -22,7 +22,6 @@
 #include "yacl/crypto/rand/rand.h"
 
 #include "psi/algorithm/dkpir/common.h"
-#include "psi/algorithm/dkpir/phe/phe.h"
 #include "psi/algorithm/dkpir/query.h"
 
 using namespace std::chrono_literals;
@@ -31,8 +30,8 @@ namespace psi::dkpir {
 DkPirSenderDispatcher::DkPirSenderDispatcher(
     std::shared_ptr<::apsi::sender::SenderDB> sender_db,
     std::shared_ptr<::apsi::sender::SenderDB> sender_cnt_db,
-    ::apsi::oprf::OPRFKey oprf_key, const std::string &sk_file,
-    const std::string &result_file)
+    ::apsi::oprf::OPRFKey oprf_key, CurveType curve_type,
+    const std::string &sk_file, const std::string &result_file)
     : sender_db_(std::move(sender_db)),
       sender_cnt_db_(std::move(sender_cnt_db)),
       oprf_key_(std::move(oprf_key)),
@@ -64,12 +63,13 @@ DkPirSenderDispatcher::DkPirSenderDispatcher(
   SPDLOG_INFO("Loaded the random polynomial and the private key from {}",
               sk_file);
 
+  std::string curve_name = FetchCurveName(curve_type);
   std::shared_ptr<yacl::crypto::EcGroup> curve =
-      yacl::crypto::EcGroupFactory::Instance().Create(
-          "fourq", yacl::ArgLib = "FourQlib");
+      yacl::crypto::EcGroupFactory::Instance().Create(curve_name);
 
-  psi::dkpir::phe::KeyGenerator::GenerateKey(curve, x, &public_key_,
-                                             &secret_key_);
+  secret_key_ = heu::lib::algorithms::elgamal::SecretKey(x, curve);
+  public_key_ =
+      heu::lib::algorithms::elgamal::PublicKey(curve, curve->MulBase(x));
 }
 
 void DkPirSenderDispatcher::run(std::atomic<bool> &stop,
@@ -120,34 +120,16 @@ void DkPirSenderDispatcher::run(std::atomic<bool> &stop,
   }
 }
 
-void DkPirSenderDispatcher::SendPublicKey(
-    const std::shared_ptr<yacl::link::Context> &lctx) const {
-  auto curve = public_key_.GetCurve();
-  auto pk_point = public_key_.GetPk();
-
-  yacl::Buffer pk_buf = curve->SerializePoint(pk_point);
-  lctx->SendAsync(lctx->NextRank(), pk_buf, "Send phe pk");
-
-  SPDLOG_INFO("Sent the public key of phe");
-}
-
-psi::dkpir::phe::Ciphertext DkPirSenderDispatcher::ReceiveRowCountCt(
+heu::lib::algorithms::elgamal::Ciphertext
+DkPirSenderDispatcher::ReceiveRowCountCt(
     const std::shared_ptr<yacl::link::Context> &lctx) {
   auto curve = public_key_.GetCurve();
-  uint64_t ciphertext_size = curve->GetSerializeLength() * 2;
 
   yacl::Buffer row_count_ct_buf =
       lctx->Recv(lctx->NextRank(), "Recv ct of total row count");
-  YACL_ENFORCE(static_cast<uint64_t>(row_count_ct_buf.size()) ==
-               ciphertext_size);
 
-  std::vector<uint8_t> row_count_ct_vec(ciphertext_size);
-  std::memcpy(row_count_ct_vec.data(), row_count_ct_buf.data(),
-              ciphertext_size);
-
-  psi::dkpir::phe::Ciphertext row_count_ct;
-  row_count_ct.DeserializeCiphertext(curve, row_count_ct_vec.data(),
-                                     ciphertext_size);
+  heu::lib::algorithms::elgamal::Ciphertext row_count_ct;
+  row_count_ct.Deserialize(row_count_ct_buf);
 
   SPDLOG_INFO("Received the ciphertext of the total row count");
 
@@ -155,7 +137,7 @@ psi::dkpir::phe::Ciphertext DkPirSenderDispatcher::ReceiveRowCountCt(
 }
 
 void DkPirSenderDispatcher::CheckRowCountAndSendShuffleSeed(
-    const psi::dkpir::phe::Ciphertext &row_count_ct,
+    const heu::lib::algorithms::elgamal::Ciphertext &row_count_ct,
     const std::shared_ptr<yacl::link::Context> &lctx) {
   auto curve = public_key_.GetCurve();
 
@@ -169,9 +151,7 @@ void DkPirSenderDispatcher::CheckRowCountAndSendShuffleSeed(
   yacl::math::MPInt poly_row_count =
       ComputePoly(polynomial_, row_count, query_count_);
 
-  YACL_ENFORCE(psi::dkpir::phe::Evaluator::Check(row_count_ct, poly_row_count,
-                                                 secret_key_),
-               "Check row count failed");
+  YACL_ENFORCE(Check(row_count_ct, poly_row_count), "Check row count failed");
 
   SaveResult(row_count);
   SPDLOG_INFO(
@@ -188,10 +168,21 @@ void DkPirSenderDispatcher::CheckRowCountAndSendShuffleSeed(
   SPDLOG_INFO("Sent the shuffle seed and counter");
 }
 
+bool DkPirSenderDispatcher::Check(
+    const heu::lib::algorithms::elgamal::Ciphertext &ct,
+    const yacl::math::MPInt &m) {
+  std::shared_ptr<yacl::crypto::EcGroup> curve = public_key_.GetCurve();
+  yacl::crypto::EcPoint res =
+      curve->MulDoubleBase(m, secret_key_.GetX(), ct.c1);
+
+  return curve->PointEqual(res, ct.c2);
+}
+
 void DkPirSenderDispatcher::SaveResult(uint64_t row_count) {
   std::ofstream fs(result_file_);
   fs << "count" << std::endl;
   fs << row_count;
+  fs.close();
 }
 
 void DkPirSenderDispatcher::dispatch_parms(
@@ -273,11 +264,8 @@ void DkPirSenderDispatcher::dispatch_query(
     // Sender processes the row count query
     DkPirSender::RunQuery(query, chl, streaming_result);
 
-    // Sender transmits the public key of phe
-    SendPublicKey(chl.get_lctx());
-
     // Sender gets the encrypted sum from the receiver
-    psi::dkpir::phe::Ciphertext row_count_ct =
+    heu::lib::algorithms::elgamal::Ciphertext row_count_ct =
         ReceiveRowCountCt(chl.get_lctx());
 
     // Sender processes the data query

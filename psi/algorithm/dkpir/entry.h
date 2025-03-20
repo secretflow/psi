@@ -17,12 +17,15 @@
 #include "psi/utils/resource_manager.h"
 #include "psi/wrapper/apsi/utils/sender_db.h"
 
+#include "psi/proto/psi.pb.h"
+
 namespace psi::dkpir {
 struct DkPirSenderOptions {
   std::size_t threads = 1;
   std::size_t nonce_byte_count = 16;
   bool compress = false;
   bool streaming_result = true;
+  CurveType curve_type;
 
   // "all", "debug", "info", "warning", "error", "off"
   std::string log_level = "all";
@@ -45,6 +48,7 @@ struct DkPirSenderOptions {
 struct DkPirReceiverOptions {
   std::size_t threads = 1;
   bool streaming_result = true;
+  CurveType curve_type;
 
   // "all", "debug", "info", "warning", "error", "off"
   std::string log_level = "all";

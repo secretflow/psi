@@ -1,6 +1,7 @@
 {
   "dk_pir_sender_config": {
     "mode": "MODE_OFFLINE",
+    "curve_type": "CURVE_FOURQ",
     "source_file": "/temp/duplicate_key_db.csv",
     "params_file": "/temp/100-1-300.json",
     "tmp_folder": "/temp/tmp/",

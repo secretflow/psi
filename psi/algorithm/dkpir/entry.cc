@@ -67,7 +67,7 @@ int SenderOffline(const DkPirSenderOptions &options) {
   // Generate SenderCntDB (for row count)
   sender_cnt_db = psi::dkpir::GenerateSenderCntDB(
       key_count_file, options.params_file, options.secret_key_file,
-      options.nonce_byte_count, options.compress, oprf_key);
+      options.nonce_byte_count, options.compress, options.curve_type, oprf_key);
   YACL_ENFORCE(sender_cnt_db != nullptr, "Create sender_cnt_db from {} failed",
                key_count_file);
 
@@ -119,8 +119,8 @@ int SenderOnline(const DkPirSenderOptions &options,
   std::atomic<bool> stop = false;
 
   psi::dkpir::DkPirSenderDispatcher dispatcher(
-      sender_db, sender_cnt_db, oprf_key, options.secret_key_file,
-      options.result_file);
+      sender_db, sender_cnt_db, oprf_key, options.curve_type,
+      options.secret_key_file, options.result_file);
 
   lctx->ConnectToMesh();
   dispatcher.run(stop, lctx, options.streaming_result);
@@ -214,9 +214,9 @@ int ReceiverOnline(const DkPirReceiverOptions &options,
   uint64_t shuffle_counter = 0;
   try {
     SPDLOG_INFO("Sending DkPir query");
-    query_result = receiver.RequestQuery(oprf_items, label_keys, shuffle_seed,
-                                         shuffle_counter, channel,
-                                         options.streaming_result);
+    query_result = receiver.RequestQuery(
+        oprf_items, label_keys, shuffle_seed, shuffle_counter, channel,
+        options.curve_type, options.streaming_result);
     SPDLOG_INFO("Received DkPir query response");
   } catch (const std::exception &ex) {
     SPDLOG_WARN("Failed sending DkPir query: {}", ex.what());

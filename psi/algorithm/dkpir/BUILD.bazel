@@ -30,6 +30,7 @@ psi_cc_library(
     "//psi/utils:resource_manager",
     "//psi/wrapper/apsi/utils:sender_db",
     "//psi/utils:csv_converter",
+    "//psi/proto:psi_cc_proto",
   ]
 )
 
@@ -50,10 +51,12 @@ psi_cc_library(
   srcs = ["receiver.cc"],
   hdrs = ["receiver.h"],
   deps = [
+    ":common",
     ":oprf_receiver",
+    "//psi/proto:psi_cc_proto",
     "//psi/wrapper/apsi:receiver",
     "//psi/wrapper/apsi:yacl_channel",
-    "//psi/algorithm/dkpir/phe:phe",
+    "@heu//heu/library/algorithms/elgamal:elgamal",
   ]
 )
 
@@ -63,13 +66,14 @@ psi_cc_library(
   hdrs = ["common.h"],
   deps = [
     ":secret_key_cc_proto",
-    "//psi/algorithm/dkpir/phe:phe",
     "//psi/wrapper/apsi/utils:common",
     "//psi/wrapper/apsi/cli:common_utils",
     "//psi/wrapper/apsi/utils:sender_db",
     "//psi/wrapper/apsi:yacl_channel",
+    "//psi/proto:psi_cc_proto",
     "@yacl//yacl/math/mpint:mpint",
     "@yacl//yacl/crypto/rand:rand",
+    "@heu//heu/library/algorithms/elgamal:elgamal",
   ],
 )
 
@@ -77,28 +81,14 @@ psi_cc_library(
   name = "sender_dispatcher",
   srcs = ["sender_dispatcher.cc"],
   hdrs = ["sender_dispatcher.h"],
-  defines = [
-      "__LINUX__",
-  ] + select({
-      "@bazel_tools//src/conditions:linux_x86_64": [
-          "_AMD64_",
-          "_ASM_",
-      ],
-      "@bazel_tools//src/conditions:darwin_arm64": [
-          "_ARM64_",
-      ],
-      "//conditions:default": [
-          "_AMD64_",
-      ],
-  }),
   deps = [
     ":common",
     ":sender",
     "@apsi",
     "@yacl//yacl/crypto/rand:rand",
-    "@yacl//yacl/crypto/ecc/FourQlib",
-    "//psi/algorithm/dkpir/phe:phe",
+    "@heu//heu/library/algorithms/elgamal:elgamal",
     "//psi/wrapper/apsi:yacl_channel",
+    "//psi/proto:psi_cc_proto",
   ]
 )
 
@@ -134,27 +124,22 @@ psi_cc_library(
   name = "sender_cnt_db",
   srcs = ["sender_cnt_db.cc"],
   hdrs = ["sender_cnt_db.h"],
-  defines = [
-      "__LINUX__",
-  ] + select({
-      "@bazel_tools//src/conditions:linux_x86_64": [
-          "_AMD64_",
-          "_ASM_",
-      ],
-      "@bazel_tools//src/conditions:darwin_arm64": [
-          "_ARM64_",
-      ],
-      "//conditions:default": [
-          "_AMD64_",
-      ],
-  }),
   deps = [
     ":common",
+    ":encryptor",
+    "//psi/proto:psi_cc_proto",
     "//psi/wrapper/apsi/utils:common",
     "//psi/wrapper/apsi/utils:sender_db",
-    "//psi/algorithm/dkpir/phe:phe",
-    "@yacl//yacl/crypto/ecc/FourQlib",
+    "@heu//heu/library/algorithms/elgamal:elgamal",
     "@yacl//yacl/crypto/rand:rand",
     "@yacl//yacl/utils:parallel",
+  ]
+)
+
+psi_cc_library(
+  name = "encryptor",
+  hdrs = ["encryptor.h"],
+  deps = [
+    "@heu//heu/library/algorithms/elgamal:elgamal",
   ]
 )

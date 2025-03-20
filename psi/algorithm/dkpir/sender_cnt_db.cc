@@ -14,12 +14,12 @@
 
 #include "psi/algorithm/dkpir/sender_cnt_db.h"
 
+#include "heu/library/algorithms/elgamal/elgamal.h"
 #include "yacl/crypto/rand/rand.h"
 #include "yacl/utils/parallel.h"
 
 #include "psi/algorithm/dkpir/common.h"
-#include "psi/algorithm/dkpir/phe/encryptor.h"
-#include "psi/algorithm/dkpir/phe/key_generator.h"
+#include "psi/algorithm/dkpir/encryptor.h"
 #include "psi/wrapper/apsi/utils/sender_db.h"
 
 namespace psi::dkpir {
@@ -45,16 +45,15 @@ uint64_t GetCount(const std::vector<unsigned char> &label) {
 // EC-ElGamal. Finally, store the linear function and the private key to a
 // local file.
 void EncryptCount(psi::apsi_wrapper::LabeledData &data,
-                  const std::string &sk_file) {
-  std::shared_ptr<yacl::crypto::EcGroup> curve =
-      yacl::crypto::EcGroupFactory::Instance().Create(
-          "fourq", yacl::ArgLib = "FourQlib");
-  uint64_t point_size = curve->GetSerializeLength();
+                  const std::string &sk_file, CurveType curve_type) {
+  std::string curve_name = FetchCurveName(curve_type);
 
-  psi::dkpir::phe::PublicKey public_key;
-  psi::dkpir::phe::SecretKey secret_key;
-  psi::dkpir::phe::KeyGenerator::GenerateKey(curve, &public_key, &secret_key);
-  psi::dkpir::phe::Encryptor encryptor(public_key);
+  heu::lib::algorithms::elgamal::PublicKey public_key;
+  heu::lib::algorithms::elgamal::SecretKey secret_key;
+  heu::lib::algorithms::elgamal::KeyGenerator::Generate(curve_name, &secret_key,
+                                                        &public_key);
+  // Since there's no need for decryption, skip the check of the plaintext range
+  psi::dkpir::ElgamalEncryptor encryptor(public_key);
 
   // Generate a random linear function p(x)=ax+b
   std::vector<uint64_t> polynomial(2);
@@ -67,10 +66,12 @@ void EncryptCount(psi::apsi_wrapper::LabeledData &data,
       uint64_t count = GetCount(data[idx].second);
       yacl::math::MPInt count_poly = psi::dkpir::ComputePoly(polynomial, count);
 
-      data[idx].second.resize(point_size * 2);
-      psi::dkpir::phe::Ciphertext ciphertext = encryptor.Encrypt(count_poly);
-      ciphertext.SerializeCiphertext(curve, data[idx].second.data(),
-                                     point_size * 2);
+      heu::lib::algorithms::elgamal::Ciphertext ciphertext =
+          encryptor.Encrypt(count_poly);
+
+      yacl::Buffer ct_buffer = ciphertext.Serialize();
+      data[idx].second.resize(ct_buffer.size());
+      std::memcpy(data[idx].second.data(), ct_buffer.data(), ct_buffer.size());
     }
   });
 
@@ -87,7 +88,8 @@ void EncryptCount(psi::apsi_wrapper::LabeledData &data,
 std::shared_ptr<::apsi::sender::SenderDB> GenerateSenderCntDB(
     const std::string &db_file, const std::string &params_file,
     const std::string &sk_file, size_t nonce_byte_count, bool compress,
-    ::apsi::oprf::OPRFKey &oprf_key, const std::vector<std::string> &keys,
+    CurveType curve_type, ::apsi::oprf::OPRFKey &oprf_key,
+    const std::vector<std::string> &keys,
     const std::vector<std::string> &labels) {
   std::unique_ptr<::apsi::PSIParams> params =
       psi::apsi_wrapper::BuildPsiParams(params_file);
@@ -105,14 +107,15 @@ std::shared_ptr<::apsi::sender::SenderDB> GenerateSenderCntDB(
     return nullptr;
   }
 
-  return CreateSenderCntDB(*db_data, std::move(params), sk_file, oprf_key,
-                           nonce_byte_count, compress);
+  return CreateSenderCntDB(*db_data, std::move(params), sk_file, curve_type,
+                           oprf_key, nonce_byte_count, compress);
 }
 
 std::shared_ptr<::apsi::sender::SenderDB> CreateSenderCntDB(
     const psi::apsi_wrapper::DBData &db_data,
     std::unique_ptr<::apsi::PSIParams> psi_params, const std::string &sk_file,
-    ::apsi::oprf::OPRFKey &oprf_key, size_t nonce_byte_count, bool compress) {
+    CurveType curve_type, ::apsi::oprf::OPRFKey &oprf_key,
+    size_t nonce_byte_count, bool compress) {
   if (!psi_params) {
     APSI_LOG_ERROR("No PSI parameters were given");
     return nullptr;
@@ -124,7 +127,7 @@ std::shared_ptr<::apsi::sender::SenderDB> CreateSenderCntDB(
     psi::apsi_wrapper::LabeledData labeled_db_data =
         std::get<psi::apsi_wrapper::LabeledData>(db_data);
 
-    EncryptCount(labeled_db_data, sk_file);
+    EncryptCount(labeled_db_data, sk_file, curve_type);
 
     // Find the longest label and use that as label size
     size_t label_byte_count =

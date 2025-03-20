@@ -16,6 +16,8 @@
 
 syntax = "proto3";
 
+import "psi/proto/psi.proto";
+
 package psi;
 
 // NOTE(junfeng): We provide a config identical to original APSI CLI.
@@ -171,6 +173,9 @@ message DkPirSenderConfig {
 
   // The label columns name of input data
   repeated string labels = 13;
+
+  // The elliptic curve cryptography used in Elgamal. This is a mandatory option
+  .psi.CurveType curve_type = 14;
 }
 
 message DkPirReceiverConfig {
@@ -204,6 +209,9 @@ message DkPirReceiverConfig {
 
   // The label columns name which receiver want to query
   repeated string labels = 9;
+
+  // The elliptic curve cryptography used in Elgamal. This is a mandatory option
+  .psi.CurveType curve_type = 10;
 }
 
 // The report of pir task.

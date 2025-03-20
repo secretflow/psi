@@ -17,10 +17,12 @@
 #include <memory>
 
 #include "apsi/oprf/oprf_sender.h"
+#include "heu/library/algorithms/elgamal/elgamal.h"
 
-#include "psi/algorithm/dkpir/phe/phe.h"
 #include "psi/algorithm/dkpir/sender.h"
 #include "psi/wrapper/apsi/yacl_channel.h"
+
+#include "psi/proto/psi.pb.h"
 
 namespace psi::dkpir {
 class DkPirSenderDispatcher {
@@ -29,21 +31,23 @@ class DkPirSenderDispatcher {
 
   DkPirSenderDispatcher(std::shared_ptr<::apsi::sender::SenderDB> sender_db,
                         std::shared_ptr<::apsi::sender::SenderDB> sender_cnt_db,
-                        ::apsi::oprf::OPRFKey oprf_key,
+                        ::apsi::oprf::OPRFKey oprf_key, CurveType curve_type,
                         const std::string &sk_file,
                         const std::string &result_file);
 
   void run(std::atomic<bool> &stop, std::shared_ptr<yacl::link::Context> lctx,
            bool streaming_result = true);
 
-  void SendPublicKey(const std::shared_ptr<yacl::link::Context> &lctx) const;
-
-  psi::dkpir::phe::Ciphertext ReceiveRowCountCt(
+  heu::lib::algorithms::elgamal::Ciphertext ReceiveRowCountCt(
       const std::shared_ptr<yacl::link::Context> &lctx);
 
   void CheckRowCountAndSendShuffleSeed(
-      const psi::dkpir::phe::Ciphertext &row_count_ct,
+      const heu::lib::algorithms::elgamal::Ciphertext &row_count_ct,
       const std::shared_ptr<yacl::link::Context> &lctx);
+
+  // Check if the ciphertext ct is the encrypted result of the plaintext m
+  bool Check(const heu::lib::algorithms::elgamal::Ciphertext &ct,
+             const yacl::math::MPInt &m);
 
   void SaveResult(uint64_t row_count);
 
@@ -52,8 +56,8 @@ class DkPirSenderDispatcher {
   std::shared_ptr<::apsi::sender::SenderDB> sender_cnt_db_;
 
   // Public and private key pair of Elgamal encryption
-  psi::dkpir::phe::PublicKey public_key_;
-  psi::dkpir::phe::SecretKey secret_key_;
+  heu::lib::algorithms::elgamal::PublicKey public_key_;
+  heu::lib::algorithms::elgamal::SecretKey secret_key_;
 
   ::apsi::oprf::OPRFKey oprf_key_;
 

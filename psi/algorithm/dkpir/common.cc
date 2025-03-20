@@ -61,14 +61,15 @@ yacl::math::MPInt ComputePoly(const std::vector<uint64_t> &poly,
 }
 
 void Save(const std::vector<uint64_t> &poly,
-          const psi::dkpir::phe::SecretKey &secret_key, std::ostream &out) {
+          const heu::lib::algorithms::elgamal::SecretKey &secret_key,
+          std::ostream &out) {
   YACL_ENFORCE(poly.size() == 2, "This should be a linear function.");
   psi::dkpir::SecretKeyProto secret_key_proto;
 
   secret_key_proto.add_polynomial(poly[0]);
   secret_key_proto.add_polynomial(poly[1]);
 
-  yacl::Buffer buffer = secret_key.GetSk().Serialize();
+  yacl::Buffer buffer = secret_key.GetX().Serialize();
   std::string str(buffer);
   secret_key_proto.set_secret_key(str);
 
@@ -168,4 +169,25 @@ void PrintTransmittedData(::apsi::network::Channel &channel) {
               nice_byte_count(channel.bytes_sent() + channel.bytes_received()));
 }
 
+std::string FetchCurveName(CurveType curve_type) {
+  std::string curve_name;
+  switch (curve_type) {
+    case CurveType::CURVE_25519: {
+      curve_name = "Curve25519";
+      break;
+    }
+    case CurveType::CURVE_FOURQ: {
+      curve_name = "FourQ";
+      break;
+    }
+    case CurveType::CURVE_SM2: {
+      curve_name = "sm2";
+      break;
+    }
+    default: {
+      YACL_THROW("Invaild curve type");
+    }
+  }
+  return curve_name;
+}
 }  // namespace psi::dkpir

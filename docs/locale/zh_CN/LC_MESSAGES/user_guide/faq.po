@@ -45,14 +45,14 @@ msgid ""
 msgstr "如果 **broadcast_result** 开启，只有 **receiver** （接收方）和 **sender** （发送方）能够接收结果，而任何第三方都无法看到。因此，如果 **receiver** 和 **sender** 都希望获取结果，将 **broadcast_result** 设置为true是安全的。"
 
 #: ../../user_guide/faq.rst:16
-msgid "What is :ref: `IO_TYPE_UNSPECIFIED <IO_TYPE_UNSPECIFIED>`?"
-msgstr "什么是 :ref: `IO_TYPE_UNSPECIFIED <IO_TYPE_UNSPECIFIED>` ? "
+msgid "What is :ref:`IO_TYPE_UNSPECIFIED <IO_TYPE_UNSPECIFIED>`?"
+msgstr "什么是 :ref:`IO_TYPE_UNSPECIFIED <IO_TYPE_UNSPECIFIED>` ? "
 
 #: ../../user_guide/faq.rst:18
 msgid ""
-"You must select a type as IoType. :ref:`IO_TYPE_UNSPECIFIED <IO_TYPE_UNSPECIFIED>` is the default value of :ref: `IoType <IoType>`, which is meaningless. At this moment, we only support :ref:`IO_TYPE_FILE_CSV <IO_TYPE_FILE_CSV>`."
+"You must select a type as IoType. :ref:`IO_TYPE_UNSPECIFIED <IO_TYPE_UNSPECIFIED>` is the default value of :ref:`IoType <IoType>`, which is meaningless. At this moment, we only support :ref:`IO_TYPE_FILE_CSV <IO_TYPE_FILE_CSV>`."
 msgstr ""
-"您必须选择一种类型作为IoType。 :ref:`IO_TYPE_UNSPECIFIED <IO_TYPE_UNSPECIFIED>` 是 :ref: `IoType <IoType>` 的默认值，但它没有实际意义。目前，我们仅支持 :ref: `IO_TYPE_FILE_CSV <IO_TYPE_FILE_CSV>` 。"
+"您必须选择一种类型作为IoType。 :ref:`IO_TYPE_UNSPECIFIED <IO_TYPE_UNSPECIFIED>` 是 :ref:`IoType <IoType>` 的默认值，但它没有实际意义。目前，我们仅支持 :ref:`IO_TYPE_FILE_CSV <IO_TYPE_FILE_CSV>` 。"
 
 #: ../../user_guide/faq.rst:20
 msgid ""

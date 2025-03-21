@@ -863,5 +863,5 @@ msgstr "ByteString"
 
 #: ../../reference/launch_config.md
 msgid "str"
-msgstr "atr"
+msgstr "str"
 

@@ -24,7 +24,6 @@
 #include "generate_rand.h"
 #include "inner_product.h"
 
-
 namespace pir::simple {
 class PIRServer {
  public:

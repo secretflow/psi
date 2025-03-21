@@ -18,96 +18,96 @@ load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library", "psi_cc_test")
 package(default_visibility = ["//visibility:public"])
 
 psi_cc_library(
-  name = "entry",
-  srcs = ["entry.cc"],
-  hdrs = ["entry.h"],
-  deps = [
-    ":common",
-    ":sender",
-    ":receiver",
-    ":sender_cnt_db",
-    ":sender_dispatcher",
-    "//psi/utils:resource_manager",
-    "//psi/wrapper/apsi/utils:sender_db",
-    "//psi/utils:csv_converter",
-    "//psi/proto:psi_cc_proto",
-  ]
+    name = "entry",
+    srcs = ["entry.cc"],
+    hdrs = ["entry.h"],
+    deps = [
+        ":common",
+        ":receiver",
+        ":sender",
+        ":sender_cnt_db",
+        ":sender_dispatcher",
+        "//psi/proto:psi_cc_proto",
+        "//psi/utils:csv_converter",
+        "//psi/utils:resource_manager",
+        "//psi/wrapper/apsi/utils:sender_db",
+    ],
 )
 
 psi_cc_library(
-  name = "sender",
-  srcs = ["sender.cc"],
-  hdrs = ["sender.h"],
-  deps = [
-    ":query",
-    "//psi/wrapper/apsi:sender",
-    "//psi/wrapper/apsi:yacl_channel",
-    "@yacl//yacl/crypto/rand:rand",
-  ]
+    name = "sender",
+    srcs = ["sender.cc"],
+    hdrs = ["sender.h"],
+    deps = [
+        ":query",
+        "//psi/wrapper/apsi:sender",
+        "//psi/wrapper/apsi:yacl_channel",
+        "@yacl//yacl/crypto/rand",
+    ],
 )
 
 psi_cc_library(
-  name = "receiver",
-  srcs = ["receiver.cc"],
-  hdrs = ["receiver.h"],
-  deps = [
-    ":common",
-    ":oprf_receiver",
-    "//psi/proto:psi_cc_proto",
-    "//psi/wrapper/apsi:receiver",
-    "//psi/wrapper/apsi:yacl_channel",
-    "@heu//heu/library/algorithms/elgamal:elgamal",
-  ]
+    name = "receiver",
+    srcs = ["receiver.cc"],
+    hdrs = ["receiver.h"],
+    deps = [
+        ":common",
+        ":oprf_receiver",
+        "//psi/proto:psi_cc_proto",
+        "//psi/wrapper/apsi:receiver",
+        "//psi/wrapper/apsi:yacl_channel",
+        "@heu//heu/library/algorithms/elgamal",
+    ],
 )
 
 psi_cc_library(
-  name = "common",
-  srcs = ["common.cc"],
-  hdrs = ["common.h"],
-  deps = [
-    ":secret_key_cc_proto",
-    "//psi/wrapper/apsi/utils:common",
-    "//psi/wrapper/apsi/cli:common_utils",
-    "//psi/wrapper/apsi/utils:sender_db",
-    "//psi/wrapper/apsi:yacl_channel",
-    "//psi/proto:psi_cc_proto",
-    "@yacl//yacl/math/mpint:mpint",
-    "@yacl//yacl/crypto/rand:rand",
-    "@heu//heu/library/algorithms/elgamal:elgamal",
-  ],
+    name = "common",
+    srcs = ["common.cc"],
+    hdrs = ["common.h"],
+    deps = [
+        ":secret_key_cc_proto",
+        "//psi/proto:psi_cc_proto",
+        "//psi/wrapper/apsi:yacl_channel",
+        "//psi/wrapper/apsi/cli:common_utils",
+        "//psi/wrapper/apsi/utils:common",
+        "//psi/wrapper/apsi/utils:sender_db",
+        "@heu//heu/library/algorithms/elgamal",
+        "@yacl//yacl/crypto/rand",
+        "@yacl//yacl/math/mpint",
+    ],
 )
 
 psi_cc_library(
-  name = "sender_dispatcher",
-  srcs = ["sender_dispatcher.cc"],
-  hdrs = ["sender_dispatcher.h"],
-  deps = [
-    ":common",
-    ":sender",
-    "@apsi",
-    "@yacl//yacl/crypto/rand:rand",
-    "@heu//heu/library/algorithms/elgamal:elgamal",
-    "//psi/wrapper/apsi:yacl_channel",
-    "//psi/proto:psi_cc_proto",
-  ]
+    name = "sender_dispatcher",
+    srcs = ["sender_dispatcher.cc"],
+    hdrs = ["sender_dispatcher.h"],
+    deps = [
+        ":common",
+        ":sender",
+        "//psi/proto:psi_cc_proto",
+        "//psi/wrapper/apsi:yacl_channel",
+        "@apsi",
+        "@heu//heu/library/algorithms/elgamal",
+        "@yacl//yacl/crypto/rand",
+    ],
 )
 
 psi_cc_library(
-  name = "query",
-  hdrs = ["query.h"],
-  deps = [
-    "@apsi",
-  ]
+    name = "query",
+    hdrs = ["query.h"],
+    deps = [
+        "@apsi",
+    ],
 )
 
 psi_cc_library(
-  name = "oprf_receiver",
-  srcs = ["oprf_receiver.cc"],
-  hdrs = ["oprf_receiver.h"],
-  deps = [
-    "@apsi",
-    "@seal",
-  ]
+    name = "oprf_receiver",
+    srcs = ["oprf_receiver.cc"],
+    hdrs = ["oprf_receiver.h"],
+    deps = [
+        "@apsi",
+        "@seal",
+    ],
 )
 
 proto_library(
@@ -121,25 +121,25 @@ cc_proto_library(
 )
 
 psi_cc_library(
-  name = "sender_cnt_db",
-  srcs = ["sender_cnt_db.cc"],
-  hdrs = ["sender_cnt_db.h"],
-  deps = [
-    ":common",
-    ":encryptor",
-    "//psi/proto:psi_cc_proto",
-    "//psi/wrapper/apsi/utils:common",
-    "//psi/wrapper/apsi/utils:sender_db",
-    "@heu//heu/library/algorithms/elgamal:elgamal",
-    "@yacl//yacl/crypto/rand:rand",
-    "@yacl//yacl/utils:parallel",
-  ]
+    name = "sender_cnt_db",
+    srcs = ["sender_cnt_db.cc"],
+    hdrs = ["sender_cnt_db.h"],
+    deps = [
+        ":common",
+        ":encryptor",
+        "//psi/proto:psi_cc_proto",
+        "//psi/wrapper/apsi/utils:common",
+        "//psi/wrapper/apsi/utils:sender_db",
+        "@heu//heu/library/algorithms/elgamal",
+        "@yacl//yacl/crypto/rand",
+        "@yacl//yacl/utils:parallel",
+    ],
 )
 
 psi_cc_library(
-  name = "encryptor",
-  hdrs = ["encryptor.h"],
-  deps = [
-    "@heu//heu/library/algorithms/elgamal:elgamal",
-  ]
+    name = "encryptor",
+    hdrs = ["encryptor.h"],
+    deps = [
+        "@heu//heu/library/algorithms/elgamal",
+    ],
 )

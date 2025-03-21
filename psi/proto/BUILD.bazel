@@ -30,8 +30,8 @@ proto_library(
     name = "pir_proto",
     srcs = ["pir.proto"],
     deps = [
-      ":psi_proto",
-    ]
+        ":psi_proto",
+    ],
 )
 
 cc_proto_library(

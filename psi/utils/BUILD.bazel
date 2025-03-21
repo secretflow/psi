@@ -476,9 +476,9 @@ psi_cc_test(
     name = "csv_converter_test",
     srcs = ["csv_converter_test.cc"],
     deps = [
-        ":csv_converter",
         ":arrow_csv_batch_provider",
-        "@com_google_googletest//:gtest",
+        ":csv_converter",
         ":random_str",
+        "@com_google_googletest//:gtest",
     ],
 )

@@ -89,9 +89,7 @@ class YaclChannel : public ::apsi::network::NetworkChannel {
   /**
   Returns a smart pointer to the yacl::link::Context.
   */
-  std::shared_ptr<yacl::link::Context> get_lctx() const {
-    return lctx_;
-  }
+  std::shared_ptr<yacl::link::Context> get_lctx() const { return lctx_; }
 
  protected:
   std::shared_ptr<yacl::link::Context> lctx_;

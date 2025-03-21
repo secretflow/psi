@@ -177,7 +177,7 @@ message DkPirSenderConfig {
   // The elliptic curve cryptography used in Elgamal. If skip_count_check is
   // false, this is a must-have option
   .psi.CurveType curve_type = 14;
-  
+
   // If true, the check of row count will be skiped.
   bool skip_count_check = 15;
 }

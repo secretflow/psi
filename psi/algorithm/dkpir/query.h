@@ -29,7 +29,7 @@ class DkPirQuery : public ::apsi::sender::Query {
              std::shared_ptr<::apsi::sender::SenderDB> sender_db,
              std::shared_ptr<::apsi::sender::SenderDB> sender_cnt_db)
       : ::apsi::sender::Query(std::move(query_request), sender_db),
-        sender_cnt_db_(std::move(sender_cnt_db)) {};
+        sender_cnt_db_(std::move(sender_cnt_db)){};
 
   std::shared_ptr<::apsi::sender::SenderDB> sender_cnt_db() const noexcept {
     return sender_cnt_db_;

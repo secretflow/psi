@@ -19,8 +19,8 @@
 #include <vector>
 
 namespace pir::simple {
-PIRServer::PIRServer(size_t n, size_t q, size_t N, size_t p,
-                     std::string ip, int port)
+PIRServer::PIRServer(size_t n, size_t q, size_t N, size_t p, std::string ip,
+                     int port)
     : n_(n), q_(q), N_(N), p_(p), ip_(ip), port_(port) {}
 
 void PIRServer::generate_database() {

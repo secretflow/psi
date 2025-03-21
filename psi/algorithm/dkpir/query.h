@@ -24,6 +24,7 @@ using QueryRequest = std::unique_ptr<::apsi::network::SenderOperationQuery>;
 // query both data and row count
 class DkPirQuery : public ::apsi::sender::Query {
  public:
+  using ::apsi::sender::Query::Query;
   DkPirQuery(QueryRequest query_request,
              std::shared_ptr<::apsi::sender::SenderDB> sender_db,
              std::shared_ptr<::apsi::sender::SenderDB> sender_cnt_db)

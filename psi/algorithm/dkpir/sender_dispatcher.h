@@ -33,7 +33,8 @@ class DkPirSenderDispatcher {
                         std::shared_ptr<::apsi::sender::SenderDB> sender_cnt_db,
                         ::apsi::oprf::OPRFKey oprf_key, CurveType curve_type,
                         const std::string &sk_file,
-                        const std::string &result_file);
+                        const std::string &result_file,
+                        bool skip_count_check = false);
 
   void run(std::atomic<bool> &stop, std::shared_ptr<yacl::link::Context> lctx,
            bool streaming_result = true);
@@ -74,6 +75,9 @@ class DkPirSenderDispatcher {
 
   // Store the total row count
   std::string result_file_;
+
+  // If true, the check of row count will be skipped
+  bool skip_count_check_;
 
   void dispatch_parms(std::unique_ptr<::apsi::network::SenderOperation> sop,
                       psi::apsi_wrapper::YaclChannel &channel);

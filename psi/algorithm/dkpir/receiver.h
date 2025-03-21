@@ -65,8 +65,8 @@ class DkPirReceiver : public psi::apsi_wrapper::Receiver {
       const std::vector<::apsi::HashedItem> &items,
       const std::vector<::apsi::LabelKey> &label_keys, uint128_t &shuffle_seed,
       uint64_t &shuffle_counter, psi::apsi_wrapper::YaclChannel &chl,
-      CurveType curve_type, bool streaming_result = true,
-      uint32_t bucket_idx = 0);
+      CurveType curve_type, bool skip_count_check = false,
+      bool streaming_result = true, uint32_t bucket_idx = 0);
 
   // Send the ciphertext of the total row count
   void SendRowCountCt(

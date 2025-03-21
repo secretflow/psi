@@ -41,13 +41,15 @@ void Save(const std::vector<uint64_t> &poly,
 // Load the linear function and the private key of phe
 void Load(std::vector<uint64_t> &poly, yacl::math::MPInt &x, std::istream &in);
 
-// Receiver can match the key with the label using the shuffle seed
-void PrintIntersectionResults(
+// Receiver can match the key with the label using the shuffle seed and shuffle
+// counter, if skip_count_check is false.
+void WriteIntersectionResults(
     const std::vector<std::string> &orig_items,
     const std::vector<::apsi::Item> &items,
     const std::vector<::apsi::receiver::MatchRecord> &intersection,
     const uint128_t &shuffle_seed, const uint64_t &shuffle_counter,
-    const std::string &out_file, bool append_to_outfile = false);
+    const std::string &out_file, bool skip_count_check = false,
+    bool append_to_outfile = false);
 
 void PrintTransmittedData(::apsi::network::Channel &channel);
 

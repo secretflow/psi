@@ -47,11 +47,15 @@ int SenderOffline(const DkPirSenderOptions &options) {
   psi::ApsiCsvConverter sender_converter(options.source_file, options.key,
                                          options.labels);
 
-  sender_converter.MergeColumnAndRow(key_value_file, key_count_file);
-
-  SPDLOG_INFO(
-      "Sender created two temporary files, one for the data table and the "
-      "other for the row count table");
+  if (options.skip_count_check) {
+    sender_converter.MergeColumnAndRow(key_value_file);
+    SPDLOG_INFO("Sender created a temporary file for the data table");
+  } else {
+    sender_converter.MergeColumnAndRow(key_value_file, key_count_file);
+    SPDLOG_INFO(
+        "Sender created two temporary files, one for the data table and the "
+        "other for the row count table");
+  }
 
   ::apsi::oprf::OPRFKey oprf_key;
   std::shared_ptr<::apsi::sender::SenderDB> sender_db;
@@ -64,24 +68,30 @@ int SenderOffline(const DkPirSenderOptions &options) {
   YACL_ENFORCE(sender_db != nullptr, "Create sender_db from {} failed",
                key_value_file);
 
-  // Generate SenderCntDB (for row count)
-  sender_cnt_db = psi::dkpir::GenerateSenderCntDB(
-      key_count_file, options.params_file, options.secret_key_file,
-      options.nonce_byte_count, options.compress, options.curve_type, oprf_key);
-  YACL_ENFORCE(sender_cnt_db != nullptr, "Create sender_cnt_db from {} failed",
-               key_count_file);
-
   // Save the sender_db if a save file was given
   YACL_ENFORCE(psi::apsi_wrapper::TrySaveSenderDB(options.value_sdb_out_file,
                                                   sender_db, oprf_key),
                "Save sender_db to {} failed.", options.value_sdb_out_file);
+  SPDLOG_INFO("Sender saved sender_db");
 
-  // Save the sender_cnt_db using the reusable method TrySaveSenderDB
-  YACL_ENFORCE(psi::apsi_wrapper::TrySaveSenderDB(options.count_sdb_out_file,
-                                                  sender_cnt_db, oprf_key),
-               "Save sender_cnt_db to {} failed.", options.count_sdb_out_file);
+  if (!options.skip_count_check) {
+    // Generate SenderCntDB (for row count)
+    sender_cnt_db = psi::dkpir::GenerateSenderCntDB(
+        key_count_file, options.params_file, options.secret_key_file,
+        options.nonce_byte_count, options.compress, options.curve_type,
+        oprf_key);
+    YACL_ENFORCE(sender_cnt_db != nullptr,
+                 "Create sender_cnt_db from {} failed", key_count_file);
 
-  SPDLOG_INFO("Sender saved sender_db and sender_cnt_db");
+    // Save the sender_cnt_db using the reusable method TrySaveSenderDB
+    YACL_ENFORCE(psi::apsi_wrapper::TrySaveSenderDB(options.count_sdb_out_file,
+                                                    sender_cnt_db, oprf_key),
+                 "Save sender_cnt_db to {} failed.",
+                 options.count_sdb_out_file);
+
+    SPDLOG_INFO("Sender saved sender_cnt_db");
+  }
+
   return 0;
 }
 
@@ -104,23 +114,27 @@ int SenderOnline(const DkPirSenderOptions &options,
   YACL_ENFORCE(sender_db != nullptr, "Load old sender_db from {} failed",
                options.value_sdb_out_file);
 
-  // Here, we reuse the method TryLoadSenderDB, which means that oprf_key will
-  // be read twice. But since these two databases actually use the same
-  // oprf_key, it doesn't matter.
-  sender_cnt_db = psi::apsi_wrapper::TryLoadSenderDB(
-      options.count_sdb_out_file, options.params_file, oprf_key);
+  SPDLOG_INFO("Sender loaded sender_db");
 
-  YACL_ENFORCE(sender_cnt_db != nullptr,
-               "Load old sender_cnt_db from {} failed",
-               options.count_sdb_out_file);
+  if (!options.skip_count_check) {
+    // Here, we reuse the method TryLoadSenderDB, which means that oprf_key will
+    // be read twice. But since these two databases actually use the same
+    // oprf_key, it doesn't matter.
+    sender_cnt_db = psi::apsi_wrapper::TryLoadSenderDB(
+        options.count_sdb_out_file, options.params_file, oprf_key);
 
-  SPDLOG_INFO("Sender loaded sender_db and sender_cnt_db");
+    YACL_ENFORCE(sender_cnt_db != nullptr,
+                 "Load old sender_cnt_db from {} failed",
+                 options.count_sdb_out_file);
+
+    SPDLOG_INFO("Sender loaded sender_cnt_db");
+  }
 
   std::atomic<bool> stop = false;
 
   psi::dkpir::DkPirSenderDispatcher dispatcher(
       sender_db, sender_cnt_db, oprf_key, options.curve_type,
-      options.secret_key_file, options.result_file);
+      options.secret_key_file, options.result_file, options.skip_count_check);
 
   lctx->ConnectToMesh();
   dispatcher.run(stop, lctx, options.streaming_result);
@@ -201,8 +215,13 @@ int ReceiverOnline(const DkPirReceiverOptions &options,
     SPDLOG_INFO("Sending OPRF request for {} items ", items_vec.size());
     // psi::apsi_wrapper::Receiver::RequestOPRF doesn't support shuffling, but
     // psi::dkpir::DkPirReceiver::RequestOPRF does.
-    tie(oprf_items, label_keys) =
-        DkPirReceiver::RequestOPRF(items_vec, channel);
+    if (options.skip_count_check) {
+      tie(oprf_items, label_keys) =
+          psi::apsi_wrapper::Receiver::RequestOPRF(items_vec, channel);
+    } else {
+      tie(oprf_items, label_keys) =
+          DkPirReceiver::RequestOPRF(items_vec, channel);
+    }
     SPDLOG_INFO("Received OPRF response for {} items", items_vec.size());
   } catch (const std::exception &ex) {
     SPDLOG_WARN("OPRF request failed: {}", ex.what());
@@ -216,15 +235,16 @@ int ReceiverOnline(const DkPirReceiverOptions &options,
     SPDLOG_INFO("Sending DkPir query");
     query_result = receiver.RequestQuery(
         oprf_items, label_keys, shuffle_seed, shuffle_counter, channel,
-        options.curve_type, options.streaming_result);
+        options.curve_type, options.skip_count_check, options.streaming_result);
     SPDLOG_INFO("Received DkPir query response");
   } catch (const std::exception &ex) {
     SPDLOG_WARN("Failed sending DkPir query: {}", ex.what());
     return -1;
   }
 
-  PrintIntersectionResults(orig_items, items_vec, query_result, shuffle_seed,
-                           shuffle_counter, apsi_output_file);
+  WriteIntersectionResults(orig_items, items_vec, query_result, shuffle_seed,
+                           shuffle_counter, apsi_output_file,
+                           options.skip_count_check);
 
   PrintTransmittedData(channel);
   psi::apsi_wrapper::cli::print_timing_report(::apsi::util::recv_stopwatch);

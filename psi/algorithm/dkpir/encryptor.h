@@ -22,7 +22,7 @@ using namespace heu::lib::algorithms::elgamal;
 
 // This is a rework of Encryptor in heu::lib::algorithms::elgamal. Since
 // ElGamal's decryption will not be used in DkPir, the range restriction for
-// plaintext has been removed.
+// plaintext is removed.
 class ElgamalEncryptor {
  public:
   explicit ElgamalEncryptor(const PublicKey &public_key)

@@ -31,16 +31,18 @@ DkPirSenderDispatcher::DkPirSenderDispatcher(
     std::shared_ptr<::apsi::sender::SenderDB> sender_db,
     std::shared_ptr<::apsi::sender::SenderDB> sender_cnt_db,
     ::apsi::oprf::OPRFKey oprf_key, CurveType curve_type,
-    const std::string &sk_file, const std::string &result_file)
+    const std::string &sk_file, const std::string &result_file,
+    bool skip_count_check)
     : sender_db_(std::move(sender_db)),
       sender_cnt_db_(std::move(sender_cnt_db)),
       oprf_key_(std::move(oprf_key)),
       shuffle_seed_(yacl::crypto::SecureRandSeed()),
       shuffle_counter_(yacl::crypto::SecureRandU64()),
       query_count_(0),
-      result_file_(result_file) {
-  if (!sender_db_ || !sender_cnt_db_) {
-    YACL_THROW("sender_db or sender_cnt_db is not set");
+      result_file_(result_file),
+      skip_count_check_(skip_count_check) {
+  if (!sender_db_) {
+    YACL_THROW("sender_db is not set");
   }
 
   // If SenderDB is not stripped, the OPRF key it holds must be equal to the
@@ -52,24 +54,30 @@ DkPirSenderDispatcher::DkPirSenderDispatcher(
     YACL_THROW("mismatching OPRF keys");
   }
 
-  // Load the random polynomial and the private key
-  yacl::math::MPInt x;
-  polynomial_.resize(2);
+  if (!skip_count_check_) {
+    if (!sender_cnt_db_) {
+      YACL_THROW("sender_cnt_db is not set");
+    }
 
-  std::ifstream fs(sk_file, std::ios::binary);
-  psi::dkpir::Load(polynomial_, x, fs);
-  fs.close();
+    // Load the random polynomial and the private key
+    yacl::math::MPInt x;
+    polynomial_.resize(2);
 
-  SPDLOG_INFO("Loaded the random polynomial and the private key from {}",
-              sk_file);
+    std::ifstream fs(sk_file, std::ios::binary);
+    psi::dkpir::Load(polynomial_, x, fs);
+    fs.close();
 
-  std::string curve_name = FetchCurveName(curve_type);
-  std::shared_ptr<yacl::crypto::EcGroup> curve =
-      yacl::crypto::EcGroupFactory::Instance().Create(curve_name);
+    SPDLOG_INFO("Loaded the random polynomial and the private key from {}",
+                sk_file);
 
-  secret_key_ = heu::lib::algorithms::elgamal::SecretKey(x, curve);
-  public_key_ =
-      heu::lib::algorithms::elgamal::PublicKey(curve, curve->MulBase(x));
+    std::string curve_name = FetchCurveName(curve_type);
+    std::shared_ptr<yacl::crypto::EcGroup> curve =
+        yacl::crypto::EcGroupFactory::Instance().Create(curve_name);
+
+    secret_key_ = heu::lib::algorithms::elgamal::SecretKey(x, curve);
+    public_key_ =
+        heu::lib::algorithms::elgamal::PublicKey(curve, curve->MulBase(x));
+  }
 }
 
 void DkPirSenderDispatcher::run(std::atomic<bool> &stop,
@@ -222,9 +230,15 @@ void DkPirSenderDispatcher::dispatch_oprf(
 
     query_count_ = oprf_request->data.size() / ::apsi::oprf::oprf_query_size;
     SPDLOG_INFO("Receiver queried a total of {} keys", query_count_);
+    if (skip_count_check_) {
+      // Sender processes OPRF queries in the same way as APSI
+      psi::apsi_wrapper::Sender::RunOPRF(oprf_request, oprf_key_, chl);
+    } else {
+      // Sender shuffles the OPRF results
+      DkPirSender::RunOPRF(oprf_request, oprf_key_, shuffle_seed_,
+                           shuffle_counter_, chl);
+    }
 
-    DkPirSender::RunOPRF(oprf_request, oprf_key_, shuffle_seed_,
-                         shuffle_counter_, chl);
   } catch (const std::exception &ex) {
     APSI_LOG_ERROR("Sender threw an exception while processing OPRF request: "
                    << ex.what());
@@ -242,7 +256,7 @@ void DkPirSenderDispatcher::dispatch_query(
 
     auto send_func = DkPirSender::BasicSend<::apsi::Response::element_type>;
 
-    if (sender_db_ == nullptr || sender_cnt_db_ == nullptr) {
+    if (!sender_db_ || (!skip_count_check_ && !sender_cnt_db_)) {
       ::apsi::QueryResponse response_query =
           std::make_unique<::apsi::QueryResponse::element_type>();
       response_query->package_count = 0;
@@ -258,21 +272,29 @@ void DkPirSenderDispatcher::dispatch_query(
       return;
     }
 
-    // Create the DkPirQuery object which includes two databases
-    DkPirQuery query(std::move(query_request), sender_db_, sender_cnt_db_);
+    if (skip_count_check_) {
+      // Create the DkPirQuery object which only includes one database for data
+      DkPirQuery query(std::move(query_request), sender_db_);
 
-    // Sender processes the row count query
-    DkPirSender::RunQuery(query, chl, streaming_result);
+      // Sender only processes the data query
+      psi::apsi_wrapper::Sender::RunQuery(query, chl, streaming_result);
+    } else {
+      // Create the DkPirQuery object which includes two databases
+      DkPirQuery query(std::move(query_request), sender_db_, sender_cnt_db_);
 
-    // Sender gets the encrypted sum from the receiver
-    heu::lib::algorithms::elgamal::Ciphertext row_count_ct =
-        ReceiveRowCountCt(chl.get_lctx());
+      // Sender processes the row count query
+      DkPirSender::RunQuery(query, chl, streaming_result);
 
-    // Sender processes the data query
-    psi::apsi_wrapper::Sender::RunQuery(query, chl, streaming_result);
+      // Sender gets the encrypted sum from the receiver
+      heu::lib::algorithms::elgamal::Ciphertext row_count_ct =
+          ReceiveRowCountCt(chl.get_lctx());
 
-    // Sender checks the total row count and transmits the shuffle seed
-    CheckRowCountAndSendShuffleSeed(row_count_ct, chl.get_lctx());
+      // Sender processes the data query
+      psi::apsi_wrapper::Sender::RunQuery(query, chl, streaming_result);
+
+      // Sender checks the total row count and transmits the shuffle seed
+      CheckRowCountAndSendShuffleSeed(row_count_ct, chl.get_lctx());
+    }
   } catch (const std::exception &ex) {
     SPDLOG_ERROR("Sender threw an exception while processing query: {}",
                  ex.what());

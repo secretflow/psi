@@ -25,20 +25,6 @@
 
 namespace psi::dkpir {
 
-struct Colors {
-  static const std::string Red;
-  static const std::string Green;
-  static const std::string RedBold;
-  static const std::string GreenBold;
-  static const std::string Reset;
-};
-
-const std::string Colors::Red = "\033[31m";
-const std::string Colors::Green = "\033[32m";
-const std::string Colors::RedBold = "\033[1;31m";
-const std::string Colors::GreenBold = "\033[1;32m";
-const std::string Colors::Reset = "\033[0m";
-
 yacl::math::MPInt ComputePoly(const std::vector<uint64_t> &poly,
                               const uint64_t &data) {
   YACL_ENFORCE(poly.size() == 2, "This is a linear function.");
@@ -95,45 +81,48 @@ void Load(std::vector<uint64_t> &poly, yacl::math::MPInt &x, std::istream &in) {
   x.Deserialize(str);
 }
 
-void PrintIntersectionResults(
+void WriteIntersectionResults(
     const std::vector<std::string> &orig_items,
     const std::vector<::apsi::Item> &items,
     const std::vector<::apsi::receiver::MatchRecord> &intersection,
     const uint128_t &shuffle_seed, const uint64_t &shuffle_counter,
-    const std::string &out_file, bool append_to_outfile) {
+    const std::string &out_file, bool skip_count_check,
+    bool append_to_outfile) {
   if (orig_items.size() != items.size()) {
     throw std::invalid_argument("orig_items must have same size as items");
   }
 
-  yacl::crypto::YaclReplayUrbg<uint32_t> gen(shuffle_seed, shuffle_counter);
-  std::vector<uint64_t> shuffle_indexes(orig_items.size());
-  for (uint64_t i = 0; i < orig_items.size(); ++i) {
-    shuffle_indexes[i] = i;
-  }
-  std::shuffle(shuffle_indexes.begin(), shuffle_indexes.end(), gen);
-
   std::stringstream csv_output;
   std::string csv_header = "key,value";
-  int match_cnt = 0;
-  for (size_t i = 0; i < orig_items.size(); i++) {
-    std::stringstream msg;
-    if (intersection[shuffle_indexes[i]].found) {
-      match_cnt++;
-      // msg << Colors::GreenBold << orig_items[i] << Colors::Reset << "(FOUND)
-      // ";
-      csv_output << orig_items[i];
-      if (intersection[shuffle_indexes[i]].label) {
-        // msg << ": ";
-        // msg << Colors::GreenBold <<
-        // intersection[shuffle_indexes[i]].label.to_string()
-        //     << Colors::Reset;
-        csv_output << "," << intersection[shuffle_indexes[i]].label.to_string();
+
+  if (skip_count_check) {
+    for (uint64_t i = 0; i < orig_items.size(); ++i) {
+      if (intersection[i].found) {
+        csv_output << orig_items[i];
+        if (intersection[i].label) {
+          csv_output << "," << intersection[i].label.to_string();
+        }
+        csv_output << std::endl;
       }
-      csv_output << std::endl;
-      // APSI_LOG_INFO(msg.str());
-    } else {
-      // msg << Colors::RedBold << orig_items[i] << Colors::Reset << " (NOT
-      // FOUND)"; APSI_LOG_INFO(msg.str());
+    }
+  } else {
+    // Obtain shuffle mapping to restore data
+    yacl::crypto::YaclReplayUrbg<uint32_t> gen(shuffle_seed, shuffle_counter);
+    std::vector<uint64_t> shuffle_indexes(orig_items.size());
+    for (uint64_t i = 0; i < orig_items.size(); ++i) {
+      shuffle_indexes[i] = i;
+    }
+    std::shuffle(shuffle_indexes.begin(), shuffle_indexes.end(), gen);
+
+    for (uint64_t i = 0; i < orig_items.size(); ++i) {
+      if (intersection[shuffle_indexes[i]].found) {
+        csv_output << orig_items[i];
+        if (intersection[shuffle_indexes[i]].label) {
+          csv_output << ","
+                     << intersection[shuffle_indexes[i]].label.to_string();
+        }
+        csv_output << std::endl;
+      }
     }
   }
 
@@ -172,10 +161,6 @@ void PrintTransmittedData(::apsi::network::Channel &channel) {
 std::string FetchCurveName(CurveType curve_type) {
   std::string curve_name;
   switch (curve_type) {
-    case CurveType::CURVE_25519: {
-      curve_name = "Curve25519";
-      break;
-    }
     case CurveType::CURVE_FOURQ: {
       curve_name = "FourQ";
       break;

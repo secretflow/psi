@@ -174,8 +174,12 @@ message DkPirSenderConfig {
   // The label columns name of input data
   repeated string labels = 13;
 
-  // The elliptic curve cryptography used in Elgamal. This is a mandatory option
+  // The elliptic curve cryptography used in Elgamal. If skip_count_check is
+  // false, this is a must-have option
   .psi.CurveType curve_type = 14;
+  
+  // If true, the check of row count will be skiped.
+  bool skip_count_check = 15;
 }
 
 message DkPirReceiverConfig {
@@ -210,8 +214,12 @@ message DkPirReceiverConfig {
   // The label columns name which receiver want to query
   repeated string labels = 9;
 
-  // The elliptic curve cryptography used in Elgamal. This is a mandatory option
+  // The elliptic curve cryptography used in Elgamal. If skip_count_check is
+  // false, this is a must-have option
   .psi.CurveType curve_type = 10;
+
+  // If true, the check of row count will be skiped.
+  bool skip_count_check = 11;
 }
 
 // The report of pir task.

@@ -180,7 +180,8 @@ std::vector<::apsi::receiver::MatchRecord> DkPirReceiver::RequestQuery(
     const std::vector<::apsi::HashedItem> &items,
     const std::vector<::apsi::LabelKey> &label_keys, uint128_t &shuffle_seed,
     uint64_t &shuffle_counter, psi::apsi_wrapper::YaclChannel &chl,
-    CurveType curve_type, bool streaming_result, uint32_t bucket_idx) {
+    CurveType curve_type, bool skip_count_check, bool streaming_result,
+    uint32_t bucket_idx) {
   // Create query and send to Sender
   auto query = create_query(items, bucket_idx);
   chl.send(std::move(query.first));
@@ -189,23 +190,28 @@ std::vector<::apsi::receiver::MatchRecord> DkPirReceiver::RequestQuery(
   std::vector<::apsi::receiver::MatchRecord> data_query_result,
       count_query_result;
 
-  // Receiver processes the query result for the row count
-  count_query_result = ReceiveQuery(label_keys, itt, chl, streaming_result);
-  SPDLOG_INFO("Received the response for the row count query");
+  if (skip_count_check) {
+    // In this case, Receiver only needs to process the query result for data
+    data_query_result = ReceiveQuery(label_keys, itt, chl, streaming_result);
+  } else {
+    // Receiver processes the query result for the row count
+    count_query_result = ReceiveQuery(label_keys, itt, chl, streaming_result);
+    SPDLOG_INFO("Received the response for the row count query");
 
-  // Receiver adds the ciphertexts of the row count and sends the result
-  // to Sender
-  SendRowCountCt(curve_type, count_query_result, chl.get_lctx());
+    // Receiver adds the ciphertexts of the row count and sends the result
+    // to Sender
+    SendRowCountCt(curve_type, count_query_result, chl.get_lctx());
 
-  // Receiver processes the query result for the data
-  data_query_result = ReceiveQuery(label_keys, itt, chl, streaming_result);
-  SPDLOG_INFO("Received the response for the data query");
+    // Receiver processes the query result for the data
+    data_query_result = ReceiveQuery(label_keys, itt, chl, streaming_result);
+    SPDLOG_INFO("Received the response for the data query");
 
-  // Receiver computes the total row count of the data
-  SendRowCount(data_query_result, chl.get_lctx());
+    // Receiver computes the total row count of the data
+    SendRowCount(data_query_result, chl.get_lctx());
 
-  // Receiver gets the shuffle seed
-  ReceiveShuffleSeed(chl.get_lctx(), shuffle_seed, shuffle_counter);
+    // Receiver gets the shuffle seed
+    ReceiveShuffleSeed(chl.get_lctx(), shuffle_seed, shuffle_counter);
+  }
 
   return data_query_result;
 }

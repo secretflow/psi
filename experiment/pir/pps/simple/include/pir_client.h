@@ -19,10 +19,10 @@
 #include <cstdint>
 #include <iostream>
 #include <memory>
-#include <mutex>
 #include <stdexcept>
 #include <string>
 #include <vector>
+
 #include "data_transmit.h"
 #include "generate_rand.h"
 #include "inner_product.h"
@@ -49,49 +49,44 @@ class PIRClient {
   size_t N_;                                    // database size
   size_t p_;                                    // plaintext modulus
   size_t delta_;                                // scalar
-  int radius_;                                  // Gaussian distribution radius
-  double sigma_;                                // standard deviation
   size_t idx_row_;                              // row index
   std::vector<__uint128_t> s_;                  // secret vector
   std::vector<__uint128_t> ans_;                // answer vector
   std::vector<std::vector<__uint128_t>> hint_;  // hint from server
   std::vector<std::vector<__uint128_t>> A_;     // LWE matrix
+  std::vector<double> gaussian_distribution_;   // Gaussian distribution
   std::string ip_;
   int port_;
 
-  std::vector<double> precompute_discrete_gaussian() {
-    if (radius_ <= 0 || sigma_ <= 0) {
+  void precompute_discrete_gaussian(const int &radius, const double &sigma) {
+    if (radius <= 0 || sigma <= 0) {
       throw std::invalid_argument("Invalid radius or sigma");
     }
 
-    const double range = radius_ * sigma_;
+    const double range = radius * sigma;
     const size_t max_k = static_cast<size_t>(floor(range));
-    std::vector<double> probabilities;
-    const double sigma_sq = sigma_ * sigma_;
+    const double sigma_sq = sigma * sigma;
     double sum = 0.0;
 
     for (size_t k = -max_k; k <= max_k; k++) {
       double prob = exp(-k * k / (2 * sigma_sq));
-      probabilities.push_back(prob);
+      gaussian_distribution_.push_back(prob);
       sum += prob;
     }
 
-    for (size_t i = 0; i < probabilities.size(); i++) {
-      probabilities[i] /= sum;
+    for (size_t i = 0; i < gaussian_distribution_.size(); i++) {
+      gaussian_distribution_[i] /= sum;
     }
-
-    return probabilities;
   }
 
-  std::vector<size_t> sample_batch(const std::vector<double> &probabilities,
-                                   size_t n) {
+  std::vector<size_t> sample_batch(size_t n) {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::discrete_distribution<size_t> dist(probabilities.begin(),
-                                            probabilities.end());
+    std::discrete_distribution<size_t> dist(gaussian_distribution_.begin(),
+    gaussian_distribution_.end());
 
     std::vector<size_t> samples(n);
-    const size_t max_k = (probabilities.size() - 1) / 2;
+    const size_t max_k = (gaussian_distribution_.size() - 1) / 2;
     for (size_t i = 0; i < n; i++) {
       samples[i] = dist(gen) - max_k;
     }

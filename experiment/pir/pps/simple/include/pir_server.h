@@ -19,18 +19,20 @@
 #include <iostream>
 #include <string>
 #include <vector>
+
 #include "data_transmit.h"
 #include "generate_rand.h"
 #include "inner_product.h"
+
 
 namespace pir::simple {
 class PIRServer {
  public:
   PIRServer(size_t n, size_t q, size_t N, size_t p, std::string ip, int port);
+  
+  void generate_database();
 
   void set_A_(const std::vector<std::vector<__uint128_t>> &A);
-
-  void write_qu(std::vector<__uint128_t> &&qu);
 
   void server_setup();
 
@@ -38,14 +40,16 @@ class PIRServer {
 
   void server_answer();
 
+  void get_value(const size_t &idx);
+
  private:
-  size_t n_;                                        // dimension
-  size_t q_;                                        // modulus
-  size_t N_;                                        // database size
-  size_t p_;                                        // plaintext modulus
-  std::vector<std::vector<__uint128_t>> database_;  // database
-  std::vector<std::vector<__uint128_t>> A_;         // LWE matrix
-  std::vector<__uint128_t> qu_;                     // query
+  size_t n_;                                        //  dimension
+  size_t q_;                                        //  modulus
+  size_t N_;                                        //  database size
+  size_t p_;                                        //  plaintext modulus
+  std::vector<std::vector<__uint128_t>> database_;  //  database
+  std::vector<std::vector<__uint128_t>> A_;         //  LWE matrix
+  std::vector<__uint128_t> qu_;                     //  query
   std::string ip_;
   int port_;
 };

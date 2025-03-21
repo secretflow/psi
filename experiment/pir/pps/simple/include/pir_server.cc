@@ -13,25 +13,24 @@
 // limitations under the License.
 
 #include "pir_server.h"
+
+#include <cmath>
 #include <iostream>
 #include <vector>
 
 namespace pir::simple {
-PIRServer::PIRServer(size_t n, size_t q, size_t N, size_t p, std::string ip,
-                     int port)
-    : n_(n), q_(q), N_(N), p_(p), ip_(ip), port_(port) {
-  size_t row = static_cast<size_t>(sqrt(N));
-  size_t col = static_cast<size_t>(sqrt(N));
+PIRServer::PIRServer(size_t n, size_t q, size_t N, size_t p,
+                     std::string ip, int port)
+    : n_(n), q_(q), N_(N), p_(p), ip_(ip), port_(port) {}
+
+void PIRServer::generate_database() {
+  size_t row = static_cast<size_t>(sqrt(N_));
+  size_t col = static_cast<size_t>(sqrt(N_));
   database_.resize(row);
-  for (size_t i = 0; i < sqrt(N); i++) {
-    database_[i] = generate_random_vector(row, p);
+  for (size_t i = 0; i < row; i++) {
+    database_[i] = generate_random_vector(col, p_);
   }
   std::cout << "Database generated" << std::endl;
-
-  A_.resize(n);
-  for (size_t i = 0; i < n; i++) {
-    A_[i] = generate_random_vector(row, q);
-  }
 }
 
 void PIRServer::set_A_(const std::vector<std::vector<__uint128_t>> &A) {
@@ -66,5 +65,13 @@ void PIRServer::server_answer() {
   }
   Sender sender(ip_, port_);
   sender.sendData(ans);
+}
+
+void PIRServer::get_value(const size_t &idx) {
+  size_t row_num = static_cast<size_t>(sqrt(N_));
+  size_t row = idx / row_num;
+  size_t col = idx % row_num;
+  __uint128_t value = database_[row][col];
+  std::cout << "Original value: " << value << std::endl;
 }
 }  // namespace pir::simple

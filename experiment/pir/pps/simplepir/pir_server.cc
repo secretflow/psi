@@ -15,7 +15,6 @@
 #include "pir_server.h"
 
 #include <cmath>
-#include <iostream>
 #include <vector>
 
 namespace pir::simple {
@@ -30,7 +29,6 @@ void PIRServer::generate_database() {
   for (size_t i = 0; i < row; i++) {
     database_[i] = generate_random_vector(col, p_);
   }
-  std::cout << "Database generated" << std::endl;
 }
 
 void PIRServer::set_A_(const std::vector<std::vector<__uint128_t>> &A) {
@@ -54,7 +52,6 @@ void PIRServer::server_setup() {
 void PIRServer::server_query() {
   Receiver receiver(port_);
   qu_ = receiver.receiveData();
-  std::cout << "Query received" << std::endl;
 }
 
 void PIRServer::server_answer() {
@@ -67,11 +64,12 @@ void PIRServer::server_answer() {
   sender.sendData(ans);
 }
 
-void PIRServer::get_value(const size_t &idx) {
+__uint128_t PIRServer::get_value(const size_t &idx) {
   size_t row_num = static_cast<size_t>(sqrt(N_));
   size_t row = idx / row_num;
   size_t col = idx % row_num;
   __uint128_t value = database_[row][col];
-  std::cout << "Original value: " << value << std::endl;
+  return value;
 }
 }  // namespace pir::simple
+

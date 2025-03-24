@@ -12,62 +12,82 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <iostream>
-#include <string>
+#include <gtest/gtest.h>
+
+#include <memory>
 #include <thread>
 #include <vector>
 
 #include "pir_client.h"
 #include "pir_server.h"
 
-int main() {
-  size_t n = 1 << 10;
-  size_t N = 1ULL << 12;
-  size_t q = 1ULL << 32;
-  size_t p = 991;
-  std::string ip = "127.0.0.1";
-  int port = 12345;
-  int radius = 4;
-  double sigma = 6.8;
+namespace pir::simple {
+namespace {
 
-  try {
-    std::vector<std::vector<__uint128_t>> A;
-    A.resize(n);
-    size_t row = static_cast<size_t>(sqrt(N));
-    for (size_t i = 0; i < n; i++) {
-      A[i] = pir::simple::generate_random_vector(row, q);
-    }
-    std::cout << "A generated" << std::endl;
+// 测试参数配置
+constexpr size_t TEST_N = 1 << 10;
+constexpr size_t TEST_DB_SIZE = 1ULL << 12;
+constexpr size_t TEST_Q = 1ULL << 32;
+constexpr size_t TEST_P = 991;
+constexpr int TEST_PORT = 12345;
+const size_t TEST_IDX = 10;
 
-    pir::simple::PIRServer server(n, q, N, p, ip, port);
-    pir::simple::PIRClient client(n, q, N, p, radius, sigma, ip, port);
+class PIRTest : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    server = std::make_unique<pir::simple::PIRServer>(
+        TEST_N, TEST_Q, TEST_DB_SIZE, TEST_P, "127.0.0.1", TEST_PORT);
 
-    server.set_A_(A);
-    server.generate_database();
-    client.matrix_transpose_128(A);
-    auto server_thread = std::thread([&server]() { server.server_setup(); });
-    auto client_thread = std::thread([&client]() { client.client_setup(); });
-    server_thread.join();
-    client_thread.join();
+    client = std::make_unique<pir::simple::PIRClient>(
+        TEST_N, TEST_Q, TEST_DB_SIZE, TEST_P, 4, 6.8, "127.0.0.1", TEST_PORT);
 
-    size_t idx = 10;
-
-    server_thread = std::thread([&server]() { server.server_query(); });
-    client_thread = std::thread([&client, idx]() { client.client_query(idx); });
-
-    server_thread.join();
-    client_thread.join();
-
-    server_thread = std::thread([&server]() { server.server_answer(); });
-    client_thread = std::thread([&client]() { client.client_answer(); });
-
-    server_thread.join();
-    client_thread.join();
-
-    client.client_recover();
-    server.get_value(idx);
-  } catch (const std::exception &e) {
-    std::cerr << e.what() << std::endl;
+    generate_test_matrix();
   }
-  return 0;
+
+  void TearDown() override {
+    server.reset();
+    client.reset();
+  }
+
+  void generate_test_matrix() {
+    A.resize(TEST_N);
+    size_t row = static_cast<size_t>(sqrt(TEST_DB_SIZE));
+    for (size_t i = 0; i < TEST_N; i++) {
+      A[i] = pir::simple::generate_random_vector(row, TEST_Q);
+    }
+  }
+
+  std::vector<std::vector<__uint128_t>> A;
+  std::unique_ptr<pir::simple::PIRServer> server;
+  std::unique_ptr<pir::simple::PIRClient> client;
+};
+
+TEST_F(PIRTest, AllWorkflow) {
+  server->set_A_(A);
+  server->generate_database();
+  client->matrix_transpose_128(A);
+
+  std::thread server_setup([this]() { server->server_setup(); });
+  std::thread client_setup([this]() { client->client_setup(); });
+  server_setup.join();
+  client_setup.join();
+
+  const size_t test_idx = 10;
+  std::thread server_query([this]() { server->server_query(); });
+  std::thread client_query(
+      [this, test_idx]() { client->client_query(test_idx); });
+  server_query.join();
+  client_query.join();
+
+  std::thread server_answer([this]() { server->server_answer(); });
+  std::thread client_answer([this]() { client->client_answer(); });
+  server_answer.join();
+  client_answer.join();
+
+  auto recovered = client->client_recover();
+  auto expected = server->get_value(test_idx);
+  EXPECT_EQ(recovered, expected);
 }
+}  // namespace
+}  // namespace pir::simple
+

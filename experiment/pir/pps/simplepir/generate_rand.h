@@ -24,9 +24,10 @@
 
 namespace pir::simple {
 
-__uint128_t generate_128bit_random(std::random_device &rd);
+__uint128_t generate_128bit_random();
 
 // generate a random vector of size `size` with elements in [0, q)
 std::vector<__uint128_t> generate_random_vector(size_t size,
-                                                const size_t &modulus);
+                                                const size_t &modulus_);
 }  // namespace pir::simple
+

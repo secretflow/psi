@@ -14,10 +14,11 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
-#include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -41,7 +42,7 @@ class PIRClient {
 
   void client_answer();
 
-  void client_recover();
+  __uint128_t client_recover();
 
  private:
   size_t n_;                                    // dimension
@@ -95,3 +96,4 @@ class PIRClient {
   }
 };
 }  // namespace pir::simple
+

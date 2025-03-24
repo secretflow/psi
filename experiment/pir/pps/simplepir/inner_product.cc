@@ -53,3 +53,4 @@ __uint128_t fast_inner_product_modq(const std::vector<__uint128_t> &row,
   return result;
 }
 }  // namespace pir::simple
+

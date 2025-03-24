@@ -19,7 +19,8 @@
 
 namespace pir::simple {
 
-__uint128_t generate_128bit_random(std::random_device &rd) {
+__uint128_t generate_128bit_random() {
+  std::random_device rd;
   std::mt19937_64 gen(rd());
   std::uniform_int_distribution<uint64_t> dis(
       0, std::numeric_limits<uint64_t>::max());
@@ -30,18 +31,18 @@ __uint128_t generate_128bit_random(std::random_device &rd) {
 }
 
 std::vector<__uint128_t> generate_random_vector(size_t size,
-                                                const size_t &modulus) {
+                                                const size_t &modulus_) {
   if (size == 0) {
     return {};
   }
-  if (modulus <= 0) {
+  if (modulus_ <= 0) {
     throw std::invalid_argument("modulus must be greater than 0");
   }
-  std::random_device rd;
   std::vector<__uint128_t> result(size);
   for (size_t i = 0; i < size; i++) {
-    result[i] = generate_128bit_random(rd) % modulus;
+    result[i] = generate_128bit_random() % modulus_;
   }
   return result;
 }
 }  // namespace pir::simple
+

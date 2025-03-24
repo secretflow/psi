@@ -87,7 +87,6 @@ Receiver::Receiver(int port) : port_(port) {
     std::cerr << "Error: Failed to listen on socket" << std::endl;
     exit(1);
   }
-  std::cout << "Waiting for connection..." << std::endl;
 }
 
 Receiver::~Receiver() { close(sockfd_); }
@@ -116,3 +115,4 @@ std::vector<__uint128_t> Receiver::receiveData() {
   return data;
 }
 }  // namespace pir::simple
+

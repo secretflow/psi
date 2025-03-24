@@ -16,7 +16,6 @@
 
 #include <cmath>
 #include <cstdint>
-#include <iostream>
 #include <string>
 #include <vector>
 
@@ -28,7 +27,7 @@ namespace pir::simple {
 class PIRServer {
  public:
   PIRServer(size_t n, size_t q, size_t N, size_t p, std::string ip, int port);
-  
+
   void generate_database();
 
   void set_A_(const std::vector<std::vector<__uint128_t>> &A);
@@ -39,7 +38,7 @@ class PIRServer {
 
   void server_answer();
 
-  void get_value(const size_t &idx);
+  __uint128_t get_value(const size_t &idx);
 
  private:
   size_t n_;                                        //  dimension
@@ -53,3 +52,4 @@ class PIRServer {
   int port_;
 };
 }  // namespace pir::simple
+

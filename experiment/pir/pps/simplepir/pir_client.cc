@@ -14,7 +14,6 @@
 
 #include "pir_client.h"
 
-#include <iostream>
 #include <vector>
 
 namespace pir::simple {
@@ -24,8 +23,6 @@ PIRClient::PIRClient(size_t n, size_t q, size_t N, size_t p, int radius,
     : n_(n), q_(q), N_(N), p_(p), ip_(ip), port_(port) {
   delta_ = static_cast<size_t>(
       floor(static_cast<double>(q) / static_cast<double>(p)));
-  std::cout << delta_ << std::endl;
-  std::cout << q / p << std::endl;
   precompute_discrete_gaussian(radius, sigma);
 }
 
@@ -63,7 +60,6 @@ void PIRClient::client_setup() {
       hint_[i][j] = hint_vec[i * n_ + j];
     }
   }
-  std::cout << "Hint received" << std::endl;
 }
 
 void PIRClient::client_query(size_t idx) {
@@ -92,14 +88,14 @@ void PIRClient::client_query(size_t idx) {
 void PIRClient::client_answer() {
   Receiver receiver(port_);
   ans_ = receiver.receiveData();
-  std::cout << "Answer received" << std::endl;
 }
 
-void PIRClient::client_recover() {
+__uint128_t PIRClient::client_recover() {
   __uint128_t d_ =
       ans_[idx_row_] - fast_inner_product_modq(hint_[idx_row_], s_, q_);
   __uint128_t d = static_cast<__uint128_t>(
       (d_ % delta_ >= delta_ / 2) ? (d_ / delta_) - 1 : (d_ / delta_));
-  std::cout << "Recovered value: " << d % p_ << std::endl;
+  return d % p_;
 }
 }  // namespace pir::simple
+

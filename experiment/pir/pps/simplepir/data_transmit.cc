@@ -89,9 +89,7 @@ Receiver::Receiver(int port) : port_(port) {
   }
 }
 
-Receiver::~Receiver() {
-  close(sockfd_);
-}
+Receiver::~Receiver() { close(sockfd_); }
 
 std::vector<__uint128_t> Receiver::receiveData() {
   struct sockaddr_in cli_addr;

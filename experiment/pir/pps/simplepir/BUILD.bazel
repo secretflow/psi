@@ -17,15 +17,15 @@ load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library", "psi_cc_test")
 package(default_visibility = ["//visibility:public"])
 
 psi_cc_library(
-    name = "generate_rand",
-    srcs = ["generate_rand.cc"],
-    hdrs = ["generate_rand.h"],
-)
-
-psi_cc_library(
     name = "data_transmit",
     srcs = ["data_transmit.cc"],
     hdrs = ["data_transmit.h"],
+)
+
+psi_cc_library(
+    name = "generate_rand",
+    srcs = ["generate_rand.cc"],
+    hdrs = ["generate_rand.h"],
 )
 
 psi_cc_library(
@@ -39,8 +39,8 @@ psi_cc_library(
     srcs = ["pir_client.cc"],
     hdrs = ["pir_client.h"],
     deps = [
-        ":generate_rand",
         ":data_transmit",
+        ":generate_rand",
         ":inner_product",
     ],
 )
@@ -50,8 +50,8 @@ psi_cc_library(
     srcs = ["pir_server.cc"],
     hdrs = ["pir_server.h"],
     deps = [
-        ":generate_rand",
         ":data_transmit",
+        ":generate_rand",
         ":inner_product",
     ],
 )
@@ -63,7 +63,6 @@ psi_cc_test(
     deps = [
         ":pir_client",
         ":pir_server",
-        "@googletest//:gtest_main",
     ],
 )
 
@@ -74,6 +73,6 @@ psi_cc_binary(
     deps = [
         ":pir_client",
         ":pir_server",
-        "@com_google_benchmark//:benchmark",
+        "@com_github_google_benchmark//:benchmark_main",
     ],
 )

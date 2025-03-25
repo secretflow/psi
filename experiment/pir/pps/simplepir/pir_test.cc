@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gtest/gtest.h>
-
 #include <memory>
 #include <thread>
 #include <vector>
 
+#include "gtest/gtest.h"
 #include "pir_client.h"
 #include "pir_server.h"
 

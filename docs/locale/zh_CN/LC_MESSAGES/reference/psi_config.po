@@ -99,7 +99,7 @@ msgstr "[ PsiType](#psitype)"
 
 #: ../../reference/psi_config.md
 msgid "The psi type."
-msgstr "PSI 类型"
+msgstr "PSI 类型。"
 
 #: ../../reference/psi_config.md
 msgid "receiver_rank"

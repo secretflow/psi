@@ -14,6 +14,7 @@
 
 #include "pir_client.h"
 
+#include <string>
 #include <vector>
 
 namespace pir::simple {
@@ -75,8 +76,8 @@ void PIRClient::client_query(size_t idx) {
   std::vector<__uint128_t> qu;
   qu.resize(row_num);
   for (size_t i = 0; i < row_num; i++) {
-    qu[i] = (fast_inner_product_modq(A_[i], s_, q_) +
-             static_cast<__uint128_t>(u_i_col[i]));
+    qu[i] = (fast_inner_product_modq(A_[i], s_, q_)
+             + static_cast<__uint128_t>(u_i_col[i]));
     qu[i] += static_cast<__uint128_t>(error_vec[i]);
     qu[i] %= q_;
   }
@@ -98,4 +99,3 @@ __uint128_t PIRClient::client_recover() {
   return d % p_;
 }
 }  // namespace pir::simple
-

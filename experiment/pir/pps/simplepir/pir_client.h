@@ -84,7 +84,7 @@ class PIRClient {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::discrete_distribution<size_t> dist(gaussian_distribution_.begin(),
-    gaussian_distribution_.end());
+                                            gaussian_distribution_.end());
 
     std::vector<size_t> samples(n);
     const size_t max_k = (gaussian_distribution_.size() - 1) / 2;
@@ -96,4 +96,3 @@ class PIRClient {
   }
 };
 }  // namespace pir::simple
-

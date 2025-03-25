@@ -77,4 +77,3 @@ class Receiver {
   }
 };
 }  // namespace pir::simple
-

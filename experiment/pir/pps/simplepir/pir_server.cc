@@ -15,6 +15,7 @@
 #include "pir_server.h"
 
 #include <cmath>
+#include <string>
 #include <vector>
 
 namespace pir::simple {
@@ -72,4 +73,3 @@ __uint128_t PIRServer::get_value(const size_t &idx) {
   return value;
 }
 }  // namespace pir::simple
-

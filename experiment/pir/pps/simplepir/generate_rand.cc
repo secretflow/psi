@@ -45,4 +45,3 @@ std::vector<__uint128_t> generate_random_vector(size_t size,
   return result;
 }
 }  // namespace pir::simple
-

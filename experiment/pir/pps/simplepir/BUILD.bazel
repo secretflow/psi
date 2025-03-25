@@ -1,25 +1,40 @@
-cc_library(
+// Copyright 2025 The secretflow authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library", "psi_cc_test")
+
+package(default_visibility = ["//visibility:public"])
+
+psi_cc_library(
     name = "generate_rand",
     srcs = ["generate_rand.cc"],
     hdrs = ["generate_rand.h"],
-    visibility = ["//visibility:public"],
 )
 
-cc_library(
+psi_cc_library(
     name = "data_transmit",
     srcs = ["data_transmit.cc"],
     hdrs = ["data_transmit.h"],
-    visibility = ["//visibility:public"],
 )
 
-cc_library(
+psi_cc_library(
     name = "inner_product",
     srcs = ["inner_product.cc"],
     hdrs = ["inner_product.h"],
-    visibility = ["//visibility:public"],
 )
 
-cc_library(
+psi_cc_library(
     name = "pir_client",
     srcs = ["pir_client.cc"],
     hdrs = ["pir_client.h"],
@@ -28,10 +43,9 @@ cc_library(
         ":data_transmit",
         ":inner_product",
     ],
-    visibility = ["//visibility:public"],
 )
 
-cc_library(
+psi_cc_library(
     name = "pir_server",
     srcs = ["pir_server.cc"],
     hdrs = ["pir_server.h"],
@@ -40,17 +54,26 @@ cc_library(
         ":data_transmit",
         ":inner_product",
     ],
-    visibility = ["//visibility:public"],
 )
 
-cc_test(
+psi_cc_test(
     name = "pir_test",
     srcs = ["pir_test.cc"],
+    linkopts = ["-pthread"],
     deps = [
         ":pir_client",
         ":pir_server",
         "@googletest//:gtest_main",
     ],
-    linkopts = ["-pthread"],
 )
 
+psi_cc_binary(
+    name = "pir_benchmark",
+    srcs = ["pir_benchmark.cc"],
+    linkopts = ["-pthread"],
+    deps = [
+        ":pir_client",
+        ":pir_server",
+        "@com_google_benchmark//:benchmark",
+    ],
+)

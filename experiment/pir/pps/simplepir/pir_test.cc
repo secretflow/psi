@@ -22,9 +22,6 @@
 #include "pir_server.h"
 
 namespace pir::simple {
-namespace {
-
-// 测试参数配置
 constexpr size_t TEST_N = 1 << 10;
 constexpr size_t TEST_DB_SIZE = 1ULL << 12;
 constexpr size_t TEST_Q = 1ULL << 32;
@@ -88,6 +85,4 @@ TEST_F(PIRTest, AllWorkflow) {
   auto expected = server->get_value(test_idx);
   EXPECT_EQ(recovered, expected);
 }
-}  // namespace
 }  // namespace pir::simple
-

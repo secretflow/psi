@@ -52,4 +52,3 @@ class PIRServer {
   int port_;
 };
 }  // namespace pir::simple
-

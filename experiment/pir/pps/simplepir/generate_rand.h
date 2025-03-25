@@ -30,4 +30,3 @@ __uint128_t generate_128bit_random();
 std::vector<__uint128_t> generate_random_vector(size_t size,
                                                 const size_t &modulus_);
 }  // namespace pir::simple
-

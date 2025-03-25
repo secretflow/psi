@@ -91,7 +91,7 @@ msgstr "描述"
 
 #: ../../reference/psi_config.md
 msgid "psi_type"
-msgstr "PSI 类型"
+msgstr "psi_type"
 
 #: ../../reference/psi_config.md
 msgid "[ PsiType](#psitype)"
@@ -99,11 +99,11 @@ msgstr "[ PsiType](#psitype)"
 
 #: ../../reference/psi_config.md
 msgid "The psi type."
-msgstr "psi类型"
+msgstr "The psi type"
 
 #: ../../reference/psi_config.md
 msgid "receiver_rank"
-msgstr "接收方编号"
+msgstr "receiver_rank"
 
 #: ../../reference/psi_config.md
 msgid "[ uint32](#uint32)"
@@ -115,7 +115,7 @@ msgstr "指定接收方编号。该接收方将获取 PSI 结果。"
 
 #: ../../reference/psi_config.md
 msgid "broadcast_result"
-msgstr "广播结果"
+msgstr "broadcast_result"
 
 #: ../../reference/psi_config.md
 msgid "[ bool](#bool)"
@@ -127,7 +127,7 @@ msgstr "是否将 PSI 结果广播给所有参与者。"
 
 #: ../../reference/psi_config.md
 msgid "input_params"
-msgstr "输入参数"
+msgstr "input_params"
 
 #: ../../reference/psi_config.md
 msgid "[ InputParams](#inputparams)"
@@ -135,11 +135,11 @@ msgstr "[ InputParams](#inputparams)"
 
 #: ../../reference/psi_config.md ../../reference/psi_config.md:87
 msgid "The input parameters of psi."
-msgstr "psi的输入参数。"
+msgstr "PSI 的输入参数。"
 
 #: ../../reference/psi_config.md
 msgid "output_params"
-msgstr "输出参数"
+msgstr "output_params"
 
 #: ../../reference/psi_config.md
 msgid "[ OutputParams](#outputparams)"
@@ -147,11 +147,11 @@ msgstr "[ OutputParams](#outputparams)"
 
 #: ../../reference/psi_config.md ../../reference/psi_config.md:135
 msgid "The output parameters of psi."
-msgstr "psi的输出参数。"
+msgstr "PSI 的输出参数。"
 
 #: ../../reference/psi_config.md
 msgid "curve_type"
-msgstr "椭圆曲线类型"
+msgstr "curve_type"
 
 #: ../../reference/psi_config.md
 msgid "[ CurveType](#curvetype)"
@@ -163,7 +163,7 @@ msgstr "可选，在需要时指定 PSI 中使用的椭圆曲线密码算法。"
 
 #: ../../reference/psi_config.md
 msgid "bucket_size"
-msgstr "哈希桶大小"
+msgstr "bucket_size"
 
 #: ../../reference/psi_config.md
 msgid "Optional, specified the hash bucket size used in psi."
@@ -171,7 +171,7 @@ msgstr "可选，用于指定 PSI 中使用的哈希桶大小。"
 
 #: ../../reference/psi_config.md
 msgid "preprocess_path"
-msgstr "预处理路径"
+msgstr "preprocess_path"
 
 #: ../../reference/psi_config.md
 msgid "[ string](#string)"
@@ -183,7 +183,7 @@ msgstr "可选，用于指定离线预处理文件的路径。"
 
 #: ../../reference/psi_config.md
 msgid "ecdh_secret_key_path"
-msgstr "ECDH 秘密密钥路径"
+msgstr "ecdh_secret_key_path"
 
 #: ../../reference/psi_config.md
 msgid "Optional，secret key path of ecdh_oprf, 256bit/32bytes binary file."
@@ -191,7 +191,7 @@ msgstr "可选，ECDH-OPRF 的密钥路径，256 位（32 字节）二进制文�
 
 #: ../../reference/psi_config.md
 msgid "dppsi_params"
-msgstr "DP PSI 参数"
+msgstr "dppsi_params"
 
 #: ../../reference/psi_config.md
 msgid "[ DpPsiParams](#dppsiparams)"
@@ -211,7 +211,7 @@ msgstr "DP-PSI 的输入参数。"
 
 #: ../../reference/psi_config.md
 msgid "bob_sub_sampling"
-msgstr "Bob 子采样概率"
+msgstr "bob_sub_sampling"
 
 #: ../../reference/psi_config.md
 msgid "[ double](#double)"
@@ -235,7 +235,7 @@ msgstr "输入参数"
 
 #: ../../reference/psi_config.md
 msgid "path"
-msgstr "路径"
+msgstr "path"
 
 #: ../../reference/psi_config.md
 msgid "The path of input csv file."
@@ -243,7 +243,7 @@ msgstr "输入 CSV 文件的路径。"
 
 #: ../../reference/psi_config.md
 msgid "select_fields"
-msgstr "选择字段"
+msgstr "select_fields"
 
 #: ../../reference/psi_config.md
 msgid "[repeated string](#string)"
@@ -255,7 +255,7 @@ msgstr "输入数据中需选择字段。"
 
 #: ../../reference/psi_config.md
 msgid "precheck"
-msgstr "字段预检查"
+msgstr "precheck"
 
 #: ../../reference/psi_config.md
 msgid "Whether to check select fields duplicate."
@@ -283,7 +283,7 @@ msgstr "输出 CSV 文件的路径。"
 
 #: ../../reference/psi_config.md
 msgid "need_sort"
-msgstr "是否需要排序"
+msgstr "need_sort"
 
 #: ../../reference/psi_config.md
 msgid "Whether to sort output file by select fields."
@@ -299,7 +299,7 @@ msgstr "PSI 结果报告。"
 
 #: ../../reference/psi_config.md
 msgid "original_count"
-msgstr "原始数据量"
+msgstr "original_count"
 
 #: ../../reference/psi_config.md
 msgid "[ int64](#int64)"
@@ -311,7 +311,7 @@ msgstr "输入数据量。"
 
 #: ../../reference/psi_config.md
 msgid "intersection_count"
-msgstr "交集数据量"
+msgstr "intersection_count"
 
 #: ../../reference/psi_config.md
 msgid "The count of intersection. Get `-1` when self party can not get result."
@@ -319,7 +319,7 @@ msgstr "交集数据量。当本方无法获取结果时，返回 `-1`。"
 
 #: ../../reference/psi_config.md
 msgid "original_key_count"
-msgstr "原始数据量"
+msgstr "original_key_count"
 
 #: ../../reference/psi_config.md
 msgid "none"
@@ -327,7 +327,7 @@ msgstr "无"
 
 #: ../../reference/psi_config.md
 msgid "intersection_key_count"
-msgstr "交集数据量"
+msgstr "intersection_key_count"
 
 #: ../../reference/psi_config.md:163
 msgid "CurveType"

@@ -19,790 +19,790 @@ msgstr ""
 
 #: ../../reference/psi_config.md:1
 msgid "PSI v1 Configuration"
-msgstr ""
+msgstr "PSI v1 配置"
 
 #: ../../reference/psi_config.md:3
 msgid "Table of Contents"
-msgstr ""
+msgstr "目录"
 
 #: ../../reference/psi_config.md:7 ../../reference/psi_config.md:29
 msgid "Messages"
-msgstr ""
+msgstr "消息"
 
 #: ../../reference/psi_config.md:8
 msgid "[BucketPsiConfig](#bucketpsiconfig)"
-msgstr ""
+msgstr "[BucketPsiConfig](#bucketpsiconfig)"
 
 #: ../../reference/psi_config.md:9
 msgid "[DpPsiParams](#dppsiparams)"
-msgstr ""
+msgstr "[DpPsiParams](#dppsiparams)"
 
 #: ../../reference/psi_config.md:10
 msgid "[InputParams](#inputparams)"
-msgstr ""
+msgstr "[InputParams](#inputparams)"
 
 #: ../../reference/psi_config.md:11
 msgid "[MemoryPsiConfig](#memorypsiconfig)"
-msgstr ""
+msgstr "[MemoryPsiConfig](#memorypsiconfig)"
 
 #: ../../reference/psi_config.md:12
 msgid "[OutputParams](#outputparams)"
-msgstr ""
+msgstr "[OutputParams](#outputparams)"
 
 #: ../../reference/psi_config.md:13
 msgid "[PsiResultReport](#psiresultreport)"
-msgstr ""
+msgstr "[PsiResultReport](#psiresultreport)"
 
 #: ../../reference/psi_config.md:17 ../../reference/psi_config.md:160
 msgid "Enums"
-msgstr ""
+msgstr "枚举"
 
 #: ../../reference/psi_config.md:18
 msgid "[CurveType](#curvetype)"
-msgstr ""
+msgstr "[CurveType](#curvetype)"
 
 #: ../../reference/psi_config.md:19
 msgid "[PsiType](#psitype)"
-msgstr ""
+msgstr "[PsiType](#psitype)"
 
 #: ../../reference/psi_config.md:23
 msgid "[Scalar Value Types](#scalar-value-types)"
-msgstr ""
+msgstr "[Scalar Value Types](#scalar-value-types)"
 
 #: ../../reference/psi_config.md:32
 msgid "BucketPsiConfig"
-msgstr ""
+msgstr "BucketPsiConfig"
 
 #: ../../reference/psi_config.md:39
 msgid "The Bucket-psi configuration."
-msgstr ""
+msgstr "Bucket-psi 配置"
 
 #: ../../reference/psi_config.md
 msgid "Field"
-msgstr ""
+msgstr "字段"
 
 #: ../../reference/psi_config.md
 msgid "Type"
-msgstr ""
+msgstr "类型"
 
 #: ../../reference/psi_config.md
 msgid "Description"
-msgstr ""
+msgstr "描述"
 
 #: ../../reference/psi_config.md
 msgid "psi_type"
-msgstr ""
+msgstr "psi_type"
 
 #: ../../reference/psi_config.md
 msgid "[ PsiType](#psitype)"
-msgstr ""
+msgstr "[ PsiType](#psitype)"
 
 #: ../../reference/psi_config.md
 msgid "The psi type."
-msgstr ""
+msgstr "PSI 类型。"
 
 #: ../../reference/psi_config.md
 msgid "receiver_rank"
-msgstr ""
+msgstr "receiver_rank"
 
 #: ../../reference/psi_config.md
 msgid "[ uint32](#uint32)"
-msgstr ""
+msgstr "[ uint32](#uint32)"
 
 #: ../../reference/psi_config.md
 msgid "Specified the receiver rank. Receiver can get psi result."
-msgstr ""
+msgstr "指定接收方编号。该接收方将获取 PSI 结果。"
 
 #: ../../reference/psi_config.md
 msgid "broadcast_result"
-msgstr ""
+msgstr "broadcast_result"
 
 #: ../../reference/psi_config.md
 msgid "[ bool](#bool)"
-msgstr ""
+msgstr "[ bool](#bool)"
 
 #: ../../reference/psi_config.md
 msgid "Whether to broadcast psi result to all parties."
-msgstr ""
+msgstr "是否将 PSI 结果广播给所有参与者。"
 
 #: ../../reference/psi_config.md
 msgid "input_params"
-msgstr ""
+msgstr "input_params"
 
 #: ../../reference/psi_config.md
 msgid "[ InputParams](#inputparams)"
-msgstr ""
+msgstr "[ InputParams](#inputparams)"
 
 #: ../../reference/psi_config.md ../../reference/psi_config.md:87
 msgid "The input parameters of psi."
-msgstr ""
+msgstr "PSI 的输入参数。"
 
 #: ../../reference/psi_config.md
 msgid "output_params"
-msgstr ""
+msgstr "output_params"
 
 #: ../../reference/psi_config.md
 msgid "[ OutputParams](#outputparams)"
-msgstr ""
+msgstr "[ OutputParams](#outputparams)"
 
 #: ../../reference/psi_config.md ../../reference/psi_config.md:135
 msgid "The output parameters of psi."
-msgstr ""
+msgstr "PSI 的输出参数。"
 
 #: ../../reference/psi_config.md
 msgid "curve_type"
-msgstr ""
+msgstr "curve_type"
 
 #: ../../reference/psi_config.md
 msgid "[ CurveType](#curvetype)"
-msgstr ""
+msgstr "[ CurveType](#curvetype)"
 
 #: ../../reference/psi_config.md
 msgid "Optional, specified elliptic curve cryptography used in psi when needed."
-msgstr ""
+msgstr "可选，在需要时指定 PSI 中使用的椭圆曲线密码算法。"
 
 #: ../../reference/psi_config.md
 msgid "bucket_size"
-msgstr ""
+msgstr "bucket_size"
 
 #: ../../reference/psi_config.md
 msgid "Optional, specified the hash bucket size used in psi."
-msgstr ""
+msgstr "可选，用于指定 PSI 中使用的哈希桶大小。"
 
 #: ../../reference/psi_config.md
 msgid "preprocess_path"
-msgstr ""
+msgstr "preprocess_path"
 
 #: ../../reference/psi_config.md
 msgid "[ string](#string)"
-msgstr ""
+msgstr "[ string](#string)"
 
 #: ../../reference/psi_config.md
 msgid "Optional，the path of offline preprocess file."
-msgstr ""
+msgstr "可选，用于指定离线预处理文件的路径。"
 
 #: ../../reference/psi_config.md
 msgid "ecdh_secret_key_path"
-msgstr ""
+msgstr "ecdh_secret_key_path"
 
 #: ../../reference/psi_config.md
 msgid "Optional，secret key path of ecdh_oprf, 256bit/32bytes binary file."
-msgstr ""
+msgstr "可选，ECDH-OPRF 的密钥路径，256 位（32 字节）二进制文件。"
 
 #: ../../reference/psi_config.md
 msgid "dppsi_params"
-msgstr ""
+msgstr "dppsi_params"
 
 #: ../../reference/psi_config.md
 msgid "[ DpPsiParams](#dppsiparams)"
-msgstr ""
+msgstr "[ DpPsiParams](#dppsiparams)"
 
 #: ../../reference/psi_config.md
 msgid "Optional，params for dp-psi"
-msgstr ""
+msgstr "可选，DP-PSI 的参数。"
 
 #: ../../reference/psi_config.md:70
 msgid "DpPsiParams"
-msgstr ""
+msgstr "DpPsiParams"
 
 #: ../../reference/psi_config.md:71
 msgid "The input parameters of dp-psi."
-msgstr ""
+msgstr "DP-PSI 的输入参数。"
 
 #: ../../reference/psi_config.md
 msgid "bob_sub_sampling"
-msgstr ""
+msgstr "bob_sub_sampling"
 
 #: ../../reference/psi_config.md
 msgid "[ double](#double)"
-msgstr ""
+msgstr "[ double](#double)"
 
 #: ../../reference/psi_config.md
 msgid "bob sub-sampling bernoulli_distribution probability."
-msgstr ""
+msgstr "Bob 子采样使用的 bernoulli_distribution 概率。"
 
 #: ../../reference/psi_config.md
 msgid "epsilon"
-msgstr ""
+msgstr "epsilon"
 
 #: ../../reference/psi_config.md
 msgid "dp epsilon"
-msgstr ""
+msgstr "DP epsilon"
 
 #: ../../reference/psi_config.md:82
 msgid "InputParams"
-msgstr ""
+msgstr "输入参数"
 
 #: ../../reference/psi_config.md
 msgid "path"
-msgstr ""
+msgstr "path"
 
 #: ../../reference/psi_config.md
 msgid "The path of input csv file."
-msgstr ""
+msgstr "输入 CSV 文件的路径。"
 
 #: ../../reference/psi_config.md
 msgid "select_fields"
-msgstr ""
+msgstr "select_fields"
 
 #: ../../reference/psi_config.md
 msgid "[repeated string](#string)"
-msgstr ""
+msgstr "[repeated string](#string)"
 
 #: ../../reference/psi_config.md
 msgid "The select fields of input data."
-msgstr ""
+msgstr "输入数据中需选择字段。"
 
 #: ../../reference/psi_config.md
 msgid "precheck"
-msgstr ""
+msgstr "precheck"
 
 #: ../../reference/psi_config.md
 msgid "Whether to check select fields duplicate."
-msgstr ""
+msgstr "是否检查选择字段是否重复。"
 
 #: ../../reference/psi_config.md:99
 msgid "MemoryPsiConfig"
-msgstr ""
+msgstr "MemoryPsiConfig"
 
 #: ../../reference/psi_config.md:105
 msgid "The In-memory psi configuration."
-msgstr ""
+msgstr "PSI 在内存中的配置。"
 
 #: ../../reference/psi_config.md
 msgid "Optional，Params for dp-psi"
-msgstr ""
+msgstr "可选，DP-PSI 的参数。"
 
 #: ../../reference/psi_config.md:130
 msgid "OutputParams"
-msgstr ""
+msgstr "输出参数"
 
 #: ../../reference/psi_config.md
 msgid "The path of output csv file."
-msgstr ""
+msgstr "输出 CSV 文件的路径。"
 
 #: ../../reference/psi_config.md
 msgid "need_sort"
-msgstr ""
+msgstr "need_sort"
 
 #: ../../reference/psi_config.md
 msgid "Whether to sort output file by select fields."
-msgstr ""
+msgstr "是否按选择字段对输出文件进行排序。"
 
 #: ../../reference/psi_config.md:146
 msgid "PsiResultReport"
-msgstr ""
+msgstr "PsiResultReport"
 
 #: ../../reference/psi_config.md:147
 msgid "The report of psi result."
-msgstr ""
+msgstr "PSI 结果报告。"
 
 #: ../../reference/psi_config.md
 msgid "original_count"
-msgstr ""
+msgstr "original_count"
 
 #: ../../reference/psi_config.md
 msgid "[ int64](#int64)"
-msgstr ""
+msgstr "[ int64](#int64)"
 
 #: ../../reference/psi_config.md
 msgid "The data count of input."
-msgstr ""
+msgstr "输入数据量。"
 
 #: ../../reference/psi_config.md
 msgid "intersection_count"
-msgstr ""
+msgstr "intersection_count"
 
 #: ../../reference/psi_config.md
 msgid "The count of intersection. Get `-1` when self party can not get result."
-msgstr ""
+msgstr "交集数据量。当本方无法获取结果时，返回 `-1`。"
 
 #: ../../reference/psi_config.md
 msgid "original_key_count"
-msgstr ""
+msgstr "original_key_count"
 
 #: ../../reference/psi_config.md
 msgid "none"
-msgstr ""
+msgstr "none"
 
 #: ../../reference/psi_config.md
 msgid "intersection_key_count"
-msgstr ""
+msgstr "intersection_key_count"
 
 #: ../../reference/psi_config.md:163
 msgid "CurveType"
-msgstr ""
+msgstr "CurveType"
 
 #: ../../reference/psi_config.md:164
 msgid "The specified elliptic curve cryptography used in psi."
-msgstr ""
+msgstr "PSI 中使用的指定椭圆曲线密码算法。"
 
 #: ../../reference/psi_config.md
 msgid "Name"
-msgstr ""
+msgstr "名称"
 
 #: ../../reference/psi_config.md
 msgid "Number"
-msgstr ""
+msgstr "编号"
 
 #: ../../reference/psi_config.md
 msgid "CURVE_INVALID_TYPE"
-msgstr ""
+msgstr "CURVE_INVALID_TYPE"
 
 #: ../../reference/psi_config.md
 msgid "0"
-msgstr ""
+msgstr "0"
 
 #: ../../reference/psi_config.md
 msgid "CURVE_25519"
-msgstr ""
+msgstr "CURVE_25519"
 
 #: ../../reference/psi_config.md
 msgid "1"
-msgstr ""
+msgstr "1"
 
 #: ../../reference/psi_config.md
 msgid "Daniel J. Bernstein. Curve25519: new diffie-hellman speed records"
-msgstr ""
+msgstr "Daniel J. Bernstein：Curve25519——新的 Diffie-Hellman 速度记录"
 
 #: ../../reference/psi_config.md
 msgid "CURVE_FOURQ"
-msgstr ""
+msgstr "CURVE_FOURQ"
 
 #: ../../reference/psi_config.md
 msgid "2"
-msgstr ""
+msgstr "2"
 
 #: ../../reference/psi_config.md
 msgid ""
 "FourQ: four-dimensional decompositions on a Q-curve over the Mersenne "
 "prime"
-msgstr ""
+msgstr "FourQ：在 Mersenne 素数上的 Q 曲线进行四维分解"
 
 #: ../../reference/psi_config.md
 msgid "CURVE_SM2"
-msgstr ""
+msgstr "CURVE_SM2"
 
 #: ../../reference/psi_config.md
 msgid "3"
-msgstr ""
+msgstr "3"
 
 #: ../../reference/psi_config.md
 msgid ""
 "SM2 is an elliptic curve based cryptosystem (ECC) published as a Chinese "
 "National Standard as GBT.32918.1-2016 and published in ISO/IEC "
 "14888-3:2018"
-msgstr ""
+msgstr "SM2 是一种基于椭圆曲线的密码系统（ECC），已作为中国国家标准 GBT 32918.1-2016 发布，并被收录于国际标准 ISO/IEC 14888-3:2018 中。"
 
 #: ../../reference/psi_config.md
 msgid "CURVE_SECP256K1"
-msgstr ""
+msgstr "CURVE_SECP256K1"
 
 #: ../../reference/psi_config.md
 msgid "4"
-msgstr ""
+msgstr "4"
 
 #: ../../reference/psi_config.md
 msgid ""
 "parameters of the elliptic curve defined in Standards for Efficient "
 "Cryptography (SEC) http://www.secg.org/sec2-v2.pdf"
-msgstr ""
+msgstr "该椭圆曲线的参数定义于《高效密码学标准（SEC）》：http://www.secg.org/sec2-v2.pdf"
 
 #: ../../reference/psi_config.md
 msgid "CURVE_25519_ELLIGATOR2"
-msgstr ""
+msgstr "CURVE_25519_ELLIGATOR2"
 
 #: ../../reference/psi_config.md
 msgid "5"
-msgstr ""
+msgstr "5"
 
 #: ../../reference/psi_config.md
 msgid "Curve25519 with rfc9380 elligator2 hash_to_curve"
-msgstr ""
+msgstr "带有 rfc9380 elligator2 hash_to_curve 的 Curve25519"
 
 #: ../../reference/psi_config.md:178
 msgid "PsiType"
-msgstr ""
+msgstr "PsiType"
 
 #: ../../reference/psi_config.md:185
 msgid "The algorithm type of psi."
-msgstr ""
+msgstr "PSI 的算法类型。"
 
 #: ../../reference/psi_config.md
 msgid "INVALID_PSI_TYPE"
-msgstr ""
+msgstr "INVALID_PSI_TYPE"
 
 #: ../../reference/psi_config.md
 msgid "ECDH_PSI_2PC"
-msgstr ""
+msgstr "ECDH_PSI_2PC"
 
 #: ../../reference/psi_config.md
 msgid "``` NOTICED: No longer supported ``` DDH based PSI"
-msgstr ""
+msgstr "``` 注意：不再支持 ``` 基于 DDH 的 PSI"
 
 #: ../../reference/psi_config.md
 msgid "KKRT_PSI_2PC"
-msgstr ""
+msgstr "KKRT_PSI_2PC"
 
 #: ../../reference/psi_config.md
 msgid ""
 "``` NOTICED: No longer supported ``` Efficient Batched Oblivious PRF with"
 " Applications to Private Set Intersection "
 "https://eprint.iacr.org/2016/799.pdf"
-msgstr ""
+msgstr "``` 注意：不再支持 ``` 高效批处理的不经意伪随机函数及其在隐私集合求交中的应用 https://eprint.iacr.org/2016/799.pdf"
 
 #: ../../reference/psi_config.md
 msgid "ECDH_PSI_3PC"
-msgstr ""
+msgstr "ECDH_PSI_3PC"
 
 #: ../../reference/psi_config.md
 msgid ""
 "Multi-party PSI based on ECDH (Say A, B, C (receiver)) notice: two-party "
 "intersection cardinarlity leak ("
-msgstr ""
+msgstr "基于 ECDH 的多方 PSI（例如 A、B、C（接收方））注意：会泄露两方交集的基数（"
 
 #: ../../reference/psi_config.md
 msgid "ECDH_PSI_NPC"
-msgstr ""
+msgstr "ECDH_PSI_NPC"
 
 #: ../../reference/psi_config.md
 msgid ""
 "Iterative running 2-party ecdh psi to get n-party PSI. Notice: two-party "
 "intersection leak"
-msgstr ""
+msgstr "迭代运行双方 ECDH PSI 以获得多方 PSI。注意：会泄露两方交集"
 
 #: ../../reference/psi_config.md
 msgid "KKRT_PSI_NPC"
-msgstr ""
+msgstr "KKRT_PSI_NPC"
 
 #: ../../reference/psi_config.md
 msgid "6"
-msgstr ""
+msgstr "6"
 
 #: ../../reference/psi_config.md
 msgid ""
 "Iterative running 2-party kkrt psi to get n-party PSI. Notice: two-party "
 "intersection leak"
-msgstr ""
+msgstr "迭代运行双方 KKRT PSI 以获得多方 PSI。注意：会泄露两方交集"
 
 #: ../../reference/psi_config.md
 msgid "ECDH_OPRF_UB_PSI_2PC_GEN_CACHE"
-msgstr ""
+msgstr "ECDH_OPRF_UB_PSI_2PC_GEN_CACHE"
 
 #: ../../reference/psi_config.md
 msgid "7"
-msgstr ""
+msgstr "7"
 
 #: ../../reference/psi_config.md
 msgid ""
 "``` NOTICED: No longer supported ``` ecdh-oprf 2-party Unbalanced-PSI "
 "Generate CACHE."
-msgstr ""
+msgstr "``` 注意：不再支持 ``` 基于 ECDH-OPRF 的两方非均衡 PSI，生成缓存阶段。"
 
 #: ../../reference/psi_config.md
 msgid "ECDH_OPRF_UB_PSI_2PC_TRANSFER_CACHE"
-msgstr ""
+msgstr "ECDH_OPRF_UB_PSI_2PC_TRANSFER_CACHE"
 
 #: ../../reference/psi_config.md
 msgid "8"
-msgstr ""
+msgstr "8"
 
 #: ../../reference/psi_config.md
 msgid ""
 "``` NOTICED: No longer supported ``` ecdh-oprf 2-party Unbalanced-PSI "
 "transfer CACHE."
-msgstr ""
+msgstr "``` 注意：不再支持 ``` 基于 ECDH-OPRF 的两方非均衡 PSI，传输缓存阶段。"
 
 #: ../../reference/psi_config.md
 msgid "ECDH_OPRF_UB_PSI_2PC_OFFLINE"
-msgstr ""
+msgstr "ECDH_OPRF_UB_PSI_2PC_OFFLINE"
 
 #: ../../reference/psi_config.md
 msgid "9"
-msgstr ""
+msgstr "9"
 
 #: ../../reference/psi_config.md
 msgid ""
 "``` NOTICED: No longer supported ``` ecdh-oprf 2-party Unbalanced-PSI "
 "offline phase."
-msgstr ""
+msgstr "``` 注意：不再支持 ``` 基于 ECDH-OPRF 的两方非均衡 PSI，离线阶段。"
 
 #: ../../reference/psi_config.md
 msgid "ECDH_OPRF_UB_PSI_2PC_ONLINE"
-msgstr ""
+msgstr "ECDH_OPRF_UB_PSI_2PC_ONLINE"
 
 #: ../../reference/psi_config.md
 msgid "10"
-msgstr ""
+msgstr "10"
 
 #: ../../reference/psi_config.md
 msgid ""
 "``` NOTICED: No longer supported ``` ecdh-oprf 2-party Unbalanced-PSI "
 "online phase."
-msgstr ""
+msgstr "``` 注意：不再支持 ``` 基于 ECDH-OPRF 的两方非均衡 PSI，在线阶段。"
 
 #: ../../reference/psi_config.md
 msgid "ECDH_OPRF_UB_PSI_2PC_SHUFFLE_ONLINE"
-msgstr ""
+msgstr "ECDH_OPRF_UB_PSI_2PC_SHUFFLE_ONLINE"
 
 #: ../../reference/psi_config.md
 msgid "11"
-msgstr ""
+msgstr "11"
 
 #: ../../reference/psi_config.md
 msgid ""
 "``` NOTICED: No longer supported ``` ecdh-oprf 2-party Unbalanced-PSI "
 "with shuffling online phase. large set party get intersection result"
-msgstr ""
+msgstr "``` 注意：不再支持 ``` 基于 ECDH-OPRF 的两方非均衡 PSI，含打乱处理的在线阶段。大集合方获得交集结果。"
 
 #: ../../reference/psi_config.md
 msgid "DP_PSI_2PC"
-msgstr ""
+msgstr "DP_PSI_2PC"
 
 #: ../../reference/psi_config.md
 msgid "12"
-msgstr ""
+msgstr "12"
 
 #: ../../reference/psi_config.md
 msgid ""
 "Differentially-Private PSI https://arxiv.org/pdf/2208.13249.pdf bases on "
 "ECDH-PSI, and provides: Differentially private PSI results."
-msgstr ""
+msgstr "差分隐私 PSI（DP-PSI），基于 ECDH-PSI。详情见：https://arxiv.org/pdf/2208.13249.pdf，支持差分隐私保护的 PSI 结果。"
 
 #: ../../reference/psi_config.md
 msgid "RR22_FAST_PSI_2PC"
-msgstr ""
+msgstr "RR22_FAST_PSI_2PC"
 
 #: ../../reference/psi_config.md
 msgid "13"
-msgstr ""
+msgstr "13"
 
 #: ../../reference/psi_config.md
 msgid ""
 "``` NOTICED: No longer supported ``` Blazing Fast PSI "
 "https://eprint.iacr.org/2022/320.pdf two mode: fast mode or low "
 "communication mode"
-msgstr ""
+msgstr "``` 注意：不再支持 ``` 基于 Blazing Fast PSI 的两种模式：快速模式和低通信模式。详情见：https://eprint.iacr.org/2022/320.pdf"
 
 #: ../../reference/psi_config.md
 msgid "RR22_LOWCOMM_PSI_2PC"
-msgstr ""
+msgstr "RR22_LOWCOMM_PSI_2PC"
 
 #: ../../reference/psi_config.md
 msgid "14"
-msgstr ""
+msgstr "14"
 
 #: ../../reference/psi_config.md
 msgid "RR22_MALICIOUS_PSI_2PC"
-msgstr ""
+msgstr "RR22_MALICIOUS_PSI_2PC"
 
 #: ../../reference/psi_config.md
 msgid "15"
-msgstr ""
+msgstr "15"
 
 #: ../../reference/psi_config.md:209
 msgid "Scalar Value Types"
-msgstr ""
+msgstr "标量值类型"
 
 #: ../../reference/psi_config.md
 msgid ".proto Type"
-msgstr ""
+msgstr ".proto 类型"
 
 #: ../../reference/psi_config.md
 msgid "Notes"
-msgstr ""
+msgstr "备注"
 
 #: ../../reference/psi_config.md
 msgid "C++ Type"
-msgstr ""
+msgstr "C++ 类型"
 
 #: ../../reference/psi_config.md
 msgid "Java Type"
-msgstr ""
+msgstr "Java 类型"
 
 #: ../../reference/psi_config.md
 msgid "Python Type"
-msgstr ""
+msgstr "Python 类型"
 
 #: ../../reference/psi_config.md
 msgid "<div><h4 id=\"double\" /></div><a name=\"double\" /> double"
-msgstr ""
+msgstr "<div><h4 id=\"double\" /></div><a name=\"double\" /> double"
 
 #: ../../reference/psi_config.md
 msgid "double"
-msgstr ""
+msgstr "double"
 
 #: ../../reference/psi_config.md
 msgid "float"
-msgstr ""
+msgstr "float"
 
 #: ../../reference/psi_config.md
 msgid "<div><h4 id=\"float\" /></div><a name=\"float\" /> float"
-msgstr ""
+msgstr "<div><h4 id=\"float\" /></div><a name=\"float\" /> float"
 
 #: ../../reference/psi_config.md
 msgid "<div><h4 id=\"int32\" /></div><a name=\"int32\" /> int32"
-msgstr ""
+msgstr "<div><h4 id=\"int32\" /></div><a name=\"int32\" /> int32"
 
 #: ../../reference/psi_config.md
 msgid ""
 "Uses variable-length encoding. Inefficient for encoding negative numbers "
 "– if your field is likely to have negative values, use sint32 instead."
-msgstr ""
+msgstr "使用可变长度编码。对于编码负值时效率低下，如果字段可能具有负值，请使用 sint32 代替。"
 
 #: ../../reference/psi_config.md
 msgid "int32"
-msgstr ""
+msgstr "int32"
 
 #: ../../reference/psi_config.md
 msgid "int"
-msgstr ""
+msgstr "int"
 
 #: ../../reference/psi_config.md
 msgid "<div><h4 id=\"int64\" /></div><a name=\"int64\" /> int64"
-msgstr ""
+msgstr "<div><h4 id=\"int64\" /></div><a name=\"int64\" /> int64"
 
 #: ../../reference/psi_config.md
 msgid ""
 "Uses variable-length encoding. Inefficient for encoding negative numbers "
 "– if your field is likely to have negative values, use sint64 instead."
-msgstr ""
+msgstr "使用可变长度编码。对于编码负值时效率低下，如果字段可能具有负值，请使用 sint64 代替。"
 
 #: ../../reference/psi_config.md
 msgid "int64"
-msgstr ""
+msgstr "int64"
 
 #: ../../reference/psi_config.md
 msgid "long"
-msgstr ""
+msgstr "long"
 
 #: ../../reference/psi_config.md
 msgid "int/long"
-msgstr ""
+msgstr "int/long"
 
 #: ../../reference/psi_config.md
 msgid "<div><h4 id=\"uint32\" /></div><a name=\"uint32\" /> uint32"
-msgstr ""
+msgstr "<div><h4 id=\"uint32\" /></div><a name=\"uint32\" /> uint32"
 
 #: ../../reference/psi_config.md
 msgid "Uses variable-length encoding."
-msgstr ""
+msgstr "使用可变长度编码。"
 
 #: ../../reference/psi_config.md
 msgid "uint32"
-msgstr ""
+msgstr "uint32"
 
 #: ../../reference/psi_config.md
 msgid "<div><h4 id=\"uint64\" /></div><a name=\"uint64\" /> uint64"
-msgstr ""
+msgstr "<div><h4 id=\"uint64\" /></div><a name=\"uint64\" /> uint64"
 
 #: ../../reference/psi_config.md
 msgid "uint64"
-msgstr ""
+msgstr "uint64"
 
 #: ../../reference/psi_config.md
 msgid "<div><h4 id=\"sint32\" /></div><a name=\"sint32\" /> sint32"
-msgstr ""
+msgstr "<div><h4 id=\"sint32\" /></div><a name=\"sint32\" /> sint32"
 
 #: ../../reference/psi_config.md
 msgid ""
 "Uses variable-length encoding. Signed int value. These more efficiently "
 "encode negative numbers than regular int32s."
-msgstr ""
+msgstr "使用可变长度编码。有符号整数值。这些编码效率更高，可以更有效地编码负数。"
 
 #: ../../reference/psi_config.md
 msgid "<div><h4 id=\"sint64\" /></div><a name=\"sint64\" /> sint64"
-msgstr ""
+msgstr "<div><h4 id=\"sint64\" /></div><a name=\"sint64\" /> sint64"
 
 #: ../../reference/psi_config.md
 msgid ""
 "Uses variable-length encoding. Signed int value. These more efficiently "
 "encode negative numbers than regular int64s."
-msgstr ""
+msgstr "使用可变长度编码。有符号整数值。这些编码效率更高，可以更有效地编码负数。"
 
 #: ../../reference/psi_config.md
 msgid "<div><h4 id=\"fixed32\" /></div><a name=\"fixed32\" /> fixed32"
-msgstr ""
+msgstr "<div><h4 id=\"fixed32\" /></div><a name=\"fixed32\" /> fixed32"
 
 #: ../../reference/psi_config.md
 msgid ""
 "Always four bytes. More efficient than uint32 if values are often greater"
 " than 2^28."
-msgstr ""
+msgstr "总是四个字节。如果值经常大于 2^28，则比 uint32 更高效。"
 
 #: ../../reference/psi_config.md
 msgid "<div><h4 id=\"fixed64\" /></div><a name=\"fixed64\" /> fixed64"
-msgstr ""
+msgstr "<div><h4 id=\"fixed64\" /></div><a name=\"fixed64\" /> fixed64"
 
 #: ../../reference/psi_config.md
 msgid ""
 "Always eight bytes. More efficient than uint64 if values are often "
 "greater than 2^56."
-msgstr ""
+msgstr "总是八个字节。如果值经常大于 2^56，则比 uint64 更高效。"
 
 #: ../../reference/psi_config.md
 msgid "<div><h4 id=\"sfixed32\" /></div><a name=\"sfixed32\" /> sfixed32"
-msgstr ""
+msgstr "<div><h4 id=\"sfixed32\" /></div><a name=\"sfixed32\" /> sfixed32"
 
 #: ../../reference/psi_config.md
 msgid "Always four bytes."
-msgstr ""
+msgstr "总是四个字节。"
 
 #: ../../reference/psi_config.md
 msgid "<div><h4 id=\"sfixed64\" /></div><a name=\"sfixed64\" /> sfixed64"
-msgstr ""
+msgstr "<div><h4 id=\"sfixed64\" /></div><a name=\"sfixed64\" /> sfixed64"
 
 #: ../../reference/psi_config.md
 msgid "Always eight bytes."
-msgstr ""
+msgstr "总是八个字节。"
 
 #: ../../reference/psi_config.md
 msgid "<div><h4 id=\"bool\" /></div><a name=\"bool\" /> bool"
-msgstr ""
+msgstr "<div><h4 id=\"bool\" /></div><a name=\"bool\" /> bool"
 
 #: ../../reference/psi_config.md
 msgid "bool"
-msgstr ""
+msgstr "bool"
 
 #: ../../reference/psi_config.md
 msgid "boolean"
-msgstr ""
+msgstr "boolean"
 
 #: ../../reference/psi_config.md
 msgid "<div><h4 id=\"string\" /></div><a name=\"string\" /> string"
-msgstr ""
+msgstr "<div><h4 id=\"string\" /></div><a name=\"string\" /> string"
 
 #: ../../reference/psi_config.md
 msgid "A string must always contain UTF-8 encoded or 7-bit ASCII text."
-msgstr ""
+msgstr "字符串必须始终包含 UTF-8 编码或 7 位 ASCII 文本。"
 
 #: ../../reference/psi_config.md
 msgid "string"
-msgstr ""
+msgstr "string"
 
 #: ../../reference/psi_config.md
 msgid "String"
-msgstr ""
+msgstr "String"
 
 #: ../../reference/psi_config.md
 msgid "str/unicode"
-msgstr ""
+msgstr "str/unicode"
 
 #: ../../reference/psi_config.md
 msgid "<div><h4 id=\"bytes\" /></div><a name=\"bytes\" /> bytes"
-msgstr ""
+msgstr "<div><h4 id=\"bytes\" /></div><a name=\"bytes\" /> bytes"
 
 #: ../../reference/psi_config.md
 msgid "May contain any arbitrary sequence of bytes."
-msgstr ""
+msgstr "可能包含任何任意字节序列。"
 
 #: ../../reference/psi_config.md
 msgid "ByteString"
-msgstr ""
+msgstr "ByteString"
 
 #: ../../reference/psi_config.md
 msgid "str"
-msgstr ""
+msgstr "str"
 
 #~ msgid "DDH based PSI"
 #~ msgstr ""

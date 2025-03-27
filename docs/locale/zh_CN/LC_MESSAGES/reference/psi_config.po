@@ -323,7 +323,7 @@ msgstr "original_key_count"
 
 #: ../../reference/psi_config.md
 msgid "none"
-msgstr "无"
+msgstr "none"
 
 #: ../../reference/psi_config.md
 msgid "intersection_key_count"

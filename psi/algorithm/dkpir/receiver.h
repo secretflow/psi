@@ -24,7 +24,7 @@ namespace psi::dkpir {
 class DkPirReceiver : public psi::apsi_wrapper::Receiver {
  public:
   DkPirReceiver(::apsi::PSIParams params)
-      : psi::apsi_wrapper::Receiver(params){};
+      : psi::apsi_wrapper::Receiver(params) {}
 
   // Creates and returns a psi::dkpir::OPRFReceiver object for the given items.
   static OPRFReceiver CreateOPRFReceiver(

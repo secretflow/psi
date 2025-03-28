@@ -211,7 +211,7 @@ The alternate way to visualize trace is to use **chrome://tracing**:
 
 
 
-## PSI V2 Benchamrk
+## PSI V2 Benchmark
 
 Please refer to [PSI V2 Benchmark](docs/user_guide/psi_v2_benchmark.md)
 

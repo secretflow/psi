@@ -24,6 +24,7 @@
 #include "perfetto.h"
 #include "spdlog/spdlog.h"
 
+#include "psi/algorithm/dkpir/entry.h"
 #include "psi/apps/psi_launcher/factory.h"
 #include "psi/prelude.h"
 #include "psi/trace_categories.h"
@@ -240,6 +241,81 @@ PirResultReport RunPir(const ApsiSenderConfig& apsi_sender_config,
         apsi_sender_config.experimental_bucket_group_cnt();
   }
   YACL_ENFORCE_EQ(RunSender(options, lctx), 0);
+
+  return PirResultReport();
+}
+
+PirResultReport RunDkPir(const DkPirReceiverConfig& dk_pir_receiver_config,
+                         const std::shared_ptr<yacl::link::Context>& lctx) {
+  psi::dkpir::DkPirReceiverOptions options;
+
+  options.threads = dk_pir_receiver_config.threads();
+  options.curve_type = dk_pir_receiver_config.curve_type();
+  options.skip_count_check = dk_pir_receiver_config.skip_count_check();
+  if (dk_pir_receiver_config.log_level() == "all" ||
+      dk_pir_receiver_config.log_level() == "debug" ||
+      dk_pir_receiver_config.log_level() == "info" ||
+      dk_pir_receiver_config.log_level() == "warning" ||
+      dk_pir_receiver_config.log_level() == "error" ||
+      dk_pir_receiver_config.log_level() == "off") {
+    options.log_level = dk_pir_receiver_config.log_level();
+  }
+  options.log_file = dk_pir_receiver_config.log_file();
+  options.params_file = dk_pir_receiver_config.params_file();
+  options.query_file = dk_pir_receiver_config.query_file();
+  options.result_file = dk_pir_receiver_config.result_file();
+  options.tmp_folder = dk_pir_receiver_config.tmp_folder();
+  options.key = dk_pir_receiver_config.key();
+  options.labels =
+      std::vector<std::string>(dk_pir_receiver_config.labels().begin(),
+                               dk_pir_receiver_config.labels().end());
+
+  YACL_ENFORCE_EQ(ReceiverOnline(options, lctx), 0);
+
+  return PirResultReport();
+}
+
+PirResultReport RunDkPir(const DkPirSenderConfig& dk_pir_sender_config,
+                         const std::shared_ptr<yacl::link::Context>& lctx) {
+  psi::dkpir::DkPirSenderOptions options;
+
+  options.threads = dk_pir_sender_config.threads();
+  options.curve_type = dk_pir_sender_config.curve_type();
+  options.skip_count_check = dk_pir_sender_config.skip_count_check();
+  if (dk_pir_sender_config.log_level() == "all" ||
+      dk_pir_sender_config.log_level() == "debug" ||
+      dk_pir_sender_config.log_level() == "info" ||
+      dk_pir_sender_config.log_level() == "warning" ||
+      dk_pir_sender_config.log_level() == "error" ||
+      dk_pir_sender_config.log_level() == "off") {
+    options.log_level = dk_pir_sender_config.log_level();
+  }
+  options.log_file = dk_pir_sender_config.log_file();
+  options.params_file = dk_pir_sender_config.params_file();
+  options.source_file = dk_pir_sender_config.source_file();
+  options.value_sdb_out_file = dk_pir_sender_config.value_sdb_out_file();
+  options.count_sdb_out_file = dk_pir_sender_config.count_sdb_out_file();
+  options.secret_key_file = dk_pir_sender_config.secret_key_file();
+  options.result_file = dk_pir_sender_config.result_file();
+  options.tmp_folder = dk_pir_sender_config.tmp_folder();
+  options.key = dk_pir_sender_config.key();
+  options.labels =
+      std::vector<std::string>(dk_pir_sender_config.labels().begin(),
+                               dk_pir_sender_config.labels().end());
+
+  switch (dk_pir_sender_config.mode()) {
+    case psi::DkPirSenderConfig::MODE_OFFLINE: {
+      YACL_ENFORCE_EQ(SenderOffline(options), 0);
+      break;
+    }
+    case psi::DkPirSenderConfig::MODE_ONLINE: {
+      YACL_ENFORCE_EQ(SenderOnline(options, lctx), 0);
+      break;
+    }
+    default: {
+      YACL_THROW("unsupported mode.");
+    }
+  }
 
   return PirResultReport();
 }

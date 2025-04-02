@@ -122,35 +122,35 @@ void QueryServiceClient::PreprocessDBChunk(const yacl::Buffer& chunk_buffer) {
     uint64_t end_index_backup = std::min(
         start_index_backup + backup_set_per_thread, total_backup_set_num_);
 
-    threads.emplace_back(
-        [&, start_index, end_index, start_index_backup, end_index_backup] {
-          // Update the parities for the primary hints
-          for (uint64_t j = start_index; j < end_index; j++) {
-            auto tmp = PRFEvalWithLongKeyAndTag(long_key_, primary_sets_[j].tag,
-                                                chunk_index);
-            auto offset = tmp & (chunk_size_ - 1);
-            {
-              std::lock_guard<std::mutex> lock(hit_map_mutex);
-              hit_map[offset] = true;
-            }
-            primary_sets_[j].parity.XorFromRaw(absl::Span<const uint8_t>(
-                db_chunk.data() + (offset * entry_size_), entry_size_));
-          }
+    threads.emplace_back([&, start_index, end_index, start_index_backup,
+                          end_index_backup, chunk_index, db_chunk] {
+      // Update the parities for the primary hints
+      for (uint64_t j = start_index; j < end_index; j++) {
+        auto tmp = PRFEvalWithLongKeyAndTag(long_key_, primary_sets_[j].tag,
+                                            chunk_index);
+        auto offset = tmp & (chunk_size_ - 1);
+        {
+          std::lock_guard<std::mutex> lock(hit_map_mutex);
+          hit_map[offset] = true;
+        }
+        primary_sets_[j].parity.XorFromRaw(absl::Span<const uint8_t>(
+            db_chunk.data() + (offset * entry_size_), entry_size_));
+      }
 
-          // Update the parities for the backup hints
-          for (uint64_t j = start_index_backup; j < end_index_backup; j++) {
-            // Skip if backup set belongs to chunk i
-            if (j < chunk_index * backup_set_num_per_chunk_ ||
-                j >= (chunk_index + 1) * backup_set_num_per_chunk_) {
-              auto tmp = PRFEvalWithLongKeyAndTag(
-                  long_key_, local_backup_sets_[j].tag, chunk_index);
-              auto offset = tmp & (chunk_size_ - 1);
-              local_backup_sets_[j].parity_after_puncture.XorFromRaw(
-                  absl::Span<const uint8_t>(
-                      db_chunk.data() + (offset * entry_size_), entry_size_));
-            }
-          }
-        });
+      // Update the parities for the backup hints
+      for (uint64_t j = start_index_backup; j < end_index_backup; j++) {
+        // Skip if backup set belongs to chunk i
+        if (j < chunk_index * backup_set_num_per_chunk_ ||
+            j >= (chunk_index + 1) * backup_set_num_per_chunk_) {
+          auto tmp = PRFEvalWithLongKeyAndTag(
+              long_key_, local_backup_sets_[j].tag, chunk_index);
+          auto offset = tmp & (chunk_size_ - 1);
+          local_backup_sets_[j].parity_after_puncture.XorFromRaw(
+              absl::Span<const uint8_t>(
+                  db_chunk.data() + (offset * entry_size_), entry_size_));
+        }
+      }
+    });
   }
 
   for (auto& thread : threads) {

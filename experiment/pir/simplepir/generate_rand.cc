@@ -19,8 +19,9 @@
 #include "yacl/base/exception.h"
 
 namespace pir::simple {
-std::vector<uint64_t>
-generate_random_vector(size_t size, const uint64_t &modulus_, bool fast_mode) {
+std::vector<uint64_t> generate_random_vector(size_t size,
+                                             const uint64_t &modulus_,
+                                             bool fast_mode) {
   YACL_ENFORCE(size > 0);
   YACL_ENFORCE(modulus_ > 1);
 

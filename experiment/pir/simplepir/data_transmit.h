@@ -15,8 +15,8 @@
 #pragma once
 
 #include <arpa/inet.h>
-#include <unistd.h>
 #include <spdlog/spdlog.h>
+#include <unistd.h>
 
 #include <cstdint>
 #include <cstdio>

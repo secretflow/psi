@@ -29,8 +29,7 @@ namespace pir::piano {
 constexpr uint64_t kStatisticalSecurityLog2 = 40;
 
 // Natural logarithm of the security parameter, ln(x) = log2(x) * ln(2)
-const double kStatisticalSecurityLn =
-    std::log(2) * kStatisticalSecurityLog2;
+const double kStatisticalSecurityLn = std::log(2) * kStatisticalSecurityLog2;
 
 struct LocalSet {
   /**

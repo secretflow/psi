@@ -100,7 +100,9 @@ void QueryServiceClient::InitializeLocalSets() {
 }
 
 void QueryServiceClient::PreprocessDBChunk(const yacl::Buffer& chunk_buffer) {
-  auto [chunk_index, db_chunk] = DeserializeDBChunk(chunk_buffer);
+  uint64_t chunk_index;
+  std::vector<uint8_t> db_chunk;
+  std::tie(chunk_index, db_chunk) = DeserializeDBChunk(chunk_buffer);
 
   // Use multiple threads to parallelize the computation for the chunk
   std::vector<std::thread> threads;

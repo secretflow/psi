@@ -14,42 +14,29 @@
 
 #include "inner_product.h"
 
+#include "yacl/base/exception.h"
+
 namespace pir::simple {
-__uint128_t fast_inner_product_modq(const std::vector<__uint128_t> &row,
-                                    const std::vector<__uint128_t> &col,
-                                    const size_t &q) {
-  if (row.size() != col.size()) {
-    throw std::invalid_argument("Row and column sizes do not match");
-  }
+uint64_t fast_inner_product_modq(const std::vector<uint64_t> &row,
+                                 const std::vector<uint64_t> &col,
+                                 const uint64_t &q) {
+  YACL_ENFORCE(row.size() == col.size());
+  YACL_ENFORCE(q > 0);
+
   const size_t len = row.size();
-  const __uint128_t q128 = static_cast<__uint128_t>(q);
-  __uint128_t result = 0;
+  uint128_t result = 0;  // 128-bit accumulator for large intermediate sums
 
-  constexpr size_t UNROLL = 4;
-  constexpr size_t MOD_FREQ = 32;
+  for (size_t i = 0; i < len; i++) {
+    // 128-bit multiplication to prevent overflow
+    uint128_t product = static_cast<uint128_t>(row[i]) * col[i];
 
-  size_t i = 0;
-  __uint128_t buffer = 0;
+    product %= q;  // Reduce product modulo q
+    result += product;
 
-  for (; i + UNROLL <= len; i += UNROLL) {
-    for (size_t j = 0; j < UNROLL; j++) {
-      const size_t idx = i + j;
-      const __uint128_t term = (row[idx] % q128) * (col[idx] % q128);
-      buffer += term;
-
-      if (idx % MOD_FREQ == MOD_FREQ - 1) {
-        result += buffer % q128;
-        buffer = 0;
-        result %= q128;
-      }
-    }
+    // Final reduction ensures result ∈ [0, q)
+    result %= q;
   }
 
-  for (; i < len; i++) {
-    buffer += (row[i] % q128) * (col[i] % q128);
-  }
-
-  result = (result + buffer) % q128;
-  return result;
+  return static_cast<uint64_t>(result);
 }
 }  // namespace pir::simple

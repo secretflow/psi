@@ -21,67 +21,78 @@
 #include "pir_server.h"
 
 namespace pir::simple {
-constexpr size_t TEST_N = 1 << 10;
-constexpr size_t TEST_DB_SIZE = 1ULL << 12;
-constexpr size_t TEST_Q = 1ULL << 32;
-constexpr size_t TEST_P = 991;
-constexpr int TEST_PORT = 12345;
-const size_t TEST_IDX = 10;
+constexpr size_t kTestDim = 1 << 10;
+constexpr size_t kTestSize = 1ULL << 12;
+constexpr uint64_t kTestModulus = 1ULL << 32;
+constexpr uint64_t kTestPlainModulus = 991;
+constexpr int kTestPort = 12345;
+const size_t kTestIndex = 10;
 
 class PIRTest : public ::testing::Test {
  protected:
   void SetUp() override {
+    // Initialize PIR server with test parameters
     server = std::make_unique<pir::simple::PIRServer>(
-        TEST_N, TEST_Q, TEST_DB_SIZE, TEST_P, "127.0.0.1", TEST_PORT);
+        kTestDim, kTestModulus, kTestSize, kTestPlainModulus, "127.0.0.1",
+        kTestPort);
 
+    // Initialize PIR client with test parameters
     client = std::make_unique<pir::simple::PIRClient>(
-        TEST_N, TEST_Q, TEST_DB_SIZE, TEST_P, 4, 6.8, "127.0.0.1", TEST_PORT);
+        kTestDim, kTestModulus, kTestSize, kTestPlainModulus, 4, 6.8,
+        "127.0.0.1", kTestPort);
 
+    // Generate test LWE matrix data for PIR
     generate_test_matrix();
   }
 
   void TearDown() override {
+    // Clean up server and client resources
     server.reset();
     client.reset();
   }
 
   void generate_test_matrix() {
-    A.resize(TEST_N);
-    size_t row = static_cast<size_t>(sqrt(TEST_DB_SIZE));
-    for (size_t i = 0; i < TEST_N; i++) {
-      A[i] = pir::simple::generate_random_vector(row, TEST_Q);
+    A.resize(kTestDim);
+    size_t row = static_cast<size_t>(sqrt(kTestSize));
+    for (size_t i = 0; i < kTestDim; i++) {
+      A[i] = pir::simple::generate_random_vector(row, kTestModulus);
     }
   }
 
-  std::vector<std::vector<__uint128_t>> A;
+  std::vector<std::vector<uint64_t>> A;
   std::unique_ptr<pir::simple::PIRServer> server;
   std::unique_ptr<pir::simple::PIRClient> client;
 };
 
 TEST_F(PIRTest, AllWorkflow) {
+  // Phase 1: Set LWE matrix for server and client
   server->set_A_(A);
   server->generate_database();
-  client->matrix_transpose_128(A);
+  client->matrix_transpose(A);
 
+  // Phase 2: PIR setup
   std::thread server_setup([this]() { server->server_setup(); });
   std::thread client_setup([this]() { client->client_setup(); });
   server_setup.join();
   client_setup.join();
 
-  const size_t test_idx = 10;
+  // Phase 3: PIR query
+  const size_t kTestIndex = 10;
   std::thread server_query([this]() { server->server_query(); });
   std::thread client_query(
-      [this, test_idx]() { client->client_query(test_idx); });
+      [this, kTestIndex]() { client->client_query(kTestIndex); });
   server_query.join();
   client_query.join();
 
+  // Phase 4: PIR answer
   std::thread server_answer([this]() { server->server_answer(); });
   std::thread client_answer([this]() { client->client_answer(); });
   server_answer.join();
   client_answer.join();
 
-  auto recovered = client->client_recover();
-  auto expected = server->get_value(test_idx);
-  EXPECT_EQ(recovered, expected);
+  // Phase 5: Result verification
+  auto recovered = client->client_recover();      // Client decrypts result
+  auto expected = server->get_value(kTestIndex);  // Server's true value
+  EXPECT_EQ(recovered, expected);  // Validate PIR protocol correctness
 }
 }  // namespace pir::simple

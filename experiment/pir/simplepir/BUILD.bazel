@@ -20,18 +20,27 @@ psi_cc_library(
     name = "data_transmit",
     srcs = ["data_transmit.cc"],
     hdrs = ["data_transmit.h"],
+    deps = ["@yacl//yacl/base:exception"],
 )
 
 psi_cc_library(
     name = "generate_rand",
     srcs = ["generate_rand.cc"],
     hdrs = ["generate_rand.h"],
+    deps = [
+        "@yacl//yacl/base:exception",
+        "@yacl//yacl/crypto/rand",
+    ],
 )
 
 psi_cc_library(
     name = "inner_product",
     srcs = ["inner_product.cc"],
     hdrs = ["inner_product.h"],
+    deps = [
+        "@yacl//yacl/base:exception",
+        "@yacl//yacl/base:int128",
+    ],
 )
 
 psi_cc_library(
@@ -42,6 +51,7 @@ psi_cc_library(
         ":data_transmit",
         ":generate_rand",
         ":inner_product",
+        "@yacl//yacl/base:exception",
     ],
 )
 
@@ -73,6 +83,6 @@ psi_cc_binary(
     deps = [
         ":pir_client",
         ":pir_server",
-        "@com_github_google_benchmark//:benchmark_main",
+        "@google_benchmark//:benchmark_main",
     ],
 )

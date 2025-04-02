@@ -22,11 +22,28 @@
 #include <string>
 #include <vector>
 
+#include "yacl/crypto/rand/rand.h"
+
 namespace pir::simple {
 
-__uint128_t generate_128bit_random();
-
-// generate a random vector of size `size` with elements in [0, q)
-std::vector<__uint128_t> generate_random_vector(size_t size,
-                                                const size_t &modulus_);
+/**
+ * Generates a vector of cryptographically secure random numbers modulo q
+ *
+ * @param size        Number of elements in output vector (must be >0)
+ * @param modulus_    Modulus value for elements (must be >1)
+ * @param fast_mode   When true, uses faster but non-cryptographic PRG
+ *                    (default: false for security-sensitive contexts)
+ *
+ * @return Vector of random integers in [0, modulus_-1]
+ *
+ * @throws yacl::Exception if modulus_ < 2 or size == 0
+ *
+ * Features:
+ * - Two PRG modes:
+ *   1. Secure mode (default): Uses CSPRNG
+ *   2. Fast mode: Uses faster but non-cryptographic PRG
+ */
+std::vector<uint64_t> generate_random_vector(size_t size,
+                                             const uint64_t &modulus_,
+                                             bool fast_mode = false);
 }  // namespace pir::simple

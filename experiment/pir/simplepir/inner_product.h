@@ -19,8 +19,20 @@
 #include <stdexcept>
 #include <vector>
 
+#include "yacl/base/int128.h"
+
 namespace pir::simple {
-__uint128_t fast_inner_product_modq(const std::vector<__uint128_t> &row,
-                                    const std::vector<__uint128_t> &col,
-                                    const size_t &q);
+
+/**
+ * Computes the modular inner product of two vectors efficiently.
+ *
+ * @param row First vector (typically a row from a matrix)
+ * @param col Second vector (typically a column from a matrix)
+ * @param q Modulus value (must be > 1)
+ *
+ * @return (Σ(row[i] * col[i])) mod q
+ */
+uint64_t fast_inner_product_modq(const std::vector<uint64_t> &row,
+                                 const std::vector<uint64_t> &col,
+                                 const uint64_t &q);
 }  // namespace pir::simple

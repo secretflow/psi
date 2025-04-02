@@ -22,39 +22,56 @@
 
 namespace {
 struct TestContext {
-  size_t n = 1 << 10;
+  size_t dimension = 1 << 10;
   size_t N = 1ULL << 12;
-  size_t q = 1ULL << 32;
-  size_t p = 991;
+  uint64_t q = 1ULL << 32;
+  uint64_t p = 991;
   std::string ip = "127.0.0.1";
   int port = 12345;
   int radius = 4;
   double sigma = 6.8;
-  std::vector<std::vector<__uint128_t>> A;
+  std::vector<std::vector<uint64_t>> A;
 };
 
+// Initializes test context with parameters
+// 1. Generates random LWE matrix A
+// 2. Configures parameters for lattice-based PIR scheme
 static TestContext SetupContext() {
   TestContext ctx;
-  ctx.A.resize(ctx.n);
+  ctx.A.resize(ctx.dimension);
   size_t row = static_cast<size_t>(sqrt(ctx.N));
-  for (size_t i = 0; i < ctx.n; i++) {
+  for (size_t i = 0; i < ctx.dimension; i++) {
     ctx.A[i] = pir::simple::generate_random_vector(row, ctx.q);
   }
   return ctx;
 }
 
+// Google Benchmark test case for PIR protocol
+// Measures end-to-end execution time of PIR workflow:
+// 1. Setup phase: Key exchange and precomputation
+// 2. Query phase: Encrypted index retrieval
+// 3. Answer phase: Database response generation
+// 4. Recovery phase: Plaintext extraction
 static void BM_SimplePIR(benchmark::State &state) {
-  auto ctx = SetupContext();
-
-  pir::simple::PIRServer server(ctx.n, ctx.q, ctx.N, ctx.p, ctx.ip, ctx.port);
-  pir::simple::PIRClient client(ctx.n, ctx.q, ctx.N, ctx.p, ctx.radius,
-                                ctx.sigma, ctx.ip, ctx.port);
-
-  server.set_A_(ctx.A);
-  server.generate_database();
-  client.matrix_transpose_128(ctx.A);
-
   for (auto _ : state) {
+    // Phase 0: Context initialization (excluded from timing)
+    state.PauseTiming();
+    auto ctx = SetupContext();  // Generate test parameters
+
+    // Initialize server/client with test configuration
+    pir::simple::PIRServer server(ctx.dimension, ctx.q, ctx.N, ctx.p, ctx.ip,
+                                  ctx.port);
+    pir::simple::PIRClient client(ctx.dimension, ctx.q, ctx.N, ctx.p,
+                                  ctx.radius, ctx.sigma, ctx.ip, ctx.port);
+
+    // Configure cryptographic materials
+    server.set_A_(ctx.A);            // Load LWE matrix to server
+    server.generate_database();      // Generate simulated database
+    client.matrix_transpose(ctx.A);  // Optimize client-side computations
+
+    state.ResumeTiming();
+
+    // Phase 1: Setup
     auto server_setup = std::thread([&server]() { server.server_setup(); });
     auto client_setup = std::thread([&client]() { client.client_setup(); });
     server_setup.join();
@@ -62,21 +79,25 @@ static void BM_SimplePIR(benchmark::State &state) {
 
     size_t idx = 10;
 
+    // Phase 2: Query
     auto server_query = std::thread([&server]() { server.server_query(); });
     auto client_query =
         std::thread([&client, idx]() { client.client_query(idx); });
     server_query.join();
     client_query.join();
 
+    // Phase 3: Answer
     auto server_answer = std::thread([&server]() { server.server_answer(); });
     auto client_answer = std::thread([&client]() { client.client_answer(); });
     server_answer.join();
     client_answer.join();
 
-    client.client_recover();
+    // Phase 4: Recover
+    client.client_recover();  // Decrypt and validate retrieved value
   }
 }
+
+// Register benchmark with timing in milliseconds
 BENCHMARK(BM_SimplePIR)->Unit(benchmark::kMillisecond);
 }  // namespace
-
-// BENCHMARK_MAIN();
+BENCHMARK_MAIN();

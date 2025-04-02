@@ -14,99 +14,87 @@
 
 #include "data_transmit.h"
 
-#include <iomanip>
-#include <iostream>
 #include <string>
 #include <vector>
 
 namespace pir::simple {
-std::ostream &operator<<(std::ostream &os, const __uint128_t &value) {
-  if (value == 0) {
-    return os << "0";
-  }
-
-  uint64_t high = value >> 64;
-  uint64_t low = static_cast<uint64_t>(value);
-  os << "0x" << std::hex << std::setfill('0') << std::setw(16) << high
-     << std::setw(16) << low;
-  return os;
-}
-
 Sender::Sender(const std::string &ip, int port) : ip_(ip), port_(port) {}
 
-void Sender::sendData(const std::vector<__uint128_t> &data) {
+void Sender::sendData(const std::vector<uint64_t> &data) {
+  // Create TCP socket
   int sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sockfd < 0) {
-    std::cerr << "Error: Failed to create socket" << std::endl;
-    exit(1);
+    SPDLOG_ERROR("Error: Failed to create socket.");
   }
 
+  // Configure server address structure
   struct sockaddr_in serv_addr;
   serv_addr.sin_family = AF_INET;
-  serv_addr.sin_port = htons(port_);
+  serv_addr.sin_port = htons(port_);  // Convert to network byte order
   inet_pton(AF_INET, ip_.c_str(), &serv_addr.sin_addr);
 
+  // Establish connection with server
   int res = connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
   if (res < 0) {
-    std::cerr << "Error: Failed to connect to server" << std::endl;
-    exit(1);
+    SPDLOG_ERROR("Error: Failed to connect socket.");
   }
 
-  // send data size
+  // Send data size header (network byte order)
   size_t size = htonl(data.size());
   sendAll(sockfd, &size, sizeof(size));
 
-  // send data
+  // Send payload data elements
   for (size_t i = 0; i < data.size(); i++) {
     sendAll(sockfd, &data[i], sizeof(data[i]));
   }
 
+  // Cleanup socket resources
   close(sockfd);
 }
 
 Receiver::Receiver(int port) : port_(port) {
+  // Create listening socket
   sockfd_ = socket(AF_INET, SOCK_STREAM, 0);
   if (sockfd_ < 0) {
-    std::cerr << "Error: Failed to create socket" << std::endl;
-    exit(1);
+    SPDLOG_ERROR("Error: Failed to create socket.");
   }
 
+  // Configure server address
   struct sockaddr_in serv_addr;
   serv_addr.sin_family = AF_INET;
-  serv_addr.sin_addr.s_addr = INADDR_ANY;
+  serv_addr.sin_addr.s_addr = INADDR_ANY;  // Bind to all interfaces
   serv_addr.sin_port = htons(port_);
 
+  // Bind and listen
   int res = bind(sockfd_, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
   if (res < 0) {
-    std::cerr << "Error: Failed to bind socket" << std::endl;
-    exit(1);
+    SPDLOG_ERROR("Error: Failed to bind socket.");
   }
 
-  res = listen(sockfd_, 5);
+  res = listen(sockfd_, 5);  // Backlog of 5 connections
   if (res < 0) {
-    std::cerr << "Error: Failed to listen on socket" << std::endl;
-    exit(1);
+    SPDLOG_ERROR("Error: Failed to listen socket.");
   }
 }
 
 Receiver::~Receiver() { close(sockfd_); }
 
-std::vector<__uint128_t> Receiver::receiveData() {
+std::vector<uint64_t> Receiver::receiveData() {
+  // Accept incoming connection
   struct sockaddr_in cli_addr;
   socklen_t clilen = sizeof(cli_addr);
   int newsockfd = accept(sockfd_, (struct sockaddr *)&cli_addr, &clilen);
   if (newsockfd < 0) {
-    std::cerr << "Error: Failed to accept connection" << std::endl;
-    exit(1);
+    SPDLOG_ERROR("Error: Failed to accept socket.");
   }
 
-  // receive data size
+  // Receive data size header
   size_t size;
   receiveAll(newsockfd, &size, sizeof(size));
-  size = ntohl(size);
+  size = ntohl(size);  // Convert to host byte order
 
-  // receive data
-  std::vector<__uint128_t> data(size);
+  // Receive payload data
+  std::vector<uint64_t> data(size);
   for (size_t i = 0; i < size; i++) {
     receiveAll(newsockfd, &data[i], sizeof(data[i]));
   }

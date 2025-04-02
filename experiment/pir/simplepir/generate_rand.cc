@@ -14,33 +14,29 @@
 
 #include "generate_rand.h"
 
-#include <limits>
 #include <vector>
 
+#include "yacl/base/exception.h"
+
 namespace pir::simple {
+std::vector<uint64_t>
+generate_random_vector(size_t size, const uint64_t &modulus_, bool fast_mode) {
+  YACL_ENFORCE(size > 0);
+  YACL_ENFORCE(modulus_ > 1);
 
-__uint128_t generate_128bit_random() {
-  std::random_device rd;
-  std::mt19937_64 gen(rd());
-  std::uniform_int_distribution<uint64_t> dis(
-      0, std::numeric_limits<uint64_t>::max());
-  __uint128_t value = dis(gen);
-  value <<= 64;
-  value |= dis(gen);
-  return value;
-}
+  std::vector<uint64_t> result(size);
 
-std::vector<__uint128_t> generate_random_vector(size_t size,
-                                                const size_t &modulus_) {
-  if (size == 0) {
-    return {};
-  }
-  if (modulus_ <= 0) {
-    throw std::invalid_argument("modulus must be greater than 0");
-  }
-  std::vector<__uint128_t> result(size);
-  for (size_t i = 0; i < size; i++) {
-    result[i] = generate_128bit_random() % modulus_;
+  // Branch selection based on security requirements
+  if (fast_mode) {
+    // Non-cryptographic PRG path
+    for (size_t i = 0; i < size; i++) {
+      result[i] = yacl::crypto::FastRandU64() % modulus_;  // Unsafe modulo
+    }
+  } else {
+    // Cryptographic PRG path (production use)
+    for (size_t i = 0; i < size; i++) {
+      result[i] = yacl::crypto::RandU64() % modulus_;  // Secure random
+    }
   }
   return result;
 }

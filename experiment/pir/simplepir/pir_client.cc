@@ -18,20 +18,20 @@
 #include <vector>
 
 namespace pir::simple {
-
-PIRClient::PIRClient(size_t n, size_t q, size_t N, size_t p, int radius,
-                     double sigma, std::string ip, int port)
-    : n_(n), q_(q), N_(N), p_(p), ip_(ip), port_(port) {
+PIRClient::PIRClient(size_t dimension, uint64_t q, size_t N, uint64_t p,
+                     int radius, double sigma, std::string ip, int port)
+    : dimension_(dimension), q_(q), N_(N), p_(p), ip_(ip), port_(port) {
+  // Calculate scaling factor between plaintext and ciphertext spaces
   delta_ = static_cast<size_t>(
       floor(static_cast<double>(q) / static_cast<double>(p)));
+
+  // Precompute discrete Gaussian distribution for error sampling
   precompute_discrete_gaussian(radius, sigma);
 }
 
-void PIRClient::matrix_transpose_128(
-    const std::vector<std::vector<__uint128_t>> &mat) {
-  if (mat.empty()) {
-    throw std::invalid_argument("Empty matrix");
-  }
+void PIRClient::matrix_transpose(
+    const std::vector<std::vector<uint64_t>> &mat) {
+  YACL_ENFORCE(!mat.empty());
 
   const size_t row = mat.size();
   const size_t col = mat[0].size();
@@ -48,54 +48,76 @@ void PIRClient::matrix_transpose_128(
   }
 }
 
+// Setup phase: Receives and stores precomputed hint values from server
+// hint = database * A^T mod q
 void PIRClient::client_setup() {
   Receiver receiver(port_);
-  std::vector<__uint128_t> hint_vec = receiver.receiveData();
+  std::vector<uint64_t> hint_vec = receiver.receiveData();
 
+  // Reconstruct 2D hint matrix from linear vecto
   const size_t row_num = static_cast<size_t>(sqrt(N_));
   hint_.resize(row_num);
-
   for (size_t i = 0; i < row_num; i++) {
-    hint_[i].resize(n_);
-    for (size_t j = 0; j < n_; j++) {
-      hint_[i][j] = hint_vec[i * n_ + j];
+    hint_[i].resize(dimension_);
+    for (size_t j = 0; j < dimension_; j++) {
+      hint_[i][j] = hint_vec[i * dimension_ + j];
     }
   }
+
+  receiver.~Receiver();
 }
 
+// Query phase:
+// 1. Encodes target row index and column index
+// 2. Adds Gaussian noise for LWE security
+// 3. Sends encrypted query to server
+// @param idx: Linear index of target database element
 void PIRClient::client_query(size_t idx) {
   size_t row_num = static_cast<size_t>(sqrt(N_));
-  idx_row_ = idx / row_num;
-  size_t idx_col = idx % row_num;
-  std::vector<size_t> u_i_col(row_num);
-  u_i_col[idx_col] = delta_;
+
+  // Convert linear index to 2D coordinates
+  idx_row_ = idx / row_num;        // Target row index
+  size_t idx_col = idx % row_num;  // Target column index
+
+  // Compute encrypted query: qu = A*s + e + delta*u_i_col (mod q)
+  std::vector<uint64_t> u_i_col(row_num);
+  u_i_col[idx_col] = static_cast<uint64_t>(delta_);
 
   std::vector<size_t> error_vec = sample_batch(row_num);
 
-  s_ = generate_random_vector(n_, q_);
-  std::vector<__uint128_t> qu;
+  s_ = generate_random_vector(dimension_, q_);
+  std::vector<uint64_t> qu;
   qu.resize(row_num);
   for (size_t i = 0; i < row_num; i++) {
-    qu[i] = (fast_inner_product_modq(A_[i], s_, q_) +
-             static_cast<__uint128_t>(u_i_col[i]));
-    qu[i] += static_cast<__uint128_t>(error_vec[i]);
+    qu[i] = fast_inner_product_modq(A_[i], s_, q_) + u_i_col[i];
+    qu[i] += static_cast<uint64_t>(error_vec[i]);
     qu[i] %= q_;
   }
 
+  // Send encrypted query to server
   Sender sender(ip_, port_);
   sender.sendData(qu);
 }
 
+// Answer phase
+// ans = db * qu mod q
 void PIRClient::client_answer() {
   Receiver receiver(port_);
   ans_ = receiver.receiveData();
+  receiver.~Receiver();
 }
 
-__uint128_t PIRClient::client_recover() {
-  __uint128_t d_ =
+// Recover phase: Extracts plaintext from encrypted response
+// 1. Removes secret key component using hint
+// 2. Applies modulus switching (q → p)
+// @return Retrieved plaintext value from database
+uint64_t PIRClient::client_recover() {
+  // Compute d_ = ans - hint*s mod q
+  uint64_t d_ =
       ans_[idx_row_] - fast_inner_product_modq(hint_[idx_row_], s_, q_);
-  __uint128_t d = static_cast<__uint128_t>(
-      (d_ % delta_ >= delta_ / 2) ? (d_ / delta_) - 1 : (d_ / delta_));
-  return d % p_;
+
+  // Handle modular rounding: Map from Z_q to Z_p
+  uint64_t d = (d_ % delta_ >= delta_ / 2) ? (d_ / delta_) - 1 : (d_ / delta_);
+  return d % p_;  // Final plaintext in Z_p
 }
 }  // namespace pir::simple

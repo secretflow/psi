@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <string>
-#include <thread>
+#include <future>
+#include <memory>
 #include <vector>
 
 #include "benchmark/benchmark.h"
-#include "pir_client.h"
-#include "pir_server.h"
+#include "client.h"
+#include "server.h"
+#include "yacl/link/test_util.h"
 
 namespace {
 struct TestContext {
@@ -26,8 +27,6 @@ struct TestContext {
   size_t N = 1ULL << 12;
   uint64_t q = 1ULL << 32;
   uint64_t p = 991;
-  std::string ip = "127.0.0.1";
-  int port = 12345;
   int radius = 4;
   double sigma = 6.8;
   std::vector<std::vector<uint64_t>> A;
@@ -59,41 +58,43 @@ static void BM_SimplePIR(benchmark::State &state) {
     auto ctx = SetupContext();  // Generate test parameters
 
     // Initialize server/client with test configuration
-    pir::simple::PIRServer server(ctx.dimension, ctx.q, ctx.N, ctx.p, ctx.ip,
-                                  ctx.port);
-    pir::simple::PIRClient client(ctx.dimension, ctx.q, ctx.N, ctx.p,
-                                  ctx.radius, ctx.sigma, ctx.ip, ctx.port);
+    std::unique_ptr<pir::simple::PIRServer> server =
+        std::make_unique<pir::simple::PIRServer>(
+            ctx.dimension, ctx.q, ctx.N, ctx.p);
+    std::unique_ptr<pir::simple::PIRClient> client =
+        std::make_unique<pir::simple::PIRClient>(
+            ctx.dimension, ctx.q, ctx.N, ctx.p, ctx.radius, ctx.sigma);
 
     // Configure cryptographic materials
-    server.set_A_(ctx.A);            // Load LWE matrix to server
-    server.generate_database();      // Generate simulated database
-    client.matrix_transpose(ctx.A);  // Optimize client-side computations
+    server->set_A_(ctx.A);            // Load LWE matrix to server
+    server->generate_database();      // Generate simulated database
+    client->matrix_transpose(ctx.A);  // Optimize client-side computations
 
     state.ResumeTiming();
 
     // Phase 1: Setup
-    auto server_setup = std::thread([&server]() { server.server_setup(); });
-    auto client_setup = std::thread([&client]() { client.client_setup(); });
-    server_setup.join();
-    client_setup.join();
-
-    size_t idx = 10;
+    auto lctxs = yacl::link::test::SetupWorld(2);
+    auto server_setup = std::async([&] { server->server_setup(lctxs[0]); });
+    auto client_setup = std::async([&] { client->client_setup(lctxs[1]); });
+    server_setup.get();
+    client_setup.get();
 
     // Phase 2: Query
-    auto server_query = std::thread([&server]() { server.server_query(); });
+    size_t idx = 10;
     auto client_query =
-        std::thread([&client, idx]() { client.client_query(idx); });
-    server_query.join();
-    client_query.join();
+        std::async([&] { client->client_query(idx, lctxs[0]); });
+    auto server_query = std::async([&] { server->server_query(lctxs[1]); });
+    client_query.get();
+    server_query.get();
 
     // Phase 3: Answer
-    auto server_answer = std::thread([&server]() { server.server_answer(); });
-    auto client_answer = std::thread([&client]() { client.client_answer(); });
-    server_answer.join();
-    client_answer.join();
+    auto server_answer = std::async([&] { server->server_answer(lctxs[0]); });
+    auto client_answer = std::async([&] { client->client_answer(lctxs[1]); });
+    server_answer.get();
+    client_answer.get();
 
     // Phase 4: Recover
-    client.client_recover();  // Decrypt and validate retrieved value
+    client->client_recover();  // Decrypt and validate retrieved value
   }
 }
 

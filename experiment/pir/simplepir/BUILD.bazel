@@ -17,13 +17,6 @@ load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library", "psi_cc_test")
 package(default_visibility = ["//visibility:public"])
 
 psi_cc_library(
-    name = "data_transmit",
-    srcs = ["data_transmit.cc"],
-    hdrs = ["data_transmit.h"],
-    deps = ["@yacl//yacl/base:exception"],
-)
-
-psi_cc_library(
     name = "generate_rand",
     srcs = ["generate_rand.cc"],
     hdrs = ["generate_rand.h"],
@@ -44,45 +37,67 @@ psi_cc_library(
 )
 
 psi_cc_library(
-    name = "pir_client",
-    srcs = ["pir_client.cc"],
-    hdrs = ["pir_client.h"],
+    name = "receiver",
+    srcs = ["receiver.cc"],
+    hdrs = ["receiver.h"],
     deps = [
-        ":data_transmit",
+        "@yacl//yacl/base:buffer",
+        "@yacl//yacl/link:context",
+    ],
+)
+
+psi_cc_library(
+    name = "sender",
+    srcs = ["sender.cc"],
+    hdrs = ["sender.h"],
+    deps = [
+        "@yacl//yacl/base:buffer",
+        "@yacl//yacl/link:context",
+    ],
+)
+
+psi_cc_library(
+    name = "client",
+    srcs = ["client.cc"],
+    hdrs = ["client.h"],
+    deps = [
         ":generate_rand",
         ":inner_product",
+        ":receiver",
+        ":sender",
         "@yacl//yacl/base:exception",
     ],
 )
 
 psi_cc_library(
-    name = "pir_server",
-    srcs = ["pir_server.cc"],
-    hdrs = ["pir_server.h"],
+    name = "server",
+    srcs = ["server.cc"],
+    hdrs = ["server.h"],
     deps = [
-        ":data_transmit",
         ":generate_rand",
         ":inner_product",
+        ":receiver",
+        ":sender",
     ],
 )
 
 psi_cc_test(
     name = "pir_test",
     srcs = ["pir_test.cc"],
-    linkopts = ["-pthread"],
     deps = [
-        ":pir_client",
-        ":pir_server",
+        ":client",
+        ":server",
+        "@yacl//yacl/link:test_util",
     ],
 )
 
 psi_cc_binary(
     name = "pir_benchmark",
     srcs = ["pir_benchmark.cc"],
-    linkopts = ["-pthread"],
     deps = [
-        ":pir_client",
-        ":pir_server",
+        ":client",
+        ":server",
         "@google_benchmark//:benchmark_main",
+        "@yacl//yacl/link:test_util",
     ],
 )

@@ -12,20 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <gtest/gtest.h>
+
+#include <future>
 #include <memory>
-#include <thread>
 #include <vector>
 
-#include "gtest/gtest.h"
-#include "pir_client.h"
-#include "pir_server.h"
+#include "client.h"
+#include "server.h"
+#include "yacl/link/test_util.h"
 
 namespace pir::simple {
 constexpr size_t kTestDim = 1 << 10;
 constexpr size_t kTestSize = 1ULL << 12;
 constexpr uint64_t kTestModulus = 1ULL << 32;
 constexpr uint64_t kTestPlainModulus = 991;
-constexpr int kTestPort = 12345;
 const size_t kTestIndex = 10;
 
 class PIRTest : public ::testing::Test {
@@ -33,16 +34,14 @@ class PIRTest : public ::testing::Test {
   void SetUp() override {
     // Initialize PIR server with test parameters
     server = std::make_unique<pir::simple::PIRServer>(
-        kTestDim, kTestModulus, kTestSize, kTestPlainModulus, "127.0.0.1",
-        kTestPort);
+        kTestDim, kTestModulus, kTestSize, kTestPlainModulus);
 
     // Initialize PIR client with test parameters
     client = std::make_unique<pir::simple::PIRClient>(
-        kTestDim, kTestModulus, kTestSize, kTestPlainModulus, 4, 6.8,
-        "127.0.0.1", kTestPort);
+        kTestDim, kTestModulus, kTestSize, kTestPlainModulus, 4, 6.8);
 
     // Generate test LWE matrix data for PIR
-    generate_test_matrix();
+    generate_LWE_matrix();
   }
 
   void TearDown() override {
@@ -51,7 +50,7 @@ class PIRTest : public ::testing::Test {
     client.reset();
   }
 
-  void generate_test_matrix() {
+  void generate_LWE_matrix() {
     A.resize(kTestDim);
     size_t row = static_cast<size_t>(sqrt(kTestSize));
     for (size_t i = 0; i < kTestDim; i++) {
@@ -71,24 +70,25 @@ TEST_F(PIRTest, AllWorkflow) {
   client->matrix_transpose(A);
 
   // Phase 2: PIR setup
-  std::thread server_setup([this]() { server->server_setup(); });
-  std::thread client_setup([this]() { client->client_setup(); });
-  server_setup.join();
-  client_setup.join();
+  auto lctxs = yacl::link::test::SetupWorld(2);
+  auto server_setup = std::async([&] { server->server_setup(lctxs[0]); });
+  auto client_setup = std::async([&] { client->client_setup(lctxs[1]); });
+  server_setup.get();
+  client_setup.get();
 
   // Phase 3: PIR query
   const size_t kTestIndex = 10;
-  std::thread server_query([this]() { server->server_query(); });
-  std::thread client_query(
-      [this, kTestIndex]() { client->client_query(kTestIndex); });
-  server_query.join();
-  client_query.join();
+  auto client_query =
+      std::async([&] { client->client_query(kTestIndex, lctxs[0]); });
+  auto server_query = std::async([&] { server->server_query(lctxs[1]); });
+  client_query.get();
+  server_query.get();
 
   // Phase 4: PIR answer
-  std::thread server_answer([this]() { server->server_answer(); });
-  std::thread client_answer([this]() { client->client_answer(); });
-  server_answer.join();
-  client_answer.join();
+  auto server_answer = std::async([&] { server->server_answer(lctxs[0]); });
+  auto client_answer = std::async([&] { client->client_answer(lctxs[1]); });
+  server_answer.get();
+  client_answer.get();
 
   // Phase 5: Result verification
   auto recovered = client->client_recover();      // Client decrypts result

@@ -24,7 +24,7 @@ single_version_override(
 )
 
 bazel_dep(name = "platforms", version = "0.0.11")
-bazel_dep(name = "apple_support", version = "1.17.1")
+bazel_dep(name = "apple_support", version = "1.21.1")
 bazel_dep(name = "rules_cc", version = "0.0.13")
 bazel_dep(name = "rules_proto", version = "6.0.0.bcr.1")
 bazel_dep(name = "rules_foreign_cc", version = "0.12.0")

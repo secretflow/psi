@@ -30,10 +30,8 @@ std::vector<uint64_t> DeserializeMessage(const yacl::Buffer &buffer) {
 
   // Step 1: Read number of elements from buffer header
   size_t data_size;
-  std::memcpy(&data_size,
-              data_ptr,
-              sizeof(data_size));  // Copy sizeof(size_t) bytes for data size
-  data_ptr += sizeof(data_size);   // Advance pointer past size header
+  std::memcpy(&data_size, data_ptr, sizeof(data_size));
+  data_ptr += sizeof(data_size);
 
   // Initialize result vector with pre-allocated size
   std::vector<uint64_t> data(data_size);
@@ -41,10 +39,9 @@ std::vector<uint64_t> DeserializeMessage(const yacl::Buffer &buffer) {
   // Step 2: Deserialize each 64-bit unsigned integer element
   for (size_t i = 0; i < data_size; i++) {
     uint64_t element;
-    std::memcpy(
-        &element, data_ptr, sizeof(element));  // Copy 8 bytes for uint64_t
-    data[i] = element;                         // Store in result vector
-    data_ptr += sizeof(element);               // Move pointer to next element
+    std::memcpy(&element, data_ptr, sizeof(element));
+    data[i] = element;
+    data_ptr += sizeof(element);
   }
 
   return data;

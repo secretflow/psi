@@ -17,12 +17,8 @@
 #include <vector>
 
 namespace pir::simple {
-PIRClient::PIRClient(size_t dimension,
-                     uint64_t q,
-                     size_t N,
-                     uint64_t p,
-                     int radius,
-                     double sigma)
+PIRClient::PIRClient(size_t dimension, uint64_t q, size_t N, uint64_t p,
+                     int radius, double sigma)
     : dimension_(dimension), q_(q), N_(N), p_(p) {
   // Calculate scaling factor between plaintext and ciphertext spaces
   delta_ = static_cast<size_t>(
@@ -76,8 +72,8 @@ void PIRClient::client_query(size_t idx,
   size_t row_num = static_cast<size_t>(sqrt(N_));
 
   // Convert linear index to 2D coordinates
-  idx_row_ = idx / row_num;        // Target row index
-  size_t idx_col = idx % row_num;  // Target column index
+  idx_row_ = idx / row_num;
+  size_t idx_col = idx % row_num;
 
   // Compute encrypted query: qu = A*s + e + delta*u_i_col (mod q)
   std::vector<uint64_t> u_i_col(row_num);

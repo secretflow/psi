@@ -58,17 +58,17 @@ static void BM_SimplePIR(benchmark::State &state) {
     auto ctx = SetupContext();  // Generate test parameters
 
     // Initialize server/client with test configuration
-    std::unique_ptr<pir::simple::PIRServer> server =
-        std::make_unique<pir::simple::PIRServer>(
-            ctx.dimension, ctx.q, ctx.N, ctx.p);
-    std::unique_ptr<pir::simple::PIRClient> client =
-        std::make_unique<pir::simple::PIRClient>(
-            ctx.dimension, ctx.q, ctx.N, ctx.p, ctx.radius, ctx.sigma);
+    std::unique_ptr<pir::simple::PIRServer> server;
+    server = std::make_unique<pir::simple::PIRServer>(ctx.dimension, ctx.q,
+                                                      ctx.N, ctx.p);
+    std::unique_ptr<pir::simple::PIRClient> client;
+    client = std::make_unique<pir::simple::PIRClient>(
+        ctx.dimension, ctx.q, ctx.N, ctx.p, ctx.radius, ctx.sigma);
 
     // Configure cryptographic materials
-    server->set_A_(ctx.A);            // Load LWE matrix to server
-    server->generate_database();      // Generate simulated database
-    client->matrix_transpose(ctx.A);  // Optimize client-side computations
+    server->set_A_(ctx.A);
+    server->generate_database();
+    client->matrix_transpose(ctx.A);
 
     state.ResumeTiming();
 

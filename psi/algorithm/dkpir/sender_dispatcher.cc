@@ -203,7 +203,7 @@ void DkPirSenderDispatcher::dispatch_parms(
     ::apsi::ParamsRequest params_request =
         ::apsi::to_params_request(std::move(sop));
 
-    DkPirSender::RunParams(params_request, sender_db_, chl);
+    psi::apsi_wrapper::Sender::RunParams(params_request, sender_db_, chl);
   } catch (const std::exception &ex) {
     APSI_LOG_ERROR(
         "Sender threw an exception while processing parameter request: "
@@ -235,8 +235,8 @@ void DkPirSenderDispatcher::dispatch_oprf(
       psi::apsi_wrapper::Sender::RunOPRF(oprf_request, oprf_key_, chl);
     } else {
       // Sender shuffles the OPRF results
-      DkPirSender::RunOPRF(oprf_request, oprf_key_, shuffle_seed_,
-                           shuffle_counter_, chl);
+      psi::dkpir::DkPirSender::RunOPRF(oprf_request, oprf_key_, shuffle_seed_,
+                                       shuffle_counter_, chl);
     }
 
   } catch (const std::exception &ex) {
@@ -254,7 +254,8 @@ void DkPirSenderDispatcher::dispatch_query(
     // Create the QueryRequest
     auto query_request = ::apsi::to_query_request(std::move(sop));
 
-    auto send_func = DkPirSender::BasicSend<::apsi::Response::element_type>;
+    auto send_func =
+        psi::apsi_wrapper::Sender::BasicSend<::apsi::Response::element_type>;
 
     if (!sender_db_ || (!skip_count_check_ && !sender_cnt_db_)) {
       ::apsi::QueryResponse response_query =
@@ -283,7 +284,7 @@ void DkPirSenderDispatcher::dispatch_query(
       DkPirQuery query(std::move(query_request), sender_db_, sender_cnt_db_);
 
       // Sender processes the row count query
-      DkPirSender::RunQuery(query, chl, streaming_result);
+      psi::dkpir::DkPirSender::RunQuery(query, chl, streaming_result);
 
       // Sender gets the encrypted sum from the receiver
       heu::lib::algorithms::elgamal::Ciphertext row_count_ct =

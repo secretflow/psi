@@ -18,33 +18,31 @@
 #include "psi/wrapper/apsi/sender.h"
 #include "psi/wrapper/apsi/yacl_channel.h"
 
-namespace psi::dkpir {
-class DkPirSender : public psi::apsi_wrapper::Sender {
- public:
-  DkPirSender() = delete;
+namespace psi::dkpir::DkPirSender {
 
-  static ::apsi::OPRFResponse GenerateOPRFResponse(
-      const ::apsi::OPRFRequest &oprf_request, ::apsi::oprf::OPRFKey key,
-      const uint128_t &shuffle_seed, const uint64_t &shuffle_counter);
+::apsi::OPRFResponse GenerateOPRFResponse(
+    const ::apsi::OPRFRequest &oprf_request, ::apsi::oprf::OPRFKey key,
+    const uint128_t &shuffle_seed, const uint64_t &shuffle_counter);
 
-  // Generate and send a response to an OPRF request, which is a shuffled
-  // result.
-  static void RunOPRF(
-      const ::apsi::OPRFRequest &oprf_request, ::apsi::oprf::OPRFKey key,
-      const uint128_t &shuffle_seed, const uint64_t &shuffle_counter,
-      ::apsi::network::Channel &chl,
-      std::function<void(::apsi::network::Channel &, ::apsi::Response)>
-          send_fun = BasicSend<::apsi::Response::element_type>);
+// Generate and send a response to an OPRF request, which is a shuffled
+// result.
+void RunOPRF(
+    const ::apsi::OPRFRequest &oprf_request, ::apsi::oprf::OPRFKey key,
+    const uint128_t &shuffle_seed, const uint64_t &shuffle_counter,
+    ::apsi::network::Channel &chl,
+    std::function<void(::apsi::network::Channel &, ::apsi::Response)> send_fun =
+        psi::apsi_wrapper::Sender::BasicSend<::apsi::Response::element_type>);
 
-  // Generate and send a response to a row count query. Compared to the method
-  // in the superclass, the main modification is to replace the database of the
-  // query from sender_db to sender_cnt_db
-  static void RunQuery(
-      const psi::dkpir::DkPirQuery &query, psi::apsi_wrapper::YaclChannel &chl,
-      bool streaming_result = true,
-      std::function<void(::apsi::network::Channel &, ::apsi::Response)>
-          send_fun = BasicSend<::apsi::Response::element_type>,
-      std::function<void(::apsi::network::Channel &, ::apsi::ResultPart)>
-          send_rp_fun = BasicSend<::apsi::ResultPart::element_type>);
-};
-}  // namespace psi::dkpir
+// Generate and send a response to a row count query. Compared to the method
+// in the superclass, the main modification is to replace the database of the
+// query from sender_db to sender_cnt_db
+void RunQuery(
+    const psi::dkpir::DkPirQuery &query, psi::apsi_wrapper::YaclChannel &chl,
+    bool streaming_result = true,
+    std::function<void(::apsi::network::Channel &, ::apsi::Response)> send_fun =
+        psi::apsi_wrapper::Sender::BasicSend<::apsi::Response::element_type>,
+    std::function<void(::apsi::network::Channel &, ::apsi::ResultPart)>
+        send_rp_fun = psi::apsi_wrapper::Sender::BasicSend<
+            ::apsi::ResultPart::element_type>);
+
+}  // namespace psi::dkpir::DkPirSender

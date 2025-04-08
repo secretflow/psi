@@ -156,7 +156,8 @@ void DkPirSender::RunQuery(
 
   ::apsi::ThreadPoolMgr tpm;
 
-  auto send_func = BasicSend<::apsi::Response::element_type>;
+  auto send_func =
+      psi::apsi_wrapper::Sender::BasicSend<::apsi::Response::element_type>;
 
   // Acquire read lock on sender_cnt_db
   auto sender_cnt_db = query.sender_cnt_db();
@@ -254,8 +255,9 @@ void DkPirSender::RunQuery(
 
   // Compute query powers for the bundle indexes
   for (uint64_t bundle_idx = 0; bundle_idx < bundle_idx_count; bundle_idx++) {
-    ComputePowers(sender_cnt_db, crypto_context, all_powers, pd,
-                  static_cast<uint32_t>(bundle_idx), pool);
+    psi::apsi_wrapper::Sender::ComputePowers(
+        sender_cnt_db, crypto_context, all_powers, pd,
+        static_cast<uint32_t>(bundle_idx), pool);
   }
 
   APSI_LOG_DEBUG("Finished computing powers for all bundle indices");
@@ -270,7 +272,7 @@ void DkPirSender::RunQuery(
         sender_cnt_db->get_cache_at(static_cast<uint32_t>(bundle_idx));
     for (auto &cache : bundle_caches) {
       futures.push_back(tpm.thread_pool().enqueue([&, bundle_idx, cache]() {
-        ProcessBinBundleCache(
+        psi::apsi_wrapper::Sender::ProcessBinBundleCache(
             sender_cnt_db, crypto_context, cache, all_powers, chl, send_rp_fun,
             static_cast<uint32_t>(bundle_idx), query.compr_mode(), pool,
             rps_mutex, streaming_result ? nullptr : &rps);

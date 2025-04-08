@@ -16,19 +16,21 @@
 
 #include <vector>
 
+#include "spdlog/spdlog.h"
+
 namespace pir::simple {
-PIRClient::PIRClient(size_t dimension, uint64_t q, size_t N, uint64_t p,
-                     int radius, double sigma)
+SimplePirClient::SimplePirClient(size_t dimension, uint64_t q, size_t N,
+                                 uint64_t p, int radius, double sigma)
     : dimension_(dimension), q_(q), N_(N), p_(p) {
   // Calculate scaling factor between plaintext and ciphertext spaces
   delta_ = static_cast<size_t>(
       floor(static_cast<double>(q) / static_cast<double>(p)));
 
   // Precompute discrete Gaussian distribution for error sampling
-  precompute_discrete_gaussian(radius, sigma);
+  PrecomputeDiscreteGaussian(radius, sigma);
 }
 
-void PIRClient::matrix_transpose(
+void SimplePirClient::MatrixTranspose(
     const std::vector<std::vector<uint64_t>> &mat) {
   YACL_ENFORCE(!mat.empty());
 
@@ -49,9 +51,9 @@ void PIRClient::matrix_transpose(
 
 // Setup phase: Receives and stores precomputed hint values from server
 // hint = database * A^T mod q
-void PIRClient::client_setup(std::shared_ptr<yacl::link::Context> lctx) {
+void SimplePirClient::ClientSetup(std::shared_ptr<yacl::link::Context> lctx) {
   std::vector<uint64_t> hint_vec = RecvData(lctx);
-  // Reconstruct 2D hint matrix from linear vecto
+  // Reconstruct 2D hint matrix from linear vector
   const size_t row_num = static_cast<size_t>(sqrt(N_));
   hint_.resize(row_num);
   for (size_t i = 0; i < row_num; i++) {
@@ -67,8 +69,11 @@ void PIRClient::client_setup(std::shared_ptr<yacl::link::Context> lctx) {
 // 2. Adds Gaussian noise for LWE security
 // 3. Sends encrypted query to server
 // @param idx: Linear index of target database element
-void PIRClient::client_query(size_t idx,
-                             std::shared_ptr<yacl::link::Context> lctx) {
+void SimplePirClient::ClientQuery(size_t idx,
+                                  std::shared_ptr<yacl::link::Context> lctx) {
+  if (idx >= N_) {
+    SPDLOG_ERROR("Index out of bounds: {} >= {}", idx, N_);
+  }
   size_t row_num = static_cast<size_t>(sqrt(N_));
 
   // Convert linear index to 2D coordinates
@@ -79,13 +84,13 @@ void PIRClient::client_query(size_t idx,
   std::vector<uint64_t> u_i_col(row_num);
   u_i_col[idx_col] = static_cast<uint64_t>(delta_);
 
-  std::vector<size_t> error_vec = sample_batch(row_num);
+  std::vector<size_t> error_vec = SampleBatch(row_num);
 
-  s_ = generate_random_vector(dimension_, q_);
+  s_ = GenerateRandomVector(dimension_, q_);
   std::vector<uint64_t> qu;
   qu.resize(row_num);
   for (size_t i = 0; i < row_num; i++) {
-    qu[i] = fast_inner_product_modq(A_[i], s_, q_) + u_i_col[i];
+    qu[i] = InnerProductModq(A_[i], s_, q_) + u_i_col[i];
     qu[i] += static_cast<uint64_t>(error_vec[i]);
     qu[i] %= q_;
   }
@@ -96,7 +101,7 @@ void PIRClient::client_query(size_t idx,
 
 // Answer phase
 // ans = db * qu mod q
-void PIRClient::client_answer(std::shared_ptr<yacl::link::Context> lctx) {
+void SimplePirClient::ClientAnswer(std::shared_ptr<yacl::link::Context> lctx) {
   ans_ = RecvData(lctx);
 }
 
@@ -104,10 +109,9 @@ void PIRClient::client_answer(std::shared_ptr<yacl::link::Context> lctx) {
 // 1. Removes secret key component using hint
 // 2. Applies modulus switching (q → p)
 // @return Retrieved plaintext value from database
-uint64_t PIRClient::client_recover() {
+uint64_t SimplePirClient::ClientRecover() {
   // Compute d_ = ans - hint*s mod q
-  uint64_t d_ =
-      ans_[idx_row_] - fast_inner_product_modq(hint_[idx_row_], s_, q_);
+  uint64_t d_ = ans_[idx_row_] - InnerProductModq(hint_[idx_row_], s_, q_);
 
   // Handle modular rounding: Map from Z_q to Z_p
   uint64_t d = (d_ % delta_ >= delta_ / 2) ? (d_ / delta_) - 1 : (d_ / delta_);

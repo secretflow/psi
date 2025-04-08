@@ -24,14 +24,12 @@
 #include <string>
 #include <vector>
 
-#include "generate_rand.h"
-#include "inner_product.h"
-#include "receiver.h"
-#include "sender.h"
+#include "network_util.h"
+#include "util.h"
 #include "yacl/base/exception.h"
 
 namespace pir::simple {
-class PIRClient {
+class SimplePirClient {
  public:
   // Constructor initializes cryptographic parameters
   // @param dimension: LWE problem dimension
@@ -42,20 +40,20 @@ class PIRClient {
   // @param sigma: Gaussian distribution standard deviation
   // @param ip: Server IP address for network communication
   // @param port: Server port number for network communication
-  PIRClient(size_t dimension, uint64_t q, size_t N, uint64_t p, int radius,
-            double sigma);
+  SimplePirClient(size_t dimension, uint64_t q, size_t N, uint64_t p,
+                  int radius, double sigma);
 
   // Transposes LWE matrix A for efficient computation
   // @param mat: LWE matrix from server (column-major format)
-  void matrix_transpose(const std::vector<std::vector<uint64_t>> &mat);
+  void MatrixTranspose(const std::vector<std::vector<uint64_t>> &mat);
 
-  void client_setup(std::shared_ptr<yacl::link::Context> lctx);
+  void ClientSetup(std::shared_ptr<yacl::link::Context> lctx);
 
-  void client_query(size_t idx, std::shared_ptr<yacl::link::Context> lctx);
+  void ClientQuery(size_t idx, std::shared_ptr<yacl::link::Context> lctx);
 
-  void client_answer(std::shared_ptr<yacl::link::Context> lctx);
+  void ClientAnswer(std::shared_ptr<yacl::link::Context> lctx);
 
-  uint64_t client_recover();
+  uint64_t ClientRecover();
 
  private:
   size_t dimension_ = 1024;                    // dimension
@@ -73,7 +71,7 @@ class PIRClient {
   // Precomputes discrete Gaussian distribution for error sampling
   // @param radius: Number of standard deviations to consider (±range)
   // @param sigma: Standard deviation of distribution
-  void precompute_discrete_gaussian(const int &radius, const double &sigma) {
+  void PrecomputeDiscreteGaussian(const int &radius, const double &sigma) {
     YACL_ENFORCE(radius > 0 && sigma > 0);
 
     const double range = radius * sigma;
@@ -97,7 +95,7 @@ class PIRClient {
   // Samples errors from precomputed distribution
   // @param n: Number of samples to generate
   // @return Vector of integer errors in [-radius*sigma, radius*sigma]
-  std::vector<size_t> sample_batch(size_t n) {
+  std::vector<size_t> SampleBatch(size_t n) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::discrete_distribution<size_t> dist(gaussian_distribution_.begin(),

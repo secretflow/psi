@@ -20,13 +20,11 @@
 #include <string>
 #include <vector>
 
-#include "generate_rand.h"
-#include "inner_product.h"
-#include "receiver.h"
-#include "sender.h"
+#include "network_util.h"
+#include "util.h"
 
 namespace pir::simple {
-class PIRServer {
+class SimplePirServer {
  public:
   // Constructor for PIR server
   // @param dimension - Dimension of the LWE problem (security parameter)
@@ -35,26 +33,26 @@ class PIRServer {
   // @param p - Plaintext modulus
   // @param ip - Network interface address for communication
   // @param port - Network port for client-server communication
-  PIRServer(size_t dimension, uint64_t q, size_t N, uint64_t p);
+  SimplePirServer(size_t dimension, uint64_t q, size_t N, uint64_t p);
 
   // Initializes database structure with random plaintext values
   // Database is organized as sqrt(N) x sqrt(N) matrix for efficient processing
-  void generate_database();
+  void GenerateDatabase();
 
   // Sets the n x sqrt(N) LWE matrix used for cryptographic operations
   // @param A - LWE matrix (column-major format)
-  void set_A_(const std::vector<std::vector<uint64_t>> &A);
+  void SetA_(const std::vector<std::vector<uint64_t>> &A);
 
-  void server_setup(std::shared_ptr<yacl::link::Context> lctx);
+  void ServerSetup(std::shared_ptr<yacl::link::Context> lctx);
 
-  void server_query(std::shared_ptr<yacl::link::Context> lctx);
+  void ServerQuery(std::shared_ptr<yacl::link::Context> lctx);
 
-  void server_answer(std::shared_ptr<yacl::link::Context> lctx);
+  void ServerAnswer(std::shared_ptr<yacl::link::Context> lctx);
 
   // Retrieves plaintext value from database
   // @param idx - Index of requested data element
   // @return Plaintext value at specified index
-  uint64_t get_value(const size_t &idx);
+  uint64_t GetValue(const size_t &idx);
 
  private:
   size_t dimension_ = 1024;                      //  dimension

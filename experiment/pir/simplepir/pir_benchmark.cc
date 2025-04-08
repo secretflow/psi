@@ -40,7 +40,7 @@ static TestContext SetupContext() {
   ctx.A.resize(ctx.dimension);
   size_t row = static_cast<size_t>(sqrt(ctx.N));
   for (size_t i = 0; i < ctx.dimension; i++) {
-    ctx.A[i] = pir::simple::generate_random_vector(row, ctx.q);
+    ctx.A[i] = pir::simple::GenerateRandomVector(row, ctx.q);
   }
   return ctx;
 }
@@ -58,47 +58,45 @@ static void BM_SimplePIR(benchmark::State &state) {
     auto ctx = SetupContext();  // Generate test parameters
 
     // Initialize server/client with test configuration
-    std::unique_ptr<pir::simple::PIRServer> server;
-    server = std::make_unique<pir::simple::PIRServer>(ctx.dimension, ctx.q,
-                                                      ctx.N, ctx.p);
-    std::unique_ptr<pir::simple::PIRClient> client;
-    client = std::make_unique<pir::simple::PIRClient>(
+    std::unique_ptr<pir::simple::SimplePirServer> server;
+    std::unique_ptr<pir::simple::SimplePirClient> client;
+    server = std::make_unique<pir::simple::SimplePirServer>(
+        ctx.dimension, ctx.q, ctx.N, ctx.p);
+    client = std::make_unique<pir::simple::SimplePirClient>(
         ctx.dimension, ctx.q, ctx.N, ctx.p, ctx.radius, ctx.sigma);
 
     // Configure cryptographic materials
-    server->set_A_(ctx.A);
-    server->generate_database();
-    client->matrix_transpose(ctx.A);
+    server->SetA_(ctx.A);
+    server->GenerateDatabase();
+    client->MatrixTranspose(ctx.A);
 
     state.ResumeTiming();
 
     // Phase 1: Setup
     auto lctxs = yacl::link::test::SetupWorld(2);
-    auto server_setup = std::async([&] { server->server_setup(lctxs[0]); });
-    auto client_setup = std::async([&] { client->client_setup(lctxs[1]); });
+    auto server_setup = std::async([&] { server->ServerSetup(lctxs[0]); });
+    auto client_setup = std::async([&] { client->ClientSetup(lctxs[1]); });
     server_setup.get();
     client_setup.get();
 
     // Phase 2: Query
     size_t idx = 10;
-    auto client_query =
-        std::async([&] { client->client_query(idx, lctxs[0]); });
-    auto server_query = std::async([&] { server->server_query(lctxs[1]); });
+    auto client_query = std::async([&] { client->ClientQuery(idx, lctxs[0]); });
+    auto server_query = std::async([&] { server->ServerQuery(lctxs[1]); });
     client_query.get();
     server_query.get();
 
     // Phase 3: Answer
-    auto server_answer = std::async([&] { server->server_answer(lctxs[0]); });
-    auto client_answer = std::async([&] { client->client_answer(lctxs[1]); });
+    auto server_answer = std::async([&] { server->ServerAnswer(lctxs[0]); });
+    auto client_answer = std::async([&] { client->ClientAnswer(lctxs[1]); });
     server_answer.get();
     client_answer.get();
 
     // Phase 4: Recover
-    client->client_recover();  // Decrypt and validate retrieved value
+    client->ClientRecover();  // Decrypt and validate retrieved value
   }
 }
 
 // Register benchmark with timing in milliseconds
 BENCHMARK(BM_SimplePIR)->Unit(benchmark::kMillisecond);
 }  // namespace
-BENCHMARK_MAIN();

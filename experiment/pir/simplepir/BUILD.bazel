@@ -17,39 +17,20 @@ load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library", "psi_cc_test")
 package(default_visibility = ["//visibility:public"])
 
 psi_cc_library(
-    name = "generate_rand",
-    srcs = ["generate_rand.cc"],
-    hdrs = ["generate_rand.h"],
+    name = "util",
+    srcs = ["util.cc"],
+    hdrs = ["util.h"],
     deps = [
         "@yacl//yacl/base:exception",
+        "@yacl//yacl/base:int128",
         "@yacl//yacl/crypto/rand",
     ],
 )
 
 psi_cc_library(
-    name = "inner_product",
-    srcs = ["inner_product.cc"],
-    hdrs = ["inner_product.h"],
-    deps = [
-        "@yacl//yacl/base:exception",
-        "@yacl//yacl/base:int128",
-    ],
-)
-
-psi_cc_library(
-    name = "receiver",
-    srcs = ["receiver.cc"],
-    hdrs = ["receiver.h"],
-    deps = [
-        "@yacl//yacl/base:buffer",
-        "@yacl//yacl/link:context",
-    ],
-)
-
-psi_cc_library(
-    name = "sender",
-    srcs = ["sender.cc"],
-    hdrs = ["sender.h"],
+    name = "network_util",
+    srcs = ["network_util.cc"],
+    hdrs = ["network_util.h"],
     deps = [
         "@yacl//yacl/base:buffer",
         "@yacl//yacl/link:context",
@@ -61,10 +42,8 @@ psi_cc_library(
     srcs = ["client.cc"],
     hdrs = ["client.h"],
     deps = [
-        ":generate_rand",
-        ":inner_product",
-        ":receiver",
-        ":sender",
+        ":network_util",
+        ":util",
         "@yacl//yacl/base:exception",
     ],
 )
@@ -74,10 +53,9 @@ psi_cc_library(
     srcs = ["server.cc"],
     hdrs = ["server.h"],
     deps = [
-        ":generate_rand",
-        ":inner_product",
-        ":receiver",
-        ":sender",
+        ":network_util",
+        ":util",
+        "@yacl//yacl/base:exception",
     ],
 )
 

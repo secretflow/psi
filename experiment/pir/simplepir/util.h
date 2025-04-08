@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <iomanip>
 #include <random>
@@ -22,10 +23,10 @@
 #include <string>
 #include <vector>
 
+#include "yacl/base/int128.h"
 #include "yacl/crypto/rand/rand.h"
 
 namespace pir::simple {
-
 /**
  * Generates a vector of cryptographically secure random numbers modulo q
  *
@@ -43,7 +44,19 @@ namespace pir::simple {
  *   1. Secure mode (default): Uses CSPRNG
  *   2. Fast mode: Uses faster but non-cryptographic PRG
  */
-std::vector<uint64_t> generate_random_vector(size_t size,
-                                             const uint64_t &modulus_,
-                                             bool fast_mode = false);
+std::vector<uint64_t> GenerateRandomVector(size_t size,
+                                           const uint64_t &modulus_,
+                                           bool fast_mode = false);
+
+/**
+ * Computes the modular inner product of two vectors efficiently.
+ *
+ * @param row First vector (typically a row from a matrix)
+ * @param col Second vector (typically a column from a matrix)
+ * @param q Modulus value (must be > 1)
+ *
+ * @return (Σ(row[i] * col[i])) mod q
+ */
+uint64_t InnerProductModq(const std::vector<uint64_t> &row,
+                          const std::vector<uint64_t> &col, const uint64_t &q);
 }  // namespace pir::simple

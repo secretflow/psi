@@ -12,14 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "inner_product.h"
+#include "util.h"
+
+#include <vector>
 
 #include "yacl/base/exception.h"
 
 namespace pir::simple {
-uint64_t fast_inner_product_modq(const std::vector<uint64_t> &row,
-                                 const std::vector<uint64_t> &col,
-                                 const uint64_t &q) {
+std::vector<uint64_t> GenerateRandomVector(size_t size,
+                                           const uint64_t &modulus_,
+                                           bool fast_mode) {
+  YACL_ENFORCE(size > 0);
+  YACL_ENFORCE(modulus_ > 1);
+
+  std::vector<uint64_t> result(size);
+
+  // Branch selection based on security requirements
+  if (fast_mode) {
+    // Non-cryptographic PRG path
+    for (size_t i = 0; i < size; i++) {
+      result[i] = yacl::crypto::FastRandU64() % modulus_;  // Unsafe modulo
+    }
+  } else {
+    // Cryptographic PRG path (production use)
+    for (size_t i = 0; i < size; i++) {
+      result[i] = yacl::crypto::RandU64() % modulus_;  // Secure random
+    }
+  }
+  return result;
+}
+
+uint64_t InnerProductModq(const std::vector<uint64_t> &row,
+                          const std::vector<uint64_t> &col, const uint64_t &q) {
   YACL_ENFORCE(row.size() == col.size());
   YACL_ENFORCE(q > 0);
 
@@ -30,7 +54,7 @@ uint64_t fast_inner_product_modq(const std::vector<uint64_t> &row,
     // 128-bit multiplication to prevent overflow
     uint128_t product = static_cast<uint128_t>(row[i]) * col[i];
 
-    product %= q;  // Reduce product modulo q
+    product %= q;
     result += product;
 
     // Final reduction ensures result ∈ [0, q)

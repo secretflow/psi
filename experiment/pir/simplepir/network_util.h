@@ -21,10 +21,22 @@
 #include "yacl/link/context.h"
 
 namespace pir::simple {
+/// @brief Serializes a vector of 64-bit integers into network-ready binary
+/// format
+/// @param data Reference to source data vector containing uint64_t elements
+/// @return yacl::Buffer with packed binary data
+yacl::Buffer SerializeMessage(const std::vector<uint64_t> &data);
+
 /// @brief Deserializes binary buffer into vector of 64-bit unsigned integers
 /// @param buffer Reference to binary data buffer containing serialized message
 /// @return Vector of deserialized numerical values
 std::vector<uint64_t> DeserializeMessage(const yacl::Buffer &buffer);
+
+/// @brief Transmits data vector to peer node using asynchronous communication
+/// @param data Vector of numerical values to send
+/// @param lctx Network communication context handle
+void SendData(const std::vector<uint64_t> &data,
+              std::shared_ptr<yacl::link::Context> lctx);
 
 /// @brief Network reception handler with integrated deserialization
 /// @param lctx Shared pointer to communication context managing network links

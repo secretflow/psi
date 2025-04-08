@@ -33,15 +33,15 @@ class PIRTest : public ::testing::Test {
  protected:
   void SetUp() override {
     // Initialize PIR server with test parameters
-    server = std::make_unique<pir::simple::PIRServer>(
+    server = std::make_unique<pir::simple::SimplePirServer>(
         kTestDim, kTestModulus, kTestSize, kTestPlainModulus);
 
     // Initialize PIR client with test parameters
-    client = std::make_unique<pir::simple::PIRClient>(
+    client = std::make_unique<pir::simple::SimplePirClient>(
         kTestDim, kTestModulus, kTestSize, kTestPlainModulus, 4, 6.8);
 
     // Generate test LWE matrix data for PIR
-    generate_LWE_matrix();
+    GenerateLweMatrix();
   }
 
   void TearDown() override {
@@ -50,49 +50,49 @@ class PIRTest : public ::testing::Test {
     client.reset();
   }
 
-  void generate_LWE_matrix() {
+  void GenerateLweMatrix() {
     A.resize(kTestDim);
     size_t row = static_cast<size_t>(sqrt(kTestSize));
     for (size_t i = 0; i < kTestDim; i++) {
-      A[i] = pir::simple::generate_random_vector(row, kTestModulus);
+      A[i] = pir::simple::GenerateRandomVector(row, kTestModulus);
     }
   }
 
   std::vector<std::vector<uint64_t>> A;
-  std::unique_ptr<pir::simple::PIRServer> server;
-  std::unique_ptr<pir::simple::PIRClient> client;
+  std::unique_ptr<pir::simple::SimplePirServer> server;
+  std::unique_ptr<pir::simple::SimplePirClient> client;
 };
 
 TEST_F(PIRTest, AllWorkflow) {
   // Phase 1: Set LWE matrix for server and client
-  server->set_A_(A);
-  server->generate_database();
-  client->matrix_transpose(A);
+  server->SetA_(A);
+  server->GenerateDatabase();
+  client->MatrixTranspose(A);
 
   // Phase 2: PIR setup
   auto lctxs = yacl::link::test::SetupWorld(2);
-  auto server_setup = std::async([&] { server->server_setup(lctxs[0]); });
-  auto client_setup = std::async([&] { client->client_setup(lctxs[1]); });
+  auto server_setup = std::async([&] { server->ServerSetup(lctxs[0]); });
+  auto client_setup = std::async([&] { client->ClientSetup(lctxs[1]); });
   server_setup.get();
   client_setup.get();
 
   // Phase 3: PIR query
   const size_t kTestIndex = 10;
   auto client_query =
-      std::async([&] { client->client_query(kTestIndex, lctxs[0]); });
-  auto server_query = std::async([&] { server->server_query(lctxs[1]); });
+      std::async([&] { client->ClientQuery(kTestIndex, lctxs[0]); });
+  auto server_query = std::async([&] { server->ServerQuery(lctxs[1]); });
   client_query.get();
   server_query.get();
 
   // Phase 4: PIR answer
-  auto server_answer = std::async([&] { server->server_answer(lctxs[0]); });
-  auto client_answer = std::async([&] { client->client_answer(lctxs[1]); });
+  auto server_answer = std::async([&] { server->ServerAnswer(lctxs[0]); });
+  auto client_answer = std::async([&] { client->ClientAnswer(lctxs[1]); });
   server_answer.get();
   client_answer.get();
 
   // Phase 5: Result verification
-  auto recovered = client->client_recover();      // Client decrypts result
-  auto expected = server->get_value(kTestIndex);  // Server's true value
-  EXPECT_EQ(recovered, expected);  // Validate PIR protocol correctness
+  auto recovered = client->ClientRecover();
+  auto expected = server->GetValue(kTestIndex);
+  EXPECT_EQ(recovered, expected);
 }
 }  // namespace pir::simple

@@ -45,7 +45,7 @@ void SimplePirServer::SetA_(const std::vector<std::vector<uint64_t>> &A) {
 // PIR setup phase:
 // 1. Precomputes hint = db * A^T mod q
 // 2. Sends hint to client through network
-void SimplePirServer::ServerSetup(std::shared_ptr<yacl::link::Context> lctx) {
+void SimplePirServer::Setup(std::shared_ptr<yacl::link::Context> lctx) {
   const size_t row_num = static_cast<size_t>(sqrt(N_));
   std::vector<uint64_t> hint;
   hint.reserve(row_num * dimension_);
@@ -66,14 +66,14 @@ void SimplePirServer::ServerSetup(std::shared_ptr<yacl::link::Context> lctx) {
 // PIR query phase:
 // 1. Receives and stores encrypted query from client
 // 2. Uses blocking network receiver to wait for query data
-void SimplePirServer::ServerQuery(std::shared_ptr<yacl::link::Context> lctx) {
+void SimplePirServer::Query(std::shared_ptr<yacl::link::Context> lctx) {
   qu_ = RecvData(lctx);  // Store encrypted query vector
 }
 
 // PIR answer phase:
 // 1. Calculates ans = db * qu mod q
 // 2. Sends encrypted response back to client
-void SimplePirServer::ServerAnswer(std::shared_ptr<yacl::link::Context> lctx) {
+void SimplePirServer::Answer(std::shared_ptr<yacl::link::Context> lctx) {
   const size_t row_num = static_cast<size_t>(sqrt(N_));
   std::vector<uint64_t> ans(row_num);
 

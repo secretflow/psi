@@ -71,27 +71,26 @@ TEST_F(PIRTest, AllWorkflow) {
 
   // Phase 2: PIR setup
   auto lctxs = yacl::link::test::SetupWorld(2);
-  auto server_setup = std::async([&] { server->ServerSetup(lctxs[0]); });
-  auto client_setup = std::async([&] { client->ClientSetup(lctxs[1]); });
+  auto server_setup = std::async([&] { server->Setup(lctxs[0]); });
+  auto client_setup = std::async([&] { client->Setup(lctxs[1]); });
   server_setup.get();
   client_setup.get();
 
   // Phase 3: PIR query
   const size_t kTestIndex = 10;
-  auto client_query =
-      std::async([&] { client->ClientQuery(kTestIndex, lctxs[0]); });
-  auto server_query = std::async([&] { server->ServerQuery(lctxs[1]); });
+  auto client_query = std::async([&] { client->Query(kTestIndex, lctxs[0]); });
+  auto server_query = std::async([&] { server->Query(lctxs[1]); });
   client_query.get();
   server_query.get();
 
   // Phase 4: PIR answer
-  auto server_answer = std::async([&] { server->ServerAnswer(lctxs[0]); });
-  auto client_answer = std::async([&] { client->ClientAnswer(lctxs[1]); });
+  auto server_answer = std::async([&] { server->Answer(lctxs[0]); });
+  auto client_answer = std::async([&] { client->Answer(lctxs[1]); });
   server_answer.get();
   client_answer.get();
 
   // Phase 5: Result verification
-  auto recovered = client->ClientRecover();
+  auto recovered = client->Recover();
   auto expected = server->GetValue(kTestIndex);
   EXPECT_EQ(recovered, expected);
 }

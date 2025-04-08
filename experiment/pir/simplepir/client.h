@@ -47,13 +47,13 @@ class SimplePirClient {
   // @param mat: LWE matrix from server (column-major format)
   void MatrixTranspose(const std::vector<std::vector<uint64_t>> &mat);
 
-  void ClientSetup(std::shared_ptr<yacl::link::Context> lctx);
+  void Setup(std::shared_ptr<yacl::link::Context> lctx);
 
-  void ClientQuery(size_t idx, std::shared_ptr<yacl::link::Context> lctx);
+  void Query(size_t idx, std::shared_ptr<yacl::link::Context> lctx);
 
-  void ClientAnswer(std::shared_ptr<yacl::link::Context> lctx);
+  void Answer(std::shared_ptr<yacl::link::Context> lctx);
 
-  uint64_t ClientRecover();
+  uint64_t Recover();
 
  private:
   size_t dimension_ = 1024;                    // dimension

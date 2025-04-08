@@ -51,7 +51,7 @@ void SimplePirClient::MatrixTranspose(
 
 // Setup phase: Receives and stores precomputed hint values from server
 // hint = database * A^T mod q
-void SimplePirClient::ClientSetup(std::shared_ptr<yacl::link::Context> lctx) {
+void SimplePirClient::Setup(std::shared_ptr<yacl::link::Context> lctx) {
   std::vector<uint64_t> hint_vec = RecvData(lctx);
   // Reconstruct 2D hint matrix from linear vector
   const size_t row_num = static_cast<size_t>(sqrt(N_));
@@ -69,8 +69,8 @@ void SimplePirClient::ClientSetup(std::shared_ptr<yacl::link::Context> lctx) {
 // 2. Adds Gaussian noise for LWE security
 // 3. Sends encrypted query to server
 // @param idx: Linear index of target database element
-void SimplePirClient::ClientQuery(size_t idx,
-                                  std::shared_ptr<yacl::link::Context> lctx) {
+void SimplePirClient::Query(size_t idx,
+                            std::shared_ptr<yacl::link::Context> lctx) {
   if (idx >= N_) {
     SPDLOG_ERROR("Index out of bounds: {} >= {}", idx, N_);
   }
@@ -101,7 +101,7 @@ void SimplePirClient::ClientQuery(size_t idx,
 
 // Answer phase
 // ans = db * qu mod q
-void SimplePirClient::ClientAnswer(std::shared_ptr<yacl::link::Context> lctx) {
+void SimplePirClient::Answer(std::shared_ptr<yacl::link::Context> lctx) {
   ans_ = RecvData(lctx);
 }
 
@@ -109,7 +109,7 @@ void SimplePirClient::ClientAnswer(std::shared_ptr<yacl::link::Context> lctx) {
 // 1. Removes secret key component using hint
 // 2. Applies modulus switching (q → p)
 // @return Retrieved plaintext value from database
-uint64_t SimplePirClient::ClientRecover() {
+uint64_t SimplePirClient::Recover() {
   // Compute d_ = ans - hint*s mod q
   uint64_t d_ = ans_[idx_row_] - InnerProductModq(hint_[idx_row_], s_, q_);
 

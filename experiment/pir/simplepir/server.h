@@ -43,11 +43,11 @@ class SimplePirServer {
   // @param A - LWE matrix (column-major format)
   void SetA_(const std::vector<std::vector<uint64_t>> &A);
 
-  void ServerSetup(std::shared_ptr<yacl::link::Context> lctx);
+  void Setup(std::shared_ptr<yacl::link::Context> lctx);
 
-  void ServerQuery(std::shared_ptr<yacl::link::Context> lctx);
+  void Query(std::shared_ptr<yacl::link::Context> lctx);
 
-  void ServerAnswer(std::shared_ptr<yacl::link::Context> lctx);
+  void Answer(std::shared_ptr<yacl::link::Context> lctx);
 
   // Retrieves plaintext value from database
   // @param idx - Index of requested data element

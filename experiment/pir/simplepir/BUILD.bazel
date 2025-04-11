@@ -33,6 +33,7 @@ psi_cc_library(
     hdrs = ["network_util.h"],
     deps = [
         "@yacl//yacl/base:buffer",
+        "@yacl//yacl/base:int128",
         "@yacl//yacl/link:context",
     ],
 )
@@ -42,9 +43,8 @@ psi_cc_library(
     srcs = ["client.cc"],
     hdrs = ["client.h"],
     deps = [
-        ":network_util",
         ":util",
-        "@yacl//yacl/base:exception",
+        "@yacl//yacl/crypto/tools:prg",
     ],
 )
 
@@ -53,9 +53,8 @@ psi_cc_library(
     srcs = ["server.cc"],
     hdrs = ["server.h"],
     deps = [
-        ":network_util",
         ":util",
-        "@yacl//yacl/base:exception",
+        "@yacl//yacl/crypto/tools:prg",
     ],
 )
 
@@ -64,6 +63,7 @@ psi_cc_test(
     srcs = ["pir_test.cc"],
     deps = [
         ":client",
+        ":network_util",
         ":server",
         "@yacl//yacl/link:test_util",
     ],

@@ -16,11 +16,9 @@
 
 #include <cmath>
 #include <cstdint>
-#include <memory>
 #include <string>
 #include <vector>
 
-#include "network_util.h"
 #include "util.h"
 
 namespace pir::simple {
@@ -35,32 +33,38 @@ class SimplePirServer {
   // @param port - Network port for client-server communication
   SimplePirServer(size_t dimension, uint64_t q, size_t N, uint64_t p);
 
-  // Initializes database structure with random plaintext values
   // Database is organized as sqrt(N) x sqrt(N) matrix for efficient processing
-  void GenerateDatabase();
+  void SetDatabase(const std::vector<std::vector<uint64_t>> &database);
 
-  // Sets the n x sqrt(N) LWE matrix used for cryptographic operations
-  // @param A - LWE matrix (column-major format)
-  void SetA_(const std::vector<std::vector<uint64_t>> &A);
+  // Generates the n x sqrt(N) LWE matrix (column-major format) used for
+  // cryptographic operations
+  void GenerateLweMatrix();
 
-  void Setup(std::shared_ptr<yacl::link::Context> lctx);
+  // Gets the CSPRNG seed used to generate LWE matrix
+  uint128_t GetSeed() const;
 
-  void Query(std::shared_ptr<yacl::link::Context> lctx);
+  // PIR setup phase:
+  // 1. Precomputes hint = db * A^T mod q
+  // 2. Sends hint to client through network
+  std::vector<uint64_t> Setup();
 
-  void Answer(std::shared_ptr<yacl::link::Context> lctx);
+  // PIR answer phase:
+  // 1. Calculates ans = db * qu mod q
+  // 2. Sends encrypted response back to client
+  std::vector<uint64_t> Answer(const std::vector<uint64_t> &qu);
 
   // Retrieves plaintext value from database
   // @param idx - Index of requested data element
   // @return Plaintext value at specified index
-  uint64_t GetValue(const size_t &idx);
+  uint64_t GetValue(size_t idx);
 
  private:
-  size_t dimension_ = 1024;                      //  dimension
-  uint64_t q_ = 1ULL << 32;                      //  modulus
-  size_t N_ = 0;                                 //  database size
-  uint64_t p_ = 991;                             //  plaintext modulus
+  size_t dimension_ = 1024;  //  dimension
+  uint64_t q_ = 1ULL << 32;  //  modulus
+  size_t N_ = 0;             //  database size
+  uint64_t p_ = 0;           //  plaintext modulus
+  uint128_t seed_ = 0;       //  seed for random number generation
   std::vector<std::vector<uint64_t>> database_;  //  database
   std::vector<std::vector<uint64_t>> A_;         //  LWE matrix
-  std::vector<uint64_t> qu_;                     //  query
 };
 }  // namespace pir::simple

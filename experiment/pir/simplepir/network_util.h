@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "yacl/base/buffer.h"
+#include "yacl/base/int128.h"
 #include "yacl/link/context.h"
 
 namespace pir::simple {
@@ -25,21 +26,44 @@ namespace pir::simple {
 /// format
 /// @param data Reference to source data vector containing uint64_t elements
 /// @return yacl::Buffer with packed binary data
-yacl::Buffer SerializeMessage(const std::vector<uint64_t> &data);
+yacl::Buffer SerializeVector(const std::vector<uint64_t> &data);
+
+/// @brief Serializes a 128-bit integer into network-ready binary format
+/// @param value Reference to the 128-bit integer to serialize
+/// @return yacl::Buffer with packed binary data
+yacl::Buffer SerializeUint128(uint128_t value);
 
 /// @brief Deserializes binary buffer into vector of 64-bit unsigned integers
 /// @param buffer Reference to binary data buffer containing serialized message
 /// @return Vector of deserialized numerical values
-std::vector<uint64_t> DeserializeMessage(const yacl::Buffer &buffer);
+std::vector<uint64_t> DeserializeVector(const yacl::Buffer &buffer);
+
+/// @brief Deserializes a 128-bit integer from network-ready binary format
+/// @param buffer Reference to binary data buffer containing serialized integer
+/// @return Deserialized 128-bit integer
+uint128_t DeserializeUint128(const yacl::Buffer &buffer);
 
 /// @brief Transmits data vector to peer node using asynchronous communication
 /// @param data Vector of numerical values to send
 /// @param lctx Network communication context handle
-void SendData(const std::vector<uint64_t> &data,
-              std::shared_ptr<yacl::link::Context> lctx);
+void SendVector(const std::vector<uint64_t> &data,
+                std::shared_ptr<yacl::link::Context> lctx);
+
+/// @brief Transmits a 128-bit integer to peer node using asynchronous
+/// communication
+/// @param seed Reference to the 128-bit integer to send
+/// @param lctx Network communication context handle
+void SendUint128(uint128_t seed, std::shared_ptr<yacl::link::Context> lctx);
 
 /// @brief Network reception handler with integrated deserialization
+/// @param data Reference to the vector to receive and deserialize into
 /// @param lctx Shared pointer to communication context managing network links
-/// @return Deserialized data vector received from peer
-std::vector<uint64_t> RecvData(std::shared_ptr<yacl::link::Context> lctx);
+void RecvVector(std::vector<uint64_t> &data,
+                std::shared_ptr<yacl::link::Context> lctx);
+
+/// @brief Network reception handler for 128-bit integer with integrated
+/// deserialization
+/// @param seed Reference to the 128-bit integer to receive
+/// @param lctx Shared pointer to communication context managing network links
+void RecvUint128(uint128_t &seed, std::shared_ptr<yacl::link::Context> lctx);
 }  // namespace pir::simple

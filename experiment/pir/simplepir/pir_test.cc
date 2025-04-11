@@ -15,10 +15,10 @@
 #include <gtest/gtest.h>
 
 #include <future>
-#include <memory>
 #include <vector>
 
 #include "client.h"
+#include "network_util.h"
 #include "server.h"
 #include "yacl/link/test_util.h"
 
@@ -29,69 +29,69 @@ constexpr uint64_t kTestModulus = 1ULL << 32;
 constexpr uint64_t kTestPlainModulus = 991;
 const size_t kTestIndex = 10;
 
-class PIRTest : public ::testing::Test {
- protected:
-  void SetUp() override {
-    // Initialize PIR server with test parameters
-    server = std::make_unique<pir::simple::SimplePirServer>(
-        kTestDim, kTestModulus, kTestSize, kTestPlainModulus);
-
-    // Initialize PIR client with test parameters
-    client = std::make_unique<pir::simple::SimplePirClient>(
-        kTestDim, kTestModulus, kTestSize, kTestPlainModulus, 4, 6.8);
-
-    // Generate test LWE matrix data for PIR
-    GenerateLweMatrix();
+inline void GenerateDatabase(std::vector<std::vector<uint64_t>> &database) {
+  size_t row = static_cast<size_t>(sqrt(kTestSize));
+  size_t col = static_cast<size_t>(sqrt(kTestSize));
+  database.resize(row);
+  for (size_t i = 0; i < row; i++) {
+    database[i] =
+        pir::simple::GenerateRandomVector(col, kTestPlainModulus, true);
   }
+}
 
-  void TearDown() override {
-    // Clean up server and client resources
-    server.reset();
-    client.reset();
-  }
-
-  void GenerateLweMatrix() {
-    A.resize(kTestDim);
-    size_t row = static_cast<size_t>(sqrt(kTestSize));
-    for (size_t i = 0; i < kTestDim; i++) {
-      A[i] = pir::simple::GenerateRandomVector(row, kTestModulus);
-    }
-  }
-
-  std::vector<std::vector<uint64_t>> A;
-  std::unique_ptr<pir::simple::SimplePirServer> server;
-  std::unique_ptr<pir::simple::SimplePirClient> client;
-};
-
-TEST_F(PIRTest, AllWorkflow) {
-  // Phase 1: Set LWE matrix for server and client
-  server->SetA_(A);
-  server->GenerateDatabase();
-  client->MatrixTranspose(A);
+TEST(PIRTest, AllWorkflow) {
+  pir::simple::SimplePirServer server(kTestDim, kTestModulus, kTestSize,
+                                      kTestPlainModulus);
+  pir::simple::SimplePirClient client(kTestDim, kTestModulus, kTestSize,
+                                      kTestPlainModulus, 4, 6.8);
+  std::vector<std::vector<uint64_t>> database;
+  GenerateDatabase(database);
+  // Phase 1: Sets LWE matrix for server and client
+  server.SetDatabase(database);
+  server.GenerateLweMatrix();
+  uint128_t server_seed = server.GetSeed();
+  auto server_hint_vec = server.Setup();
 
   // Phase 2: PIR setup
+  // Sends LWE matrix for client
+  uint128_t client_seed;
   auto lctxs = yacl::link::test::SetupWorld(2);
-  auto server_setup = std::async([&] { server->Setup(lctxs[0]); });
-  auto client_setup = std::async([&] { client->Setup(lctxs[1]); });
-  server_setup.get();
-  client_setup.get();
+  auto sender = std::async([&] { SendUint128(server_seed, lctxs[0]); });
+  auto receiver = std::async([&] { RecvUint128(client_seed, lctxs[1]); });
+  sender.get();
+  receiver.get();
+
+  // Sends hint to client
+  std::vector<uint64_t> client_hint_vec;
+  sender = std::async([&] { SendVector(server_hint_vec, lctxs[0]); });
+  receiver = std::async([&] { RecvVector(client_hint_vec, lctxs[1]); });
+  sender.get();
+  receiver.get();
+
+  client.Setup(client_seed, client_hint_vec);
 
   // Phase 3: PIR query
   const size_t kTestIndex = 10;
-  auto client_query = std::async([&] { client->Query(kTestIndex, lctxs[0]); });
-  auto server_query = std::async([&] { server->Query(lctxs[1]); });
-  client_query.get();
-  server_query.get();
+  auto client_query = client.Query(kTestIndex);
+  std::vector<uint64_t> server_query_received;
+
+  sender = std::async([&] { SendVector(client_query, lctxs[0]); });
+  receiver = std::async([&] { RecvVector(server_query_received, lctxs[1]); });
+  sender.get();
+  receiver.get();
 
   // Phase 4: PIR answer
-  auto server_answer = std::async([&] { server->Answer(lctxs[0]); });
-  auto client_answer = std::async([&] { client->Answer(lctxs[1]); });
-  server_answer.get();
-  client_answer.get();
+  auto server_answer = server.Answer(server_query_received);
+  std::vector<uint64_t> client_answer_received;
+
+  sender = std::async([&] { SendVector(server_answer, lctxs[0]); });
+  receiver = std::async([&] { RecvVector(client_answer_received, lctxs[1]); });
+  sender.get();
+  receiver.get();
 
   // Phase 5: Result verification
-  auto recovered = client->Recover();
-  auto expected = server->GetValue(kTestIndex);
+  auto recovered = client.Recover(client_answer_received);
+  auto expected = server.GetValue(kTestIndex);
   EXPECT_EQ(recovered, expected);
 }
 }  // namespace pir::simple

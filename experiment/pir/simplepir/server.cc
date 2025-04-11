@@ -18,34 +18,51 @@
 #include <vector>
 
 #include "spdlog/spdlog.h"
-#include "yacl/base/exception.h"
+#include "yacl/crypto/tools/prg.h"
 
 namespace pir::simple {
 SimplePirServer::SimplePirServer(size_t dimension, uint64_t q, size_t N,
                                  uint64_t p)
     : dimension_(dimension), q_(q), N_(N), p_(p) {}
 
-void SimplePirServer::GenerateDatabase() {
-  size_t row = static_cast<size_t>(sqrt(N_));
-  size_t col = static_cast<size_t>(sqrt(N_));
-  database_.resize(row);
-  for (size_t i = 0; i < row; i++) {
-    // Generate row with random values in [0, p_)
-    database_[i] = GenerateRandomVector(col, p_, true);
+void SimplePirServer::SetDatabase(
+    const std::vector<std::vector<uint64_t>> &database) {
+  // Checks if database is empty
+  if (database.empty()) {
+    SPDLOG_ERROR("Database is empty");
+    return;
+  }
+
+  // Checks if database size matches expected size
+  size_t row_num = static_cast<size_t>(sqrt(N_));
+  size_t col_num = static_cast<size_t>(sqrt(N_));
+  if (database.size() != row_num || database[0].size() != col_num) {
+    SPDLOG_ERROR("Database size mismatch: expected {} x {}, got {} x {}",
+                 row_num, col_num, database.size(), database[0].size());
+    return;
+  }
+
+  // Sets the database
+  database_ = database;
+}
+
+void SimplePirServer::GenerateLweMatrix() {
+  seed_ = yacl::crypto::SecureRandSeed();
+  const size_t row_num = static_cast<size_t>(sqrt(N_));
+  auto rand_vals =
+      yacl::crypto::PrgAesCtr<uint64_t>(seed_, dimension_ * row_num);
+
+  A_.resize(dimension_, std::vector<uint64_t>(row_num));
+  for (size_t i = 0; i < dimension_; i++) {
+    for (size_t j = 0; j < row_num; j++) {
+      A_[i][j] = rand_vals[i * row_num + j] % q_;
+    }
   }
 }
 
-void SimplePirServer::SetA_(const std::vector<std::vector<uint64_t>> &A) {
-  YACL_ENFORCE(!A.empty());
-  YACL_ENFORCE(A[0].size() == static_cast<size_t>(sqrt(N_)));
-  YACL_ENFORCE(A.size() == dimension_);
-  A_ = A;
-}
+uint128_t SimplePirServer::GetSeed() const { return seed_; }
 
-// PIR setup phase:
-// 1. Precomputes hint = db * A^T mod q
-// 2. Sends hint to client through network
-void SimplePirServer::Setup(std::shared_ptr<yacl::link::Context> lctx) {
+std::vector<uint64_t> SimplePirServer::Setup() {
   const size_t row_num = static_cast<size_t>(sqrt(N_));
   std::vector<uint64_t> hint;
   hint.reserve(row_num * dimension_);
@@ -59,43 +76,31 @@ void SimplePirServer::Setup(std::shared_ptr<yacl::link::Context> lctx) {
     }
   }
 
-  // Sends precomputed hint to client
-  SendData(hint, lctx);
+  return hint;
 }
 
-// PIR query phase:
-// 1. Receives and stores encrypted query from client
-// 2. Uses blocking network receiver to wait for query data
-void SimplePirServer::Query(std::shared_ptr<yacl::link::Context> lctx) {
-  qu_ = RecvData(lctx);  // Store encrypted query vector
-}
-
-// PIR answer phase:
-// 1. Calculates ans = db * qu mod q
-// 2. Sends encrypted response back to client
-void SimplePirServer::Answer(std::shared_ptr<yacl::link::Context> lctx) {
+std::vector<uint64_t> SimplePirServer::Answer(const std::vector<uint64_t> &qu) {
   const size_t row_num = static_cast<size_t>(sqrt(N_));
   std::vector<uint64_t> ans(row_num);
 
-  // Compute matrix-vector product with query
+  // Computes matrix-vector product with query
   for (size_t i = 0; i < row_num; i++) {
-    ans[i] = InnerProductModq(database_[i], qu_, q_);
+    ans[i] = InnerProductModq(database_[i], qu, q_);
   }
-  // Send response vector to client
-  SendData(ans, lctx);
+
+  return ans;
 }
 
-// Retrieves plaintext value from database by index
-// @param idx: Linear index in [0, N_)
-// @return: Plaintext value at position (row, col)
-uint64_t SimplePirServer::GetValue(const size_t &idx) {
+uint64_t SimplePirServer::GetValue(size_t idx) {
   if (idx >= N_) {
     SPDLOG_ERROR("Index out of bounds: {} >= {}", idx, N_);
   }
+
   size_t row_num = static_cast<size_t>(sqrt(N_));
-  size_t row = idx / row_num;
-  size_t col = idx % row_num;
-  uint64_t value = database_[row][col];
+  size_t row_idx = idx / row_num;
+  size_t col_idx = idx % row_num;
+  uint64_t value = database_[row_idx][col_idx];
+
   return value;
 }
 }  // namespace pir::simple

@@ -19,11 +19,10 @@
 #include "yacl/base/exception.h"
 
 namespace pir::simple {
-std::vector<uint64_t> GenerateRandomVector(size_t size,
-                                           const uint64_t &modulus_,
+std::vector<uint64_t> GenerateRandomVector(size_t size, uint64_t modulus,
                                            bool fast_mode) {
   YACL_ENFORCE(size > 0);
-  YACL_ENFORCE(modulus_ > 1);
+  YACL_ENFORCE(modulus > 1);
 
   std::vector<uint64_t> result(size);
 
@@ -31,19 +30,19 @@ std::vector<uint64_t> GenerateRandomVector(size_t size,
   if (fast_mode) {
     // Non-cryptographic PRG path
     for (size_t i = 0; i < size; i++) {
-      result[i] = yacl::crypto::FastRandU64() % modulus_;  // Unsafe modulo
+      result[i] = yacl::crypto::FastRandU64() % modulus;  // Unsafe modulo
     }
   } else {
     // Cryptographic PRG path (production use)
     for (size_t i = 0; i < size; i++) {
-      result[i] = yacl::crypto::RandU64() % modulus_;  // Secure random
+      result[i] = yacl::crypto::RandU64() % modulus;  // Secure random
     }
   }
   return result;
 }
 
 uint64_t InnerProductModq(const std::vector<uint64_t> &row,
-                          const std::vector<uint64_t> &col, const uint64_t &q) {
+                          const std::vector<uint64_t> &col, uint64_t q) {
   YACL_ENFORCE(row.size() == col.size());
   YACL_ENFORCE(q > 0);
 

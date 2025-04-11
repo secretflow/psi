@@ -18,6 +18,7 @@
 
 #include "benchmark/benchmark.h"
 #include "client.h"
+#include "network_util.h"
 #include "server.h"
 #include "yacl/link/test_util.h"
 
@@ -29,18 +30,18 @@ struct TestContext {
   uint64_t p = 991;
   int radius = 4;
   double sigma = 6.8;
-  std::vector<std::vector<uint64_t>> A;
+  std::vector<std::vector<uint64_t>> database;
 };
 
 // Initializes test context with parameters
-// 1. Generates random LWE matrix A
+// 1. Generates random database
 // 2. Configures parameters for lattice-based PIR scheme
 static TestContext SetupContext() {
   TestContext ctx;
-  ctx.A.resize(ctx.dimension);
   size_t row = static_cast<size_t>(sqrt(ctx.N));
-  for (size_t i = 0; i < ctx.dimension; i++) {
-    ctx.A[i] = pir::simple::GenerateRandomVector(row, ctx.q);
+  ctx.database.resize(row);
+  for (size_t i = 0; i < row; i++) {
+    ctx.database[i] = pir::simple::GenerateRandomVector(row, ctx.p, true);
   }
   return ctx;
 }
@@ -66,34 +67,61 @@ static void BM_SimplePIR(benchmark::State &state) {
         ctx.dimension, ctx.q, ctx.N, ctx.p, ctx.radius, ctx.sigma);
 
     // Configure cryptographic materials
-    server->SetA_(ctx.A);
-    server->GenerateDatabase();
-    client->MatrixTranspose(ctx.A);
+    server->SetDatabase(ctx.database);
+    server->GenerateLweMatrix();
+    auto server_seed = server->GetSeed();
 
     state.ResumeTiming();
 
     // Phase 1: Setup
+    auto server_hint_vec = server->Setup();
+    uint128_t client_seed;
+    std::vector<uint64_t> client_hint_vec;
+
     auto lctxs = yacl::link::test::SetupWorld(2);
-    auto server_setup = std::async([&] { server->Setup(lctxs[0]); });
-    auto client_setup = std::async([&] { client->Setup(lctxs[1]); });
-    server_setup.get();
-    client_setup.get();
+
+    // Send LWE matrix for client
+    auto sender =
+        std::async([&] { pir::simple::SendUint128(server_seed, lctxs[0]); });
+    auto receiver =
+        std::async([&] { pir::simple::RecvUint128(client_seed, lctxs[1]); });
+    sender.get();
+    receiver.get();
+
+    // Send hint to client
+    sender =
+        std::async([&] { pir::simple::SendVector(server_hint_vec, lctxs[0]); });
+    receiver =
+        std::async([&] { pir::simple::RecvVector(client_hint_vec, lctxs[1]); });
+    sender.get();
+    receiver.get();
+    client->Setup(client_seed, client_hint_vec);
 
     // Phase 2: Query
     size_t idx = 10;
-    auto client_query = std::async([&] { client->Query(idx, lctxs[0]); });
-    auto server_query = std::async([&] { server->Query(lctxs[1]); });
-    client_query.get();
-    server_query.get();
+    auto client_query = client->Query(idx);
+    std::vector<uint64_t> server_query_received;
+
+    sender =
+        std::async([&] { pir::simple::SendVector(client_query, lctxs[0]); });
+    receiver = std::async(
+        [&] { pir::simple::RecvVector(server_query_received, lctxs[1]); });
+    sender.get();
+    receiver.get();
 
     // Phase 3: Answer
-    auto server_answer = std::async([&] { server->Answer(lctxs[0]); });
-    auto client_answer = std::async([&] { client->Answer(lctxs[1]); });
-    server_answer.get();
-    client_answer.get();
+    auto server_answer = server->Answer(server_query_received);
+    std::vector<uint64_t> answer_received;
+
+    sender =
+        std::async([&] { pir::simple::SendVector(server_answer, lctxs[0]); });
+    receiver =
+        std::async([&] { pir::simple::RecvVector(answer_received, lctxs[1]); });
+    sender.get();
+    receiver.get();
 
     // Phase 4: Recover
-    client->Recover();  // Decrypt and validate retrieved value
+    client->Recover(answer_received);  // Decrypt and validate retrieved value
   }
 }
 

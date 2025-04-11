@@ -19,14 +19,11 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
-#include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
-#include "network_util.h"
 #include "util.h"
-#include "yacl/base/exception.h"
 
 namespace pir::simple {
 class SimplePirClient {
@@ -43,73 +40,48 @@ class SimplePirClient {
   SimplePirClient(size_t dimension, uint64_t q, size_t N, uint64_t p,
                   int radius, double sigma);
 
-  // Transposes LWE matrix A for efficient computation
-  // @param mat: LWE matrix from server (column-major format)
-  void MatrixTranspose(const std::vector<std::vector<uint64_t>> &mat);
+  // Uses the CSPRNG seed received from server to set LWE matrix
+  void SetLweMatrix(uint128_t seed);
 
-  void Setup(std::shared_ptr<yacl::link::Context> lctx);
+  // Setup phase: Receives and stores precomputed hint values from server
+  // hint = database * A^T mod q
+  void Setup(uint128_t seed, const std::vector<uint64_t> &hint_vec);
 
-  void Query(size_t idx, std::shared_ptr<yacl::link::Context> lctx);
+  // Query phase:
+  // 1. Encodes target row index and column index
+  // 2. Adds Gaussian noise for LWE security
+  // 3. Sends encrypted query to server
+  // @param idx: Linear index of target database element
+  std::vector<uint64_t> Query(size_t idx);
 
-  void Answer(std::shared_ptr<yacl::link::Context> lctx);
-
-  uint64_t Recover();
+  // Recover phase: Extracts plaintext from encrypted response
+  // 1. Removes secret key component using hint
+  // 2. Applies modulus switching (q → p)
+  // @return Retrieved plaintext value from database
+  uint64_t Recover(const std::vector<uint64_t> &ans);
 
  private:
-  size_t dimension_ = 1024;                    // dimension
-  uint64_t q_ = 1ULL << 32;                    // modulus
-  size_t N_ = 0;                               // database size
-  uint64_t p_ = 991;                           // plaintext modulus
-  uint64_t delta_ = q_ / p_;                   // scalar
-  size_t idx_row_ = 0;                         // row index
-  std::vector<uint64_t> s_;                    // secret vector
-  std::vector<uint64_t> ans_;                  // answer vector
-  std::vector<std::vector<uint64_t>> hint_;    // hint from server
-  std::vector<std::vector<uint64_t>> A_;       // LWE matrix
-  std::vector<double> gaussian_distribution_;  // Gaussian distribution
+  size_t dimension_ = 1024;                      // dimension
+  uint64_t q_ = 1ULL << 32;                      // modulus
+  size_t N_ = 0;                                 // database size
+  uint64_t p_ = 0;                               // plaintext modulus
+  uint64_t delta_ = 0;                           // scalar
+  size_t idx_row_ = 0;                           // row index
+  std::vector<uint64_t> s_;                      // secret vector
+  std::vector<std::vector<uint64_t>> hint_;      // hint from server
+  std::vector<std::vector<uint64_t>> A_;         // LWE matrix
+  std::vector<double> gaussian_distribution_;    // Gaussian distribution
+  std::vector<double> cumulative_distribution_;  // Cumulative distribution
+                                                 // function (CDF) for sampling
 
   // Precomputes discrete Gaussian distribution for error sampling
   // @param radius: Number of standard deviations to consider (±range)
   // @param sigma: Standard deviation of distribution
-  void PrecomputeDiscreteGaussian(const int &radius, const double &sigma) {
-    YACL_ENFORCE(radius > 0 && sigma > 0);
-
-    const double range = radius * sigma;
-    const size_t max_k = static_cast<size_t>(floor(range));
-    const double sigma_sq = sigma * sigma;
-    double sum = 0.0;
-
-    // Compute unnormalized probabilities
-    for (size_t k = -max_k; k <= max_k; k++) {
-      double prob = exp(-k * k / (2 * sigma_sq));
-      gaussian_distribution_.push_back(prob);
-      sum += prob;
-    }
-
-    // Normalize to create valid probability distribution
-    for (size_t i = 0; i < gaussian_distribution_.size(); i++) {
-      gaussian_distribution_[i] /= sum;
-    }
-  }
+  void PrecomputeDiscreteGaussian(int radius, double sigma);
 
   // Samples errors from precomputed distribution
   // @param n: Number of samples to generate
   // @return Vector of integer errors in [-radius*sigma, radius*sigma]
-  std::vector<size_t> SampleBatch(size_t n) {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::discrete_distribution<size_t> dist(gaussian_distribution_.begin(),
-                                            gaussian_distribution_.end());
-
-    std::vector<size_t> samples(n);
-    const size_t max_k = (gaussian_distribution_.size() - 1) / 2;
-
-    // Generate samples with center adjustment
-    for (size_t i = 0; i < n; i++) {
-      samples[i] = dist(gen) - max_k;  // Shift to symmetric range
-    }
-
-    return samples;
-  }
+  std::vector<int> SampleGaussian(size_t n);
 };
 }  // namespace pir::simple

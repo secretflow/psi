@@ -31,7 +31,7 @@ namespace pir::simple {
  * Generates a vector of cryptographically secure random numbers modulo q
  *
  * @param size        Number of elements in output vector (must be >0)
- * @param modulus_    Modulus value for elements (must be >1)
+ * @param modulus    Modulus value for elements (must be >1)
  * @param fast_mode   When true, uses faster but non-cryptographic PRG
  *                    (default: false for security-sensitive contexts)
  *
@@ -44,8 +44,7 @@ namespace pir::simple {
  *   1. Secure mode (default): Uses CSPRNG
  *   2. Fast mode: Uses faster but non-cryptographic PRG
  */
-std::vector<uint64_t> GenerateRandomVector(size_t size,
-                                           const uint64_t &modulus_,
+std::vector<uint64_t> GenerateRandomVector(size_t size, uint64_t modulus,
                                            bool fast_mode = false);
 
 /**
@@ -58,5 +57,5 @@ std::vector<uint64_t> GenerateRandomVector(size_t size,
  * @return (Σ(row[i] * col[i])) mod q
  */
 uint64_t InnerProductModq(const std::vector<uint64_t> &row,
-                          const std::vector<uint64_t> &col, const uint64_t &q);
+                          const std::vector<uint64_t> &col, uint64_t q);
 }  // namespace pir::simple

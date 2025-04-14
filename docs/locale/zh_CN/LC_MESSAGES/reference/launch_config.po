@@ -8,14 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SecretFlow PSI Library \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-14 16:02+0800\n"
+"POT-Creation-Date: 2024-12-26 20:09+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.17.0\n"
+"Generated-By: Babel 2.15.0\n"
 
 #: ../../reference/launch_config.md:1
 msgid "Launch Configuration"
@@ -413,7 +413,7 @@ msgstr "链路配置的设置"
 
 #: ../../reference/launch_config.md
 msgid "id"
-msgstr"id"
+msgstr "id"
 
 #: ../../reference/launch_config.md
 msgid "the UUID of this communication. optional"
@@ -589,7 +589,7 @@ msgstr "[repeated uint32](#uint32)"
 
 #: ../../reference/launch_config.md
 msgid "retry on these brpc error codes, if empty, retry on all codes"
-msgstr ""
+msgstr "针对这些 brpc 错误码进行重试，若为空，则对所有错误码重试"
 
 #: ../../reference/launch_config.md
 msgid "http_codes"
@@ -597,7 +597,7 @@ msgstr "http_codes"
 
 #: ../../reference/launch_config.md
 msgid "retry on these http codes, if empty, retry on all http codes"
-msgstr "针对这些 brpc 错误码进行重试，若为空，则对所有错误码重试"
+msgstr "针对这些 http 错误码进行重试，若为空，则对所有 http 码重试"
 
 #: ../../reference/launch_config.md
 msgid "aggressive_retry"

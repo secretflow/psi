@@ -26,9 +26,8 @@ msgid ""
 "Please check psi.BucketPsiConfig at **PSI v1 Configuration**. Please "
 "check psi.v2.PsiConfig and psi.v2.UbPsiConfig at **PSI v2 "
 "Configuration**."
-msgstr ""
-"请在PSI v1配置中查看psi.BucketPsiConfig。请在PSI "
-"v2配置中查看psi.v2.PsiConfig和psi.v2.UbPsiConfig。"
+msgstr "请在PSI v1配置中查看psi.BucketPsiConfig。"
+"请在PSI v2配置中查看psi.v2.PsiConfig和psi.v2.UbPsiConfig。"
 
 #: ../../reference/launch_config.md:6
 msgid "Table of Contents"
@@ -136,8 +135,7 @@ msgstr "使用链路配置"
 msgid ""
 "[**oneof**](https://developers.google.com/protocol-"
 "buffers/docs/proto3#oneof) runtime_config.legacy_psi_config"
-msgstr ""
-"[**oneof**](https://developers.google.com/protocol-"
+msgstr "[**oneof**](https://developers.google.com/protocol-"
 "buffers/docs/proto3#oneof) runtime_config.legacy_psi_config"
 
 #: ../../reference/launch_config.md
@@ -152,8 +150,7 @@ msgstr "请检查 psi.proto 文件"
 msgid ""
 "[**oneof**](https://developers.google.com/protocol-"
 "buffers/docs/proto3#oneof) runtime_config.psi_config"
-msgstr ""
-"[**oneof**](https://developers.google.com/protocol-"
+msgstr "[**oneof**](https://developers.google.com/protocol-"
 "buffers/docs/proto3#oneof) runtime_config.psi_config"
 
 #: ../../reference/launch_config.md
@@ -168,8 +165,7 @@ msgstr "请检查 psi_v2.proto 文件"
 msgid ""
 "[**oneof**](https://developers.google.com/protocol-"
 "buffers/docs/proto3#oneof) runtime_config.ub_psi_config"
-msgstr ""
-"[**oneof**](https://developers.google.com/protocol-"
+msgstr "[**oneof**](https://developers.google.com/protocol-"
 "buffers/docs/proto3#oneof) runtime_config.ub_psi_config"
 
 #: ../../reference/launch_config.md
@@ -180,8 +176,7 @@ msgstr "[ v2.UbPsiConfig](#v2ubpsiconfig)"
 msgid ""
 "[**oneof**](https://developers.google.com/protocol-"
 "buffers/docs/proto3#oneof) runtime_config.apsi_sender_config"
-msgstr ""
-"[**oneof**](https://developers.google.com/protocol-"
+msgstr "[**oneof**](https://developers.google.com/protocol-"
 "buffers/docs/proto3#oneof) runtime_config.apsi_sender_config"
 
 #: ../../reference/launch_config.md
@@ -337,16 +332,17 @@ msgstr "scope"
 msgid ""
 "Scope of port. Must be Cluster,Domain,Local. Defaults to \"Local\". "
 "+optional"
-msgstr "端口的作用范围。必须为 Cluster、Domain 或 Local。默认为 \"Local\". +optional"
-
+msgstr ""
+"端口的作用范围。必须为 Cluster、Domain 或 Local。默认为 \"Local\". "
+"+optional"
 #: ../../reference/launch_config.md
 msgid "protocol"
 msgstr "protocol"
 
 #: ../../reference/launch_config.md
 msgid "Protocol for port. Must be HTTP,GRPC. Defaults to \"HTTP\". +optional"
-msgstr "端口的协议。必须为 HTTP 或 GRPC。默认为 \"HTTP\". +optional"
-
+msgstr "端口的协议。必须为 HTTP 或 GRPC。默认为 \"HTTP\". "
+"+optional"
 #: ../../reference/launch_config.md:127
 msgid "Service"
 msgstr "服务"
@@ -417,7 +413,7 @@ msgstr "链路配置的设置"
 
 #: ../../reference/launch_config.md
 msgid "id"
-msgstr ""
+msgstr"id"
 
 #: ../../reference/launch_config.md
 msgid "the UUID of this communication. optional"
@@ -437,7 +433,7 @@ msgstr "connect_retry_times"
 
 #: ../../reference/launch_config.md
 msgid "[ uint32](#uint32)"
-msgstr "[ uint32](#uint32)\"\""
+msgstr "[ uint32](#uint32)"""
 
 #: ../../reference/launch_config.md
 msgid "connect to mesh retry time."
@@ -467,26 +463,33 @@ msgstr "接收超时时间（单位为毫秒）。 "
 msgid ""
 "'recv time' is the max time that a party will wait for a given event. for"
 " example:"
-msgstr "‘接收时间’是一方等待某一特定事件的最长时间。例如："
+msgstr ""
+"‘接收时间’是一方等待某一特定事件的最长时间。例如："
 
 #: ../../reference/launch_config.md:185
 msgid ""
 "begin recv end recv |--------|-------recv-"
 "time----------|------------------| alice's timeline"
-msgstr "开始接收  结束接收 |--------|-------接收-时间----------|------------------| alice的时间线"
+msgstr ""
+"开始接收  结束接收 |--------|-------接收-"
+"时间----------|------------------| alice的时间线"
 
 #: ../../reference/launch_config.md:187
 msgid ""
 "begin send end send |-----busy-"
 "work-------------|-------------|------------| bob's timeline"
-msgstr "开始发送  结束发送 |-----忙碌-工作-------------|-------------|------------| bob的时间线"
+msgstr ""
+"开始发送  结束发送 |-----忙碌-"
+"工作-------------|-------------|------------| bob的时间线"
 
-#: ../../reference/launch_config.md:189
+ #: ../../reference/launch_config.md:189
 msgid ""
 "in above case, when alice begins recv for a specific event, bob is still "
 "busy doing its job, when alice's wait time exceed wait_timeout_ms, it "
 "raise exception, although bob now is starting to send data."
-msgstr "在上述例子中，当爱丽丝开始为某个特定事件进行接收操作时，bob仍在忙着做自己的事情。当alice的等待时间超过了等待超时时间（以毫秒为单位），它就会抛出异常，尽管此时鲍勃刚开始发送数据。"
+msgstr ""
+"在上述例子中，当爱丽丝开始为某个特定事件进行接收操作时，bob仍在忙着做自己的事情。"
+"当alice的等待时间超过了等待超时时间（以毫秒为单位），它就会抛出异常，尽管此时鲍勃刚开始发送数据。"
 
 #: ../../reference/launch_config.md:191
 msgid ""
@@ -496,9 +499,8 @@ msgid ""
 "single http request size is greater than this limit, it will be unpacked "
 "into small chunks then reassembled."
 msgstr ""
-"所以对于耗时较长的任务（在这种情况下一方可能需要等待另一方很长时间），这个值应该相应地进行调整。| | http最大负载大小” | "
-"[无符号32位整数（uint32）](#uint32) | "
-"这是HTTP的最大负载大小。如果单个HTTP请求的大小超过了这个限制，它将被拆分成小的数据块，然后再重新组合起来。  "
+"所以对于耗时较长的任务（在这种情况下一方可能需要等待另一方很长时间），这个值应该相应地进行调整。| | "
+"http最大负载大小” | [无符号32位整数（uint32）](#uint32) | 这是HTTP的最大负载大小。如果单个HTTP请求的大小超过了这个限制，它将被拆分成小的数据块，然后再重新组合起来。  "
 
 #: ../../reference/launch_config.md:194
 msgid ""
@@ -521,18 +523,13 @@ msgid ""
 "RetryOptionsProto](#retryoptionsproto) | retry options |"
 msgstr ""
 "This field does affect performance. Please choose wisely. | | "
-"http_timeout_ms | [ uint32](#uint32) | 单个HTTP请求的超时时间。 | | "
-"throttle_window_size | [ uint32](#uint32) | "
-"通道的限流窗口大小。如果正在传输的消息数量超过了限制大小，`SendAsync` 将阻塞，直到消息被处理，或者在等待 "
-"`recv_timeout_ms` 后抛出异常 | | brpc_channel_protocol | [ string](#string) | "
-"BRPC客户端通道协议。 | | brpc_channel_connection_type | [ string](#string) | "
-"BRPC客户端通道连接类型。 | | enable_ssl | [ bool](#bool) | 链接通道的SSL选项。 | | "
-"client_ssl_opts | [ SSLOptionsProto](#ssloptionsproto) | 通道的SSL配置。如果 "
-"enable_ssl == false，则此配置将被忽略； | | server_ssl_opts | [ "
-"SSLOptionsProto](#ssloptionsproto) | 服务的SSL配置。如果 enable_ssl == "
-"false，则此配置将被忽略； | | chunk_parallel_send_size | [ uint32](#uint32) | "
-"通道的分块并行发送大小。如果在发送消息时需要分块发送，最大并行发送大小为 chunk_parallel_send_size | | "
-"retry_opts | [ RetryOptionsProto](#retryoptionsproto) | 重试选项 |"
+"http_timeout_ms | [ uint32](#uint32) | 单个HTTP请求的超时时间。 | "
+"| throttle_window_size | [ uint32](#uint32) | 通道的限流窗口大小。如果正在传输的消息数量超过了限制大小，`SendAsync` 将阻塞，直到消息被处理，或者在等待 `recv_timeout_ms` 后抛出异常 | | brpc_channel_protocol | [ "
+"string](#string) | BRPC客户端通道协议。 | | "
+"brpc_channel_connection_type | [ string](#string) | BRPC客户端通道连接类型。 | | enable_ssl | [ bool](#bool) | 链接通道的SSL选项。 | | client_ssl_opts | [ SSLOptionsProto](#ssloptionsproto) | 通道的SSL配置。如果 enable_ssl == false，则此配置将被忽略； | | "
+"server_ssl_opts | [ SSLOptionsProto](#ssloptionsproto) | 服务的SSL配置。如果 enable_ssl == false，则此配置将被忽略； | | "
+"chunk_parallel_send_size | [ uint32](#uint32) | 通道的分块并行发送大小。如果在发送消息时需要分块发送，最大并行发送大小为 chunk_parallel_send_size | | retry_opts | [ "
+"RetryOptionsProto](#retryoptionsproto) | 重试选项 |"
 
 #: ../../reference/launch_config.md:208
 msgid "PartyProto"
@@ -614,7 +611,8 @@ msgstr "[ bool](#bool)"
 msgid ""
 "do aggressive retry， this means that retries will be made on additional "
 "error codes"
-msgstr "启用激进重试，即会在额外错误码上进行重试"
+msgstr ""
+"启用激进重试，即会在额外错误码上进行重试"
 
 #: ../../reference/launch_config.md:237
 msgid "SSLOptionsProto"
@@ -648,7 +646,8 @@ msgstr "verify_depth"
 msgid ""
 "Set the maximum depth of the certificate chain for verification If 0, "
 "turn off the verification"
-msgstr "设置证书链验证的最大深度。如果为 0，则关闭验证"
+msgstr ""
+"设置证书链验证的最大深度。如果为 0，则关闭验证"
 
 #: ../../reference/launch_config.md
 msgid "ca_file_path"
@@ -658,7 +657,8 @@ msgstr "ca_file_path"
 msgid ""
 "Set the trusted CA file to verify the peer's certificate If empty, use "
 "the system default CA files"
-msgstr "设置受信任的证书颁发机构（CA）文件以验证对等方的证书。如果为空，则使用系统默认的CA文件。"
+msgstr ""
+"设置受信任的证书颁发机构（CA）文件以验证对等方的证书。如果为空，则使用系统默认的CA文件。"
 
 #: ../../reference/launch_config.md:255
 msgid "Scalar Value Types"
@@ -788,7 +788,8 @@ msgstr "<div><h4 id=\"fixed32\" /></div><a name=\"fixed32\" /> fixed32"
 msgid ""
 "Always four bytes. More efficient than uint32 if values are often greater"
 " than 2^28."
-msgstr "始终为四个字节。如果值经常大于 2^28，则比 uint32 更高效。” 或 “固定为四字节。若数值常大于 2^28，则比 uint32 效率更高。"
+msgstr "始终为四个字节。如果值经常大于 2^28，则比 uint32 更高效。” 或 “固定为四字节。若数值常大于 2^28，"
+"则比 uint32 效率更高。"
 
 #: ../../reference/launch_config.md
 msgid "<div><h4 id=\"fixed64\" /></div><a name=\"fixed64\" /> fixed64"
@@ -817,8 +818,8 @@ msgid "Always eight bytes."
 msgstr "始终为八个字节"
 
 #: ../../reference/launch_config.md
-msgid "<div><h4 id=\"bool\" /></div><a name=\"bool\" /> bool"
-msgstr "<div><h4 id=\"double\" /></div><a name=\"double\" /> double"
+msgid "<div><h4 id=\"string\" /></div><a name=\"string\" /> string"
+msgstr "<div><h4 id=\"string\" /></div><a name=\"string\" /> string"
 
 #: ../../reference/launch_config.md
 msgid "bool"

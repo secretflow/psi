@@ -19,7 +19,7 @@ Welcome to SecretFlow PSI Library. There are multiple methods to use PSI/PIR.
 For `PSI`, we have a developing :doc:`v2 PSI <reference/psi_v2_config>`, and we recommend using it.
 
 +------------------------+------------------------------------------------+---------------------------------------------+
-|                        | PSI v1 APIs(Deprecated)                        | PSI v2 APIs                                 | 
+|                        | PSI v1 APIs(Deprecated)                        | PSI v2 APIs                                 |
 +========================+================================================+=============================================+
 | Supported Protocols    | ECDH, KKRT, ECDH_OPRF_UB, DP_PSI, RR22         | ECDH, KKRT, RR22, ECDH_OPRF_UB              |
 +------------------------+------------------------------------------------+---------------------------------------------+
@@ -72,18 +72,18 @@ APIs:
 
 - PSI v1:
     - (Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_df
-    - (Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_csv 
-    - (Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_join_df 
-    - (Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_join_csv 
+    - (Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_csv
+    - (Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_join_df
+    - (Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_join_csv
 
 - PSI v2:
-    - https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_v2
+    - https://www.secretflow.org.cn/en/docs/secretflow/main/source/secretflow.device.device.device#secretflow.device.device.spu.SPU.psi
 
 - PIR:
-    - (Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.pir_setup
-    - (Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.pir_query 
-    - (Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.pir_memory_query 
-    - :doc:`pir config <reference/pir_config>`
+    - (Deleted) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.pir_setup
+    - (Deleted) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.pir_query
+    - (Deleted) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.pir_memory_query
+    - :doc:`pir config <https://www.secretflow.org.cn/en/docs/psi/v0.5.0b0/reference/pir_config>`
 
 - Component: https://www.secretflow.org.cn/docs/secretflow/latest/en-US/component/comp_list#psi
 
@@ -107,7 +107,7 @@ Please check `SecretPad handbook <https://www.secretflow.org.cn/docs/quickstart/
 (Deprecated) Easy PSI
 """"""""""""""""""""""""
 
-Please check `Easy PSI handbook <https://www.secretflow.org.cn/docs/quickstart/easy-psi>`_.
+Please check `Easy PSI handbook <https://www.secretflow.org.cn/zh-CN/docs/easy-psi>`_.
 
 
 .. _building:
@@ -133,7 +133,7 @@ You can use docker to compile::
          --entrypoint="bash" \
          secretflow/release-ci:latest
 
-    
+
     # attach to build container
     docker exec -it psi-dev-$(whoami) bash
 

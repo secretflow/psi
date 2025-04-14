@@ -8,14 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SecretFlow PSI Library \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-26 20:09+0800\n"
+"POT-Creation-Date: 2025-04-14 16:02+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.15.0\n"
+"Generated-By: Babel 2.17.0\n"
 
 #: ../../getting_started.rst:2
 msgid "Getting started"
@@ -209,7 +209,7 @@ msgstr ""
 msgid "APIs:"
 msgstr ""
 
-#: ../../getting_started.rst:73
+#: ../../getting_started.rst:77
 msgid "PSI v1:"
 msgstr ""
 
@@ -237,40 +237,40 @@ msgid ""
 "US/source/secretflow#secretflow.SPU.psi_join_csv"
 msgstr ""
 
-#: ../../getting_started.rst:79
+#: ../../getting_started.rst:80
 msgid "PSI v2:"
 msgstr ""
 
 #: ../../getting_started.rst:80
-msgid ""
-"https://www.secretflow.org.cn/docs/secretflow/latest/en-"
-"US/source/secretflow#secretflow.SPU.psi_v2"
+msgid "https://www.secretflow.org.cn/en/docs/secretflow/main/source/secretflow.device.device.device#secretflow.device.device.spu.SPU.psi"
 msgstr ""
 
-#: ../../getting_started.rst:82
+#: ../../getting_started.rst:86
 msgid "PIR:"
 msgstr ""
 
 #: ../../getting_started.rst:83
 msgid ""
-"(Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-"
+"(Deleted) https://www.secretflow.org.cn/docs/secretflow/latest/en-"
 "US/source/secretflow#secretflow.SPU.pir_setup"
 msgstr ""
 
 #: ../../getting_started.rst:84
 msgid ""
-"(Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-"
+"(Deleted) https://www.secretflow.org.cn/docs/secretflow/latest/en-"
 "US/source/secretflow#secretflow.SPU.pir_query"
 msgstr ""
 
 #: ../../getting_started.rst:85
 msgid ""
-"(Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-"
+"(Deleted) https://www.secretflow.org.cn/docs/secretflow/latest/en-"
 "US/source/secretflow#secretflow.SPU.pir_memory_query"
 msgstr ""
 
 #: ../../getting_started.rst:86
-msgid ":doc:`pir config <reference/pir_config>`"
+msgid ""
+":doc:`pir config "
+"<https://www.secretflow.org.cn/en/docs/psi/v0.5.0b0/reference/pir_config>`"
 msgstr ""
 
 #: ../../getting_started.rst:88
@@ -289,7 +289,7 @@ msgid ""
 "<https://www.secretflow.org.cn/docs/scql/latest/en-US/intro/tutorial>`_."
 msgstr ""
 
-#: ../../getting_started.rst:98
+#: ../../getting_started.rst:100
 msgid "Featured operators using PSI:"
 msgstr ""
 
@@ -321,8 +321,8 @@ msgstr ""
 
 #: ../../getting_started.rst:110
 msgid ""
-"Please check `Easy PSI handbook "
-"<https://www.secretflow.org.cn/docs/quickstart/easy-psi>`_."
+"Please check `Easy PSI handbook <https://www.secretflow.org.cn/zh-CN/docs"
+"/easy-psi>`_."
 msgstr ""
 "请查看 `Easy PSI handbook <https://www.secretflow.org.cn/docs/quickstart"
 "/easy-psi>`_."

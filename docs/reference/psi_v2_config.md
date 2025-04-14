@@ -457,7 +457,7 @@ Role of parties.
 | ROLE_RECEIVER | 1 | receiver In 2P symmetric PSI, receivers would always receive the result in the origin protocol. |
 | ROLE_SENDER | 2 | sender In 2P symmetric PSI, senders are the other participants apart from receiver. |
 | ROLE_SERVER | 3 | server In 2P unbalanced PSI, servers own a much larger dataset. |
-| ROLE_CLIENT | 4 | server In 2P unbalanced PSI, clients own a much smaller dataset. |
+| ROLE_CLIENT | 4 | client In 2P unbalanced PSI, clients own a much smaller dataset. |
 
 
 

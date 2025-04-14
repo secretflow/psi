@@ -25,20 +25,19 @@
 
 namespace psi::dkpir {
 // Compute the value of the linear function p(x)=ax+b
-yacl::math::MPInt ComputePoly(const std::vector<uint64_t> &poly,
-                              const uint64_t &data);
+yacl::math::MPInt ComputePoly(const std::vector<uint64_t> &poly, uint64_t data);
 
 // Compute the value of the function p(x,y)=ax+by, this function can prevent
-// n*b from exceeding the range of uint32_t
-yacl::math::MPInt ComputePoly(const std::vector<uint64_t> &poly,
-                              const uint64_t &data1, const uint64_t &data2);
+// a*x or b*y from exceeding the range of uint64_t
+yacl::math::MPInt ComputePoly(const std::vector<uint64_t> &poly, uint64_t data1,
+                              uint64_t data2);
 
-// Save the linear function and the private key of phe
+// Save the linear function and the private key of Elgamal encryption
 void Save(const std::vector<uint64_t> &poly,
           const heu::lib::algorithms::elgamal::SecretKey &secret_key,
           std::ostream &out);
 
-// Load the linear function and the private key of phe
+// Load the linear function and the private key of Elgamal encryption
 void Load(std::vector<uint64_t> &poly, yacl::math::MPInt &x, std::istream &in);
 
 // Receiver can match the key with the label using the shuffle seed and shuffle
@@ -47,7 +46,7 @@ void WriteIntersectionResults(
     const std::vector<std::string> &orig_items,
     const std::vector<::apsi::Item> &items,
     const std::vector<::apsi::receiver::MatchRecord> &intersection,
-    const uint128_t &shuffle_seed, const uint64_t &shuffle_counter,
+    uint128_t shuffle_seed, uint64_t shuffle_counter,
     const std::string &out_file, bool skip_count_check = false,
     bool append_to_outfile = false);
 
@@ -55,4 +54,6 @@ void PrintTransmittedData(::apsi::network::Channel &channel);
 
 // Obtain the string used to generate the curve according to the curve type
 std::string FetchCurveName(CurveType curve_type);
+
+void RemoveTempFile(const std::string &tmp_file);
 }  // namespace psi::dkpir

@@ -26,7 +26,7 @@
 namespace psi::dkpir {
 
 yacl::math::MPInt ComputePoly(const std::vector<uint64_t> &poly,
-                              const uint64_t &data) {
+                              uint64_t data) {
   YACL_ENFORCE(poly.size() == 2, "This is a linear function.");
   yacl::math::MPInt a(poly[0]);
   yacl::math::MPInt b(poly[1]);
@@ -35,8 +35,8 @@ yacl::math::MPInt ComputePoly(const std::vector<uint64_t> &poly,
   return a * x + b;
 }
 
-yacl::math::MPInt ComputePoly(const std::vector<uint64_t> &poly,
-                              const uint64_t &data1, const uint64_t &data2) {
+yacl::math::MPInt ComputePoly(const std::vector<uint64_t> &poly, uint64_t data1,
+                              uint64_t data2) {
   YACL_ENFORCE(poly.size() == 2, "This is a linear function.");
   yacl::math::MPInt a(poly[0]);
   yacl::math::MPInt b(poly[1]);
@@ -85,7 +85,7 @@ void WriteIntersectionResults(
     const std::vector<std::string> &orig_items,
     const std::vector<::apsi::Item> &items,
     const std::vector<::apsi::receiver::MatchRecord> &intersection,
-    const uint128_t &shuffle_seed, const uint64_t &shuffle_counter,
+    uint128_t shuffle_seed, uint64_t shuffle_counter,
     const std::string &out_file, bool skip_count_check,
     bool append_to_outfile) {
   if (orig_items.size() != items.size()) {
@@ -174,5 +174,14 @@ std::string FetchCurveName(CurveType curve_type) {
     }
   }
   return curve_name;
+}
+
+void RemoveTempFile(const std::string &tmp_file) {
+  std::error_code ec;
+  std::filesystem::remove(tmp_file, ec);
+  if (ec.value() != 0) {
+    SPDLOG_WARN("can not remove tmp file: {}, msg: {}", tmp_file.c_str(),
+                ec.message());
+  }
 }
 }  // namespace psi::dkpir

@@ -25,18 +25,21 @@
 #include "seal/memorymanager.h"
 
 namespace psi::dkpir {
-// This is a copied class, only method "process_items" has been modified
-class OPRFReceiver {
+// This is a copied class from "::apsi::oprf::OPRFReceiver", only method
+// "process_items" has been modified. This class can correctly handle the
+// shuffled oprf results from the server, but "::apsi::oprf::OPRFReceiver" can
+// not.
+class ShuffledOPRFReceiver {
  public:
-  OPRFReceiver(const OPRFReceiver &) = delete;
+  ShuffledOPRFReceiver(const ShuffledOPRFReceiver &) = delete;
 
-  OPRFReceiver(OPRFReceiver &&) = default;
+  ShuffledOPRFReceiver(ShuffledOPRFReceiver &&) = default;
 
-  OPRFReceiver &operator=(const OPRFReceiver &) = delete;
+  ShuffledOPRFReceiver &operator=(const ShuffledOPRFReceiver &) = delete;
 
-  OPRFReceiver &operator=(OPRFReceiver &&) = default;
+  ShuffledOPRFReceiver &operator=(ShuffledOPRFReceiver &&) = default;
 
-  OPRFReceiver(gsl::span<const ::apsi::Item> oprf_items)
+  ShuffledOPRFReceiver(gsl::span<const ::apsi::Item> oprf_items)
       : oprf_queries_(pool_), inv_factor_data_(pool_) {
     process_items(oprf_items);
   }

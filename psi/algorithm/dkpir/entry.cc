@@ -18,16 +18,15 @@
 #include <string>
 
 #include "psi/algorithm/dkpir/common.h"
-#include "psi/algorithm/dkpir/receiver.h"
-#include "psi/algorithm/dkpir/sender.h"
-#include "psi/algorithm/dkpir/sender_cnt_db.h"
-#include "psi/algorithm/dkpir/sender_dispatcher.h"
-#include "psi/utils/csv_converter.h"
 #include "psi/utils/random_str.h"
 #include "psi/wrapper/apsi/cli/common_utils.h"
 
 namespace psi::dkpir {
 int SenderOffline(const DkPirSenderOptions &options) {
+  apsi::Log::SetConsoleDisabled(options.silent);
+  apsi::Log::SetLogFile(options.log_file);
+  apsi::Log::SetLogLevel(options.log_level);
+
   YACL_ENFORCE(!options.tmp_folder.empty(),
                "The folder for storing temporary files is not provided.");
 
@@ -44,59 +43,22 @@ int SenderOffline(const DkPirSenderOptions &options) {
   std::string key_count_file =
       tmp_dir / fmt::format("key_count_{}.csv", uuid_str);
 
-  psi::ApsiCsvConverter sender_converter(options.source_file, options.key,
-                                         options.labels);
+  DkPirSender sender(options);
 
-  if (options.skip_count_check) {
-    sender_converter.MergeColumnAndRow(key_value_file);
-    SPDLOG_INFO("Sender created a temporary file for the data table");
-  } else {
-    sender_converter.MergeColumnAndRow(key_value_file, key_count_file);
-    SPDLOG_INFO(
-        "Sender created two temporary files, one for the data table and the "
-        "other for the row count table");
-  }
+  sender.PreProcessData(key_value_file, key_count_file);
 
-  ::apsi::oprf::OPRFKey oprf_key;
-  std::shared_ptr<::apsi::sender::SenderDB> sender_db;
-  std::shared_ptr<::apsi::sender::SenderDB> sender_cnt_db;
+  sender.GenerateDB(key_value_file, key_count_file);
 
-  // Generate SenderDB (for data)
-  sender_db = psi::apsi_wrapper::GenerateSenderDB(
-      key_value_file, options.params_file, options.nonce_byte_count,
-      options.compress, oprf_key);
-  YACL_ENFORCE(sender_db != nullptr, "Create sender_db from {} failed",
-               key_value_file);
-
-  // Save the sender_db if a save file was given
-  YACL_ENFORCE(psi::apsi_wrapper::TrySaveSenderDB(options.value_sdb_out_file,
-                                                  sender_db, oprf_key),
-               "Save sender_db to {} failed.", options.value_sdb_out_file);
-  SPDLOG_INFO("Sender saved sender_db");
-
+  RemoveTempFile(key_value_file);
   if (!options.skip_count_check) {
-    // Generate SenderCntDB (for row count)
-    sender_cnt_db = psi::dkpir::GenerateSenderCntDB(
-        key_count_file, options.params_file, options.secret_key_file,
-        options.nonce_byte_count, options.compress, options.curve_type,
-        oprf_key);
-    YACL_ENFORCE(sender_cnt_db != nullptr,
-                 "Create sender_cnt_db from {} failed", key_count_file);
-
-    // Save the sender_cnt_db using the reusable method TrySaveSenderDB
-    YACL_ENFORCE(psi::apsi_wrapper::TrySaveSenderDB(options.count_sdb_out_file,
-                                                    sender_cnt_db, oprf_key),
-                 "Save sender_cnt_db to {} failed.",
-                 options.count_sdb_out_file);
-
-    SPDLOG_INFO("Sender saved sender_cnt_db");
+    RemoveTempFile(key_count_file);
   }
 
   return 0;
 }
 
 int SenderOnline(const DkPirSenderOptions &options,
-                 const std::shared_ptr<yacl::link::Context> &lctx) {
+                 std::shared_ptr<yacl::link::Context> lctx) {
   apsi::Log::SetConsoleDisabled(options.silent);
   apsi::Log::SetLogFile(options.log_file);
   apsi::Log::SetLogLevel(options.log_level);
@@ -105,45 +67,113 @@ int SenderOnline(const DkPirSenderOptions &options,
   SPDLOG_INFO("Setting thread count to {}",
               ::apsi::ThreadPoolMgr::GetThreadCount());
 
-  ::apsi::oprf::OPRFKey oprf_key;
-  std::shared_ptr<::apsi::sender::SenderDB> sender_db;
-  std::shared_ptr<::apsi::sender::SenderDB> sender_cnt_db;
+  DkPirSender sender(options);
 
-  sender_db = psi::apsi_wrapper::TryLoadSenderDB(options.value_sdb_out_file,
-                                                 options.params_file, oprf_key);
-  YACL_ENFORCE(sender_db != nullptr, "Load old sender_db from {} failed",
-               options.value_sdb_out_file);
-
-  SPDLOG_INFO("Sender loaded sender_db");
+  // Sender loads sender_db (and sender_cnt_db)
+  sender.LoadDB();
 
   if (!options.skip_count_check) {
-    // Here, we reuse the method TryLoadSenderDB, which means that oprf_key will
-    // be read twice. But since these two databases actually use the same
-    // oprf_key, it doesn't matter.
-    sender_cnt_db = psi::apsi_wrapper::TryLoadSenderDB(
-        options.count_sdb_out_file, options.params_file, oprf_key);
-
-    YACL_ENFORCE(sender_cnt_db != nullptr,
-                 "Load old sender_cnt_db from {} failed",
-                 options.count_sdb_out_file);
-
-    SPDLOG_INFO("Sender loaded sender_cnt_db");
+    sender.LoadSecretKey();
+    SPDLOG_INFO("Sender loaded the secret key and the random linear function");
   }
 
-  std::atomic<bool> stop = false;
-
-  psi::dkpir::DkPirSenderDispatcher dispatcher(
-      sender_db, sender_cnt_db, oprf_key, options.curve_type,
-      options.secret_key_file, options.result_file, options.skip_count_check);
-
   lctx->ConnectToMesh();
-  dispatcher.run(stop, lctx, options.streaming_result);
+
+  psi::apsi_wrapper::YaclChannel channel(lctx);
+
+  try {
+    ::apsi::Request oprf_request = sender.ReceiveRequest(channel);
+    SPDLOG_INFO("Sender received OPRF request");
+
+    ::apsi::OPRFResponse oprf_response =
+        sender.RunOPRF(std::move(oprf_request));
+
+    channel.send(std::move(oprf_response));
+    SPDLOG_INFO("Finished processing the OPRF query and shuffled the results");
+  } catch (const std::exception &ex) {
+    SPDLOG_ERROR("Sender threw an exception while processing OPRF request: {}",
+                 ex.what());
+    return -1;
+  }
+
+  if (options.skip_count_check) {
+    SPDLOG_INFO("In this case, skip count check");
+
+    try {
+      ::apsi::Request request = sender.ReceiveRequest(channel);
+      SPDLOG_INFO("Sender received query request");
+
+      auto query_request = ::apsi::to_query_request(std::move(request));
+
+      // Create the DkPirQuery object which only includes one database for data
+      DkPirQuery query(std::move(query_request), sender.GetSenderDB());
+
+      // Sender only processes the data query
+      sender.RunQuery(query, channel, false);
+    } catch (const std::exception &ex) {
+      SPDLOG_ERROR("Sender threw an exception while processing query: {}",
+                   ex.what());
+      return -1;
+    }
+
+  } else {
+    SPDLOG_INFO("In this case, do count check");
+
+    try {
+      ::apsi::Request request = sender.ReceiveRequest(channel);
+      SPDLOG_INFO("Sender received query request");
+
+      auto query_request = ::apsi::to_query_request(std::move(request));
+
+      // Create the DkPirQuery object which includes two databases
+      DkPirQuery query(std::move(query_request), sender.GetSenderDB(),
+                       sender.GetSenderCntDB());
+
+      // Sender processes the row count query
+      sender.RunQuery(query, channel, true);
+
+      heu::lib::algorithms::elgamal::Ciphertext row_count_ct =
+          sender.ReceiveRowCountCt(lctx);
+      SPDLOG_INFO("Sender received the ciphertext of the total row count");
+
+      // Sender processes the data query
+      sender.RunQuery(query, channel, false);
+
+      uint64_t row_count = sender.ReceiveRowCount(lctx);
+      SPDLOG_INFO("Sender received the plaintext of the total row count");
+
+      YACL_ENFORCE(sender.CheckRowCount(row_count_ct, row_count),
+                   "Check row count failed");
+
+      sender.SaveResult(row_count);
+      SPDLOG_INFO(
+          "The verification of the total row count was successful, the total "
+          "row count was {}, and the result was stored in {}",
+          row_count, options.result_file);
+
+      uint128_t shuffle_seed = sender.GetShuffleSeed();
+      uint64_t shuffle_counter = sender.GetShuffleCounter();
+
+      lctx->SendAsync(lctx->NextRank(),
+                      yacl::ByteContainerView(&shuffle_seed, sizeof(uint128_t)),
+                      "Send shuffle seed");
+      lctx->SendAsync(
+          lctx->NextRank(),
+          yacl::ByteContainerView(&shuffle_counter, sizeof(uint64_t)),
+          "Send shuffle counter");
+      SPDLOG_INFO("Sender sent the shuffle seed and counter");
+    } catch (const std::exception &ex) {
+      SPDLOG_ERROR("Sender threw an exception while processing query: {}",
+                   ex.what());
+      return -1;
+    }
+  }
 
   return 0;
 }
 
 int ReceiverOnline(const DkPirReceiverOptions &options,
-                   const std::shared_ptr<yacl::link::Context> &lctx) {
+                   std::shared_ptr<yacl::link::Context> lctx) {
   apsi::Log::SetConsoleDisabled(options.silent);
   apsi::Log::SetLogFile(options.log_file);
   apsi::Log::SetLogLevel(options.log_level);
@@ -161,107 +191,150 @@ int ReceiverOnline(const DkPirReceiverOptions &options,
 
   std::string tmp_query_file =
       tmp_dir / fmt::format("tmp_query_{}.csv", uuid_str);
-  std::string apsi_output_file =
-      tmp_dir / fmt::format("apsi_output_{}.csv", uuid_str);
+  std::string tmp_result_file =
+      tmp_dir / fmt::format("tmp_result_{}.csv", uuid_str);
 
-  psi::ApsiCsvConverter receiver_query_converter(options.query_file,
-                                                 options.key);
-  receiver_query_converter.ExtractQuery(tmp_query_file);
-  SPDLOG_INFO("Store the extracted query in {}", tmp_query_file);
+  std::unique_ptr<::apsi::PSIParams> params =
+      psi::apsi_wrapper::BuildPsiParams(options.params_file);
+
+  if (!params) {
+    SPDLOG_ERROR("Failed to read params file: terminating");
+    return -1;
+  }
+
+  DkPirReceiver receiver(*params, options);
+
+  std::vector<::apsi::Item> items = receiver.ExtractItems(tmp_query_file);
 
   lctx->ConnectToMesh();
 
   psi::apsi_wrapper::YaclChannel channel(lctx);
 
-  // Reciver must own the same params_file as sender.
-  std::unique_ptr<::apsi::PSIParams> params =
-      psi::apsi_wrapper::BuildPsiParams(options.params_file);
-
-  if (!params) {
-    try {
-      SPDLOG_INFO("Sending parameter request");
-      params = std::make_unique<::apsi::PSIParams>(
-          psi::apsi_wrapper::Receiver::RequestParams(channel));
-      SPDLOG_INFO("Received valid parameters");
-    } catch (const std::exception &ex) {
-      SPDLOG_WARN("Failed to receive valid parameters: {}", ex.what());
-      return -1;
-    }
-  }
-
   ::apsi::ThreadPoolMgr::SetThreadCount(options.threads);
   SPDLOG_INFO("Setting thread count to {}",
               ::apsi::ThreadPoolMgr::GetThreadCount());
 
-  DkPirReceiver receiver(*params);
-
-  auto [query_data, orig_items] =
-      psi::apsi_wrapper::load_db_with_orig_items(tmp_query_file);
-
-  if (!query_data ||
-      !std::holds_alternative<psi::apsi_wrapper::UnlabeledData>(*query_data)) {
-    // Failed to read query file
-    SPDLOG_ERROR("Failed to read query file: terminating");
-    return -1;
-  }
-
-  auto &items = std::get<psi::apsi_wrapper::UnlabeledData>(*query_data);
-
-  std::vector<::apsi::Item> items_vec(items.begin(), items.end());
   std::vector<::apsi::HashedItem> oprf_items;
   std::vector<::apsi::LabelKey> label_keys;
 
-  try {
-    SPDLOG_INFO("Sending OPRF request for {} items ", items_vec.size());
-    // psi::apsi_wrapper::Receiver::RequestOPRF doesn't support shuffling, but
-    // psi::dkpir::DkPirReceiver::RequestOPRF does.
-    if (options.skip_count_check) {
-      tie(oprf_items, label_keys) =
-          psi::apsi_wrapper::Receiver::RequestOPRF(items_vec, channel);
-    } else {
-      tie(oprf_items, label_keys) =
-          DkPirReceiver::RequestOPRF(items_vec, channel);
-    }
-    SPDLOG_INFO("Received OPRF response for {} items", items_vec.size());
-  } catch (const std::exception &ex) {
-    SPDLOG_WARN("OPRF request failed: {}", ex.what());
-    return -1;
-  }
+  std::vector<::apsi::receiver::MatchRecord> data_query_result,
+      count_query_result;
 
-  std::vector<::apsi::receiver::MatchRecord> query_result;
   uint128_t shuffle_seed = 0;
   uint64_t shuffle_counter = 0;
-  try {
-    SPDLOG_INFO("Sending DkPir query");
-    query_result = receiver.RequestQuery(
-        oprf_items, label_keys, shuffle_seed, shuffle_counter, channel,
-        options.curve_type, options.skip_count_check, options.streaming_result);
-    SPDLOG_INFO("Received DkPir query response");
-  } catch (const std::exception &ex) {
-    SPDLOG_WARN("Failed sending DkPir query: {}", ex.what());
-    return -1;
+  uint64_t row_count = 0;
+
+  if (options.skip_count_check) {
+    SPDLOG_INFO("In this case, skip count check");
+    try {
+      ::apsi::oprf::OPRFReceiver oprf_receiver =
+          psi::apsi_wrapper::Receiver::CreateOPRFReceiver(items);
+
+      ::apsi::Request oprf_request =
+          psi::apsi_wrapper::Receiver::CreateOPRFRequest(oprf_receiver);
+
+      channel.send(std::move(oprf_request));
+      SPDLOG_INFO("Receiver sent OPRF request for {} items ", items.size());
+
+      ::apsi::OPRFResponse oprf_response =
+          receiver.ReceiveOPRFResponse(channel);
+
+      tie(oprf_items, label_keys) = psi::apsi_wrapper::Receiver::ExtractHashes(
+          oprf_response, oprf_receiver);
+
+      SPDLOG_INFO("Receiver received OPRF response for {} items", items.size());
+    } catch (const std::exception &ex) {
+      SPDLOG_ERROR("OPRF request failed: {}", ex.what());
+      return -1;
+    }
+
+    try {
+      ::apsi::Request query_request = receiver.CreateQueryRequest(oprf_items);
+      channel.send(std::move(query_request));
+      SPDLOG_INFO("Receiver sent DkPir query");
+
+      // In this case, Receiver only needs to process the query result for data
+      data_query_result = receiver.ReceiveQueryResponse(label_keys, channel);
+      SPDLOG_INFO("Receiver received the response for the data query");
+    } catch (const std::exception &ex) {
+      SPDLOG_ERROR("Failed processing DkPir query: {}", ex.what());
+      return -1;
+    }
+
+  } else {
+    SPDLOG_INFO("In this case, do count check");
+    try {
+      ShuffledOPRFReceiver shuffled_oprf_receiver =
+          receiver.CreateShuffledOPRFReceiver(items);
+
+      ::apsi::Request oprf_request =
+          receiver.CreateOPRFRequest(shuffled_oprf_receiver);
+
+      channel.send(std::move(oprf_request));
+      SPDLOG_INFO("Receiver sent OPRF request for {} items ", items.size());
+
+      ::apsi::OPRFResponse oprf_response =
+          receiver.ReceiveOPRFResponse(channel);
+
+      tie(oprf_items, label_keys) =
+          receiver.ExtractHashes(oprf_response, shuffled_oprf_receiver);
+
+      SPDLOG_INFO("Receiver received OPRF response for {} items", items.size());
+    } catch (const std::exception &ex) {
+      SPDLOG_ERROR("OPRF request failed: {}", ex.what());
+      return -1;
+    }
+
+    try {
+      ::apsi::Request query_request = receiver.CreateQueryRequest(oprf_items);
+      channel.send(std::move(query_request));
+      SPDLOG_INFO("Receiver sent DkPir query");
+
+      // Receiver processes the query result for the row count
+      count_query_result = receiver.ReceiveQueryResponse(label_keys, channel);
+      SPDLOG_INFO("Receiver received the response for the row count query");
+
+      // Receiver adds the ciphertexts of the row count and sends the result
+      // to Sender
+      heu::lib::algorithms::elgamal::Ciphertext row_count_ct =
+          receiver.ComputeRowCountCt(count_query_result);
+
+      yacl::Buffer row_count_ct_buf = row_count_ct.Serialize(true);
+      lctx->SendAsync(lctx->NextRank(), row_count_ct_buf,
+                      "Send ct of total row count");
+      SPDLOG_INFO("Receiver sent the ciphertext of the total row count");
+
+      // Receiver processes the query result for the data
+      data_query_result = receiver.ReceiveQueryResponse(label_keys, channel);
+      SPDLOG_INFO("Receiver received the response for the data query");
+
+      // Receiver computes and sends the total row count of the data
+      uint64_t total_row_count = receiver.ComputeRowCount(data_query_result);
+
+      lctx->SendAsync(
+          lctx->NextRank(),
+          yacl::ByteContainerView(&total_row_count, sizeof(uint64_t)),
+          "Send total row count");
+      SPDLOG_INFO("Receiver sent the plaintext of the total row count");
+
+      // Receiver gets the shuffle seed
+      receiver.ReceiveShuffleSeed(lctx, shuffle_seed, shuffle_counter);
+      SPDLOG_INFO("Receiver received the shuffle seed and shuffle counter");
+    } catch (const std::exception &ex) {
+      SPDLOG_ERROR("Failed processing DkPir query: {}", ex.what());
+      return -1;
+    }
   }
 
-  WriteIntersectionResults(orig_items, items_vec, query_result, shuffle_seed,
-                           shuffle_counter, apsi_output_file,
-                           options.skip_count_check);
+  row_count = receiver.SaveResult(data_query_result, items, shuffle_seed,
+                                  shuffle_counter, tmp_result_file);
 
   PrintTransmittedData(channel);
   psi::apsi_wrapper::cli::print_timing_report(::apsi::util::recv_stopwatch);
-
-  // NOTE(junfeng): Yacl channel need to send a empty oprf request with max
-  // bucket_idx to stop.
-  DkPirReceiver::RequestOPRF({}, channel, std::numeric_limits<uint32_t>::max());
-
-  // Receiver convert result file
-  psi::ApsiCsvConverter recevier_result_converter(apsi_output_file, "key",
-                                                  {"value"});
-
-  uint64_t row_count =
-      ::seal::util::safe_cast<uint64_t>(recevier_result_converter.ExtractResult(
-          options.result_file, options.key, options.labels));
-
   SPDLOG_INFO("Receiver has received {} rows in total.", row_count);
+
+  RemoveTempFile(tmp_query_file);
+  RemoveTempFile(tmp_result_file);
 
   return 0;
 }

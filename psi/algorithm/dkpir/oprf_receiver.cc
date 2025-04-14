@@ -21,7 +21,7 @@
 #include "seal/util/defines.h"
 
 namespace psi::dkpir {
-void OPRFReceiver::set_item_count(std::size_t item_count) {
+void ShuffledOPRFReceiver::set_item_count(std::size_t item_count) {
   auto new_pool =
       ::seal::MemoryManager::GetPool(::seal::mm_prof_opt::mm_force_new, true);
   oprf_queries_ = ::seal::DynArray<unsigned char>(
@@ -30,18 +30,20 @@ void OPRFReceiver::set_item_count(std::size_t item_count) {
   pool_ = std::move(new_pool);
 }
 
-void OPRFReceiver::clear() { set_item_count(0); }
+void ShuffledOPRFReceiver::clear() { set_item_count(0); }
 
-std::vector<unsigned char> OPRFReceiver::query_data() const {
+std::vector<unsigned char> ShuffledOPRFReceiver::query_data() const {
   return {oprf_queries_.cbegin(), oprf_queries_.cend()};
 }
 
-void OPRFReceiver::process_items(gsl::span<const ::apsi::Item> oprf_items) {
+void ShuffledOPRFReceiver::process_items(
+    gsl::span<const ::apsi::Item> oprf_items) {
   set_item_count(oprf_items.size());
 
   // Create a random scalar for OPRF and save its inverse
   // Note: All points use the same scalar, otherwise shuffle will lead to
   // incorrect results
+
   ::apsi::oprf::ECPoint::scalar_type random_scalar;
   ::apsi::oprf::ECPoint::MakeRandomNonzeroScalar(random_scalar);
 
@@ -65,7 +67,7 @@ void OPRFReceiver::process_items(gsl::span<const ::apsi::Item> oprf_items) {
   }
 }
 
-void OPRFReceiver::process_responses(
+void ShuffledOPRFReceiver::process_responses(
     gsl::span<const unsigned char> oprf_responses,
     gsl::span<::apsi::HashedItem> oprf_hashes,
     gsl::span<::apsi::LabelKey> label_keys) const {

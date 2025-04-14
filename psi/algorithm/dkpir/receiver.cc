@@ -17,27 +17,55 @@
 #include <thread>
 
 #include "absl/strings/str_split.h"
-#include "heu/library/algorithms/elgamal/elgamal.h"
 
 #include "psi/algorithm/dkpir/common.h"
+#include "psi/utils/csv_converter.h"
+#include "psi/wrapper/apsi/utils/sender_db.h"
 
 using namespace std::chrono_literals;
 
 namespace psi::dkpir {
-OPRFReceiver DkPirReceiver::CreateOPRFReceiver(
-    const std::vector<::apsi::Item> &items) {
-  STOPWATCH(::apsi::util::recv_stopwatch, "DkPirReceiver::CreateOPRFReceiver");
+std::vector<::apsi::Item> DkPirReceiver::ExtractItems(
+    const std::string& tmp_query_file) {
+  // Extract the original query and generate a temporary query file that meets
+  // APSI requirements
+  psi::ApsiCsvConverter receiver_query_converter(options_.query_file,
+                                                 options_.key);
+  receiver_query_converter.ExtractQuery(tmp_query_file);
 
-  OPRFReceiver oprf_receiver(items);
-  APSI_LOG_INFO("Created OPRFReceiver for " << oprf_receiver.item_count()
-                                            << " items");
+  std::unique_ptr<psi::apsi_wrapper::DBData> query_data;
 
-  return oprf_receiver;
+  std::tie(query_data, orig_items_) =
+      psi::apsi_wrapper::load_db_with_orig_items(tmp_query_file);
+
+  if (!query_data ||
+      !std::holds_alternative<psi::apsi_wrapper::UnlabeledData>(*query_data)) {
+    // Failed to read query file
+    SPDLOG_ERROR("Failed to read query file: terminating");
+    return {};
+  }
+
+  auto& items = std::get<psi::apsi_wrapper::UnlabeledData>(*query_data);
+
+  std::vector<::apsi::Item> items_vec(items.begin(), items.end());
+
+  return items_vec;
 }
 
-std::unique_ptr<::apsi::network::SenderOperation>
-DkPirReceiver::CreateOPRFRequest(const OPRFReceiver &oprf_receiver,
-                                 uint32_t bucket_idx) {
+ShuffledOPRFReceiver DkPirReceiver::CreateShuffledOPRFReceiver(
+    const std::vector<::apsi::Item>& items) {
+  STOPWATCH(::apsi::util::recv_stopwatch,
+            "DkPirReceiver::CreateShuffledOPRFReceiver");
+
+  ShuffledOPRFReceiver shuffled_oprf_receiver(items);
+  APSI_LOG_INFO("Created ShuffledOPRFReceiver for "
+                << shuffled_oprf_receiver.item_count() << " items");
+
+  return shuffled_oprf_receiver;
+}
+
+::apsi::Request DkPirReceiver::CreateOPRFRequest(
+    const ShuffledOPRFReceiver& oprf_receiver, uint32_t bucket_idx) {
   auto sop = std::make_unique<::apsi::network::SenderOperationOPRF>();
   sop->data = oprf_receiver.query_data();
   sop->bucket_idx = bucket_idx;
@@ -47,9 +75,28 @@ DkPirReceiver::CreateOPRFRequest(const OPRFReceiver &oprf_receiver,
   return sop;
 }
 
+::apsi::OPRFResponse DkPirReceiver::ReceiveOPRFResponse(
+    psi::apsi_wrapper::YaclChannel& chl) {
+  // Wait for a valid message of the right type
+  ::apsi::OPRFResponse response;
+  bool logged_waiting = false;
+  while (!(response = ::apsi::to_oprf_response(chl.receive_response()))) {
+    if (!logged_waiting) {
+      // We want to log 'Waiting' only once, even if we have to wait for several
+      // sleeps.
+      logged_waiting = true;
+      APSI_LOG_INFO("Waiting for response to OPRF request");
+    }
+
+    std::this_thread::sleep_for(50ms);
+  }
+
+  return response;
+}
+
 std::pair<std::vector<::apsi::HashedItem>, std::vector<::apsi::LabelKey>>
-DkPirReceiver::ExtractHashes(const ::apsi::OPRFResponse &oprf_response,
-                             const OPRFReceiver &oprf_receiver) {
+DkPirReceiver::ExtractHashes(const ::apsi::OPRFResponse& oprf_response,
+                             const ShuffledOPRFReceiver& oprf_receiver) {
   STOPWATCH(::apsi::util::recv_stopwatch, "DkPirReceiver::ExtractHashes");
 
   if (!oprf_response) {
@@ -79,41 +126,17 @@ DkPirReceiver::ExtractHashes(const ::apsi::OPRFResponse &oprf_response,
   return make_pair(std::move(items), std::move(label_keys));
 }
 
-std::pair<std::vector<::apsi::HashedItem>, std::vector<::apsi::LabelKey>>
-DkPirReceiver::RequestOPRF(const std::vector<::apsi::Item> &items,
-                           psi::apsi_wrapper::YaclChannel &chl,
-                           uint32_t bucket_idx) {
-  auto oprf_receiver = CreateOPRFReceiver(items);
+::apsi::Request DkPirReceiver::CreateQueryRequest(
+    const std::vector<::apsi::HashedItem>& oprf_items, uint32_t bucket_idx) {
+  auto query = create_query(oprf_items, bucket_idx);
+  itt_ = std::move(query.second);
 
-  // Create OPRF request and send to Sender
-  chl.send(CreateOPRFRequest(oprf_receiver, bucket_idx));
-
-  if (items.empty()) {
-    return {};
-  }
-
-  // Wait for a valid message of the right type
-  ::apsi::OPRFResponse response;
-  bool logged_waiting = false;
-  while (!(response = ::apsi::to_oprf_response(chl.receive_response()))) {
-    if (!logged_waiting) {
-      // We want to log 'Waiting' only once, even if we have to wait for several
-      // sleeps.
-      logged_waiting = true;
-      APSI_LOG_INFO("Waiting for response to OPRF request");
-    }
-
-    std::this_thread::sleep_for(50ms);
-  }
-
-  // Extract the OPRF hashed items
-  return ExtractHashes(response, oprf_receiver);
+  return std::move(query.first);
 }
 
-std::vector<::apsi::receiver::MatchRecord> DkPirReceiver::ReceiveQuery(
-    const std::vector<::apsi::LabelKey> &label_keys,
-    const ::apsi::receiver::IndexTranslationTable &itt,
-    psi::apsi_wrapper::YaclChannel &chl, bool streaming_result) {
+std::vector<::apsi::receiver::MatchRecord> DkPirReceiver::ReceiveQueryResponse(
+    const std::vector<::apsi::LabelKey>& label_keys,
+    psi::apsi_wrapper::YaclChannel& chl) {
   ::apsi::ThreadPoolMgr tpm;
 
   // Wait for query response
@@ -130,9 +153,9 @@ std::vector<::apsi::receiver::MatchRecord> DkPirReceiver::ReceiveQuery(
     std::this_thread::sleep_for(50ms);
   }
 
-  if (streaming_result) {
+  if (options_.streaming_result) {
     // Set up the result
-    std::vector<::apsi::receiver::MatchRecord> mrs(itt.item_count());
+    std::vector<::apsi::receiver::MatchRecord> mrs(itt_.item_count());
 
     // Get the number of ResultPackages we expect to receive
     std::atomic<uint32_t> package_count{response->package_count};
@@ -146,23 +169,23 @@ std::vector<::apsi::receiver::MatchRecord> DkPirReceiver::ReceiveQuery(
                                << package_count << " result parts");
     for (uint64_t t = 0; t < task_count; t++) {
       futures[t] = tpm.thread_pool().enqueue([&]() {
-        process_result_worker(package_count, mrs, label_keys, itt, chl);
+        process_result_worker(package_count, mrs, label_keys, itt_, chl);
       });
     }
 
-    for (auto &f : futures) {
+    for (auto& f : futures) {
       f.get();
     }
 
     APSI_LOG_INFO("Found " << accumulate(mrs.begin(), mrs.end(), 0,
-                                         [](auto acc, auto &curr) {
+                                         [](auto acc, auto& curr) {
                                            return acc + curr.found;
                                          })
                            << " matches");
 
     return mrs;
   } else {
-    APSI_LOG_INFO("streaming_result is off.")
+    APSI_LOG_INFO("streaming_result is off.");
     APSI_LOG_INFO("waiting for " << response->package_count << " result parts");
 
     auto seal_context = get_seal_context();
@@ -172,55 +195,13 @@ std::vector<::apsi::receiver::MatchRecord> DkPirReceiver::ReceiveQuery(
       rps.emplace_back(chl.receive_result(seal_context));
     }
 
-    return process_result(label_keys, itt, rps);
+    return process_result(label_keys, itt_, rps);
   }
 }
 
-std::vector<::apsi::receiver::MatchRecord> DkPirReceiver::RequestQuery(
-    const std::vector<::apsi::HashedItem> &items,
-    const std::vector<::apsi::LabelKey> &label_keys, uint128_t &shuffle_seed,
-    uint64_t &shuffle_counter, psi::apsi_wrapper::YaclChannel &chl,
-    CurveType curve_type, bool skip_count_check, bool streaming_result,
-    uint32_t bucket_idx) {
-  // Create query and send to Sender
-  auto query = create_query(items, bucket_idx);
-  chl.send(std::move(query.first));
-  auto itt = std::move(query.second);
-
-  std::vector<::apsi::receiver::MatchRecord> data_query_result,
-      count_query_result;
-
-  if (skip_count_check) {
-    // In this case, Receiver only needs to process the query result for data
-    data_query_result = ReceiveQuery(label_keys, itt, chl, streaming_result);
-  } else {
-    // Receiver processes the query result for the row count
-    count_query_result = ReceiveQuery(label_keys, itt, chl, streaming_result);
-    SPDLOG_INFO("Received the response for the row count query");
-
-    // Receiver adds the ciphertexts of the row count and sends the result
-    // to Sender
-    SendRowCountCt(curve_type, count_query_result, chl.get_lctx());
-
-    // Receiver processes the query result for the data
-    data_query_result = ReceiveQuery(label_keys, itt, chl, streaming_result);
-    SPDLOG_INFO("Received the response for the data query");
-
-    // Receiver computes the total row count of the data
-    SendRowCount(data_query_result, chl.get_lctx());
-
-    // Receiver gets the shuffle seed
-    ReceiveShuffleSeed(chl.get_lctx(), shuffle_seed, shuffle_counter);
-  }
-
-  return data_query_result;
-}
-
-void DkPirReceiver::SendRowCountCt(
-    CurveType curve_type,
-    const std::vector<::apsi::receiver::MatchRecord> &intersection,
-    const std::shared_ptr<yacl::link::Context> &lctx) {
-  std::string curve_name = FetchCurveName(curve_type);
+heu::lib::algorithms::elgamal::Ciphertext DkPirReceiver::ComputeRowCountCt(
+    const std::vector<::apsi::receiver::MatchRecord>& intersection) {
+  std::string curve_name = psi::dkpir::FetchCurveName(options_.curve_type);
   std::shared_ptr<yacl::crypto::EcGroup> curve =
       yacl::crypto::EcGroupFactory::Instance().Create(curve_name);
 
@@ -236,7 +217,7 @@ void DkPirReceiver::SendRowCountCt(
   bool has_found = false;
 
   // Compute the ciphertext of the total row count
-  for (auto &mr : intersection) {
+  for (auto& mr : intersection) {
     if (mr.found) {
       auto byte_span = mr.label.get_as<uint8_t>();
       std::vector<uint8_t> byte_vector(byte_span.begin(), byte_span.end());
@@ -253,36 +234,26 @@ void DkPirReceiver::SendRowCountCt(
     }
   }
 
-  // Send the ciphertext of the total row count
-  yacl::Buffer row_count_ct_buf = row_count_ct.Serialize(true);
-  lctx->Send(lctx->NextRank(), row_count_ct_buf, "Send ct of total row count");
-
-  SPDLOG_INFO("Sent the ciphertext of the total row count");
+  return row_count_ct;
 }
 
-void DkPirReceiver::SendRowCount(
-    const std::vector<::apsi::receiver::MatchRecord> &intersection,
-    const std::shared_ptr<yacl::link::Context> &lctx) {
+uint64_t DkPirReceiver::ComputeRowCount(
+    const std::vector<::apsi::receiver::MatchRecord>& intersection) {
   uint64_t row_count = 0;
   // Compute the total row count
-  for (auto &mr : intersection) {
+  for (auto& mr : intersection) {
     if (mr.found) {
       std::string label = mr.label.to_string();
       std::vector<std::string> row_values = absl::StrSplit(label, "||");
       row_count += row_values.size();
     }
   }
-
-  lctx->SendAsync(lctx->NextRank(),
-                  yacl::ByteContainerView(&row_count, sizeof(uint64_t)),
-                  "Send total row count");
-
-  SPDLOG_INFO("Sent the plaintext of the total row count");
+  return row_count;
 }
 
 void DkPirReceiver::ReceiveShuffleSeed(
-    const std::shared_ptr<yacl::link::Context> &lctx, uint128_t &shuffle_seed,
-    uint64_t &shuffle_counter) {
+    std::shared_ptr<yacl::link::Context> lctx, uint128_t& shuffle_seed,
+    uint64_t& shuffle_counter) {
   yacl::Buffer shuffle_seed_buf =
       lctx->Recv(lctx->NextRank(), "Recv shuffle seed");
   YACL_ENFORCE(shuffle_seed_buf.size() == sizeof(uint128_t));
@@ -292,7 +263,22 @@ void DkPirReceiver::ReceiveShuffleSeed(
       lctx->Recv(lctx->NextRank(), "Recv shuffle counter");
   YACL_ENFORCE(shuffle_counter_buf.size() == sizeof(uint64_t));
   std::memcpy(&shuffle_counter, shuffle_counter_buf.data(), sizeof(uint64_t));
+}
 
-  SPDLOG_INFO("Received the shuffle seed and shuffle counter");
+uint64_t DkPirReceiver::SaveResult(
+    const std::vector<::apsi::receiver::MatchRecord>& intersection,
+    const std::vector<::apsi::Item>& items, uint128_t shuffle_seed,
+    uint64_t shuffle_counter, const std::string& tmp_result_file) {
+  psi::dkpir::WriteIntersectionResults(
+      orig_items_, items, intersection, shuffle_seed, shuffle_counter,
+      tmp_result_file, options_.skip_count_check);
+
+  psi::ApsiCsvConverter recevier_result_converter(tmp_result_file, "key",
+                                                  {"value"});
+  uint64_t row_count =
+      ::seal::util::safe_cast<uint64_t>(recevier_result_converter.ExtractResult(
+          options_.result_file, options_.key, options_.labels));
+
+  return row_count;
 }
 }  // namespace psi::dkpir

@@ -25,38 +25,8 @@ psi_cc_library(
         ":common",
         ":receiver",
         ":sender",
-        ":sender_cnt_db",
-        ":sender_dispatcher",
-        "//psi/proto:psi_cc_proto",
-        "//psi/utils:csv_converter",
-        "//psi/utils:resource_manager",
-        "//psi/wrapper/apsi/utils:sender_db",
-    ],
-)
-
-psi_cc_library(
-    name = "sender",
-    srcs = ["sender.cc"],
-    hdrs = ["sender.h"],
-    deps = [
-        ":query",
-        "//psi/wrapper/apsi:sender",
-        "//psi/wrapper/apsi:yacl_channel",
-        "@yacl//yacl/crypto/rand",
-    ],
-)
-
-psi_cc_library(
-    name = "receiver",
-    srcs = ["receiver.cc"],
-    hdrs = ["receiver.h"],
-    deps = [
-        ":common",
-        ":oprf_receiver",
-        "//psi/proto:psi_cc_proto",
-        "//psi/wrapper/apsi:receiver",
-        "//psi/wrapper/apsi:yacl_channel",
-        "@heu//heu/library/algorithms/elgamal",
+        "//psi/utils:random_str",
+        "//psi/wrapper/apsi/cli:common_utils",
     ],
 )
 
@@ -74,21 +44,6 @@ psi_cc_library(
         "@heu//heu/library/algorithms/elgamal",
         "@yacl//yacl/crypto/rand",
         "@yacl//yacl/math/mpint",
-    ],
-)
-
-psi_cc_library(
-    name = "sender_dispatcher",
-    srcs = ["sender_dispatcher.cc"],
-    hdrs = ["sender_dispatcher.h"],
-    deps = [
-        ":common",
-        ":sender",
-        "//psi/proto:psi_cc_proto",
-        "//psi/wrapper/apsi:yacl_channel",
-        "@apsi",
-        "@heu//heu/library/algorithms/elgamal",
-        "@yacl//yacl/crypto/rand",
     ],
 )
 
@@ -141,5 +96,71 @@ psi_cc_library(
     hdrs = ["encryptor.h"],
     deps = [
         "@heu//heu/library/algorithms/elgamal",
+    ],
+)
+
+psi_cc_library(
+    name = "sender",
+    srcs = ["sender.cc"],
+    hdrs = ["sender.h"],
+    deps = [
+        ":common",
+        ":encryptor",
+        ":query",
+        ":sender_cnt_db",
+        "//psi/proto:psi_cc_proto",
+        "//psi/utils:csv_converter",
+        "//psi/wrapper/apsi:sender",
+        "//psi/wrapper/apsi:yacl_channel",
+        "//psi/wrapper/apsi/utils:common",
+        "//psi/wrapper/apsi/utils:sender_db",
+        "@heu//heu/library/algorithms/elgamal",
+        "@yacl//yacl/crypto/rand",
+        "@yacl//yacl/utils:parallel",
+    ],
+)
+
+psi_cc_library(
+    name = "receiver",
+    srcs = ["receiver.cc"],
+    hdrs = ["receiver.h"],
+    deps = [
+        ":common",
+        ":oprf_receiver",
+        "//psi/proto:psi_cc_proto",
+        "//psi/utils:csv_converter",
+        "//psi/wrapper/apsi:receiver",
+        "//psi/wrapper/apsi:yacl_channel",
+        "//psi/wrapper/apsi/utils:sender_db",
+        "@heu//heu/library/algorithms/elgamal",
+    ],
+)
+
+psi_cc_test(
+    name = "dk_pir_test",
+    srcs = ["dk_pir_test.cc"],
+    data = [
+        "//examples/pir/apsi/data:all_files",
+        "//examples/pir/apsi/parameters:all_files",
+    ],
+    flaky = True,  # cuckoo hash stuff
+    deps = [
+        ":entry",
+        "//psi/utils:random_str",
+        "@yacl//yacl/link",
+    ],
+)
+
+psi_cc_binary(
+    name = "dk_pir_benchmark",
+    srcs = ["dk_pir_benchmark.cc"],
+    data = [
+        "//examples/pir/apsi/parameters:all_files",
+    ],
+    deps = ["@com_github_google_benchmark//:benchmark_main"] + [
+        ":entry",
+        "//psi/proto:psi_cc_proto",
+        "//psi/utils:random_str",
+        "@yacl//yacl/link",
     ],
 )

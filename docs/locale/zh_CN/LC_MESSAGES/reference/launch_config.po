@@ -37,35 +37,35 @@ msgstr "目录"
 #: ../../reference/launch_config.md:32 ../../reference/launch_config.md:47
 #: ../../reference/launch_config.md:73 ../../reference/launch_config.md:168
 msgid "Messages"
-msgstr "说明"
+msgstr "Messages"
 
 #: ../../reference/launch_config.md:11
 msgid "[LaunchConfig](#launchconfig)"
-msgstr "[启动配置](#launchconfig)"
+msgstr "[LaunchConfig](#launchconfig)"
 
 #: ../../reference/launch_config.md:19
 msgid "[AllocatedPorts](#allocatedports)"
-msgstr "[已分配端口](#allocatedports)"
+msgstr "[AllocatedPorts](#allocatedports)"
 
 #: ../../reference/launch_config.md:20
 msgid "[ClusterDefine](#clusterdefine)"
-msgstr "[集群定义](#clusterdefine)"
+msgstr "[ClusterDefine](#clusterdefine)"
 
 #: ../../reference/launch_config.md:21
 msgid "[Party](#party)"
-msgstr "[参与方](#party)"
+msgstr "[Party](#party)"
 
 #: ../../reference/launch_config.md:22
 msgid "[Port](#port)"
-msgstr "[端口](#port)"
+msgstr "[Port](#port)"
 
 #: ../../reference/launch_config.md:23
 msgid "[Service](#service)"
-msgstr "[服务](#service)"
+msgstr "[Service](#service)"
 
 #: ../../reference/launch_config.md:24
 msgid "[TaskInputConfig](#taskinputconfig)"
-msgstr "[任务输入配置](#taskinputconfig)"
+msgstr "[TaskInputConfig](#taskinputconfig)"
 
 #: ../../reference/launch_config.md:25
 msgid "[TaskInputConfig.SfPsiConfigMapEntry](#taskinputconfigsfpsiconfigmapentry)"
@@ -89,23 +89,23 @@ msgstr "[SSLOptionsProto](#ssloptionsproto)"
 
 #: ../../reference/launch_config.md:41
 msgid "[Scalar Value Types](#scalar-value-types)"
-msgstr "[标量值类型](#scalar-value-types)"
+msgstr "[Scalar Value Types](#scalar-value-types)"
 
 #: ../../reference/launch_config.md:50
 msgid "LaunchConfig"
-msgstr "启动配置"
+msgstr "LaunchConfig"
 
 #: ../../reference/launch_config.md
 msgid "Field"
-msgstr "字段"
+msgstr "Field"
 
 #: ../../reference/launch_config.md
 msgid "Type"
-msgstr "类型"
+msgstr "Type"
 
 #: ../../reference/launch_config.md
 msgid "Description"
-msgstr "描述"
+msgstr "Description"
 
 #: ../../reference/launch_config.md
 msgid "link_config"
@@ -206,11 +206,11 @@ msgstr "无"
 #: ../../reference/launch_config.md:67 ../../reference/launch_config.md:162
 #: ../../reference/launch_config.md:251
 msgid "Enums"
-msgstr "枚举"
+msgstr "Enums"
 
 #: ../../reference/launch_config.md:76
 msgid "AllocatedPorts"
-msgstr "已分配的端口"
+msgstr "AllocatedPorts"
 
 #: ../../reference/launch_config.md:77
 msgid "AllocatedPorts represents allocated ports for pod."
@@ -230,7 +230,7 @@ msgstr "已分配的端口"
 
 #: ../../reference/launch_config.md:87
 msgid "ClusterDefine"
-msgstr "集群定义"
+msgstr "ClusterDefine"
 
 #: ../../reference/launch_config.md:88
 msgid "ClusterDefine represents the information of all parties."
@@ -270,7 +270,7 @@ msgstr "自身端点的索引"
 
 #: ../../reference/launch_config.md:100
 msgid "Party"
-msgstr "参与方"
+msgstr "Party"
 
 #: ../../reference/launch_config.md:101
 msgid "Party represents the basic information of the party."
@@ -306,7 +306,7 @@ msgstr "Pod 对外提供的服务列表"
 
 #: ../../reference/launch_config.md:113
 msgid "Port"
-msgstr "端口"
+msgstr "Port"
 
 #: ../../reference/launch_config.md:114
 msgid "Port represents an allocated port for pod."
@@ -345,7 +345,7 @@ msgstr "端口的协议。必须为 HTTP 或 GRPC。默认为 \"HTTP\". "
 "+optional"
 #: ../../reference/launch_config.md:127
 msgid "Service"
-msgstr "服务"
+msgstr "Service"
 
 #: ../../reference/launch_config.md:128
 msgid "Service represents the service address corresponding to the port."
@@ -373,7 +373,7 @@ msgstr "与端口对应的端点列表"
 
 #: ../../reference/launch_config.md:139
 msgid "TaskInputConfig"
-msgstr "任务输入配置"
+msgstr "TaskInputConfig"
 
 #: ../../reference/launch_config.md
 msgid "sf_psi_config_map"
@@ -413,7 +413,7 @@ msgstr "链路配置的设置"
 
 #: ../../reference/launch_config.md
 msgid "id"
-msgstr"id"
+msgstr "id"
 
 #: ../../reference/launch_config.md
 msgid "the UUID of this communication. optional"
@@ -482,7 +482,7 @@ msgstr ""
 "开始发送  结束发送 |-----忙碌-"
 "工作-------------|-------------|------------| bob的时间线"
 
- #: ../../reference/launch_config.md:189
+#: ../../reference/launch_config.md:189
 msgid ""
 "in above case, when alice begins recv for a specific event, bob is still "
 "busy doing its job, when alice's wait time exceed wait_timeout_ms, it "
@@ -589,7 +589,7 @@ msgstr "[repeated uint32](#uint32)"
 
 #: ../../reference/launch_config.md
 msgid "retry on these brpc error codes, if empty, retry on all codes"
-msgstr ""
+msgstr "针对这些 brpc 错误码进行重试，若为空，则对所有错误码重试"
 
 #: ../../reference/launch_config.md
 msgid "http_codes"
@@ -597,7 +597,7 @@ msgstr "http_codes"
 
 #: ../../reference/launch_config.md
 msgid "retry on these http codes, if empty, retry on all http codes"
-msgstr "针对这些 brpc 错误码进行重试，若为空，则对所有错误码重试"
+msgstr "针对这些 http 错误码进行重试，若为空，则对所有 http 错误码重试"
 
 #: ../../reference/launch_config.md
 msgid "aggressive_retry"
@@ -670,7 +670,7 @@ msgstr ".proto 类型"
 
 #: ../../reference/launch_config.md
 msgid "Notes"
-msgstr "备注"
+msgstr "Notes"
 
 #: ../../reference/launch_config.md
 msgid "C++ Type"
@@ -818,8 +818,8 @@ msgid "Always eight bytes."
 msgstr "始终为八个字节"
 
 #: ../../reference/launch_config.md
-msgid "<div><h4 id=\"string\" /></div><a name=\"string\" /> string"
-msgstr "<div><h4 id=\"string\" /></div><a name=\"string\" /> string"
+msgid "<div><h4 id=\"bool\" /></div><a name=\"bool\" /> bool"
+msgstr "<div><h4 id=\"bool\" /></div><a name=\"bool\" /> bool"
 
 #: ../../reference/launch_config.md
 msgid "bool"

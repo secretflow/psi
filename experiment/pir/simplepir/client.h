@@ -35,13 +35,8 @@ class SimplePirClient {
   // @param p: Plaintext modulus
   // @param radius: Gaussian distribution range parameter
   // @param sigma: Gaussian distribution standard deviation
-  // @param ip: Server IP address for network communication
-  // @param port: Server port number for network communication
   SimplePirClient(size_t dimension, uint64_t q, size_t N, uint64_t p,
                   int radius, double sigma);
-
-  // Uses the CSPRNG seed received from server to set LWE matrix
-  void SetLweMatrix(uint128_t seed);
 
   // Setup phase: Receives and stores precomputed hint values from server
   // hint = database * A^T mod q

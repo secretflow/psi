@@ -12,17 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "client.h"
+#include "experiment/pir/simplepir/client.h"
 
 #include <vector>
 
-#include "spdlog/spdlog.h"
 #include "yacl/crypto/tools/prg.h"
 
 namespace pir::simple {
 SimplePirClient::SimplePirClient(size_t dimension, uint64_t q, size_t N,
                                  uint64_t p, int radius, double sigma)
     : dimension_(dimension), q_(q), N_(N), p_(p) {
+  // Checks if N is a perfect square
+  YACL_ENFORCE(N > 0, "N must be positive");
+  YACL_ENFORCE(N == static_cast<size_t>(sqrt(N)) * static_cast<size_t>(sqrt(N)),
+               "N must be a perfect square");
+  YACL_ENFORCE(dimension > 0, "Dimension must be positive");
+  YACL_ENFORCE(q > 0, "Modulus q must be positive");
+  YACL_ENFORCE(p > 0, "Modulus p must be positive");
   // Calculates scaling factor between plaintext and ciphertext spaces
   delta_ = static_cast<uint64_t>(
       floor(static_cast<double>(q) / static_cast<double>(p)));
@@ -49,9 +55,8 @@ void SimplePirClient::Setup(uint128_t seed,
 }
 
 std::vector<uint64_t> SimplePirClient::Query(size_t idx) {
-  if (idx >= N_) {
-    SPDLOG_ERROR("Index out of bounds: {} >= {}", idx, N_);
-  }
+  YACL_ENFORCE(idx < N_, "Index out of bounds: {}", idx);
+  YACL_ENFORCE(idx >= 0, "Index out of bounds: {}", idx);
   const size_t row_num = static_cast<size_t>(sqrt(N_));
 
   // Converts linear index to 2D coordinates

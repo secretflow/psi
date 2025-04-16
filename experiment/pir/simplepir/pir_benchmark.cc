@@ -17,9 +17,9 @@
 #include <vector>
 
 #include "benchmark/benchmark.h"
-#include "client.h"
-#include "network_util.h"
-#include "server.h"
+#include "experiment/pir/simplepir/client.h"
+#include "experiment/pir/simplepir/network_util.h"
+#include "experiment/pir/simplepir/server.h"
 #include "yacl/link/test_util.h"
 
 namespace {

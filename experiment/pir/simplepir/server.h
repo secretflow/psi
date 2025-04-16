@@ -29,8 +29,6 @@ class SimplePirServer {
   // @param q - Cryptographic modulus
   // @param N - Total number of elements in the database
   // @param p - Plaintext modulus
-  // @param ip - Network interface address for communication
-  // @param port - Network port for client-server communication
   SimplePirServer(size_t dimension, uint64_t q, size_t N, uint64_t p);
 
   // Database is organized as sqrt(N) x sqrt(N) matrix for efficient processing
@@ -45,7 +43,7 @@ class SimplePirServer {
 
   // PIR setup phase:
   // 1. Precomputes hint = db * A^T mod q
-  // 2. Sends hint to client through network
+  // 2. Sends hint to client
   std::vector<uint64_t> Setup();
 
   // PIR answer phase:

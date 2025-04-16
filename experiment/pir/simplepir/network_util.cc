@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "network_util.h"
+#include "experiment/pir/simplepir/network_util.h"
 
 #include <cstring>
 #include <memory>

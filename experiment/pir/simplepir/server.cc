@@ -12,35 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "server.h"
+#include "experiment/pir/simplepir/server.h"
 
 #include <cmath>
 #include <vector>
 
-#include "spdlog/spdlog.h"
 #include "yacl/crypto/tools/prg.h"
 
 namespace pir::simple {
 SimplePirServer::SimplePirServer(size_t dimension, uint64_t q, size_t N,
                                  uint64_t p)
-    : dimension_(dimension), q_(q), N_(N), p_(p) {}
+    : dimension_(dimension), q_(q), N_(N), p_(p) {
+  // Checks if N is a perfect square
+  YACL_ENFORCE(N > 0, "N must be positive");
+  YACL_ENFORCE(N == static_cast<size_t>(sqrt(N)) * static_cast<size_t>(sqrt(N)),
+               "N must be a perfect square");
+  YACL_ENFORCE(dimension > 0, "Dimension must be positive");
+  YACL_ENFORCE(q > 0, "Modulus q must be positive");
+  YACL_ENFORCE(p > 0, "Modulus p must be positive");
+}
 
 void SimplePirServer::SetDatabase(
     const std::vector<std::vector<uint64_t>> &database) {
   // Checks if database is empty
-  if (database.empty()) {
-    SPDLOG_ERROR("Database is empty");
-    return;
-  }
+  YACL_ENFORCE(!database.empty(), "Database is empty");
 
   // Checks if database size matches expected size
   size_t row_num = static_cast<size_t>(sqrt(N_));
   size_t col_num = static_cast<size_t>(sqrt(N_));
-  if (database.size() != row_num || database[0].size() != col_num) {
-    SPDLOG_ERROR("Database size mismatch: expected {} x {}, got {} x {}",
-                 row_num, col_num, database.size(), database[0].size());
-    return;
-  }
+  YACL_ENFORCE(database.size() == row_num, "Database size mismatch: {} != {}",
+               database.size(), row_num);
+  YACL_ENFORCE(database[0].size() == col_num,
+               "Database size mismatch: {} != {}", database[0].size(), col_num);
 
   // Sets the database
   database_ = database;
@@ -92,9 +95,8 @@ std::vector<uint64_t> SimplePirServer::Answer(const std::vector<uint64_t> &qu) {
 }
 
 uint64_t SimplePirServer::GetValue(size_t idx) {
-  if (idx >= N_) {
-    SPDLOG_ERROR("Index out of bounds: {} >= {}", idx, N_);
-  }
+  YACL_ENFORCE(idx < N_, "Index out of bounds: {}", idx);
+  YACL_ENFORCE(idx >= 0, "Index out of bounds: {}", idx);
 
   size_t row_num = static_cast<size_t>(sqrt(N_));
   size_t row_idx = idx / row_num;

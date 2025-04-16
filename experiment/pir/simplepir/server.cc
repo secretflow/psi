@@ -65,7 +65,7 @@ void SimplePirServer::GenerateLweMatrix() {
 
 uint128_t SimplePirServer::GetSeed() const { return seed_; }
 
-std::vector<uint64_t> SimplePirServer::Setup() {
+std::vector<uint64_t> SimplePirServer::GetHint() const {
   const size_t row_num = static_cast<size_t>(sqrt(N_));
   std::vector<uint64_t> hint;
   hint.reserve(row_num * dimension_);

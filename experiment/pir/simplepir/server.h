@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 
-#include "util.h"
+#include "experiment/pir/simplepir/util.h"
 
 namespace pir::simple {
 class SimplePirServer {
@@ -41,10 +41,8 @@ class SimplePirServer {
   // Gets the CSPRNG seed used to generate LWE matrix
   uint128_t GetSeed() const;
 
-  // PIR setup phase:
-  // 1. Precomputes hint = db * A^T mod q
-  // 2. Sends hint to client
-  std::vector<uint64_t> Setup();
+  // Precomputes hint = db * A^T mod q
+  std::vector<uint64_t> GetHint() const;
 
   // PIR answer phase:
   // 1. Calculates ans = db * qu mod q

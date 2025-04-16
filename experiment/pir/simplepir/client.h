@@ -23,7 +23,7 @@
 #include <string>
 #include <vector>
 
-#include "util.h"
+#include "experiment/pir/simplepir/util.h"
 
 namespace pir::simple {
 class SimplePirClient {

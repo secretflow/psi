@@ -50,7 +50,7 @@ TEST(PIRTest, AllWorkflow) {
   server.SetDatabase(database);
   server.GenerateLweMatrix();
   uint128_t server_seed = server.GetSeed();
-  auto server_hint_vec = server.Setup();
+  auto server_hint_vec = server.GetHint();
 
   // Phase 2: PIR setup
   // Sends LWE matrix for client

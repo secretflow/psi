@@ -74,7 +74,7 @@ static void BM_SimplePIR(benchmark::State &state) {
     state.ResumeTiming();
 
     // Phase 1: Setup
-    auto server_hint_vec = server->Setup();
+    auto server_hint_vec = server->GetHint();
     uint128_t client_seed;
     std::vector<uint64_t> client_hint_vec;
 

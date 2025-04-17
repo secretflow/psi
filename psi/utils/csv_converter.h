@@ -22,6 +22,10 @@
 
 namespace psi {
 
+// The delimiter used to merge rows and columns
+constexpr char kColumnDelimiter = 0x1E;
+constexpr char kRowDelimiter = 0x1F;
+
 // This class provides functionalities to convert CSV files which is used to
 // support duplicate-key PIR queries
 class ApsiCsvConverter {
@@ -41,7 +45,7 @@ class ApsiCsvConverter {
   // This method helps the receiver to extract the query from the original query
   // file. The column name will be changed to “key”. This function does not
   // implement duplicate key checking, which will be done in APSI.
-  void ExtractQuery(const std::string& query_file_path);
+  void ExtractQueryTo(const std::string& query_file_path);
 
   // This method helps the receiver to extract the result from the output of
   // APSI. Concretely, it splits the file by row and column to get all the
@@ -68,6 +72,10 @@ class ApsiCsvConverter {
 
   // Apache Arrow string arrays for storing column data
   std::vector<std::shared_ptr<arrow::StringArray>> arrays_;
+
+  // The delimiter used to merge rows and columns
+  std::string column_delimiter_;
+  std::string row_delimiter_;
 
 };  // class ApsiCsvConverter
 }  // namespace psi

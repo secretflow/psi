@@ -88,9 +88,8 @@ void WriteIntersectionResults(
     uint128_t shuffle_seed, uint64_t shuffle_counter,
     const std::string &out_file, bool skip_count_check,
     bool append_to_outfile) {
-  if (orig_items.size() != items.size()) {
-    throw std::invalid_argument("orig_items must have same size as items");
-  }
+  YACL_ENFORCE(orig_items.size() == items.size(),
+               "orig_items must have same size as items");
 
   std::stringstream csv_output;
   std::string csv_header = "key,value";

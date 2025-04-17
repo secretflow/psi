@@ -82,7 +82,11 @@ std::shared_ptr<arrow::csv::StreamingReader> MakeStreamingReader(
 ApsiCsvConverter::ApsiCsvConverter(const std::string& input_file_path,
                                    const std::string& key,
                                    const std::vector<std::string>& labels)
-    : input_file_path_(input_file_path), key_(key), labels_(labels) {
+    : input_file_path_(input_file_path),
+      key_(key),
+      labels_(labels),
+      column_delimiter_(std::string(1, kColumnDelimiter)),
+      row_delimiter_(std::string(1, kRowDelimiter)) {
   psi::apsi_wrapper::throw_if_file_invalid(input_file_path_);
 
   std::ifstream csv_file(input_file_path_);
@@ -130,8 +134,8 @@ void ApsiCsvConverter::MergeColumnAndRow(
           std::dynamic_pointer_cast<arrow::StringArray>(batch_->column(i)));
     }
 
-    // Merge multiple labels within a row using ";", and for the same key,
-    // concatenate the values from multiple rows using "||".
+    // Merge multiple labels within a row using 0x1E, and for the same key,
+    // concatenate the values from multiple rows using 0x1F.
     for (int i = 0; i < batch_->num_rows(); ++i) {
       std::string current_key = (std::string)arrays_[0]->Value(i);
 
@@ -141,10 +145,10 @@ void ApsiCsvConverter::MergeColumnAndRow(
         labels.emplace_back(arrays_[j]->Value(i));
       }
 
-      std::string current_value = absl::StrJoin(labels, ";");
+      std::string current_value = absl::StrJoin(labels, column_delimiter_);
 
       if (key_value_map.find(current_key) != key_value_map.end()) {
-        key_value_map[current_key].first += "||" + current_value;
+        key_value_map[current_key].first += row_delimiter_ + current_value;
         key_value_map[current_key].second++;
       } else {
         key_value_map[current_key] = std::make_pair(current_value, 1);
@@ -161,7 +165,7 @@ void ApsiCsvConverter::MergeColumnAndRow(
   }
 }
 
-void ApsiCsvConverter::ExtractQuery(const std::string& query_file_path) {
+void ApsiCsvConverter::ExtractQueryTo(const std::string& query_file_path) {
   std::vector<std::string> queries;
 
   while (true) {
@@ -244,14 +248,15 @@ int ApsiCsvConverter::ExtractResult(
       std::string current_key = (std::string)arrays_[0]->Value(i);
       std::string current_value = (std::string)arrays_[1]->Value(i);
 
-      // First, split the value by row based on the separator "||"
-      std::vector<std::string> row_values = absl::StrSplit(current_value, "||");
+      // First, split the value by row based on the separator 0x1F
+      std::vector<std::string> row_values =
+          absl::StrSplit(current_value, row_delimiter_);
       total_row_cnt += row_values.size();
 
-      // Second, split the row_value by column based on the separator ";"
+      // Second, split the row_value by column based on the separator 0x1E
       for (auto& row_value : row_values) {
         std::vector<std::string> current_labels =
-            absl::StrSplit(row_value, ";");
+            absl::StrSplit(row_value, column_delimiter_);
 
         YACL_ENFORCE(
             label_names.size() == current_labels.size(),

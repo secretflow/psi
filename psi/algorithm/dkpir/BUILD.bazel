@@ -62,6 +62,7 @@ psi_cc_library(
     deps = [
         "@apsi",
         "@seal",
+        "@yacl//yacl/base:exception",
     ],
 )
 

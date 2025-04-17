@@ -31,11 +31,10 @@ namespace psi::dkpir {
 namespace {
 std::vector<unsigned char> ProcessQueries(
     gsl::span<const unsigned char> oprf_queries,
-    const ::apsi::oprf::OPRFKey &oprf_key, const uint128_t &shuffle_seed,
-    const uint64_t &shuffle_counter) {
-  if (oprf_queries.size() % ::apsi::oprf::oprf_query_size) {
-    throw std::invalid_argument("oprf_queries has invalid size");
-  }
+    const ::apsi::oprf::OPRFKey &oprf_key, uint128_t shuffle_seed,
+    uint64_t shuffle_counter) {
+  YACL_ENFORCE((oprf_queries.size() % ::apsi::oprf::oprf_query_size) == 0,
+               "oprf_queries has invalid size");
 
   STOPWATCH(sender_stopwatch, "OPRFSender::ProcessQueries");
 
@@ -68,8 +67,7 @@ std::vector<unsigned char> ProcessQueries(
 
       // Multiply with key
       if (!ecpt.scalar_multiply(oprf_key.key_span(), true)) {
-        throw std::logic_error(
-            "scalar multiplication failed due to invalid query data");
+        YACL_THROW("scalar multiplication failed due to invalid query data");
       }
 
       // Save the shuffled result to oprf_responses
@@ -222,7 +220,7 @@ void DkPirSender::LoadSecretKey() {
 
   if (!oprf_request) {
     APSI_LOG_ERROR("Failed to process OPRF request: request is invalid");
-    throw std::invalid_argument("request is invalid");
+    YACL_THROW("request is invalid");
   }
 
   query_count_ = oprf_request->data.size() / ::apsi::oprf::oprf_query_size;
@@ -248,6 +246,7 @@ void DkPirSender::LoadSecretKey() {
     // data being sent to the sender in an attempt to extract OPRF key.
     // Best not to respond anything.
     APSI_LOG_ERROR("Processing OPRF request threw an exception: " << ex.what());
+    throw;
     return response_oprf;
   }
 
@@ -262,7 +261,7 @@ void DkPirSender::RunQuery(
         send_rp_fun) {
   if (!query) {
     APSI_LOG_ERROR("Failed to process query request: query is invalid");
-    throw std::invalid_argument("query is invalid");
+    YACL_THROW("query is invalid");
   }
 
   // We use a custom SEAL memory that is freed after the query is done
@@ -471,7 +470,7 @@ bool DkPirSender::CheckRowCount(
   return curve->PointEqual(res, row_count_ct.c2);
 }
 
-void DkPirSender::SaveResult(uint64_t row_count) {
+void DkPirSender::SaveRowCount(uint64_t row_count) {
   std::ofstream fs(options_.result_file);
   fs << "count" << std::endl;
   fs << row_count << std::endl;

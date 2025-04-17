@@ -114,7 +114,7 @@ class DkPirSender {
       uint64_t row_count);
 
   // Store the total number of rows of the receiver's query
-  void SaveResult(uint64_t row_count);
+  void SaveRowCount(uint64_t row_count);
 
   uint128_t GetShuffleSeed() const { return shuffle_seed_; }
   uint64_t GetShuffleCounter() const { return shuffle_counter_; }

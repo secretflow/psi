@@ -33,7 +33,7 @@ uint64_t GetCount(const std::vector<unsigned char> &label) {
     uint64_t count = static_cast<uint64_t>(std::stoi(str));
     return count;
   } catch (const std::exception &ex) {
-    SPDLOG_WARN("Row count read error: {}", ex.what());
+    YACL_THROW("Row count read error: {}", ex.what());
   }
 
   return 0;

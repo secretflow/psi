@@ -19,6 +19,7 @@
 #include "apsi/oprf/oprf_receiver.h"
 #include "apsi/util/utils.h"
 #include "seal/util/defines.h"
+#include "yacl/base/exception.h"
 
 namespace psi::dkpir {
 void ShuffledOPRFReceiver::set_item_count(std::size_t item_count) {
@@ -43,7 +44,6 @@ void ShuffledOPRFReceiver::process_items(
   // Create a random scalar for OPRF and save its inverse
   // Note: All points use the same scalar, otherwise shuffle will lead to
   // incorrect results
-
   ::apsi::oprf::ECPoint::scalar_type random_scalar;
   ::apsi::oprf::ECPoint::MakeRandomNonzeroScalar(random_scalar);
 
@@ -71,17 +71,15 @@ void ShuffledOPRFReceiver::process_responses(
     gsl::span<const unsigned char> oprf_responses,
     gsl::span<::apsi::HashedItem> oprf_hashes,
     gsl::span<::apsi::LabelKey> label_keys) const {
-  if (oprf_hashes.size() != item_count()) {
-    throw std::invalid_argument("oprf_hashes has invalid size");
-  }
-  if (label_keys.size() != item_count()) {
-    throw std::invalid_argument("label_keys has invalid size");
-  }
-  if (oprf_responses.size() !=
-      item_count() * ::apsi::oprf::oprf_response_size) {
-    throw std::invalid_argument(
-        "oprf_responses size is incompatible with oprf_hashes size");
-  }
+  YACL_ENFORCE(oprf_hashes.size() == item_count(),
+               "oprf_hashes has invalid size");
+
+  YACL_ENFORCE(label_keys.size() == item_count(),
+               "label_keys has invalid size");
+
+  YACL_ENFORCE(
+      oprf_responses.size() == item_count() * ::apsi::oprf::oprf_response_size,
+      "oprf_responses size is incompatible with oprf_hashes size");
 
   auto oprf_in_ptr = oprf_responses.data();
   for (size_t i = 0; i < item_count(); i++) {

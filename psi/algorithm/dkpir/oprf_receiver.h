@@ -31,18 +31,18 @@ namespace psi::dkpir {
 // not.
 class ShuffledOPRFReceiver {
  public:
-  ShuffledOPRFReceiver(const ShuffledOPRFReceiver &) = delete;
-
-  ShuffledOPRFReceiver(ShuffledOPRFReceiver &&) = default;
-
-  ShuffledOPRFReceiver &operator=(const ShuffledOPRFReceiver &) = delete;
-
-  ShuffledOPRFReceiver &operator=(ShuffledOPRFReceiver &&) = default;
-
   ShuffledOPRFReceiver(gsl::span<const ::apsi::Item> oprf_items)
       : oprf_queries_(pool_), inv_factor_data_(pool_) {
     process_items(oprf_items);
   }
+
+  ShuffledOPRFReceiver(const ShuffledOPRFReceiver &) = delete;
+
+  ShuffledOPRFReceiver(ShuffledOPRFReceiver &&) noexcept = default;
+
+  ShuffledOPRFReceiver &operator=(const ShuffledOPRFReceiver &) = delete;
+
+  ShuffledOPRFReceiver &operator=(ShuffledOPRFReceiver &&) noexcept = default;
 
   inline std::size_t item_count() const noexcept {
     return inv_factor_data_.item_count();
@@ -77,11 +77,11 @@ class ShuffledOPRFReceiver {
 
     FactorData(const FactorData &) = delete;
 
-    FactorData(FactorData &&) = default;
+    FactorData(FactorData &&) noexcept = default;
 
     FactorData &operator=(const FactorData &) = delete;
 
-    FactorData &operator=(FactorData &&) = default;
+    FactorData &operator=(FactorData &&) noexcept = default;
 
     std::size_t item_count() const noexcept { return item_count_; }
 

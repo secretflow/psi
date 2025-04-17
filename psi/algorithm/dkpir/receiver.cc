@@ -31,7 +31,7 @@ std::vector<::apsi::Item> DkPirReceiver::ExtractItems(
   // APSI requirements
   psi::ApsiCsvConverter receiver_query_converter(options_.query_file,
                                                  options_.key);
-  receiver_query_converter.ExtractQuery(tmp_query_file);
+  receiver_query_converter.ExtractQueryTo(tmp_query_file);
 
   std::unique_ptr<psi::apsi_wrapper::DBData> query_data;
 
@@ -41,7 +41,7 @@ std::vector<::apsi::Item> DkPirReceiver::ExtractItems(
   if (!query_data ||
       !std::holds_alternative<psi::apsi_wrapper::UnlabeledData>(*query_data)) {
     // Failed to read query file
-    SPDLOG_ERROR("Failed to read query file: terminating");
+    YACL_THROW("Failed to read query file {}", tmp_query_file);
     return {};
   }
 
@@ -100,7 +100,7 @@ DkPirReceiver::ExtractHashes(const ::apsi::OPRFResponse& oprf_response,
   STOPWATCH(::apsi::util::recv_stopwatch, "DkPirReceiver::ExtractHashes");
 
   if (!oprf_response) {
-    APSI_LOG_ERROR(
+    YACL_THROW(
         "Failed to extract OPRF hashes for items: oprf_response is null");
     return {};
   }
@@ -108,12 +108,13 @@ DkPirReceiver::ExtractHashes(const ::apsi::OPRFResponse& oprf_response,
   auto response_size = oprf_response->data.size();
   uint64_t oprf_response_item_count =
       response_size / ::apsi::oprf::oprf_response_size;
-  if ((response_size % ::apsi::oprf::oprf_response_size) ||
+  if ((response_size % ::apsi::oprf::oprf_response_size) != 0 ||
       (oprf_response_item_count != oprf_receiver.item_count())) {
     APSI_LOG_ERROR(
         "Failed to extract OPRF hashes for items: unexpected OPRF response "
         "size ("
         << response_size << " B)");
+    YACL_THROW("Failed to extract OPRF hashes for items");
     return {};
   }
 
@@ -240,11 +241,13 @@ heu::lib::algorithms::elgamal::Ciphertext DkPirReceiver::ComputeRowCountCt(
 uint64_t DkPirReceiver::ComputeRowCount(
     const std::vector<::apsi::receiver::MatchRecord>& intersection) {
   uint64_t row_count = 0;
+  std::string row_delimiter = std::string(1, kRowDelimiter);
   // Compute the total row count
   for (auto& mr : intersection) {
     if (mr.found) {
       std::string label = mr.label.to_string();
-      std::vector<std::string> row_values = absl::StrSplit(label, "||");
+      std::vector<std::string> row_values =
+          absl::StrSplit(label, row_delimiter);
       row_count += row_values.size();
     }
   }

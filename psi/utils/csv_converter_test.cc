@@ -72,6 +72,9 @@ TEST(ApsiCsvConverterTest, Works) {
   std::vector<std::string> read_keys;
   std::vector<std::string> read_values;
 
+  std::string column_delimiter = std::string(1, kColumnDelimiter);
+  std::string row_delimiter = std::string(1, kRowDelimiter);
+
   // Only one label, check if the row merging is valid.
   {
     ApsiCsvConverter converter(input_path, "id", {"label4"});
@@ -79,15 +82,19 @@ TEST(ApsiCsvConverterTest, Works) {
     ArrowCsvBatchProvider provider(key_value_file_path, {"key"}, 5, {"value"});
     tie(read_keys, read_values) = provider.ReadNextLabeledBatch();
 
+    std::string target_value1 = "one" + row_delimiter + "two";
+    std::string target_value2 = "three";
+    std::string target_value3 = "four";
+
     EXPECT_EQ(read_keys.size(), 3);
     EXPECT_EQ(read_values.size(), 3);
     for (size_t i = 0; i < read_keys.size(); ++i) {
       if (read_keys[i] == "1") {
-        EXPECT_EQ(read_values[i], "one||two");
+        EXPECT_EQ(read_values[i], target_value1);
       } else if (read_keys[i] == "3") {
-        EXPECT_EQ(read_values[i], "three");
+        EXPECT_EQ(read_values[i], target_value2);
       } else {
-        EXPECT_EQ(read_values[i], "four");
+        EXPECT_EQ(read_values[i], target_value3);
       }
     }
 
@@ -109,17 +116,22 @@ TEST(ApsiCsvConverterTest, Works) {
     ArrowCsvBatchProvider provider(key_value_file_path, {"key"}, 5, {"value"});
     tie(read_keys, read_values) = provider.ReadNextLabeledBatch();
 
+    std::string target_value1 = "b" + column_delimiter + "y1" + row_delimiter +
+                                "b" + column_delimiter + "y1";
+    std::string target_value2 = "c" + column_delimiter + "y3";
+    std::string target_value3 = "b" + column_delimiter + "y4";
+
     EXPECT_EQ(read_keys.size(), 3);
     EXPECT_EQ(read_values.size(), 3);
     for (size_t i = 0; i < read_keys.size(); ++i) {
       if (read_keys[i] == "1") {
         // Considering the actual requirements, duplicate values will not be
         // filtered.
-        EXPECT_EQ(read_values[i], "b;y1||b;y1");
+        EXPECT_EQ(read_values[i], target_value1);
       } else if (read_keys[i] == "3") {
-        EXPECT_EQ(read_values[i], "c;y3");
+        EXPECT_EQ(read_values[i], target_value2);
       } else {
-        EXPECT_EQ(read_values[i], "b;y4");
+        EXPECT_EQ(read_values[i], target_value3);
       }
     }
 
@@ -143,15 +155,24 @@ TEST(ApsiCsvConverterTest, Works) {
     ArrowCsvBatchProvider provider(key_value_file_path, {"key"}, 5, {"value"});
     tie(read_keys, read_values) = provider.ReadNextLabeledBatch();
 
+    std::string target_value1 = "b" + column_delimiter + "y1" +
+                                column_delimiter + "0.12" + row_delimiter +
+                                "b" + column_delimiter + "y1" +
+                                column_delimiter + "-0.13";
+    std::string target_value2 =
+        "c" + column_delimiter + "y3" + column_delimiter + "0.9";
+    std::string target_value3 =
+        "b" + column_delimiter + "y4" + column_delimiter + "-12";
+
     EXPECT_EQ(read_keys.size(), 3);
     EXPECT_EQ(read_values.size(), 3);
     for (size_t i = 0; i < read_keys.size(); ++i) {
       if (read_keys[i] == "1") {
-        EXPECT_EQ(read_values[i], "b;y1;0.12||b;y1;-0.13");
+        EXPECT_EQ(read_values[i], target_value1);
       } else if (read_keys[i] == "3") {
-        EXPECT_EQ(read_values[i], "c;y3;0.9");
+        EXPECT_EQ(read_values[i], target_value2);
       } else {
-        EXPECT_EQ(read_values[i], "b;y4;-12");
+        EXPECT_EQ(read_values[i], target_value3);
       }
     }
 
@@ -208,10 +229,10 @@ TEST(ApsiCsvConverterTest, Works) {
     }
   }
 
-  // Check if the function ExtractQuery is valid.
+  // Check if the function ExtractQueryTo is valid.
   {
     ApsiCsvConverter converter(input_path, "id");
-    converter.ExtractQuery(query_file_path);
+    converter.ExtractQueryTo(query_file_path);
     ArrowCsvBatchProvider provider(query_file_path, {"key"}, 5);
     read_keys = provider.ReadNextBatch();
     std::vector<std::string> target_keys = {"1", "3", "4", "1"};

@@ -88,7 +88,7 @@ class DkPirReceiver : public psi::apsi_wrapper::Receiver {
       const std::vector<::apsi::receiver::MatchRecord>& intersection);
 
   // Compute the plaintext of the total row count. The number of rows
-  // corresponding to each key can be determined by the number of "||"
+  // corresponding to each key can be determined by the number of kRowDelimiter
   // separators in the label.
   uint64_t ComputeRowCount(
       const std::vector<::apsi::receiver::MatchRecord>& intersection);

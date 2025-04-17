@@ -171,11 +171,12 @@ message DkPirSenderConfig {
   // The key column name of input data
   string key = 12;
 
-  // The label columns name of input data
+  // The label columns name of input data. This item cannot be empty.
   repeated string labels = 13;
 
   // The elliptic curve cryptography used in Elgamal. If skip_count_check is
-  // false, this is a must-have option
+  // false, this is a must-have option. The current support is "CURVE_FOURQ" and
+  // "CURVE_SM2".
   .psi.CurveType curve_type = 14;
 
   // If true, the check of row count will be skiped.
@@ -211,11 +212,13 @@ message DkPirReceiverConfig {
   // The key column name of source file
   string key = 8;
 
-  // The label columns name which receiver want to query
+  // The label columns name which receiver want to query. This item cannot be
+  // empty.
   repeated string labels = 9;
 
   // The elliptic curve cryptography used in Elgamal. If skip_count_check is
-  // false, this is a must-have option
+  // false, this is a must-have option. The current support is "CURVE_FOURQ" and
+  // "CURVE_SM2".
   .psi.CurveType curve_type = 10;
 
   // If true, the check of row count will be skiped.

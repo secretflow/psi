@@ -73,8 +73,14 @@ int SenderOnline(const DkPirSenderOptions &options,
   sender.LoadDB();
 
   if (!options.skip_count_check) {
-    sender.LoadSecretKey();
-    SPDLOG_INFO("Sender loaded the secret key and the random linear function");
+    try {
+      sender.LoadSecretKey();
+      SPDLOG_INFO(
+          "Sender loaded the secret key and the random linear function");
+    } catch (const std::exception &ex) {
+      SPDLOG_ERROR("Sender threw an exception while loading secret key: {}",
+                   ex.what());
+    }
   }
 
   lctx->ConnectToMesh();
@@ -145,7 +151,7 @@ int SenderOnline(const DkPirSenderOptions &options,
       YACL_ENFORCE(sender.CheckRowCount(row_count_ct, row_count),
                    "Check row count failed");
 
-      sender.SaveResult(row_count);
+      sender.SaveRowCount(row_count);
       SPDLOG_INFO(
           "The verification of the total row count was successful, the total "
           "row count was {}, and the result was stored in {}",
@@ -204,7 +210,15 @@ int ReceiverOnline(const DkPirReceiverOptions &options,
 
   DkPirReceiver receiver(*params, options);
 
-  std::vector<::apsi::Item> items = receiver.ExtractItems(tmp_query_file);
+  std::vector<::apsi::Item> items;
+  try {
+    items = receiver.ExtractItems(tmp_query_file);
+    SPDLOG_INFO("Receiver extracted {} items from the query file",
+                items.size());
+  } catch (const std::exception &ex) {
+    SPDLOG_ERROR("Receiver extracted query failed: {}", ex.what());
+    return -1;
+  }
 
   lctx->ConnectToMesh();
 

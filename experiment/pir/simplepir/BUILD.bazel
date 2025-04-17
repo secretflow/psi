@@ -1,0 +1,81 @@
+# Copyright 2025 The secretflow authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library", "psi_cc_test")
+
+package(default_visibility = ["//visibility:public"])
+
+psi_cc_library(
+    name = "util",
+    srcs = ["util.cc"],
+    hdrs = ["util.h"],
+    deps = [
+        "@yacl//yacl/base:exception",
+        "@yacl//yacl/base:int128",
+        "@yacl//yacl/crypto/rand",
+    ],
+)
+
+psi_cc_library(
+    name = "network_util",
+    srcs = ["network_util.cc"],
+    hdrs = ["network_util.h"],
+    deps = [
+        "@yacl//yacl/base:buffer",
+        "@yacl//yacl/base:int128",
+        "@yacl//yacl/link:context",
+    ],
+)
+
+psi_cc_library(
+    name = "client",
+    srcs = ["client.cc"],
+    hdrs = ["client.h"],
+    deps = [
+        ":util",
+        "@yacl//yacl/crypto/tools:prg",
+    ],
+)
+
+psi_cc_library(
+    name = "server",
+    srcs = ["server.cc"],
+    hdrs = ["server.h"],
+    deps = [
+        ":util",
+        "@yacl//yacl/crypto/tools:prg",
+    ],
+)
+
+psi_cc_test(
+    name = "pir_test",
+    srcs = ["pir_test.cc"],
+    deps = [
+        ":client",
+        ":network_util",
+        ":server",
+        "@yacl//yacl/link:test_util",
+    ],
+)
+
+psi_cc_binary(
+    name = "pir_benchmark",
+    srcs = ["pir_benchmark.cc"],
+    deps = [
+        ":client",
+        ":server",
+        "@google_benchmark//:benchmark_main",
+        "@yacl//yacl/link:test_util",
+    ],
+)

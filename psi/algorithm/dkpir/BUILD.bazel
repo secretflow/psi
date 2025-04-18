@@ -1,0 +1,167 @@
+# Copyright 2025
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+load("@rules_proto//proto:defs.bzl", "proto_library")
+load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library", "psi_cc_test")
+
+package(default_visibility = ["//visibility:public"])
+
+psi_cc_library(
+    name = "entry",
+    srcs = ["entry.cc"],
+    hdrs = ["entry.h"],
+    deps = [
+        ":common",
+        ":receiver",
+        ":sender",
+        "//psi/utils:random_str",
+        "//psi/wrapper/apsi/cli:common_utils",
+    ],
+)
+
+psi_cc_library(
+    name = "common",
+    srcs = ["common.cc"],
+    hdrs = ["common.h"],
+    deps = [
+        ":secret_key_cc_proto",
+        "//psi/proto:psi_cc_proto",
+        "//psi/wrapper/apsi:yacl_channel",
+        "//psi/wrapper/apsi/cli:common_utils",
+        "//psi/wrapper/apsi/utils:common",
+        "//psi/wrapper/apsi/utils:sender_db",
+        "@heu//heu/library/algorithms/elgamal",
+        "@yacl//yacl/crypto/rand",
+        "@yacl//yacl/math/mpint",
+    ],
+)
+
+psi_cc_library(
+    name = "query",
+    hdrs = ["query.h"],
+    deps = [
+        "@apsi",
+    ],
+)
+
+psi_cc_library(
+    name = "oprf_receiver",
+    srcs = ["oprf_receiver.cc"],
+    hdrs = ["oprf_receiver.h"],
+    deps = [
+        "@apsi",
+        "@seal",
+        "@yacl//yacl/base:exception",
+    ],
+)
+
+proto_library(
+    name = "secret_key_proto",
+    srcs = ["secret_key.proto"],
+)
+
+cc_proto_library(
+    name = "secret_key_cc_proto",
+    deps = [":secret_key_proto"],
+)
+
+psi_cc_library(
+    name = "sender_cnt_db",
+    srcs = ["sender_cnt_db.cc"],
+    hdrs = ["sender_cnt_db.h"],
+    deps = [
+        ":common",
+        ":encryptor",
+        "//psi/proto:psi_cc_proto",
+        "//psi/wrapper/apsi/utils:common",
+        "//psi/wrapper/apsi/utils:sender_db",
+        "@heu//heu/library/algorithms/elgamal",
+        "@yacl//yacl/crypto/rand",
+        "@yacl//yacl/utils:parallel",
+    ],
+)
+
+psi_cc_library(
+    name = "encryptor",
+    hdrs = ["encryptor.h"],
+    deps = [
+        "@heu//heu/library/algorithms/elgamal",
+    ],
+)
+
+psi_cc_library(
+    name = "sender",
+    srcs = ["sender.cc"],
+    hdrs = ["sender.h"],
+    deps = [
+        ":common",
+        ":encryptor",
+        ":query",
+        ":sender_cnt_db",
+        "//psi/proto:psi_cc_proto",
+        "//psi/utils:csv_converter",
+        "//psi/wrapper/apsi:sender",
+        "//psi/wrapper/apsi:yacl_channel",
+        "//psi/wrapper/apsi/utils:common",
+        "//psi/wrapper/apsi/utils:sender_db",
+        "@heu//heu/library/algorithms/elgamal",
+        "@yacl//yacl/crypto/rand",
+        "@yacl//yacl/utils:parallel",
+    ],
+)
+
+psi_cc_library(
+    name = "receiver",
+    srcs = ["receiver.cc"],
+    hdrs = ["receiver.h"],
+    deps = [
+        ":common",
+        ":oprf_receiver",
+        "//psi/proto:psi_cc_proto",
+        "//psi/utils:csv_converter",
+        "//psi/wrapper/apsi:receiver",
+        "//psi/wrapper/apsi:yacl_channel",
+        "//psi/wrapper/apsi/utils:sender_db",
+        "@heu//heu/library/algorithms/elgamal",
+    ],
+)
+
+psi_cc_test(
+    name = "dk_pir_test",
+    srcs = ["dk_pir_test.cc"],
+    data = [
+        "//examples/pir/apsi/data:all_files",
+        "//examples/pir/apsi/parameters:all_files",
+    ],
+    flaky = True,  # cuckoo hash stuff
+    deps = [
+        ":entry",
+        "//psi/utils:random_str",
+        "@yacl//yacl/link",
+    ],
+)
+
+psi_cc_binary(
+    name = "dk_pir_benchmark",
+    srcs = ["dk_pir_benchmark.cc"],
+    data = [
+        "//examples/pir/apsi/parameters:all_files",
+    ],
+    deps = ["@com_github_google_benchmark//:benchmark_main"] + [
+        ":entry",
+        "//psi/proto:psi_cc_proto",
+        "//psi/utils:random_str",
+        "@yacl//yacl/link",
+    ],
+)

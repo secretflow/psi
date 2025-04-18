@@ -74,8 +74,9 @@ psi_cc_binary(
     srcs = ["pir_benchmark.cc"],
     deps = [
         ":client",
+        ":network_util",
         ":server",
-        "@google_benchmark//:benchmark_main",
+        "@com_github_google_benchmark//:benchmark_main",
         "@yacl//yacl/link:test_util",
     ],
 )

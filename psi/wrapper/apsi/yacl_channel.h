@@ -86,6 +86,11 @@ class YaclChannel : public ::apsi::network::NetworkChannel {
   std::unique_ptr<::apsi::network::ResultPackage> receive_result(
       std::shared_ptr<seal::SEALContext> context) override;
 
+  /**
+  Returns a smart pointer to the yacl::link::Context.
+  */
+  std::shared_ptr<yacl::link::Context> get_lctx() const { return lctx_; }
+
  protected:
   std::shared_ptr<yacl::link::Context> lctx_;
 };  // class StreamChannel

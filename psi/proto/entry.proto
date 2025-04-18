@@ -43,5 +43,9 @@ message LaunchConfig {
     ApsiSenderConfig apsi_sender_config = 6;
 
     ApsiReceiverConfig apsi_receiver_config = 7;
+
+    DkPirSenderConfig dk_pir_sender_config = 8;
+
+    DkPirReceiverConfig dk_pir_receiver_config = 9;
   }
 }

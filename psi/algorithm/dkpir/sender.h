@@ -74,11 +74,12 @@ class DkPirSender {
 
   // The following are the methods used in the online stage. This method is used
   // to load the local sender_db and sender_cnt_db.
-  void LoadDB();
+  void LoadDB(const std::string &value_sdb_out_file,
+              const std::string &count_sdb_out_file);
 
   // Load the random linear function and the private key required for Elgamal
   // encryption.
-  void LoadSecretKey();
+  void LoadSecretKey(const std::string &secret_key_file);
 
   // Wait for a valid OPRF request or Query request from Receiver.
   ::apsi::Request ReceiveRequest(psi::apsi_wrapper::YaclChannel &chl);

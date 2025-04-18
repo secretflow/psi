@@ -96,7 +96,6 @@ std::vector<uint64_t> SimplePirServer::Answer(const std::vector<uint64_t> &qu) {
 
 uint64_t SimplePirServer::GetValue(size_t idx) {
   YACL_ENFORCE(idx < N_, "Index out of bounds: {}", idx);
-  YACL_ENFORCE(idx >= 0, "Index out of bounds: {}", idx);
 
   size_t row_num = static_cast<size_t>(sqrt(N_));
   size_t row_idx = idx / row_num;

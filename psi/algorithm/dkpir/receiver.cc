@@ -80,6 +80,8 @@ ShuffledOPRFReceiver DkPirReceiver::CreateShuffledOPRFReceiver(
   // Wait for a valid message of the right type
   ::apsi::OPRFResponse response;
   bool logged_waiting = false;
+  uint32_t retry_times = 0;
+
   while (!(response = ::apsi::to_oprf_response(chl.receive_response()))) {
     if (!logged_waiting) {
       // We want to log 'Waiting' only once, even if we have to wait for several
@@ -88,7 +90,12 @@ ShuffledOPRFReceiver DkPirReceiver::CreateShuffledOPRFReceiver(
       APSI_LOG_INFO("Waiting for response to OPRF request");
     }
 
-    std::this_thread::sleep_for(50ms);
+    std::this_thread::sleep_for(
+        std::chrono::milliseconds(kRecvRetryIntervalMs));
+
+    if (++retry_times >= kRecvRetryTimes) {
+      YACL_THROW("Sender failed to receive request from Receiver");
+    }
   }
 
   return response;
@@ -143,6 +150,8 @@ std::vector<::apsi::receiver::MatchRecord> DkPirReceiver::ReceiveQueryResponse(
   // Wait for query response
   ::apsi::QueryResponse response;
   bool logged_waiting = false;
+  uint32_t retry_times = 0;
+
   while (!(response = ::apsi::to_query_response(chl.receive_response()))) {
     if (!logged_waiting) {
       // We want to log 'Waiting' only once, even if we have to wait for several
@@ -151,7 +160,12 @@ std::vector<::apsi::receiver::MatchRecord> DkPirReceiver::ReceiveQueryResponse(
       APSI_LOG_INFO("Waiting for response to query request");
     }
 
-    std::this_thread::sleep_for(50ms);
+    std::this_thread::sleep_for(
+        std::chrono::milliseconds(kRecvRetryIntervalMs));
+
+    if (++retry_times >= kRecvRetryTimes) {
+      YACL_THROW("Sender failed to receive request from Receiver");
+    }
   }
 
   if (options_.streaming_result) {

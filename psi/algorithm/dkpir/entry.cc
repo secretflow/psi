@@ -70,11 +70,11 @@ int SenderOnline(const DkPirSenderOptions &options,
   DkPirSender sender(options);
 
   // Sender loads sender_db (and sender_cnt_db)
-  sender.LoadDB();
+  sender.LoadDB(options.value_sdb_out_file, options.count_sdb_out_file);
 
   if (!options.skip_count_check) {
     try {
-      sender.LoadSecretKey();
+      sender.LoadSecretKey(options.secret_key_file);
       SPDLOG_INFO(
           "Sender loaded the secret key and the random linear function");
     } catch (const std::exception &ex) {

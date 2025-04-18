@@ -24,6 +24,13 @@
 #include "psi/proto/psi.pb.h"
 
 namespace psi::dkpir {
+
+// The maximum number of retries for receiving requests or responses
+constexpr uint32_t kRecvRetryTimes = 10000;
+
+// The interval between retries for receiving requests or responses
+constexpr uint32_t kRecvRetryIntervalMs = 50;
+
 // Compute the value of the linear function p(x)=ax+b
 yacl::math::MPInt ComputePoly(const std::vector<uint64_t> &poly, uint64_t data);
 

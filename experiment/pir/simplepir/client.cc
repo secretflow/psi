@@ -56,7 +56,6 @@ void SimplePirClient::Setup(uint128_t seed,
 
 std::vector<uint64_t> SimplePirClient::Query(size_t idx) {
   YACL_ENFORCE(idx < N_, "Index out of bounds: {}", idx);
-  YACL_ENFORCE(idx >= 0, "Index out of bounds: {}", idx);
   const size_t row_num = static_cast<size_t>(sqrt(N_));
 
   // Converts linear index to 2D coordinates

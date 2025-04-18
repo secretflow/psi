@@ -152,11 +152,12 @@ void DkPirSender::GenerateDB(const std::string &key_value_file,
   }
 }
 
-void DkPirSender::LoadDB() {
+void DkPirSender::LoadDB(const std::string &value_sdb_out_file,
+                         const std::string &count_sdb_out_file) {
   sender_db_ = psi::apsi_wrapper::TryLoadSenderDB(
-      options_.value_sdb_out_file, options_.params_file, oprf_key_);
+      value_sdb_out_file, options_.params_file, oprf_key_);
   YACL_ENFORCE(sender_db_ != nullptr, "Load old sender_db from {} failed",
-               options_.value_sdb_out_file);
+               value_sdb_out_file);
 
   SPDLOG_INFO("Sender loaded sender_db");
 
@@ -165,21 +166,20 @@ void DkPirSender::LoadDB() {
     // be read twice. But since these two databases actually use the same
     // oprf_key, it doesn't matter.
     sender_cnt_db_ = psi::apsi_wrapper::TryLoadSenderDB(
-        options_.count_sdb_out_file, options_.params_file, oprf_key_);
+        count_sdb_out_file, options_.params_file, oprf_key_);
 
     YACL_ENFORCE(sender_cnt_db_ != nullptr,
-                 "Load old sender_cnt_db from {} failed",
-                 options_.count_sdb_out_file);
+                 "Load old sender_cnt_db from {} failed", count_sdb_out_file);
 
     SPDLOG_INFO("Sender loaded sender_cnt_db");
   }
 }
 
-void DkPirSender::LoadSecretKey() {
+void DkPirSender::LoadSecretKey(const std::string &secret_key_file) {
   yacl::math::MPInt x;
   polynomial_.resize(2);
 
-  std::ifstream fs(options_.secret_key_file, std::ios::binary);
+  std::ifstream fs(secret_key_file, std::ios::binary);
   psi::dkpir::Load(polynomial_, x, fs);
   fs.close();
 
@@ -197,6 +197,7 @@ void DkPirSender::LoadSecretKey() {
   auto seal_context = sender_db_->get_seal_context();
   std::unique_ptr<::apsi::network::SenderOperation> sop;
   bool logged_waiting = false;
+  uint32_t retry_times = 0;
 
   while (!(sop = chl.receive_operation(seal_context))) {
     if (!logged_waiting) {
@@ -207,7 +208,12 @@ void DkPirSender::LoadSecretKey() {
       APSI_LOG_INFO("Waiting for request from Receiver");
     }
 
-    std::this_thread::sleep_for(50ms);
+    std::this_thread::sleep_for(
+        std::chrono::milliseconds(kRecvRetryIntervalMs));
+
+    if (++retry_times >= kRecvRetryTimes) {
+      YACL_THROW("Sender failed to receive request from Receiver");
+    }
   }
 
   return sop;

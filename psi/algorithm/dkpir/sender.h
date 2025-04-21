@@ -73,14 +73,7 @@ class DkPirSender {
                   const std::string &key_count_file);
 
   // The following are the methods used in the online stage. This method is used
-  // to load the local sender_db and sender_cnt_db.
-  void LoadDB();
-
-  // Load the random linear function and the private key required for Elgamal
-  // encryption.
-  void LoadSecretKey();
-
-  // Wait for a valid OPRF request or Query request from Receiver.
+  // to wait for a valid OPRF request or Query request from Receiver.
   ::apsi::Request ReceiveRequest(psi::apsi_wrapper::YaclChannel &chl);
 
   // Handle OPRF request, if skipping row count check, then directly call
@@ -147,5 +140,12 @@ class DkPirSender {
 
   // The count of items in the oprf query
   uint64_t query_count_;
+
+  // Load the local sender_db and sender_cnt_db.
+  void LoadDB();
+
+  // Load the random linear function and the private key required for Elgamal
+  // encryption.
+  void LoadSecretKey();
 };
 }  // namespace psi::dkpir

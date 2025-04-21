@@ -27,7 +27,7 @@ constexpr size_t kTestDim = 1 << 10;
 constexpr size_t kTestSize = 1ULL << 12;
 constexpr uint64_t kTestModulus = 1ULL << 32;
 constexpr uint64_t kTestPlainModulus = 991;
-// const size_t kTestIndex = 10;
+constexpr size_t kTestIndex = 10;
 
 inline void GenerateDatabase(std::vector<std::vector<uint64_t>> &database) {
   size_t row = static_cast<size_t>(sqrt(kTestSize));
@@ -71,7 +71,6 @@ TEST(PIRTest, AllWorkflow) {
   client.Setup(client_seed, client_hint_vec);
 
   // Phase 3: PIR query
-  const size_t kTestIndex = 10;
   auto client_query = client.Query(kTestIndex);
   std::vector<uint64_t> server_query_received;
 

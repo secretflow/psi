@@ -43,7 +43,7 @@ int SenderOffline(const DkPirSenderOptions &options) {
   std::string key_count_file =
       tmp_dir / fmt::format("key_count_{}.csv", uuid_str);
 
-  DkPirSender sender(options);
+  DkPirSender sender(options, false);
 
   sender.PreProcessData(key_value_file, key_count_file);
 
@@ -67,21 +67,7 @@ int SenderOnline(const DkPirSenderOptions &options,
   SPDLOG_INFO("Setting thread count to {}",
               ::apsi::ThreadPoolMgr::GetThreadCount());
 
-  DkPirSender sender(options);
-
-  // Sender loads sender_db (and sender_cnt_db)
-  sender.LoadDB(options.value_sdb_out_file, options.count_sdb_out_file);
-
-  if (!options.skip_count_check) {
-    try {
-      sender.LoadSecretKey(options.secret_key_file);
-      SPDLOG_INFO(
-          "Sender loaded the secret key and the random linear function");
-    } catch (const std::exception &ex) {
-      SPDLOG_ERROR("Sender threw an exception while loading secret key: {}",
-                   ex.what());
-    }
-  }
+  DkPirSender sender(options, true);
 
   lctx->ConnectToMesh();
 

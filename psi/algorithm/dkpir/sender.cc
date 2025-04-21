@@ -91,13 +91,30 @@ std::vector<unsigned char> ProcessQueries(
 }
 }  // namespace
 
-DkPirSender::DkPirSender(const DkPirSenderOptions &options)
+DkPirSender::DkPirSender(const DkPirSenderOptions &options,
+                         bool is_online_phase)
     : options_(options),
       sender_db_(nullptr),
       sender_cnt_db_(nullptr),
       shuffle_seed_(yacl::crypto::SecureRandSeed()),
       shuffle_counter_(yacl::crypto::SecureRandU64()),
-      query_count_(0) {}
+      query_count_(0) {
+  if (is_online_phase) {
+    // Sender loads sender_db (and sender_cnt_db)
+    LoadDB();
+
+    if (!options_.skip_count_check) {
+      try {
+        LoadSecretKey();
+        SPDLOG_INFO(
+            "Sender loaded the secret key and the random linear function");
+      } catch (const std::exception &ex) {
+        SPDLOG_ERROR("Sender threw an exception while loading secret key: {}",
+                     ex.what());
+      }
+    }
+  }
+}
 
 void DkPirSender::PreProcessData(const std::string &key_value_file,
                                  const std::string &key_count_file) {
@@ -152,12 +169,11 @@ void DkPirSender::GenerateDB(const std::string &key_value_file,
   }
 }
 
-void DkPirSender::LoadDB(const std::string &value_sdb_out_file,
-                         const std::string &count_sdb_out_file) {
+void DkPirSender::LoadDB() {
   sender_db_ = psi::apsi_wrapper::TryLoadSenderDB(
-      value_sdb_out_file, options_.params_file, oprf_key_);
+      options_.value_sdb_out_file, options_.params_file, oprf_key_);
   YACL_ENFORCE(sender_db_ != nullptr, "Load old sender_db from {} failed",
-               value_sdb_out_file);
+               options_.value_sdb_out_file);
 
   SPDLOG_INFO("Sender loaded sender_db");
 
@@ -166,20 +182,21 @@ void DkPirSender::LoadDB(const std::string &value_sdb_out_file,
     // be read twice. But since these two databases actually use the same
     // oprf_key, it doesn't matter.
     sender_cnt_db_ = psi::apsi_wrapper::TryLoadSenderDB(
-        count_sdb_out_file, options_.params_file, oprf_key_);
+        options_.count_sdb_out_file, options_.params_file, oprf_key_);
 
     YACL_ENFORCE(sender_cnt_db_ != nullptr,
-                 "Load old sender_cnt_db from {} failed", count_sdb_out_file);
+                 "Load old sender_cnt_db from {} failed",
+                 options_.count_sdb_out_file);
 
     SPDLOG_INFO("Sender loaded sender_cnt_db");
   }
 }
 
-void DkPirSender::LoadSecretKey(const std::string &secret_key_file) {
+void DkPirSender::LoadSecretKey() {
   yacl::math::MPInt x;
   polynomial_.resize(2);
 
-  std::ifstream fs(secret_key_file, std::ios::binary);
+  std::ifstream fs(options_.secret_key_file, std::ios::binary);
   psi::dkpir::Load(polynomial_, x, fs);
   fs.close();
 
@@ -253,7 +270,6 @@ void DkPirSender::LoadSecretKey(const std::string &secret_key_file) {
     // Best not to respond anything.
     APSI_LOG_ERROR("Processing OPRF request threw an exception: " << ex.what());
     throw;
-    return response_oprf;
   }
 
   return response_oprf;

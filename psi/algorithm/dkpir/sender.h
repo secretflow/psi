@@ -56,7 +56,7 @@ class DkPirSender {
  public:
   DkPirSender() = default;
 
-  DkPirSender(const DkPirSenderOptions &options);
+  DkPirSender(const DkPirSenderOptions &options, bool is_online_phase);
 
   // Offline phase. Step 1: data preprocessing, which mainly includes merging
   // labels of the same key. If the row count check is not skipped, a table will
@@ -74,12 +74,11 @@ class DkPirSender {
 
   // The following are the methods used in the online stage. This method is used
   // to load the local sender_db and sender_cnt_db.
-  void LoadDB(const std::string &value_sdb_out_file,
-              const std::string &count_sdb_out_file);
+  void LoadDB();
 
   // Load the random linear function and the private key required for Elgamal
   // encryption.
-  void LoadSecretKey(const std::string &secret_key_file);
+  void LoadSecretKey();
 
   // Wait for a valid OPRF request or Query request from Receiver.
   ::apsi::Request ReceiveRequest(psi::apsi_wrapper::YaclChannel &chl);

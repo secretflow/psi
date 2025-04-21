@@ -42,7 +42,6 @@ std::vector<::apsi::Item> DkPirReceiver::ExtractItems(
       !std::holds_alternative<psi::apsi_wrapper::UnlabeledData>(*query_data)) {
     // Failed to read query file
     YACL_THROW("Failed to read query file {}", tmp_query_file);
-    return {};
   }
 
   auto& items = std::get<psi::apsi_wrapper::UnlabeledData>(*query_data);
@@ -109,7 +108,6 @@ DkPirReceiver::ExtractHashes(const ::apsi::OPRFResponse& oprf_response,
   if (!oprf_response) {
     YACL_THROW(
         "Failed to extract OPRF hashes for items: oprf_response is null");
-    return {};
   }
 
   auto response_size = oprf_response->data.size();
@@ -122,7 +120,6 @@ DkPirReceiver::ExtractHashes(const ::apsi::OPRFResponse& oprf_response,
         "size ("
         << response_size << " B)");
     YACL_THROW("Failed to extract OPRF hashes for items");
-    return {};
   }
 
   std::vector<::apsi::HashedItem> items(oprf_receiver.item_count());

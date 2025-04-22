@@ -54,7 +54,6 @@ void MultiplyAddPoly(const Params& params, absl::Span<uint64_t> res,
   WEAK_ENFORCE(res.size() == a.size());
   WEAK_ENFORCE(res.size() == b.size());
   WEAK_ENFORCE(res.size() == params.CrtCount() * params.PolyLen());
-  //
   for (size_t c = 0; c < params.CrtCount(); ++c) {
     for (size_t i = 0; i < params.PolyLen(); ++i) {
       size_t idx = c * params.PolyLen() + i;
@@ -348,8 +347,10 @@ PolyMatrixRaw Invert(const Params& params, const PolyMatrixRaw& a) {
 
 void FromNtt(const Params& params, PolyMatrixRaw& out,
              const PolyMatrixNtt& in) {
-  WEAK_ENFORCE(out.Rows() == in.Rows());
-  WEAK_ENFORCE(out.Cols() == in.Cols());
+  WEAK_ENFORCE(out.Rows() == in.Rows(), "out rows: {}, in rows: {}", out.Rows(),
+               in.Rows());
+  WEAK_ENFORCE(out.Cols() == in.Cols(), "out cols: {}, in cols: {}", out.Cols(),
+               in.Cols());
 
   for (size_t r = 0; r < out.Rows(); ++r) {
     for (size_t c = 0; c < out.Cols(); ++c) {

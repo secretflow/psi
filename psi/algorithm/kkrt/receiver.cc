@@ -19,7 +19,6 @@
 
 #include "psi/algorithm/kkrt/common.h"
 #include "psi/algorithm/kkrt/kkrt_psi.h"
-#include "psi/legacy/bucket_psi.h"
 #include "psi/prelude.h"
 #include "psi/trace_categories.h"
 #include "psi/utils/bucket.h"
@@ -57,7 +56,7 @@ void KkrtPsiReceiver::PreProcess() {
   if (bucket_count_ > 0) {
     std::vector<std::string> keys(config_.keys().begin(), config_.keys().end());
 
-    auto gen_input_bucket_f = std::async([&] {
+    SyncWait(lctx_, [&] {
       if (recovery_manager_) {
         input_bucket_store_ = CreateCacheFromProvider(
             batch_provider_, recovery_manager_->input_bucket_store_path(),
@@ -68,8 +67,6 @@ void KkrtPsiReceiver::PreProcess() {
             bucket_count_);
       }
     });
-
-    SyncWait(lctx_, &gen_input_bucket_f);
   }
 
   if (bucket_count_ > 0) {
@@ -120,7 +117,8 @@ void KkrtPsiReceiver::Online() {
 
     std::vector<HashBucketCache::BucketItem> res;
     std::vector<uint32_t> duplicate_cnt;
-    auto run_f = std::async([&] {
+
+    SyncWait(lctx_, [&] {
       std::vector<uint128_t> items_hash(bucket_items_list->size());
       yacl::parallel_for(0, bucket_items_list->size(),
                          [&](int64_t begin, int64_t end) {
@@ -140,15 +138,11 @@ void KkrtPsiReceiver::Online() {
       return res;
     });
 
-    SyncWait(lctx_, &run_f);
-
-    auto write_bucket_res_f = std::async([&] {
+    SyncWait(lctx_, [&] {
       HandleBucketResultByReceiver(config_.protocol_config().broadcast_result(),
                                    lctx_, res, duplicate_cnt,
                                    intersection_indices_writer_.get());
     });
-
-    SyncWait(lctx_, &write_bucket_res_f);
 
     if (recovery_manager_) {
       recovery_manager_->UpdateParsedBucketCount(bucket_idx + 1);

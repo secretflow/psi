@@ -16,6 +16,6 @@ def spiral_copts():
     return select({
         "@platforms//cpu:aarch64": [],
         "//conditions:default": [
-            "-mavx",
+            "-mavx2",
         ],
     })

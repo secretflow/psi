@@ -77,7 +77,9 @@ void EcdhUbPsiClient::OfflineTransferCache() {
   report_.set_intersection_count(-1);
 }
 
-void EcdhUbPsiClient::Offline() { OfflineTransferCache(); }
+void EcdhUbPsiClient::Offline() {
+  SyncWait(lctx_, [this]() { OfflineTransferCache(); });
+}
 
 // memory cost: csv_batch(1M * lineBytes) + cached_ec_point_store(items * 32B *
 // 2)
@@ -85,9 +87,7 @@ void EcdhUbPsiClient::Offline() { OfflineTransferCache(); }
 //   indexes(items * 2 * 8B)
 //   ~= 160 * items + constants(1G)
 void EcdhUbPsiClient::Online() {
-  std::shared_ptr<yacl::link::Context> sync_lctx = lctx_->Spawn();
-
-  auto online_proc = std::async([&]() {
+  SyncWait(lctx_, [&]() {
     auto private_key = yacl::crypto::SecureRandBytes(kEccKeySize);
     std::shared_ptr<EcdhOprfPsiClient> dh_oprf_psi_client_online =
         std::make_shared<EcdhOprfPsiClient>(psi_options_, private_key);
@@ -138,8 +138,6 @@ void EcdhUbPsiClient::Online() {
                                       stat.peer_intersection_count);
     }
   });
-
-  SyncWait(sync_lctx, &online_proc);
 }
 
 }  // namespace psi::ecdh

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "psi/utils/ub_psi_cache.h"
+#include "psi/algorithm/ecdh/ub_psi/ub_psi_cache.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -20,10 +20,10 @@
 #include <fstream>
 #include <vector>
 
-#include "batch_provider.h"
 #include "spdlog/spdlog.h"
 #include "yacl/base/exception.h"
 
+#include "psi/utils/batch_provider.h"
 #include "psi/utils/pb_helper.h"
 #include "psi/utils/serialize.h"
 

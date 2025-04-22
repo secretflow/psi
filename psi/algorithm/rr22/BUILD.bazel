@@ -133,9 +133,9 @@ psi_cc_library(
     hdrs = ["common.h"],
     deps = [
         ":rr22_psi",
+        "//psi/checkpoint:recovery",
         "//psi/proto:psi_v2_cc_proto",
         "//psi/utils:bucket",
-        "//psi/utils:recovery",
     ],
 )
 

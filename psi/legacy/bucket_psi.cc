@@ -38,6 +38,7 @@
 #include "psi/cryptor/cryptor_selector.h"
 #include "psi/prelude.h"
 #include "psi/utils/arrow_csv_batch_provider.h"
+#include "psi/utils/bucket.h"
 #include "psi/utils/ec_point_store.h"
 #include "psi/utils/io.h"
 #include "psi/utils/serialize.h"
@@ -119,18 +120,6 @@ void CreateOutputFolder(const std::string& path) {
   YACL_ENFORCE(ec.value() == 0,
                "failed to create output dir={} for path={}, reason = {}",
                out_dir_path.string(), path, ec.message());
-}
-
-bool HashListEqualTest(const std::vector<yacl::Buffer>& hash_list) {
-  YACL_ENFORCE(!hash_list.empty(), "unsupported hash_list size={}",
-               hash_list.size());
-  for (size_t idx = 1; idx < hash_list.size(); idx++) {
-    if (hash_list[idx] == hash_list[0]) {
-      continue;
-    }
-    return false;
-  }
-  return true;
 }
 
 size_t FilterFileByIndices(const std::string& input, const std::string& output,
@@ -250,15 +239,15 @@ std::unique_ptr<CsvChecker> CheckInput(
   SPDLOG_INFO("Begin sanity check for input file: {}, precheck_switch:{}",
               input_path, precheck_required);
   std::unique_ptr<CsvChecker> checker;
-  auto csv_check_f = std::async([&] {
+  auto csv_check_f = [&] {
     checker = std::make_unique<CsvChecker>(input_path, selected_fields,
                                            !precheck_required);
-  });
+  };
   // keep alive
   if (ic_mode) {
-    csv_check_f.get();
+    csv_check_f();
   } else {
-    SyncWait(lctx, &csv_check_f);
+    SyncWait(lctx, std::move(csv_check_f));
   }
   SPDLOG_INFO("End sanity check for input file: {}, size={}", input_path,
               checker->data_count());
@@ -415,35 +404,6 @@ std::vector<uint64_t> BucketPsi::RunPsi(std::shared_ptr<Progress>& progress,
   } else {
     return RunBucketPsi(progress, self_items_count);
   }
-}
-
-size_t NegotiateBucketNum(const std::shared_ptr<yacl::link::Context>& lctx,
-                          size_t self_items_count, size_t self_bucket_size,
-                          int psi_type) {
-  std::vector<size_t> items_size_list =
-      AllGatherItemsSize(lctx, self_items_count);
-
-  std::vector<size_t> bucket_count_list(items_size_list.size());
-  size_t max_bucket_count = 0;
-  size_t min_item_size = self_items_count;
-
-  for (size_t idx = 0; idx < items_size_list.size(); idx++) {
-    bucket_count_list[idx] =
-        (items_size_list[idx] + self_bucket_size - 1) / self_bucket_size;
-    max_bucket_count = std::max(max_bucket_count, bucket_count_list[idx]);
-    min_item_size = std::min(min_item_size, items_size_list[idx]);
-
-    SPDLOG_INFO("psi protocol={}, rank={} item_size={}", psi_type, idx,
-                items_size_list[idx]);
-  }
-
-  // one party item_size is 0, no need to do intersection
-  if (min_item_size == 0) {
-    SPDLOG_INFO("psi protocol={}, min_item_size=0", psi_type);
-    return 0;
-  }
-
-  return max_bucket_count;
 }
 
 std::vector<uint64_t> BucketPsi::RunBucketPsi(

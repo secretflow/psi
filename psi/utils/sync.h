@@ -31,80 +31,61 @@ namespace psi {
 
 namespace {
 
-static const std::string kFinishedFlag = "p_finished";
-static const std::string kUnFinishedFlag = "p_unfinished";
+const std::string kFinishedFlag = "p_finished";
+const std::string kUnFinishedFlag = "p_unfinished";
 
 }  // namespace
 
-template <typename T>
-typename std::enable_if_t<std::is_void_v<T>> SyncWait(
-    const std::shared_ptr<yacl::link::Context>& lctx, std::future<T>* f) {
+template <typename F, typename... Args>
+auto SyncWait(const std::shared_ptr<yacl::link::Context>& lctx, F&& func,
+              Args&&... args) {
+  using R = std::invoke_result_t<F, Args...>;
+
   std::shared_ptr<yacl::link::Context> sync_lctx = lctx->Spawn();
   std::vector<yacl::Buffer> flag_list;
   std::chrono::seconds span(5);
   bool done = false;
 
-  while (true) {
-    if (!done) {
-      done = f->wait_for(span) == std::future_status::ready;
-      if (done) {
-        // check if exception is raised.
-        try {
-          f->get();
-        } catch (...) {
-          std::exception_ptr ep = std::current_exception();
-          std::rethrow_exception(ep);
-        }
-      }
-    }
-    auto flag = done ? kFinishedFlag : kUnFinishedFlag;
-    flag_list = yacl::link::AllGather(sync_lctx, flag, "sync wait");
-    if (std::find_if(flag_list.begin(), flag_list.end(),
-                     [](const yacl::Buffer& b) {
-                       return std::string_view(b.data<char>(), b.size()) ==
-                              kUnFinishedFlag;
-                     }) == flag_list.end()) {
-      // all done
-      break;
-    }
-  }
-}
+  auto fut = std::async(std::launch::async, std::forward<F>(func),
+                        std::forward<Args>(args)...);
 
-template <typename T>
-typename std::enable_if_t<!std::is_void_v<T>, T> SyncWait(
-    const std::shared_ptr<yacl::link::Context>& lctx, std::future<T>* f) {
-  std::shared_ptr<yacl::link::Context> sync_lctx = lctx->Spawn();
-  std::vector<yacl::Buffer> flag_list;
-  std::chrono::seconds span(5);
-  bool done = false;
-  T res{};
+  std::conditional_t<!std::is_void_v<R>, R, std::monostate> res;
 
   while (true) {
     if (!done) {
-      done = f->wait_for(span) == std::future_status::ready;
-      if (done) {
-        // check if exception is raised.
+      auto status = fut.wait_for(span);
+      if (status == std::future_status::ready) {
+        done = true;
         try {
-          res = f->get();
+          if constexpr (!std::is_void_v<R>) {
+            // gets the result only if the return value is not void
+            res = fut.get();
+          } else {
+            fut.get();
+          }
         } catch (...) {
-          std::exception_ptr ep = std::current_exception();
-          std::rethrow_exception(ep);
+          // TODO: Consider sending msg to notify the other party to voluntarily
+          // quit
+          std::rethrow_exception(std::current_exception());
         }
       }
     }
+
+    // sync stage
     auto flag = done ? kFinishedFlag : kUnFinishedFlag;
-    flag_list = yacl::link::AllGather(sync_lctx, flag, "sync wait");
-    if (std::find_if(flag_list.begin(), flag_list.end(),
+    flag_list = yacl::link::AllGather(sync_lctx, flag, "sync_wait");
+    if (std::none_of(flag_list.begin(), flag_list.end(),
                      [](const yacl::Buffer& b) {
                        return std::string_view(b.data<char>(), b.size()) ==
                               kUnFinishedFlag;
-                     }) == flag_list.end()) {
-      // all done
+                     })) {
       break;
     }
   }
 
-  return res;
+  if constexpr (!std::is_void_v<R>) {
+    return res;
+  }
 }
 
 std::vector<size_t> AllGatherItemsSize(

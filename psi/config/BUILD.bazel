@@ -1,4 +1,4 @@
-# Copyright 2024 Ant Group Co., Ltd.
+# Copyright 2023 Ant Group Co., Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,42 +12,40 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@rules_proto//proto:defs.bzl", "proto_library")
+load("//bazel:psi.bzl", "psi_cc_library")
 
 package(default_visibility = ["//visibility:public"])
 
-proto_library(
-    name = "common_proto",
-    srcs = ["common.proto"],
+psi_cc_library(
+    name = "curve",
+    hdrs = ["curve.h"],
 )
 
-cc_proto_library(
-    name = "common_cc_proto",
-    deps = [":common_proto"],
-)
-
-proto_library(
-    name = "client_service_proto",
-    srcs = ["client_service.proto"],
+psi_cc_library(
+    name = "protocol",
+    hdrs = ["protocol.h"],
     deps = [
-        ":common_proto",
+        ":curve",
     ],
 )
 
-cc_proto_library(
-    name = "client_service_cc_proto",
-    deps = [":client_service_proto"],
-)
-
-proto_library(
-    name = "server_service_proto",
-    srcs = ["server_service.proto"],
+psi_cc_library(
+    name = "psi_config",
+    hdrs = ["psi.h"],
     deps = [
-        ":common_proto",
+        ":protocol",
     ],
 )
 
-cc_proto_library(
-    name = "server_service_cc_proto",
-    deps = [":server_service_proto"],
+psi_cc_library(
+    name = "ub_psi_config",
+    hdrs = ["ub_psi.h"],
+    deps = [
+        ":psi_config",
+    ],
+)
+
+psi_cc_library(
+    name = "logging",
+    hdrs = ["logging.h"],
 )

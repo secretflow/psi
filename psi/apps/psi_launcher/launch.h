@@ -19,6 +19,9 @@
 
 #include "yacl/link/context.h"
 
+#include "psi/apps/psi_launcher/report.h"
+#include "psi/config/psi.h"
+#include "psi/config/ub_psi.h"
 #include "psi/legacy/bucket_psi.h"
 
 #include "psi/proto/pir.pb.h"
@@ -44,5 +47,28 @@ PirResultReport RunPir(const ApsiReceiverConfig& apsi_receiver_config,
 
 PirResultReport RunPir(const ApsiSenderConfig& apsi_sender_config,
                        const std::shared_ptr<yacl::link::Context>& lctx);
+
+namespace api {
+
+namespace internal {
+v2::UbPsiConfig UbExecConfToUbconf(
+    const ub::UbPsiExecuteConfig& exec_config,
+    const std::shared_ptr<yacl::link::Context>& lctx);
+}
+
+struct ProgressParams {
+  ProgressCallbacks hook = nullptr;
+
+  uint32_t interval_ms = 5 * 1000;
+};
+
+PsiExecuteReport PsiExecute(const PsiExecuteConfig& config,
+                            const std::shared_ptr<yacl::link::Context>& lctx,
+                            const ProgressParams& progress_params = {});
+
+PsiExecuteReport UbPsiExecute(const ub::UbPsiExecuteConfig& config,
+                              const std::shared_ptr<yacl::link::Context>& lctx);
+
+}  // namespace api
 
 }  // namespace psi

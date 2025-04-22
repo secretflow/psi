@@ -105,12 +105,10 @@ void EcdhPsiSender::Online() {
       recovery_manager_ ? recovery_manager_->MarkOnlineStart(lctx_) : false;
 
   if (!online_stage_finished) {
-    auto run_f = std::async([&] {
-      return RunEcdhPsi(psi_options_, batch_provider_, self_ec_point_store_,
-                        peer_ec_point_store_);
+    SyncWait(lctx_, [&] {
+      RunEcdhPsi(psi_options_, batch_provider_, self_ec_point_store_,
+                 peer_ec_point_store_);
     });
-
-    SyncWait(lctx_, &run_f);
   }
 
   if (recovery_manager_) {
@@ -128,12 +126,10 @@ void EcdhPsiSender::PostProcess() {
     return;
   }
 
-  auto compute_indices_f = std::async([&] {
+  SyncWait(lctx_, [&] {
     (void)FinalizeAndComputeIndices(self_ec_point_store_, peer_ec_point_store_,
                                     intersection_indices_writer_.get());
   });
-
-  SyncWait(lctx_, &compute_indices_f);
 
   if (recovery_manager_) {
     recovery_manager_->MarkPostProcessEnd();

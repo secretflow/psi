@@ -35,10 +35,6 @@
 
 namespace psi {
 
-using ProgressCallbacks = std::function<void(const Progress::Data&)>;
-
-bool HashListEqualTest(const std::vector<yacl::Buffer>& hash_list);
-
 void CreateOutputFolder(const std::string& path);
 
 // NOTE(junfeng): `indices` must be sorted
@@ -104,10 +100,6 @@ void GetResultIndices(const std::vector<std::string>& item_data_list,
                       const std::vector<HashBucketCache::BucketItem>& item_list,
                       std::vector<std::string>& result_list,
                       std::vector<uint64_t>* indices);
-
-size_t NegotiateBucketNum(const std::shared_ptr<yacl::link::Context>& lctx,
-                          size_t self_items_count, size_t self_bucket_size,
-                          int psi_type);
 
 class BucketPsi {
  public:

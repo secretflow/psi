@@ -121,16 +121,13 @@ TEST_P(Ecdh3PcPsiTest, PartnersPsi) {
   std::vector<std::string> master_next_res;
   std::vector<std::string> master_prev_res;
 
-  auto master_runner = std::async([&] {
-    return ecdh_3pc_psi_master->PartnersPsi(params.items_a, &master_res);
-  });
+  auto master_runner = std::async(
+      [&] { ecdh_3pc_psi_master->PartnersPsi(params.items_a, &master_res); });
   auto master_next_runner = std::async([&] {
-    return ecdh_3pc_psi_master_next->PartnersPsi(params.items_b,
-                                                 &master_next_res);
+    ecdh_3pc_psi_master_next->PartnersPsi(params.items_b, &master_next_res);
   });
   auto master_prev_runner = std::async([&] {
-    return ecdh_3pc_psi_master_prev->PartnersPsi(params.items_c,
-                                                 &master_prev_res);
+    ecdh_3pc_psi_master_prev->PartnersPsi(params.items_c, &master_prev_res);
   });
 
   master_next_runner.get();
@@ -183,10 +180,10 @@ TEST_P(Ecdh3PcPsiTest, Works) {
     std::vector<std::string> masked_master_items;
     std::vector<std::string> partner_psi_items;
 
-    auto mask_master = std::async(
-        [&] { return handler->MaskMaster(items, &masked_master_items); });
-    auto partner_psi = std::async(
-        [&] { return handler->PartnersPsi(items, &partner_psi_items); });
+    auto mask_master =
+        std::async([&] { handler->MaskMaster(items, &masked_master_items); });
+    auto partner_psi =
+        std::async([&] { handler->PartnersPsi(items, &partner_psi_items); });
 
     mask_master.get();
     partner_psi.get();

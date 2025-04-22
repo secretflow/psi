@@ -17,9 +17,9 @@
 
 #include "yacl/link/link.h"
 
+#include "psi/checkpoint/recovery.h"
 #include "psi/utils/hash_bucket_cache.h"
 #include "psi/utils/index_store.h"
-#include "psi/utils/recovery.h"
 
 namespace psi {
 
@@ -48,4 +48,9 @@ void HandleBucketResultByReceiver(
     const std::vector<HashBucketCache::BucketItem>& result_list,
     const std::vector<uint32_t>& peer_extra_dup_cnt, IndexWriter* writer);
 
+bool HashListEqualTest(const std::vector<yacl::Buffer>& hash_list);
+
+size_t NegotiateBucketNum(const std::shared_ptr<yacl::link::Context>& lctx,
+                          size_t self_items_count, size_t self_bucket_size,
+                          int psi_type);
 }  // namespace psi

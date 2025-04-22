@@ -25,18 +25,20 @@ class IndexPirClient {
  public:
   virtual ~IndexPirClient() = default;
 
+  virtual PirType GetPirType() const = 0;
+
+  // generate or get public keys buffer
+  virtual yacl::Buffer GeneratePksBuffer() const = 0;
+  virtual std::string GeneratePksString() const = 0;
+
   virtual yacl::Buffer GenerateIndexQuery(uint64_t raw_idx) const = 0;
+  virtual std::string GenerateIndexQueryStr(uint64_t raw_idx) const = 0;
 
   virtual std::vector<uint8_t> DecodeIndexResponse(
-      const yacl::Buffer& response_buffer, uint64_t raw_idx) const = 0;
+      const yacl::ByteContainerView& response_buffer,
+      uint64_t raw_idx) const = 0;
 };
 
-class IndexPirServer {
- public:
-  virtual ~IndexPirServer() = default;
-  virtual void SetDatabase(const psi::pir_utils::RawDatabase& raw_database) = 0;
-  virtual yacl::Buffer GenerateIndexResponse(
-      const yacl::Buffer& query_buffer) const = 0;
-};
+using IndexPirServer = IndexPirDataBase;
 
 }  // namespace psi::pir

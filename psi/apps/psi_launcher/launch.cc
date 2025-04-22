@@ -231,11 +231,11 @@ PirResultReport RunPir(const ApsiSenderConfig& apsi_sender_config,
       apsi_sender_config.experimental_bucket_cnt();
   options.experimental_bucket_folder =
       apsi_sender_config.experimental_bucket_folder();
-  if (apsi_sender_config.experimental_db_generating_process_num()) {
+  if (apsi_sender_config.experimental_db_generating_process_num() != 0) {
     options.experimental_db_generating_process_num =
         apsi_sender_config.experimental_db_generating_process_num();
   }
-  if (apsi_sender_config.experimental_bucket_group_cnt()) {
+  if (apsi_sender_config.experimental_bucket_group_cnt() != 0) {
     options.experimental_bucket_group_cnt =
         apsi_sender_config.experimental_bucket_group_cnt();
   }
@@ -243,5 +243,243 @@ PirResultReport RunPir(const ApsiSenderConfig& apsi_sender_config,
 
   return PirResultReport();
 }
+
+namespace api {
+
+const std::map<PsiProtocol, v2::Protocol> kV2ProtoclMap = {
+    {PsiProtocol::PROTOCOL_ECDH, v2::Protocol::PROTOCOL_ECDH},
+    {PsiProtocol::PROTOCOL_KKRT, v2::Protocol::PROTOCOL_KKRT},
+    {PsiProtocol::PROTOCOL_RR22, v2::Protocol::PROTOCOL_RR22}};
+
+const std::map<PsiProtocol, PsiType> kPsiTypeMap = {
+    {PsiProtocol::PROTOCOL_ECDH_3PC, PsiType::ECDH_PSI_3PC},
+    {PsiProtocol::PROTOCOL_ECDH_NPC, PsiType::ECDH_PSI_NPC},
+    {PsiProtocol::PROTOCOL_KKRT_NPC, PsiType::KKRT_PSI_NPC},
+    {PsiProtocol::PROTOCOL_DP, PsiType::DP_PSI_2PC},
+};
+
+const std::map<EllipticCurveType, CurveType> kCurTypeMap = {
+    {EllipticCurveType::CURVE_INVALID_TYPE, CurveType::CURVE_INVALID_TYPE},
+    {EllipticCurveType::CURVE_25519, CurveType::CURVE_25519},
+    {EllipticCurveType::CURVE_FOURQ, CurveType::CURVE_FOURQ},
+    {EllipticCurveType::CURVE_SM2, CurveType::CURVE_SM2},
+    {EllipticCurveType::CURVE_SECP256K1, CurveType::CURVE_SECP256K1},
+    {EllipticCurveType::CURVE_25519_ELLIGATOR2,
+     CurveType::CURVE_25519_ELLIGATOR2},
+};
+
+const std::map<SourceType, v2::IoType> kIoTypeMap = {
+    {SourceType::SOURCE_TYPE_UNSPECIFIED, v2::IoType::IO_TYPE_UNSPECIFIED},
+    {SourceType::SOURCE_TYPE_FILE_CSV, v2::IoType::IO_TYPE_FILE_CSV}};
+
+const std::map<ResultJoinType, v2::PsiConfig::AdvancedJoinType> kJoinTypeMap = {
+    {ResultJoinType::JOIN_TYPE_UNSPECIFIED,
+     v2::PsiConfig::ADVANCED_JOIN_TYPE_UNSPECIFIED},
+    {ResultJoinType::JOIN_TYPE_INNER_JOIN,
+     v2::PsiConfig::ADVANCED_JOIN_TYPE_INNER_JOIN},
+    {ResultJoinType::JOIN_TYPE_LEFT_JOIN,
+     v2::PsiConfig::ADVANCED_JOIN_TYPE_LEFT_JOIN},
+    {ResultJoinType::JOIN_TYPE_RIGHT_JOIN,
+     v2::PsiConfig::ADVANCED_JOIN_TYPE_RIGHT_JOIN},
+    {ResultJoinType::JOIN_TYPE_FULL_JOIN,
+     v2::PsiConfig::ADVANCED_JOIN_TYPE_FULL_JOIN},
+    {ResultJoinType::JOIN_TYPE_DIFFERENCE,
+     v2::PsiConfig::ADVANCED_JOIN_TYPE_DIFFERENCE},
+};
+
+v2::PsiConfig ExecConfToV2Conf(
+    const PsiExecuteConfig& exec_config,
+    const std::shared_ptr<yacl::link::Context>& lctx) {
+  v2::PsiConfig v2_conf;
+  // protocol
+  auto* protocol_conf = v2_conf.mutable_protocol_config();
+  protocol_conf->set_protocol(
+      kV2ProtoclMap.at(exec_config.protocol_conf.protocol));
+  protocol_conf->set_role(exec_config.protocol_conf.receiver_rank ==
+                                  lctx->Rank()
+                              ? v2::Role::ROLE_RECEIVER
+                              : v2::Role::ROLE_SENDER);
+  protocol_conf->set_broadcast_result(
+      exec_config.protocol_conf.broadcast_result);
+  protocol_conf->mutable_ecdh_config()->set_curve(
+      kCurTypeMap.at(exec_config.protocol_conf.ecdh_params.curve));
+  protocol_conf->mutable_ecdh_config()->set_batch_size(
+      exec_config.protocol_conf.ecdh_params.batch_size);
+  protocol_conf->mutable_kkrt_config()->set_bucket_size(
+      exec_config.protocol_conf.bucket_size);
+  protocol_conf->mutable_rr22_config()->set_bucket_size(
+      exec_config.protocol_conf.bucket_size);
+  protocol_conf->mutable_rr22_config()->set_low_comm_mode(
+      exec_config.protocol_conf.rr22_params.low_comm_mode);
+
+  // input
+  v2_conf.mutable_input_config()->set_type(
+      kIoTypeMap.at(exec_config.input_params.type));
+  v2_conf.mutable_input_config()->set_path(exec_config.input_params.path);
+  v2_conf.mutable_input_attr()->set_keys_unique(
+      exec_config.input_params.keys_unique);
+
+  // output
+  v2_conf.mutable_output_attr()->set_csv_null_rep(
+      exec_config.output_params.csv_null_rep);
+  v2_conf.mutable_output_config()->set_type(
+      kIoTypeMap.at(exec_config.output_params.type));
+  v2_conf.mutable_output_config()->set_path(exec_config.output_params.path);
+
+  v2_conf.mutable_keys()->Add(exec_config.input_params.selected_keys.begin(),
+                              exec_config.input_params.selected_keys.end());
+  v2_conf.set_disable_alignment(exec_config.output_params.disable_alignment);
+
+  // recovery
+  v2_conf.mutable_recovery_config()->set_enabled(
+      exec_config.checkpoint_conf.enable);
+  v2_conf.mutable_recovery_config()->set_folder(
+      exec_config.checkpoint_conf.path);
+
+  // join
+  v2_conf.set_advanced_join_type(kJoinTypeMap.at(exec_config.join_conf.type));
+  v2_conf.set_left_side(exec_config.join_conf.left_side_rank ==
+                                exec_config.protocol_conf.receiver_rank
+                            ? v2::Role::ROLE_RECEIVER
+                            : v2::Role::ROLE_SENDER);
+  v2_conf.set_check_hash_digest(true);
+  return v2_conf;
+}
+
+BucketPsiConfig ExecConfToBucketConf(const PsiExecuteConfig& exec_config) {
+  BucketPsiConfig bucket_conf;
+  bucket_conf.set_psi_type(kPsiTypeMap.at(exec_config.protocol_conf.protocol));
+  bucket_conf.set_receiver_rank(exec_config.protocol_conf.receiver_rank);
+  bucket_conf.set_broadcast_result(exec_config.protocol_conf.broadcast_result);
+  // input
+  bucket_conf.mutable_input_params()->set_path(exec_config.input_params.path);
+  bucket_conf.mutable_input_params()->mutable_select_fields()->Add(
+      exec_config.input_params.selected_keys.begin(),
+      exec_config.input_params.selected_keys.end());
+  bucket_conf.mutable_input_params()->set_precheck(
+      !exec_config.input_params.keys_unique);
+  bucket_conf.mutable_output_params()->set_path(exec_config.output_params.path);
+  bucket_conf.mutable_output_params()->set_need_sort(
+      !exec_config.output_params.disable_alignment);
+  bucket_conf.set_curve_type(
+      kCurTypeMap.at(exec_config.protocol_conf.ecdh_params.curve));
+  bucket_conf.set_bucket_size(exec_config.protocol_conf.bucket_size);
+  bucket_conf.mutable_dppsi_params()->set_bob_sub_sampling(
+      exec_config.protocol_conf.dp_params.bob_sub_sampling);
+  bucket_conf.mutable_dppsi_params()->set_epsilon(
+      exec_config.protocol_conf.dp_params.epsilon);
+
+  return bucket_conf;
+}
+
+PsiExecuteReport PsiExecute(const PsiExecuteConfig& config,
+                            const std::shared_ptr<yacl::link::Context>& lctx,
+                            const ProgressParams& progress_params) {
+  YACL_ENFORCE(config.protocol_conf.protocol !=
+               PsiProtocol::PROTOCOL_UNSPECIFIED);
+
+  if (config.protocol_conf.protocol == PsiProtocol::PROTOCOL_ECDH_3PC ||
+      config.protocol_conf.protocol == PsiProtocol::PROTOCOL_ECDH_NPC ||
+      config.protocol_conf.protocol == PsiProtocol::PROTOCOL_KKRT_NPC ||
+      config.protocol_conf.protocol == PsiProtocol::PROTOCOL_DP) {
+    auto bucket_conf = ExecConfToBucketConf(config);
+    auto report = RunLegacyPsi(bucket_conf, lctx, progress_params.hook,
+                               progress_params.interval_ms);
+    return PsiExecuteReport{
+        .original_count = report.original_count(),
+        .intersection_count = report.intersection_count(),
+        .original_unique_count = report.original_key_count(),
+        .intersection_unique_count = report.intersection_key_count()};
+  } else {
+    auto v2_conf = ExecConfToV2Conf(config, lctx);
+    auto report = ::psi::RunPsi(v2_conf, lctx);
+    return PsiExecuteReport{
+        .original_count = report.original_count(),
+        .intersection_count = report.intersection_count(),
+        .original_unique_count = report.original_key_count(),
+        .intersection_unique_count = report.intersection_key_count()};
+  }
+}
+
+const std::map<ub::UbPsiExecuteConfig::Mode, v2::UbPsiConfig::Mode> kModeMap = {
+    {ub::UbPsiExecuteConfig::Mode::MODE_UNSPECIFIED,
+     v2::UbPsiConfig::MODE_UNSPECIFIED},
+    {ub::UbPsiExecuteConfig::Mode::MODE_OFFLINE_GEN_CACHE,
+     v2::UbPsiConfig::MODE_OFFLINE_GEN_CACHE},
+    {ub::UbPsiExecuteConfig::Mode::MODE_OFFLINE_TRANSFER_CACHE,
+     v2::UbPsiConfig::MODE_OFFLINE_TRANSFER_CACHE},
+    {ub::UbPsiExecuteConfig::Mode::MODE_OFFLINE, v2::UbPsiConfig::MODE_OFFLINE},
+    {ub::UbPsiExecuteConfig::Mode::MODE_ONLINE, v2::UbPsiConfig::MODE_ONLINE},
+    {ub::UbPsiExecuteConfig::Mode::MODE_FULL, v2::UbPsiConfig::MODE_FULL},
+};
+
+namespace internal {
+v2::UbPsiConfig UbExecConfToUbconf(
+    const ub::UbPsiExecuteConfig& exec_config,
+    const std::shared_ptr<yacl::link::Context>& lctx) {
+  YACL_ENFORCE(exec_config.role != ub::UbPsiRole::ROLE_UNSPECIFIED);
+  v2::UbPsiConfig ub_conf;
+  ub_conf.set_mode(kModeMap.at(exec_config.mode));
+  ub_conf.set_role(exec_config.role == ub::UbPsiRole::ROLE_SERVER
+                       ? v2::Role::ROLE_SERVER
+                       : v2::Role::ROLE_CLIENT);
+  ub_conf.set_server_secret_key_path(exec_config.server_params.secret_key_path);
+  ub_conf.set_cache_path(exec_config.cache_path);
+
+  // input
+  ub_conf.mutable_input_config()->set_type(
+      kIoTypeMap.at(exec_config.input_params.type));
+  ub_conf.mutable_input_config()->set_path(exec_config.input_params.path);
+  ub_conf.mutable_input_attr()->set_keys_unique(
+      exec_config.input_params.keys_unique);
+
+  // output
+  ub_conf.mutable_output_attr()->set_csv_null_rep(
+      exec_config.output_params.csv_null_rep);
+  ub_conf.mutable_output_config()->set_type(
+      kIoTypeMap.at(exec_config.output_params.type));
+  ub_conf.mutable_output_config()->set_path(exec_config.output_params.path);
+
+  ub_conf.mutable_keys()->Add(exec_config.input_params.selected_keys.begin(),
+                              exec_config.input_params.selected_keys.end());
+  ub_conf.set_disable_alignment(exec_config.output_params.disable_alignment);
+
+  // join
+  ub_conf.set_advanced_join_type(kJoinTypeMap.at(exec_config.join_conf.type));
+  auto left_side = v2::Role::ROLE_CLIENT;
+  if (exec_config.role == ub::UbPsiRole::ROLE_SERVER) {
+    if (exec_config.join_conf.left_side_rank == lctx->Rank()) {
+      left_side = v2::Role::ROLE_SERVER;
+    }
+    if (exec_config.recevie_result) {
+      ub_conf.set_server_get_result(true);
+    }
+  } else {
+    if (exec_config.join_conf.left_side_rank != lctx->Rank()) {
+      left_side = v2::Role::ROLE_SERVER;
+    }
+    if (exec_config.recevie_result) {
+      ub_conf.set_client_get_result(true);
+    }
+  }
+  ub_conf.set_left_side(left_side);
+
+  return ub_conf;
+}
+}  // namespace internal
+
+PsiExecuteReport UbPsiExecute(
+    const ub::UbPsiExecuteConfig& config,
+    const std::shared_ptr<yacl::link::Context>& lctx) {
+  auto ub_conf = internal::UbExecConfToUbconf(config, lctx);
+  auto report = ::psi::RunUbPsi(ub_conf, lctx);
+  return PsiExecuteReport{
+      .original_count = report.original_count(),
+      .intersection_count = report.intersection_count(),
+      .original_unique_count = report.original_key_count(),
+      .intersection_unique_count = report.intersection_key_count()};
+}
+
+}  // namespace api
 
 }  // namespace psi

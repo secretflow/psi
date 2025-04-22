@@ -58,8 +58,8 @@ class SimplePirServer {
   size_t dimension_ = 1024;  //  dimension
   uint64_t q_ = 1ULL << 32;  //  modulus
   size_t N_ = 0;             //  database size
-  uint64_t p_ = 0;           //  plaintext modulus
-  uint128_t seed_ = 0;       //  seed for random number generation
+  // uint64_t p_ = 0;  //  plaintext modulus
+  uint128_t seed_ = 0;  //  seed for random number generation
   std::vector<std::vector<uint64_t>> database_;  //  database
   std::vector<std::vector<uint64_t>> A_;         //  LWE matrix
 };

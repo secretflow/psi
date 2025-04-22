@@ -14,18 +14,21 @@
 
 #include "psi/algorithm/pir_interface/pir_db.h"
 
-// 1. "psi/algorithm/pir_interface/pir_db.h"  --->
-// "psi/algorithm/pir_interface/pir_db.h"
-
-// 2. "//psi/algorithm/pir_interface:pir_db",  ---->
-// "//psi/algorithm/pir_interface:pir_db"
-
 #include "absl/types/span.h"
 #include "spdlog/spdlog.h"
 #include "yacl/crypto/tools/prg.h"
 #include "yacl/utils/parallel.h"
 
-namespace psi::pir_utils {
+namespace psi::pir {
+
+// PirTye was defined in the pir_type.pb.h
+PirTypeProto PirTypeToProto(const PirType& type) {
+  PirTypeProto proto;
+  proto.set_type(type);
+  return proto;
+}
+
+PirType ProtoToPirType(const PirTypeProto& proto) { return proto.type(); }
 
 RawDatabase RawDatabase::Random(uint64_t rows, uint64_t row_byte_len) {
   std::vector<std::vector<uint8_t>> db;
@@ -77,14 +80,15 @@ std::vector<uint8_t> RawDatabase::Combine(
 
 std::vector<RawDatabase> RawDatabase::Partition(
     size_t partition_byte_len) const {
-  // row_byte_len_ >= partition_byte_len
-  YACL_ENFORCE_GE(row_byte_len_, partition_byte_len);
+  if (row_byte_len_ <= partition_byte_len) {
+    SPDLOG_INFO(
+        "row byte len({}) <= partition_byte_len({}), no need partition.",
+        row_byte_len_, partition_byte_len);
+    return std::vector<RawDatabase>{RawDatabase(rows_, row_byte_len_, db_)};
+  }
 
   size_t partition_num =
       (row_byte_len_ + partition_byte_len - 1) / partition_byte_len;
-  if (partition_num == 1) {
-    return std::vector<RawDatabase>{RawDatabase(rows_, row_byte_len_, db_)};
-  }
 
   std::vector<RawDatabase> result;
   result.reserve(partition_num);
@@ -122,4 +126,4 @@ std::vector<RawDatabase> RawDatabase::Partition(
   return result;
 }
 
-}  // namespace psi::pir_utils
+}  // namespace psi::pir

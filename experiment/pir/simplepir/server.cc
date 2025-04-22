@@ -21,8 +21,8 @@
 
 namespace pir::simple {
 SimplePirServer::SimplePirServer(size_t dimension, uint64_t q, size_t N,
-                                 uint64_t p)
-    : dimension_(dimension), q_(q), N_(N), p_(p) {
+                                 [[maybe_unused]] uint64_t p)
+    : dimension_(dimension), q_(q), N_(N) /*, p_(p)*/ {
   // Checks if N is a perfect square
   YACL_ENFORCE(N > 0, "N must be positive");
   YACL_ENFORCE(N == static_cast<size_t>(sqrt(N)) * static_cast<size_t>(sqrt(N)),
@@ -96,7 +96,6 @@ std::vector<uint64_t> SimplePirServer::Answer(const std::vector<uint64_t> &qu) {
 
 uint64_t SimplePirServer::GetValue(size_t idx) {
   YACL_ENFORCE(idx < N_, "Index out of bounds: {}", idx);
-  YACL_ENFORCE(idx >= 0, "Index out of bounds: {}", idx);
 
   size_t row_num = static_cast<size_t>(sqrt(N_));
   size_t row_idx = idx / row_num;

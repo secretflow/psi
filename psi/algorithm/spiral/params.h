@@ -100,7 +100,7 @@ struct PolyMatrixParams {
   std::size_t t_exp_right_ = 8;
 
   // t_{GSW} = log_{z_{GSW} q} + 1
-  std::size_t t_gsw_ = 8;
+  std::size_t t_gsw_ = 6;
 
   PolyMatrixParams() = default;
 
@@ -162,11 +162,27 @@ class Params {
 
   bool operator!=(const Params& other) const { return !(*this == other); }
 
-  void UpdateByDatabaseInfo(const DatabaseMetaInfo& database_info);
+  size_t UpdateByDatabaseInfo(const DatabaseMetaInfo& database_info);
 
-  [[nodiscard]] bool IsValid() const {
-    return G() <= poly_len_log2_ && DbDim1() <= kMaxDbDim &&
-           DbDim2() <= kMaxDbDim;
+  void ValidCheck() const {
+    YACL_ENFORCE(DbDim1() <= kMaxDbDim, "v1({}) should <= {}", DbDim1(),
+                 kMaxDbDim);
+    YACL_ENFORCE(DbDim2() <= kMaxDbDim, "v2({}) should <= {}", DbDim2(),
+                 kMaxDbDim);
+
+    YACL_ENFORCE(G() <= poly_len_log2_, "G({}) should <= log2d({})", G(),
+                 poly_len_log2_);
+
+    // v.size() = 2^g,  g = ceil (log2( 2^v1 + v2 * t_gsw ))
+    // v.size() / 2 >= 2^v1
+    size_t g_half = 1u << (G() - 1);
+    YACL_ENFORCE(g_half >= (1u << DbDim1()), "G/2 = {} should >= 2^{} = {}",
+                 g_half, DbDim1(), (1u << DbDim1()));
+
+    // v.size() / 2 >= v2 * t_gsw
+    YACL_ENFORCE(g_half >= (DbDim2() * TGsw()),
+                 "G/2({}) should >= v2({}) * t_gsw({}) = {}", g_half, DbDim2(),
+                 TGsw(), DbDim2() * TGsw());
   }
 
   [[nodiscard]] const std::vector<std::uint64_t>& GetNttForwardTable(
@@ -304,7 +320,23 @@ class Params {
   }
 
   // the number of raw data rows that one Pt can hold
-  std::size_t ElementSizeOfPt(size_t element_byte_len);
+  std::size_t ElementSizeOfPt(size_t element_byte_len) const;
+
+  static std::size_t ElementSizeOfPt(size_t element_byte_len,
+                                     size_t pt_modulus_bit_len,
+                                     size_t pt_coeffs) {
+    // one element needs how many coeffs
+    size_t coeff_size_of_element =
+        arith::UintNum(8 * element_byte_len, pt_modulus_bit_len);
+
+    // we have poly_len coeffs, so we can hold xx many element
+    size_t element_size_of_pt = pt_coeffs / coeff_size_of_element;
+
+    // at least, one plaintext must hold one element
+    YACL_ENFORCE_GT(element_size_of_pt, static_cast<size_t>(0));
+
+    return element_size_of_pt;
+  }
 
   // one Pt can hold how many bytes
   // in spiral, one Pt is Rp^{n*n}

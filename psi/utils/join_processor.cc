@@ -169,7 +169,7 @@ JoinProcessor::JoinProcessor(const v2::UbPsiConfig& ub_psi_config,
   if (!ub_psi_config.output_attr().csv_null_rep().empty()) {
     csv_null_rep_ = ub_psi_config.output_attr().csv_null_rep();
   }
-  align_output_ = ub_psi_config.disable_alignment();
+  align_output_ = !ub_psi_config.disable_alignment();
 }
 
 JoinProcessor::JoinProcessor(const v2::PsiConfig& psi_config,

@@ -41,13 +41,15 @@ psi_cc_library(
     deps = [
         ":seal_pir_utils",
         ":serializable_cc_proto",
-        "//psi/algorithm/pir_interface:kw_pir",
+        "//psi/algorithm/pir_interface:index_pir",
         "//psi/algorithm/pir_interface:pir_db",
         "@openssl",
+        "@protobuf",
         "@seal",
         "@yacl//yacl/base:byte_container_view",
         "@yacl//yacl/base:exception",
         "@yacl//yacl/link",
+        "@yacl//yacl/utils:elapsed_timer",
         "@yacl//yacl/utils:parallel",
     ],
 )
@@ -69,5 +71,18 @@ psi_cc_test(
         ":seal_pir",
         "@seal",
         "@yacl//yacl/crypto/tools:prg",
+        "@yacl//yacl/utils:elapsed_timer",
+    ],
+)
+
+psi_cc_test(
+    name = "seal_pir_load_test",
+    srcs = ["seal_pir_load_test.cc"],
+    deps = [
+        ":seal_pir",
+        "@protobuf",
+        "@seal",
+        "@yacl//yacl/crypto/tools:prg",
+        "@yacl//yacl/utils:elapsed_timer",
     ],
 )

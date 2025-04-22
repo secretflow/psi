@@ -124,10 +124,10 @@ psi_cc_test(
     srcs = ["poly_matrix_test.cc"],
     copts = spiral_copts(),
     deps = [
-        "poly_matrix",
-        "poly_matrix_utils",
         ":common",
         ":params",
+        ":poly_matrix",
+        ":poly_matrix_utils",
         ":util",
         "//psi/algorithm/spiral/arith:ntt_table",
         "@abseil-cpp//absl/types:span",
@@ -196,6 +196,7 @@ psi_cc_library(
     name = "spiral_client",
     srcs = ["spiral_client.cc"],
     hdrs = ["spiral_client.h"],
+    copts = spiral_copts(),
     deps = [
         ":common",
         ":discrete_gaussian",
@@ -205,7 +206,7 @@ psi_cc_library(
         ":poly_matrix_utils",
         ":public_keys",
         ":serialize",
-        "//psi/algorithm/pir_interface:kw_pir",
+        "//psi/algorithm/pir_interface:index_pir",
         "//psi/algorithm/pir_interface:pir_db",
         "@yacl//yacl/base:int128",
         "@yacl//yacl/crypto/rand",
@@ -234,6 +235,7 @@ psi_cc_library(
     name = "spiral_server",
     srcs = ["spiral_server.cc"],
     hdrs = ["spiral_server.h"],
+    copts = spiral_copts(),
     deps = [
         ":common",
         ":discrete_gaussian",
@@ -244,8 +246,9 @@ psi_cc_library(
         ":public_keys",
         ":serialize",
         ":spiral_client",
-        "//psi/algorithm/pir_interface:kw_pir",
+        "//psi/algorithm/pir_interface:index_pir",
         "//psi/algorithm/pir_interface:pir_db",
+        "@protobuf",
         "@yacl//yacl/base:int128",
         "@yacl//yacl/crypto/rand",
         "@yacl//yacl/crypto/tools:prg",
@@ -273,6 +276,7 @@ psi_cc_test(
 psi_cc_test(
     name = "spiral_pir_test",
     srcs = ["spiral_pir_test.cc"],
+    copts = spiral_copts(),
     deps = [
         ":gadget",
         ":params",
@@ -282,6 +286,25 @@ psi_cc_test(
         ":spiral_server",
         ":util",
         "@abseil-cpp//absl/types:span",
+        "@yacl//yacl/crypto/tools:prg",
+        "@yacl//yacl/utils:elapsed_timer",
+    ],
+)
+
+psi_cc_test(
+    name = "spiral_pir_load_test",
+    srcs = ["spiral_pir_load_test.cc"],
+    copts = spiral_copts(),
+    deps = [
+        ":gadget",
+        ":params",
+        ":poly_matrix_utils",
+        ":public_keys",
+        ":spiral_client",
+        ":spiral_server",
+        ":util",
+        "@abseil-cpp//absl/types:span",
+        "@protobuf",
         "@yacl//yacl/crypto/tools:prg",
         "@yacl//yacl/utils:elapsed_timer",
     ],

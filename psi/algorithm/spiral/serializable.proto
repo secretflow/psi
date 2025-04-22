@@ -42,3 +42,17 @@ message PublicKeysProto {
 message SpiralResponseProto {
   repeated PolyMatrixProto ct = 1;
 }
+
+message SpiralServerProto {
+  uint64 raw_db_rows = 1;
+  uint64 raw_db_bytes = 2;
+
+  uint64 pt_nums = 3;
+  uint64 db_dim1 = 4;
+  uint64 db_dim2 = 5;
+
+  uint64 single_pt_db_size = 6;
+  uint64 partition_num = 7;
+
+  bytes pt_dbs = 8;
+}

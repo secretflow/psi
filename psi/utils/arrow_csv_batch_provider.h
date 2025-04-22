@@ -32,7 +32,8 @@ class ArrowCsvBatchProvider : public IBasicBatchProvider,
   explicit ArrowCsvBatchProvider(const std::string& file_path,
                                  const std::vector<std::string>& keys,
                                  size_t batch_size = 1 << 20,
-                                 const std::vector<std::string>& labels = {});
+                                 const std::vector<std::string>& labels = {},
+                                 char delimiter = ',');
 
   ~ArrowCsvBatchProvider() override;
 
@@ -62,6 +63,8 @@ class ArrowCsvBatchProvider : public IBasicBatchProvider,
   const std::vector<std::string> keys_;
 
   const std::vector<std::string> labels_;
+
+  const char delimiter_;
 
   std::shared_ptr<arrow::io::ReadableFile> infile_;
 

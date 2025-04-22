@@ -26,9 +26,9 @@
 
 For each database chunk $DB[j \sqrt{n} : (j+1) \sqrt{n}]$:
 
-- Update primary table parity: for $i \in [M_1]$, $p_i \leftarrow p_i \oplus DB[\text{Set}(sk_i)[j]]$
+- Update primary table parity: for $i \in [M_1]$, $p_i \leftarrow p_i \oplus DB[\text{Set}[sk_i](j)]$
 - Store replacement entries: sample $M_2$ tuples $(r, DB[r])$ where $r$ is a random index from the current chunk
-- Update backup table parity: for $i \in \\{0, 1, \ldots, \sqrt{n} - 1\\} \setminus \\{j\\}$ and $k \in [M_2]$, $p_{i,k} \leftarrow p_{i,k} \oplus DB[\text{Set}(sk_{i,k})[j]]$
+- Update backup table parity: for $i \in \\{0, 1, \ldots, \sqrt{n} - 1\\} \setminus \\{j\\}$ and $k \in [M_2]$, $p_{i,k} \leftarrow p_{i,k} \oplus DB[\text{Set}[sk_{i,k}](j)]$
 - Delete current chunk from local storage
 
 ## Online Query Phase
@@ -45,9 +45,9 @@ Query Protocol for Index $x \in \\{0, 1, \ldots, n-1\\}$
    - Compute answer $\beta = q \oplus p_i \oplus DB[r]$
 2. **Table Refresh Mechanism**
 
-   - Locate next unused backup entry $(sk_{j^\*,k}, p_{j^\*,k})$
-   - If no entry exists, generate random $sk_{j^\*,k}$ with $p_{j^\*,k} = 0$
-   - Update primary table with new entry: $((sk_{j^\*,k}, x), p_{j^\*,k} \oplus \beta)$
+   - Locate next unused backup entry $(sk_{j^*,k}, p_{j^*,k})$
+   - If no entry exists, generate random $sk_{j^*,k}$ with $p_{j^*,k} = 0$
+   - Update primary table with new entry: $((sk_{j^*,k}, x), p_{j^*,k} \oplus \beta)$
 
 ## Theoretical Guarantees
 

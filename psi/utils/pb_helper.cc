@@ -24,7 +24,7 @@
 
 namespace psi {
 
-void DumpPbMessageToJsonFile(google::protobuf::Message& msg,
+void DumpPbMessageToJsonFile(const google::protobuf::Message& msg,
                              const std::string& json_file) {
   std::string json;
   auto stat = ::google::protobuf::util::MessageToJsonString(msg, &json);
@@ -49,4 +49,19 @@ void LoadJsonFileToPbMessage(const std::string& json_file,
   YACL_ENFORCE(stat.ok(), "json file: {} to pb failed, status:{}", json_file,
                stat.ToString());
 }
+
+std::string DumpPbMessageToJsonStr(const google::protobuf::Message& msg) {
+  std::string json;
+  auto stat = ::google::protobuf::util::MessageToJsonString(msg, &json);
+  YACL_ENFORCE(stat.ok(), "pb to json failed, status:{}", stat.ToString());
+  return json;
+}
+
+void LoadJsonStrToPbMessage(const std::string& json_str,
+                            google::protobuf::Message& msg) {
+  auto stat = ::google::protobuf::util::JsonStringToMessage(json_str, &msg);
+  YACL_ENFORCE(stat.ok(), "json str: {} to pb failed, status:{}", json_str,
+               stat.ToString());
+}
+
 }  // namespace psi

@@ -23,7 +23,7 @@
 
 #include "psi/cryptor/ecc_cryptor.h"
 
-#include "psi/proto/psi_v2.pb.h"
+#include "psi/checkpoint/checkpoint.pb.h"
 
 namespace psi {
 

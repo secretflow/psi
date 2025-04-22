@@ -79,19 +79,30 @@ int GetCpuCount() {
   // 2.2 cgroup v2
   std::ifstream v2_quota_file("/sys/fs/cgroup/cpu.max");
   if (v2_quota_file) {
-    std::string quota;
-    quota_file >> quota;
-    if (quota != "max") {
-      int64_t quota_size = std::stoll(quota);
-      int64_t period;
-      v2_quota_file >> period;
-      if (period != 0) {
-        return static_cast<int>((quota_size + period - 1) / period);
+    std::string line;
+    if (std::getline(v2_quota_file, line)) {
+      std::istringstream iss(line);
+      std::string quota_str;
+      std::string period_str;
+      if (iss >> quota_str >> period_str) {
+        if (quota_str != "max") {
+          try {
+            int64_t quota = std::stoll(quota_str);
+            int64_t period = std::stoll(period_str);
+            if (period > 0) {
+              return static_cast<int>((quota + period - 1) / period);
+            }
+          } catch (...) {
+            SPDLOG_WARN(
+                "trans quota({}) or period({}) failed, use default method",
+                quota_str, period_str);
+          }
+        }
       }
     }
   }
 
-  // 4. use hardware_concurrency
+  // 3. use hardware_concurrency
   return std::thread::hardware_concurrency();
 }
 

@@ -32,10 +32,10 @@ class Progress {
   };
 
   struct Data {
-    size_t total;
-    size_t finished;
-    size_t running;
-    size_t percentage;
+    size_t total{0};
+    size_t finished{0};
+    size_t running{0};
+    size_t percentage{0};
     std::string description;
   };
 

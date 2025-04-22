@@ -17,7 +17,7 @@ syntax = "proto3";
 
 package psi.pir;
 
-enum PirType{
+enum PirType {
   INVALID = 0;
   SEAL_PIR = 1;
   SPIRAL_PIR = 2;

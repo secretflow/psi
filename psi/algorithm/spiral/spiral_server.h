@@ -37,8 +37,6 @@ namespace psi::spiral {
 
 class SpiralServer : public psi::pir::IndexPirDataBase {
  public:
-  SpiralServer() = default;
-
   explicit SpiralServer(Params params, std::vector<uint64_t> reoriented_db)
       : psi::pir::IndexPirDataBase(psi::pir::PirType::SPIRAL_PIR),
         params_(std::move(params)),

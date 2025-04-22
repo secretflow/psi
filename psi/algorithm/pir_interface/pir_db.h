@@ -96,7 +96,7 @@ class KwPirDataBase {
 
 class IndexPirDataBase {
  public:
-  IndexPirDataBase(PirType pir_type) : pir_type_(pir_type) {}
+  explicit IndexPirDataBase(PirType pir_type) : pir_type_(pir_type) {}
   virtual ~IndexPirDataBase() = default;
 
   virtual void GenerateFromRawData(const RawDatabase& raw_data) = 0;

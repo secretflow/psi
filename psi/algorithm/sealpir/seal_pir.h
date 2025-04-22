@@ -276,7 +276,6 @@ class SealPirServer : public SealPir, public psi::pir::IndexPirDataBase {
   std::vector<std::shared_ptr<IDbPlaintextStore>> plaintext_store_;
 
   bool db_seted_ = false;
-  bool galois_keys_seted_ = false;
 
   std::unordered_map<uint32_t, seal::GaloisKeys> galois_keys_;
 

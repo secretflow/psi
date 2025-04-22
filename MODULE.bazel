@@ -79,7 +79,6 @@ new_local_repository(
 )
 
 bazel_dep(name = "kuscia", version = "0.14.0b0")
-
 bazel_dep(name = "prometheus-cpp", version = "1.2.4")
 
 # test

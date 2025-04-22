@@ -612,8 +612,7 @@ SealPirServer
 SealPirServer::SealPirServer(const SealPirOptions &options)
     : SealPir(options),
       psi::pir::IndexPirDataBase(psi::pir::PirType::SEAL_PIR),
-      db_seted_(false),
-      galois_keys_seted_(false) {
+      db_seted_(false) {
   plaintext_store_.resize(pir_params_.partition_num);
   for_each(plaintext_store_.begin(), plaintext_store_.end(),
            [](shared_ptr<IDbPlaintextStore> &ptr) {

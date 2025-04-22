@@ -66,10 +66,12 @@ class SealPir {
     bool enable_batching = true;
     bool enable_mswitching = true;
 
+    static std::size_t MaxElementsOfOnePt(size_t logt, size_t N,
+                                          size_t ele_bytes);
+
     std::string ToString() {
       std::ostringstream ss;
-      ss << "PirParams: "
-         << "\n";
+      ss << "PirParams: \n ";
       ss << "database rows: " << ele_num << ", each row length: " << ele_size
          << " bytes";
       ss << ", poly degree: " << slot_cnt << ", logt: " << logt
@@ -116,14 +118,20 @@ class SealPir {
   }
 
   template <typename T>
-  T DeSerializeSealObject(const std::string &object_bytes,
+  T DeSerializeSealObject(const yacl::ByteContainerView &object_bytes,
                           bool safe_load = false) const {
     T seal_object;
-    std::istringstream object_input(object_bytes);
+
     if (safe_load) {
-      seal_object.load(*context_, object_input);
+      seal_object.load(
+          *context_,
+          reinterpret_cast<const seal::seal_byte *>(object_bytes.data()),
+          object_bytes.size());
     } else {
-      seal_object.unsafe_load(*context_, object_input);
+      seal_object.unsafe_load(
+          *context_,
+          reinterpret_cast<const seal::seal_byte *>(object_bytes.data()),
+          object_bytes.size());
     }
     return seal_object;
   }
@@ -132,12 +140,15 @@ class SealPir {
       const std::vector<seal::Plaintext> &plains) const;
 
   std::vector<seal::Plaintext> DeSerializePlaintexts(
-      const std::string &plaintext_bytes, bool safe_load = false) const;
+      const yacl::ByteContainerView &plaintext_bytes,
+      bool safe_load = false) const;
 
   yacl::Buffer SerializeCiphertexts(
       const std::vector<seal::Ciphertext> &ciphers) const;
+
   std::vector<seal::Ciphertext> DeSerializeCiphertexts(
-      const yacl::Buffer &ciphers_buffer, bool safe_load = false) const;
+      const yacl::ByteContainerView &ciphers_buffer,
+      bool safe_load = false) const;
 
   std::vector<seal::Ciphertext> DeSerializeCiphertexts(
       const CiphertextsProto &ciphers_proto, bool safe_load = false) const;
@@ -178,17 +189,18 @@ class SealPir {
   std::string SerializeSeededQueryToStr(
       SealPirQueryProto *query_proto,
       const std::vector<std::vector<std::string>> &query_ciphers) const;
-  std::vector<std::vector<seal::Ciphertext>> DeSerializeQuery(
-      const yacl::Buffer &query_buffer, bool safe_load = false) const;
+
   std::string SerializeResponseToStr(
       SealPirResponseProto *response_proto,
       const std::vector<std::vector<seal::Ciphertext>> &response_ciphers) const;
   std::string SerializeResponseToStr(
       const std::vector<std::vector<seal::Ciphertext>> &response_ciphers) const;
   std::vector<std::vector<seal::Ciphertext>> DeSerializeResponse(
-      const std::string &response_buffer, bool safe_load = false) const;
+      const yacl::ByteContainerView &response_buffer,
+      bool safe_load = false) const;
   std::vector<std::vector<seal::Ciphertext>> DeSerializeQuery(
-      const std::string &query_buffer, bool safe_load = false) const;
+      const yacl::ByteContainerView &query_buffer,
+      bool safe_load = false) const;
   std::vector<std::vector<seal::Ciphertext>> DeSerializeQuery(
       const SealPirQueryProto &query_proto, bool safe_load = false) const;
 
@@ -221,12 +233,19 @@ class SealPirServer : public SealPir, public psi::pir::IndexPirDataBase {
 
   void GenerateFromRawData(const psi::pir::RawDatabase &raw_data) override;
 
+  void GenerateFromSimpleHashTable(
+      const psi::pir::RawDatabase &raw_data) override;
+
   bool DbSeted() const override { return db_seted_; }
 
   void GenerateFromRawData(const std::vector<yacl::ByteContainerView> &db_vec);
   void GenerateFromRawData(std::vector<std::vector<uint8_t>> raw_database) {
     psi::pir::RawDatabase raw_db(std::move(raw_database));
     GenerateFromRawData(raw_db);
+  }
+
+  std::size_t MaxElementsOfOnePt() const override {
+    return static_cast<std::size_t>(pir_params_.elements_per_plaintext);
   }
 
   SealPirServerProto SerializeToProto() const;
@@ -242,17 +261,13 @@ class SealPirServer : public SealPir, public psi::pir::IndexPirDataBase {
       const std::vector<std::vector<seal::Ciphertext>> &query,
       const seal::GaloisKeys &key) const;
 
-  yacl::Buffer Response(const yacl::Buffer &query_buffer,
+  yacl::Buffer Response(const yacl::ByteContainerView &query_buffer,
                         const yacl::Buffer &pks_buffer) const override;
-  std::string Response(const std::string &query_buffer,
+  std::string Response(const yacl::ByteContainerView &query_buffer,
                        const std::string &pks_buffer) const override;
 
-  void SetGaloisKey(uint32_t client_id, const seal::GaloisKeys &galkey);
-  void SetGaloisKey(uint32_t client_id, const yacl::Buffer &galkey);
-  void SetGaloisKey(uint32_t client_id, const std::string &galkey);
-
   std::string SerializeDbPlaintext(int db_index = 0) const;
-  void DeSerializeDbPlaintext(const std::string &db_serialize_bytes,
+  void DeSerializeDbPlaintext(const yacl::ByteContainerView &db_serialize_bytes,
                               int db_index = 0);
 
  private:
@@ -268,9 +283,6 @@ class SealPirServer : public SealPir, public psi::pir::IndexPirDataBase {
   void MultiplyPowerOfX(const seal::Ciphertext &encrypted,
                         seal::Ciphertext &destination, uint32_t index) const;
 
-  std::vector<seal::Ciphertext> ExpandQuery(const seal::Ciphertext &encrypted,
-                                            uint64_t m,
-                                            uint32_t client_id) const;
   std::vector<seal::Ciphertext> ExpandQuery(const seal::Ciphertext &encrypted,
                                             uint64_t m,
                                             const seal::GaloisKeys &key) const;
@@ -304,11 +316,10 @@ class SealPirClient : public SealPir, public psi::pir::IndexPirClient {
 
   std::vector<uint8_t> DecodeResponse(PirResponse &response,
                                       uint64_t raw_idx) const;
-  std::vector<uint8_t> DecodeIndexResponse(const yacl::Buffer &response_buffer,
-                                           uint64_t raw_idx) const override;
 
-  std::vector<uint8_t> DecodeIndexResponse(const std::string &response_buffer,
-                                           uint64_t raw_idx) const override;
+  std::vector<uint8_t> DecodeIndexResponse(
+      const yacl::ByteContainerView &response_buffer,
+      uint64_t raw_idx) const override;
 
  private:
   std::vector<seal::Plaintext> DecodeResponse(PirResponse &response) const;

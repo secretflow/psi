@@ -26,17 +26,3 @@ enum PirType {
 message PirTypeProto {
   PirType type = 1;
 }
-
-message CuckooOptionsProto {
-  uint64 num_input = 1;
-  uint64 num_stash = 2;
-  uint64 num_hash = 3;
-  double scale_factor = 4;
-  uint64 max_try_count = 5;
-}
-
-message KwPirOptionsProto {
-  CuckooOptionsProto cuckoo_options = 1;
-  uint64 key_size = 2;
-  uint64 value_size = 3;
-}

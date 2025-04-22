@@ -39,9 +39,7 @@ yacl::Buffer SerializePolyMatrixRaw(const PolyMatrixRaw& poly_matrix);
 std::string SerializePolyMatrixRawToStr(const PolyMatrixRaw& poly_matrix);
 
 PolyMatrixRaw DeserializePolyMatrixRaw(const Params& params,
-                                       yacl::Buffer& buffer);
-PolyMatrixRaw DeserializePolyMatrixRaw(const Params& params,
-                                       const std::string& buffer);
+                                       const yacl::ByteContainerView& buffer);
 
 // the first row we use a seed to compress
 yacl::Buffer SerializePolyMatrixRawRng(const PolyMatrixRaw& poly_matrix,
@@ -49,26 +47,19 @@ yacl::Buffer SerializePolyMatrixRawRng(const PolyMatrixRaw& poly_matrix,
 std::string SerializePolyMatrixRawRngToStr(const PolyMatrixRaw& poly_matrix,
                                            const Params& params);
 
-PolyMatrixRaw DeserializePolyMatrixRawRng(yacl::Buffer& buffer,
-                                          const Params& params,
-                                          yacl::crypto::Prg<uint64_t> rng);
-PolyMatrixRaw DeserializePolyMatrixRawRng(const std::string& buffer,
+PolyMatrixRaw DeserializePolyMatrixRawRng(yacl::ByteContainerView buffer,
                                           const Params& params,
                                           yacl::crypto::Prg<uint64_t> rng);
 
 yacl::Buffer SerializeResponse(const std::vector<PolyMatrixRaw>& responses);
 std::string SerializeResponseToStr(const std::vector<PolyMatrixRaw>& responses);
-std::vector<PolyMatrixRaw> DeserializeResponse(const Params& params,
-                                               const yacl::Buffer& buffer);
-std::vector<PolyMatrixRaw> DeserializeResponse(const Params& params,
-                                               const std::string& buffer);
+std::vector<PolyMatrixRaw> DeserializeResponse(
+    const Params& params, const yacl::ByteContainerView& buffer);
 
 yacl::Buffer SerializePublicKeys(const Params& params, const PublicKeys& pks);
 std::string SerializePublicKeysToStr(const Params& params,
                                      const PublicKeys& pks);
 PublicKeys DeserializePublicKeys(const Params& params,
-                                 const yacl::Buffer& buffer);
-PublicKeys DeserializePublicKeys(const Params& params,
-                                 const std::string& buffer);
+                                 const yacl::ByteContainerView& buffer);
 
 }  // namespace psi::spiral

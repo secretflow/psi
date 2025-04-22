@@ -51,14 +51,11 @@ struct SpiralQuery {
   yacl::Buffer SerializeRng();
   std::string SerializeToStr();
   std::string SerializeRngToStr();
+
   static SpiralQuery Deserialize(const Params& params,
-                                 const yacl::Buffer& buffer);
+                                 const yacl::ByteContainerView& buffer);
   static SpiralQuery DeserializeRng(const Params& params,
-                                    const yacl::Buffer& buffer);
-  static SpiralQuery Deserialize(const Params& params,
-                                 const std::string& buffer);
-  static SpiralQuery DeserializeRng(const Params& params,
-                                    const std::string& buffer);
+                                    const yacl::ByteContainerView& buffer);
 };
 
 class SpiralClient : public psi::pir::IndexPirClient {
@@ -126,14 +123,9 @@ class SpiralClient : public psi::pir::IndexPirClient {
     return query.SerializeRngToStr();
   }
 
-  std::vector<uint8_t> DecodeIndexResponse(const yacl::Buffer& response_buffer,
-                                           uint64_t raw_idx) const override {
-    auto response = DeserializeResponse(params_, response_buffer);
-
-    return DecodeResponse(response, raw_idx);
-  }
-  std::vector<uint8_t> DecodeIndexResponse(const std::string& response_buffer,
-                                           uint64_t raw_idx) const override {
+  std::vector<uint8_t> DecodeIndexResponse(
+      const yacl::ByteContainerView& response_buffer,
+      uint64_t raw_idx) const override {
     auto response = DeserializeResponse(params_, response_buffer);
 
     return DecodeResponse(response, raw_idx);

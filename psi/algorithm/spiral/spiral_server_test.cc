@@ -136,10 +136,9 @@ void FullProtocolIsCorrect(Params&& params, Params&& params_client,
 
   // new server
   SpiralServer server(std::move(params_server), db);
-  server.SetPublicKeys(std::move(pks));
 
   // gen response
-  auto response = server.ProcessQuery(query);
+  auto response = server.ProcessQuery(query, pks);
 
   // decode
   auto result = client.DecodeResponseInternal(response);
@@ -202,7 +201,6 @@ TEST(SpiralServer, MultiplyRegByDatabase) {
         PolyMatrixNtt::Zero(params.CrtCount(), params.PolyLen(), 2, 1));
   }
   SpiralServerDerive server(std::move(params_server), std::move(db));
-  server.SetPublicKeys(std::move(pp));
   // now mul
   server.MultiplyRegByDatabase(out, v_reg_reoriented, dim0, num_per);
   // decrypt
@@ -256,7 +254,6 @@ TEST(SpiralServer, CoefficientExpansion) {
   // init server
   std::vector<uint64_t> db;
   SpiralServerDerive server(std::move(params_server), std::move(db));
-  server.SetPublicKeys(std::move(pp));
   // expand to mutli ciphertext
   server.CoefficientExpansion(v, params.G(), params.StopRound(), v_w_left,
                               v_w_right, v_neg1,
@@ -313,7 +310,7 @@ TEST(SpiralServer, RegevToGsw) {
   // new Server
   std::vector<uint64_t> db;
   SpiralServerDerive server(std::move(params_server), std::move(db));
-  server.SetPublicKeys(std::move(pp));
+
   // regev to gsw
   server.RegevToGsw(v_gsw, v_inp_1, v, 1, 0);
   EXPECT_EQ(1, DecGsw(params, v_gsw[0], client));
@@ -397,7 +394,6 @@ TEST(SpiralServer, FoldCiphertexts) {
   // new Server
   std::vector<uint64_t> db;
   SpiralServerDerive server(std::move(params_server), std::move(db));
-  server.SetPublicKeys(std::move(pp));
   // now folding
   server.FoldCiphertexts(v_regev_raw, v_folding, v_folding_neg);
 

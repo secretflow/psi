@@ -372,6 +372,61 @@ void SpiralServer::GenerateFromRawData(
   database_seted_ = true;
 }
 
+void SpiralServer::GenerateFromSimpleHashTable(
+    const psi::pir::RawDatabase& raw_database) {
+  // now, we only support the pt modulus bit len = 8;
+  // for reduce the storage size of server dump
+  YACL_ENFORCE_EQ(params_.PtModulusBitLen(), 8u);
+
+  size_t partition_byte_len = params_.MaxByteLenOfPt();
+
+  SPDLOG_INFO("raw_database rows: {}, each row bytes: {}", raw_database.Rows(),
+              raw_database.RowByteLen());
+
+  SPDLOG_INFO("Before update, rows: {}, row bytes: {}", database_info_.rows_,
+              database_info_.byte_size_per_row_);
+  SPDLOG_INFO("Before update, params: {}", params_.ToString());
+
+  // we must update the params by current raw_database
+  // DatabaseMetaInfo info(raw_database.Rows(), raw_database.RowByteLen());
+  database_info_.rows_ = raw_database.Rows();
+  database_info_.byte_size_per_row_ = raw_database.RowByteLen();
+  params_.UpdateByDatabaseInfo(database_info_);
+
+  SPDLOG_INFO("After update, rows: {}, row bytes: {}", database_info_.rows_,
+              database_info_.byte_size_per_row_);
+  SPDLOG_INFO("After update, params: {}", params_.ToString());
+
+  // one Pt can hold one row data
+  // do not need to partition
+  if (partition_byte_len >= raw_database.RowByteLen()) {
+    pt_dbs_ = ConvertRawDbToPtDb(raw_database.Db());
+    single_pt_db_size_ = pt_dbs_.size();
+    partition_num_ = 1;
+    database_seted_ = true;
+    return;
+  }
+  // now we need to Partition the raw database
+  partition_num_ =
+      (raw_database.RowByteLen() + partition_byte_len - 1) / partition_byte_len;
+  auto sub_dbs = raw_database.Partition(partition_byte_len);
+
+  // now we handle each sub db
+  for (size_t j = 0; j < partition_num_; ++j) {
+    std::vector<uint8_t> tmp = ConvertRawDbToPtDb(sub_dbs[j].Db());
+
+    if (j == 0) {
+      pt_dbs_.reserve(tmp.size() * partition_num_);
+      single_pt_db_size_ = tmp.size();
+    }
+    YACL_ENFORCE_EQ(single_pt_db_size_, tmp.size());
+
+    pt_dbs_.insert(pt_dbs_.end(), tmp.begin(), tmp.end());
+  }
+
+  database_seted_ = true;
+}
+
 void SpiralServer::GenerateFromRawDataAndReorient(
     const psi::pir::RawDatabase& raw_database) {
   size_t partition_byte_len = params_.MaxByteLenOfPt();
@@ -625,88 +680,6 @@ PolyMatrixNtt SpiralServer::Pack(const std::vector<PolyMatrixRaw>& v_ct,
 }
 
 std::vector<PolyMatrixRaw> SpiralServer::ProcessQuery(
-    const SpiralQuery& query) const {
-  YACL_ENFORCE(database_seted_,
-               "Before ProcessQuery, database must be processed");
-  YACL_ENFORCE(pks_seted_, "Before ProcessQuery, PublicKeys must be seted");
-
-#ifdef __AVX2__
-  SPDLOG_INFO("Using Spiral AVX2 version");
-#else
-  SPDLOG_INFO(
-      "Using Spiral Non-AVX2 version, this will be slower than AVX2 version");
-#endif
-
-  size_t dim0 = 1 << params_.DbDim1();
-  size_t num_per = 1 << params_.DbDim2();
-  size_t db_slice_sz = dim0 * num_per * params_.PolyLen();
-
-  const auto& v_packing = pks_.v_packing_;
-
-  std::vector<uint64_t> v_reg_reoriented;
-  std::vector<PolyMatrixNtt> v_folding;
-
-  SPDLOG_INFO("Server begin to Expand Query");
-  yacl::ElapsedTimer timer;
-
-  // We default to using QueryExpand technology
-  std::tie(v_reg_reoriented, v_folding) = ExpandQuery(query);
-
-  SPDLOG_INFO("Server end to Expand Query, time cost: {} ms", timer.CountMs());
-  timer.Restart();
-
-  auto v_folding_neg = GetVFoldingNeg(v_folding);
-  size_t n_power = params_.N() * params_.N();
-  std::vector<PolyMatrixRaw> v_packed_ct;
-  v_packed_ct.reserve(partition_num_);
-
-  // init only once
-  std::vector<PolyMatrixNtt> intermediate;
-  std::vector<PolyMatrixRaw> intermediate_raw;
-  for (size_t i = 0; i < num_per; ++i) {
-    intermediate.emplace_back(params_.CrtCount(), params_.PolyLen(), 2, 1);
-    intermediate_raw.emplace_back(params_.PolyLen(), 2, 1);
-  }
-
-  // when use yacl::parallel_for, there is no improve
-  for (size_t partiton_idx = 0; partiton_idx < partition_num_; ++partiton_idx) {
-    std::vector<PolyMatrixRaw> v_ct;
-    for (size_t trial = 0; trial < n_power; ++trial) {
-      // the instances is 1, so the ins = 0
-      // so we can remove the ins
-      size_t idx = trial * db_slice_sz;
-      MultiplyRegByDatabase(intermediate, v_reg_reoriented, dim0, num_per, idx,
-                            partiton_idx);
-      // ntt to raw
-      for (size_t i = 0; i < intermediate.size(); ++i) {
-        FromNtt(params_, intermediate_raw[i], intermediate[i]);
-      }
-      // fold
-      FoldCiphertexts(intermediate_raw, v_folding, v_folding_neg);
-      // need deep-copy
-      v_ct.emplace_back(intermediate_raw[0]);
-    }
-    auto packed_ct = Pack(v_ct, v_packing);
-    v_packed_ct.push_back(FromNtt(params_, packed_ct));
-  }
-
-  // modulus switching
-  uint64_t q1 = 4 * params_.PtModulus();
-  uint64_t q2 = kQ2Values[params_.Q2Bits()];
-  for (auto& ct : v_packed_ct) {
-    ct.Rescale(0, 1, params_.Modulus(), q2);
-    ct.Rescale(1, ct.Rows(), params_.Modulus(), q1);
-  }
-
-  SPDLOG_INFO(
-      "Server end to do dot-product between query and database, time cost: {} "
-      "ms",
-      timer.CountMs());
-
-  return v_packed_ct;
-}
-
-std::vector<PolyMatrixRaw> SpiralServer::ProcessQuery(
     const SpiralQuery& query, const PublicKeys& pks) const {
   YACL_ENFORCE(database_seted_,
                "Before ProcessQuery, database must be processed");
@@ -904,84 +877,6 @@ SpiralServer::ExpandQuery(const SpiralQuery& query,
   SPDLOG_INFO("Server finished RegevToGsw, time: {} ms", timer.CountMs());
 
   return std::make_pair(std::move(v_reg_reoriented), std::move(v_folding));
-}
-
-std::pair<std::vector<uint64_t>, std::vector<PolyMatrixNtt>>
-SpiralServer::ExpandQuery(const SpiralQuery& query) const {
-  size_t dim0 = 1 << params_.DbDim1();
-  size_t further_dims = params_.DbDim2();
-  size_t num_bits_to_gen = params_.TGsw() * further_dims + dim0;
-  size_t g = arith::Log2Ceil(num_bits_to_gen);
-  size_t right_expanded = params_.TGsw() * further_dims;
-  size_t stop_round = arith::Log2Ceil(right_expanded);
-
-  std::vector<PolyMatrixNtt> v;
-  v.reserve(static_cast<size_t>(1) << g);
-  for (size_t i = 0; i < static_cast<size_t>(1) << g; ++i) {
-    v.emplace_back(params_.CrtCount(), params_.PolyLen(), 2, 1);
-  }
-
-  YACL_ENFORCE((v.size() >> 1) >= dim0, "v.size()/2: {}, v1: {}", v.size() >> 1,
-               dim0);
-  YACL_ENFORCE((v.size() >> 1) >= right_expanded,
-               "v.size()/2: {}, right_expanded(v2 * t_gsw) = {} * {} = {}",
-               v.size() >> 1, further_dims, params_.TGsw(), right_expanded);
-
-  auto query_ct_ntt = ToNtt(params_, query.ct_);
-  v[0].CopyInto(query_ct_ntt, 0, 0);
-
-  const PolyMatrixNtt& v_conversion = pks_.v_conversion_[0];
-  const std::vector<PolyMatrixNtt>& v_w_left = pks_.v_expansion_left_;
-  const std::vector<PolyMatrixNtt>& v_w_right = pks_.v_expansion_right_;
-
-  auto v_neg1 = GetVneg1(params_);
-
-  std::vector<PolyMatrixNtt> v_reg_inp;
-  v_reg_inp.reserve(dim0);
-  std::vector<PolyMatrixNtt> v_gsw_inp;
-  v_gsw_inp.reserve(right_expanded);
-
-  yacl::ElapsedTimer timer;
-
-  if (further_dims > 0) {
-    CoefficientExpansion(v, g, stop_round, v_w_left, v_w_right, v_neg1,
-                         params_.TGsw() * params_.DbDim2());
-    for (size_t i = 0; i < dim0; ++i) {
-      // deep copy
-      v_reg_inp.push_back(std::move(v[2 * i]));
-    }
-    for (size_t i = 0; i < right_expanded; ++i) {
-      WEAK_ENFORCE(2 * i + 1 < v.size());
-      v_gsw_inp.push_back(std::move(v[2 * i + 1]));
-    }
-  } else {
-    CoefficientExpansion(v, g, 0, v_w_left, v_w_right, v_neg1, 0);
-    for (size_t i = 0; i < dim0; ++i) {
-      v_reg_inp.emplace_back(v[i]);
-    }
-  }
-
-  SPDLOG_INFO("Server finished CoefficientExpansion, time: {} ms",
-              timer.CountMs());
-  timer.Restart();
-
-  size_t v_reg_sz = dim0 * 2 * params_.PolyLen();
-  std::vector<uint64_t> v_reg_reoriented(v_reg_sz);
-  ReorientRegCiphertexts(params_, v_reg_reoriented, v_reg_inp);
-
-  SPDLOG_INFO("Server finished ReorientRegCiphertexts, time: {} ms",
-              timer.CountMs());
-  timer.Restart();
-
-  std::vector<PolyMatrixNtt> v_folding;
-  for (size_t i = 0; i < params_.DbDim2(); ++i) {
-    v_folding.emplace_back(params_.CrtCount(), params_.PolyLen(), 2,
-                           2 * params_.TGsw());
-  }
-  RegevToGsw(v_folding, v_gsw_inp, v_conversion, 1, 0);
-  SPDLOG_INFO("Server finished RegevToGsw, time: {} ms", timer.CountMs());
-
-  return std::make_pair(v_reg_reoriented, v_folding);
 }
 
 void SpiralServer::MultiplyRegByDatabase(std::vector<PolyMatrixNtt>& out,

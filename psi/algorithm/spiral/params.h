@@ -320,7 +320,23 @@ class Params {
   }
 
   // the number of raw data rows that one Pt can hold
-  std::size_t ElementSizeOfPt(size_t element_byte_len);
+  std::size_t ElementSizeOfPt(size_t element_byte_len) const;
+
+  static std::size_t ElementSizeOfPt(size_t element_byte_len,
+                                     size_t pt_modulus_bit_len,
+                                     size_t pt_coeffs) {
+    // one element needs how many coeffs
+    size_t coeff_size_of_element =
+        arith::UintNum(8 * element_byte_len, pt_modulus_bit_len);
+
+    // we have poly_len coeffs, so we can hold xx many element
+    size_t element_size_of_pt = pt_coeffs / coeff_size_of_element;
+
+    // at least, one plaintext must hold one element
+    YACL_ENFORCE_GT(element_size_of_pt, static_cast<size_t>(0));
+
+    return element_size_of_pt;
+  }
 
   // one Pt can hold how many bytes
   // in spiral, one Pt is Rp^{n*n}

@@ -85,7 +85,7 @@ void Params::ComputeId() {
   std::memcpy(&id_, digest.data(), sizeof(uint64_t));
 }
 
-std::size_t Params::ElementSizeOfPt(size_t element_byte_len) {
+std::size_t Params::ElementSizeOfPt(size_t element_byte_len) const {
   // one element needs how many coeffs
   size_t coeff_size_of_element =
       arith::UintNum(8 * element_byte_len, PtModulusBitLen());
@@ -94,7 +94,7 @@ std::size_t Params::ElementSizeOfPt(size_t element_byte_len) {
   size_t element_size_of_pt = PtCoeffs() / coeff_size_of_element;
 
   // at least, one plaintext must hold one element
-  YACL_ENFORCE_GT(element_size_of_pt, static_cast<size_t>(0));
+  element_size_of_pt = std::max<size_t>(element_size_of_pt, 1u);
 
   return element_size_of_pt;
 }
@@ -104,8 +104,6 @@ size_t Params::UpdateByDatabaseInfo(const DatabaseMetaInfo& database_info) {
               database_info.byte_size_per_row_);
   // here, we only consider one row of raw data can be holded by one plaintext
   // in SpiralPIR
-
-  // size_t element_byte_len = database_info.byte_size_per_row_;
 
   // if the byte_size_per_row_ > MaxByteLenOfPt, we use the min
   size_t element_byte_len =

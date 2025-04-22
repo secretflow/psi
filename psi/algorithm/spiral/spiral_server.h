@@ -65,6 +65,10 @@ class SpiralServer : public psi::pir::IndexPirDataBase {
   // convert raw database to Plaintext of SpiralPIR
   void GenerateFromRawData(const psi::pir::RawDatabase& raw_database) override;
 
+  //  convert raw database(SimpleHashTable Version) to Plaintext of SpiralPIR
+  void GenerateFromSimpleHashTable(
+      const psi::pir::RawDatabase& raw_data) override;
+
   // convert raw database to the specific format required by SpiralPIR
   // now we support value of any length
   void GenerateFromRawDataAndReorient(
@@ -72,28 +76,16 @@ class SpiralServer : public psi::pir::IndexPirDataBase {
 
   bool DbSeted() const override { return database_seted_; }
 
-  void SetPublicKeys(PublicKeys pks) {
-    pks_ = std::move(pks);
-    pks_seted_ = true;
+  std::size_t MaxElementsOfOnePt() const override {
+    return params_.ElementSizeOfPt(database_info_.byte_size_per_row_);
   }
-
-  void SetPublicKeys(yacl::Buffer& pks_buffer) {
-    pks_ = DeserializePublicKeys(params_, pks_buffer);
-    pks_seted_ = true;
-  }
-  void SetPublicKeys(const std::string& pks_buffer) {
-    pks_ = DeserializePublicKeys(params_, pks_buffer);
-    pks_seted_ = true;
-  }
-
-  std::vector<PolyMatrixRaw> ProcessQuery(const SpiralQuery& query) const;
 
   std::vector<PolyMatrixRaw> ProcessQuery(const SpiralQuery& query,
                                           const PublicKeys& pks) const;
 
   const Params& GetParams() const { return params_; }
 
-  yacl::Buffer Response(const yacl::Buffer& query_buffer,
+  yacl::Buffer Response(const yacl::ByteContainerView& query_buffer,
                         const yacl::Buffer& pks_buffer) const override {
     auto query = SpiralQuery::DeserializeRng(params_, query_buffer);
     auto pks = DeserializePublicKeys(params_, pks_buffer);
@@ -106,7 +98,8 @@ class SpiralServer : public psi::pir::IndexPirDataBase {
 
     return SerializeResponse(response);
   }
-  std::string Response(const std::string& query_buffer,
+
+  std::string Response(const yacl::ByteContainerView& query_buffer,
                        const std::string& pks_buffer) const override {
     auto query = SpiralQuery::DeserializeRng(params_, query_buffer);
     auto pks = DeserializePublicKeys(params_, pks_buffer);
@@ -131,6 +124,7 @@ class SpiralServer : public psi::pir::IndexPirDataBase {
   void SetPartitionNum(size_t partition_num) { partition_num_ = partition_num; }
 
   SpiralServerProto SerializeToProto() const;
+
   static std::unique_ptr<SpiralServer> DeserializeFromProto(
       const SpiralServerProto& proto);
 
@@ -161,9 +155,6 @@ class SpiralServer : public psi::pir::IndexPirDataBase {
                             size_t max_btis_to_gen_right) const;
 
   std::pair<std::vector<uint64_t>, std::vector<PolyMatrixNtt>> ExpandQuery(
-      const SpiralQuery& query) const;
-
-  std::pair<std::vector<uint64_t>, std::vector<PolyMatrixNtt>> ExpandQuery(
       const SpiralQuery& query, const PublicKeys& pks) const;
 
   void RegevToGsw(std::vector<PolyMatrixNtt>& v_gsw,
@@ -191,8 +182,6 @@ class SpiralServer : public psi::pir::IndexPirDataBase {
  private:
   Params params_;
 
-  PublicKeys pks_;
-
   // pt nums after database processed
   size_t pt_nums_ = 0;
 
@@ -215,8 +204,6 @@ class SpiralServer : public psi::pir::IndexPirDataBase {
   DatabaseMetaInfo database_info_;
 
   bool database_seted_ = false;
-
-  bool pks_seted_ = false;
 };
 
 // util method

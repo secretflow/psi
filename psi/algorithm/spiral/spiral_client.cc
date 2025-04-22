@@ -49,24 +49,9 @@ std::string SpiralQuery::SerializeToStr() {
 }
 
 SpiralQuery SpiralQuery::Deserialize(const Params& params,
-                                     const yacl::Buffer& buffer) {
+                                     const yacl::ByteContainerView& buffer) {
   SpiralQueryProto proto;
   proto.ParseFromArray(buffer.data(), buffer.size());
-
-  SpiralQuery query;
-  query.ct_ = PolyMatrixRaw::FromProto(proto.ct(), params);
-
-  uint128_t seed{0};
-  std::memcpy(&seed, proto.seed().data(), sizeof(uint128_t));
-  query.seed_ = seed;
-
-  return query;
-}
-
-SpiralQuery SpiralQuery::Deserialize(const Params& params,
-                                     const std::string& buffer) {
-  SpiralQueryProto proto;
-  proto.ParseFromString(buffer);
 
   SpiralQuery query;
   query.ct_ = PolyMatrixRaw::FromProto(proto.ct(), params);
@@ -99,28 +84,9 @@ std::string SpiralQuery::SerializeRngToStr() {
 }
 
 SpiralQuery SpiralQuery::DeserializeRng(const Params& params,
-                                        const yacl::Buffer& buffer) {
+                                        const yacl::ByteContainerView& buffer) {
   SpiralQueryProto proto;
   proto.ParseFromArray(buffer.data(), buffer.size());
-
-  // first we construct seed and prg
-  uint128_t seed{0};
-  std::memcpy(&seed, proto.seed().data(), sizeof(uint128_t));
-
-  yacl::crypto::Prg<uint64_t> rng(seed);
-
-  SpiralQuery query;
-  query.seed_ = seed;
-
-  query.ct_ = PolyMatrixRaw::FromProtoRng(proto.ct(), params, rng);
-
-  return query;
-}
-
-SpiralQuery SpiralQuery::DeserializeRng(const Params& params,
-                                        const std::string& buffer) {
-  SpiralQueryProto proto;
-  proto.ParseFromString(buffer);
 
   // first we construct seed and prg
   uint128_t seed{0};

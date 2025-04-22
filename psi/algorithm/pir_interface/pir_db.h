@@ -52,48 +52,6 @@ PirType ProtoToPirType(const PirTypeProto& proto);
 // forward declare
 class RawDatabase;
 
-class KwPirDataBase {
- public:
-  KwPirDataBase() = default;
-  virtual ~KwPirDataBase() = default;
-
-  // if our setting is no payload, we need to use this function
-  // to init our DB
-  virtual void GenerateFromRawKeyData(
-      const std::vector<yacl::ByteContainerView>& db_vec) = 0;
-
-  // each element is key & value, each value`s length must be same
-  virtual void GenerateFromRawKeyValueData(
-      const std::vector<std::pair<yacl::ByteContainerView,
-                                  yacl::ByteContainerView>>& db_vec) = 0;
-
-  virtual void GenerateFromRawKeyValueData(
-      const std::vector<std::string>& keys,
-      const std::vector<std::string>& values) = 0;
-
-  virtual void GenerateFromRawKeyValueData(
-      const std::vector<uint128_t>& keys,
-      const std::vector<std::string>& values) = 0;
-
-  virtual void Dump(std::ostream& out_stream) const = 0;
-
-  virtual PirType GetPirType() const = 0;
-
-  virtual std::vector<yacl::Buffer> Response(
-      const std::vector<yacl::Buffer>& query_vec,
-      const yacl::Buffer& pks) const = 0;
-
-  virtual std::vector<std::string> Response(
-      const std::vector<std::string>& query_vec,
-      const std::string& pks) const = 0;
-
-  virtual yacl::Buffer Response(const yacl::Buffer& query_buffer,
-                                const yacl::Buffer& pks_buffer) const = 0;
-
-  virtual std::string Response(const std::string& query_buffer,
-                               const std::string& pks_buffer) const = 0;
-};
-
 class IndexPirDataBase {
  public:
   explicit IndexPirDataBase(PirType pir_type) : pir_type_(pir_type) {}
@@ -101,15 +59,19 @@ class IndexPirDataBase {
 
   virtual void GenerateFromRawData(const RawDatabase& raw_data) = 0;
 
+  virtual void GenerateFromSimpleHashTable(const RawDatabase& raw_data) = 0;
+
   virtual void Dump(std::ostream& out_stream) const = 0;
 
   PirType GetPirType() const { return pir_type_; };
 
+  virtual std::size_t MaxElementsOfOnePt() const = 0;
+
   virtual bool DbSeted() const = 0;
 
-  virtual yacl::Buffer Response(const yacl::Buffer& query_buffer,
+  virtual yacl::Buffer Response(const yacl::ByteContainerView& query_buffer,
                                 const yacl::Buffer& pks_buffer) const = 0;
-  virtual std::string Response(const std::string& query_buffer,
+  virtual std::string Response(const yacl::ByteContainerView& query_buffer,
                                const std::string& pks_buffer) const = 0;
 
  protected:

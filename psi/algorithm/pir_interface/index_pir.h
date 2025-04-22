@@ -35,9 +35,8 @@ class IndexPirClient {
   virtual std::string GenerateIndexQueryStr(uint64_t raw_idx) const = 0;
 
   virtual std::vector<uint8_t> DecodeIndexResponse(
-      const yacl::Buffer& response_buffer, uint64_t raw_idx) const = 0;
-  virtual std::vector<uint8_t> DecodeIndexResponse(
-      const std::string& response_buffer, uint64_t raw_idx) const = 0;
+      const yacl::ByteContainerView& response_buffer,
+      uint64_t raw_idx) const = 0;
 };
 
 using IndexPirServer = IndexPirDataBase;

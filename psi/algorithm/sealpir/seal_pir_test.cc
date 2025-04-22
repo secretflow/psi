@@ -70,16 +70,6 @@ TEST_P(SealPirTest, Works) {
   server.GenerateFromRawData(raw_db);
   SPDLOG_INFO("Server set database, time cost: {} ms", timer.CountMs());
 
-  // set galois key for client with id 0
-  if (isSerialized) {
-    yacl::Buffer galois_keys_str = client.GeneratePksBuffer();
-    server.SetGaloisKey(0, galois_keys_str);
-  } else {
-    GaloisKeys galois_keys = client.GenerateGaloisKeys();
-    server.SetGaloisKey(0, galois_keys);
-  }
-  SPDLOG_INFO("Set Galois keys");
-
   // gen random query index
   uint64_t ele_index =
       yacl::crypto::RandU64() % rows;  // element in DB at random position

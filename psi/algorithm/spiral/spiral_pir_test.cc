@@ -97,9 +97,6 @@ TEST_P(SpiralPirTest, Works) {
     auto pp = client.GenPublicKeys();
     SPDLOG_INFO("Do query without serialized");
 
-    // set public paramter
-    server.SetPublicKeys(std::move(pp));
-
     // now generate Query
     timer2.Restart();
     timer.Restart();
@@ -108,7 +105,7 @@ TEST_P(SpiralPirTest, Works) {
 
     // server handle query
     timer.Restart();
-    auto responses = server.ProcessQuery(query);
+    auto responses = server.ProcessQuery(query, pp);
     SPDLOG_INFO("Server ProcessQuery, time cost: {} ms", timer.CountMs());
 
     timer.Restart();

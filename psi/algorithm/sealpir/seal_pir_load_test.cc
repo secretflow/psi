@@ -72,8 +72,6 @@ TEST_P(SealPirLoadTest, Works) {
 
   yacl::Buffer galois_keys_str = client.GeneratePksBuffer();
   // using the API provided by SealPirServer to set galois keys for client 0
-  tmp_server.SetGaloisKey(0, galois_keys_str);
-  SPDLOG_INFO("Set Galois keys");
 
   // dump and load the server
   timer.Restart();

@@ -18,7 +18,7 @@
 
 #include "gtest/gtest.h"
 
-namespace psi::pir_utils {
+namespace psi::pir {
 
 TEST(RawDatabase, Work) {
   RawDatabase db = RawDatabase::Random(100, 256);
@@ -79,4 +79,4 @@ TEST(RawDatabase, Combine) {
   ASSERT_EQ(combine, db.At(idx));
 }
 
-}  // namespace psi::pir_utils
+}  // namespace psi::pir

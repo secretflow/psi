@@ -18,6 +18,10 @@
 #include <utility>
 #include <vector>
 
+#include "google/protobuf/io/zero_copy_stream_impl.h"
+#include "google/protobuf/util/delimited_message_util.h"
+#include "yacl/utils/elapsed_timer.h"
+
 #include "psi/algorithm/pir_interface/index_pir.h"
 #include "psi/algorithm/pir_interface/pir_db.h"
 #include "psi/algorithm/spiral/params.h"
@@ -27,62 +31,126 @@
 #include "psi/algorithm/spiral/serialize.h"
 #include "psi/algorithm/spiral/spiral_client.h"
 
+#include "psi/algorithm/spiral/serializable.pb.h"
+
 namespace psi::spiral {
 
-class SpiralServer : psi::pir::IndexPirServer {
+class SpiralServer : public psi::pir::IndexPirDataBase {
  public:
   SpiralServer() = default;
 
   explicit SpiralServer(Params params, std::vector<uint64_t> reoriented_db)
-      : params_(std::move(params)),
+      : psi::pir::IndexPirDataBase(psi::pir::PirType::SPIRAL_PIR),
+        params_(std::move(params)),
         single_db_size_(reoriented_db.size()),
         reoriented_dbs_(std::move(reoriented_db)) {
+    pt_nums_ = params_.NumItems();
     database_seted_ = true;
   }
 
   explicit SpiralServer(Params params, std::vector<uint64_t> reoriented_db,
                         DatabaseMetaInfo database_info)
-      : params_(std::move(params)),
+      : psi::pir::IndexPirDataBase(psi::pir::PirType::SPIRAL_PIR),
+        params_(std::move(params)),
         single_db_size_(reoriented_db.size()),
         reoriented_dbs_(std::move(reoriented_db)),
         database_info_(database_info) {
+    pt_nums_ = params_.NumItems();
     database_seted_ = true;
   }
 
   explicit SpiralServer(Params params, DatabaseMetaInfo database_info)
-      : params_(std::move(params)), database_info_(database_info) {}
+      : psi::pir::IndexPirDataBase(psi::pir::PirType::SPIRAL_PIR),
+        params_(std::move(params)),
+        database_info_(database_info) {}
+
+  // convert raw database to Plaintext of SpiralPIR
+  void GenerateFromRawData(const psi::pir::RawDatabase& raw_database) override;
 
   // convert raw database to the specific format required by SpiralPIR
   // now we support value of any length
-  void SetDatabase(const pir_utils::RawDatabase& raw_database) override;
+  void GenerateFromRawDataAndReorient(
+      const psi::pir::RawDatabase& raw_database);
 
-  void SetDatabase(std::vector<std::vector<uint8_t>> raw_database) {
-    pir_utils::RawDatabase raw_db(std::move(raw_database));
-    SetDatabase(raw_db);
+  bool DbSeted() const override { return database_seted_; }
+
+  void SetPublicKeys(PublicKeys pks) {
+    pks_ = std::move(pks);
+    pks_seted_ = true;
   }
-
-  void SetPublicKeys(PublicKeys pks) { pks_ = std::move(pks); }
 
   void SetPublicKeys(yacl::Buffer& pks_buffer) {
     pks_ = DeserializePublicKeys(params_, pks_buffer);
+    pks_seted_ = true;
+  }
+  void SetPublicKeys(const std::string& pks_buffer) {
+    pks_ = DeserializePublicKeys(params_, pks_buffer);
+    pks_seted_ = true;
   }
 
   std::vector<PolyMatrixRaw> ProcessQuery(const SpiralQuery& query) const;
 
+  std::vector<PolyMatrixRaw> ProcessQuery(const SpiralQuery& query,
+                                          const PublicKeys& pks) const;
+
   const Params& GetParams() const { return params_; }
 
-  virtual yacl::Buffer GenerateIndexResponse(
-      const yacl::Buffer& query_buffer) const override {
+  yacl::Buffer Response(const yacl::Buffer& query_buffer,
+                        const yacl::Buffer& pks_buffer) const override {
     auto query = SpiralQuery::DeserializeRng(params_, query_buffer);
+    auto pks = DeserializePublicKeys(params_, pks_buffer);
 
-    auto response = ProcessQuery(query);
+    yacl::ElapsedTimer timer;
+
+    auto response = ProcessQuery(query, pks);
+
+    SPDLOG_INFO("One index query, time cost: {} ms", timer.CountMs());
 
     return SerializeResponse(response);
   }
+  std::string Response(const std::string& query_buffer,
+                       const std::string& pks_buffer) const override {
+    auto query = SpiralQuery::DeserializeRng(params_, query_buffer);
+    auto pks = DeserializePublicKeys(params_, pks_buffer);
+
+    yacl::ElapsedTimer timer;
+    auto response = ProcessQuery(query, pks);
+    SPDLOG_INFO("One index query, time cost: {} ms", timer.CountMs());
+
+    return SerializeResponseToStr(response);
+  }
+
+  void SetPtNums(size_t pt_nums) { pt_nums_ = pt_nums; }
+
+  void SetSingleDbSize(size_t single_db_size) {
+    single_db_size_ = single_db_size;
+  }
+
+  void SetSinglePtDbSize(size_t single_pt_db_size) {
+    single_pt_db_size_ = single_pt_db_size;
+  }
+
+  void SetPartitionNum(size_t partition_num) { partition_num_ = partition_num; }
+
+  SpiralServerProto SerializeToProto() const;
+  static std::unique_ptr<SpiralServer> DeserializeFromProto(
+      const SpiralServerProto& proto);
+
+  void Dump(std::ostream& output) const override;
+
+  static std::unique_ptr<SpiralServer> Load(
+      google::protobuf::io::FileInputStream& input);
 
  protected:
   std::vector<uint64_t> ReorientRawDb(
       const std::vector<std::vector<uint8_t>>& raw_database);
+
+  // ConvertRawDbToPtDb
+  std::vector<uint8_t> ConvertRawDbToPtDb(
+      const std::vector<std::vector<uint8_t>>& raw_database);
+
+  // convert pt dbs to reoriented dbs
+  void PtDbsToReorientedDbs(const std::vector<uint8_t>& pt_dbs);
 
   PolyMatrixNtt Pack(const std::vector<PolyMatrixRaw>& v_ct,
                      const std::vector<PolyMatrixNtt>& v_w) const;
@@ -96,6 +164,9 @@ class SpiralServer : psi::pir::IndexPirServer {
 
   std::pair<std::vector<uint64_t>, std::vector<PolyMatrixNtt>> ExpandQuery(
       const SpiralQuery& query) const;
+
+  std::pair<std::vector<uint64_t>, std::vector<PolyMatrixNtt>> ExpandQuery(
+      const SpiralQuery& query, const PublicKeys& pks) const;
 
   void RegevToGsw(std::vector<PolyMatrixNtt>& v_gsw,
                   const std::vector<PolyMatrixNtt>& v_inp,
@@ -114,13 +185,29 @@ class SpiralServer : psi::pir::IndexPirServer {
   std::vector<PolyMatrixNtt> GetVFoldingNeg(
       std::vector<PolyMatrixNtt>& v_folding) const;
 
+  void SetReorientedDbs(std::vector<uint64_t> reoriented_dbs) {
+    reoriented_dbs_ = std::move(reoriented_dbs);
+    database_seted_ = true;
+  }
+
  private:
   Params params_;
 
   PublicKeys pks_;
 
+  // pt nums after database processed
+  size_t pt_nums_ = 0;
+
   // single reoriented_db's length
   size_t single_db_size_ = 0;
+
+  // single reoriented_raw_db's length
+  // single_pt_db_size_
+  size_t single_pt_db_size_ = 0;
+
+  // contains partition_num_  reoriented_raw_db
+  // pt_dbs_
+  std::vector<uint8_t> pt_dbs_;
 
   // contains partition_num_  reoriented_db
   std::vector<uint64_t> reoriented_dbs_;
@@ -130,6 +217,8 @@ class SpiralServer : psi::pir::IndexPirServer {
   DatabaseMetaInfo database_info_;
 
   bool database_seted_ = false;
+
+  bool pks_seted_ = false;
 };
 
 // util method

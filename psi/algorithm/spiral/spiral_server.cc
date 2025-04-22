@@ -15,9 +15,15 @@
 #include "psi/algorithm/spiral/spiral_server.h"
 
 #include <algorithm>
+#include <fstream>
+#include <iostream>
+#ifdef __x86_64__
+#include <immintrin.h>
+#elif defined(__aarch64__)
+#include "sse2neon.h"
+#endif
 
 #include "spdlog/spdlog.h"
-#include "yacl/utils/elapsed_timer.h"
 #include "yacl/utils/parallel.h"
 
 #include "psi/algorithm/spiral/arith/arith_params.h"
@@ -50,6 +56,7 @@ std::vector<uint64_t> SpiralServer::ReorientRawDb(
   // database
   size_t plaintext_size =
       arith::UintNum(raw_database.size(), element_size_of_pt);
+  pt_nums_ = plaintext_size;
   // now we convert raw data to plaintext
   // the total plaintext size
   size_t prod = 1 << (params_.DbDim1() + params_.DbDim2());
@@ -110,12 +117,268 @@ std::vector<uint64_t> SpiralServer::ReorientRawDb(
   return reorient_db;
 }
 
-void SpiralServer::SetDatabase(const pir_utils::RawDatabase& raw_database) {
+std::vector<uint8_t> SpiralServer::ConvertRawDbToPtDb(
+    const std::vector<std::vector<uint8_t>>& raw_database) {
+  // first, we convert raw_database into plaintexts in SpiralPIR, just R_q^{n*n}
+  std::vector<uint8_t> combined_bytes;
+  for (const auto& raw : raw_database) {
+    combined_bytes.insert(combined_bytes.end(), raw.begin(), raw.end());
+  }
+
+  YACL_ENFORCE_EQ(raw_database.size(), database_info_.rows_);
+  YACL_ENFORCE_LE(raw_database[0].size(), params_.MaxByteLenOfPt());
+
+  // here, we only consider one row of raw data can be holded by one plaintext
+  // in SpiralPIR
+  size_t element_byte_len =
+      std::min(database_info_.byte_size_per_row_, params_.MaxByteLenOfPt());
+  // the number of one plaintext can hold the rows in raw database
+  size_t element_size_of_pt = params_.ElementSizeOfPt(element_byte_len);
+  // we can conmpute how many plaintexts can be used to hold the whole raw
+  // database
+  size_t plaintext_size =
+      arith::UintNum(raw_database.size(), element_size_of_pt);
+  pt_nums_ = plaintext_size;
+  // now we convert raw data to plaintext
+  // the total plaintext size
+  size_t prod = 1 << (params_.DbDim1() + params_.DbDim2());
+  // one Plaintext can hold how many bytes
+  size_t byte_size_of_pt = element_size_of_pt * element_byte_len;
+  // the total bytes of database
+  size_t total_byte_size = database_info_.rows_ * element_byte_len;
+  // (one plaintext can hold the number of rows) * (one pt provided the coeff
+  // nums for one row)
+  size_t used_coeff_size =
+      element_size_of_pt *
+      arith::UintNum(8 * element_byte_len, params_.PtModulusBitLen());
+
+  YACL_ENFORCE_LE(used_coeff_size,
+                  params_.N() * params_.N() * params_.PolyLen());
+
+  size_t offset = 0;
+
+  std::vector<std::vector<uint8_t>> coeff_vec;
+
+  for (size_t i = 0; i < plaintext_size; ++i) {
+    size_t process_byte_size = 0;
+    if (total_byte_size <= offset) {
+      break;
+    } else if (total_byte_size < offset + byte_size_of_pt) {
+      process_byte_size = total_byte_size - offset;
+    } else {
+      process_byte_size = byte_size_of_pt;
+    }
+    YACL_ENFORCE(process_byte_size % element_byte_len == 0);
+
+    auto coeffs = util::ConvertBytesToU8Coeffs(
+        params_.PtModulusBitLen(), offset, process_byte_size, combined_bytes);
+    YACL_ENFORCE_LE(coeffs.size(), used_coeff_size);
+    offset += process_byte_size;
+
+    // padding coeffs
+    // we need the coeffs length will be n^2 * len
+    while (coeffs.size() < params_.PtCoeffs()) {
+      coeffs.push_back(1ULL);
+    }
+    coeff_vec.push_back(std::move(coeffs));
+  }
+  //
+  size_t cur_plaintext_size = coeff_vec.size();
+  YACL_ENFORCE(cur_plaintext_size <= plaintext_size);
+  // now padding the size to prod
+  while (cur_plaintext_size < prod) {
+    std::vector<uint8_t> coeffs(params_.PtCoeffs(), 1ULL);
+    coeff_vec.push_back(std::move(coeffs));
+    ++cur_plaintext_size;
+  }
+
+  // now, coeff_vec contains prod Plaintexts, each Plaintext is a
+  // std::vector<uint8_t>, we need to flatten the coeff_vec
+  std::vector<uint8_t> flatten(prod * params_.PtCoeffs());
+  uint8_t* dest = flatten.data();
+  // flatten.reserve(prod * params_.PtCoeffs());
+  for (const auto& coeff : coeff_vec) {
+    std::memcpy(dest, coeff.data(), coeff.size());
+    dest += coeff.size();
+  }
+
+  return flatten;
+}
+
+SpiralServerProto SpiralServer::SerializeToProto() const {
+  YACL_ENFORCE(database_seted_, "Before serialize, database mut be seted.");
+
+  SpiralServerProto proto;
+
+  proto.set_raw_db_rows(database_info_.rows_);
+  proto.set_raw_db_bytes(database_info_.byte_size_per_row_);
+
+  proto.set_pt_nums(pt_nums_);
+  proto.set_db_dim1(params_.DbDim1());
+  proto.set_db_dim2(params_.DbDim2());
+
+  proto.set_single_pt_db_size(single_pt_db_size_);
+  proto.set_partition_num(partition_num_);
+
+  std::string* data = proto.mutable_pt_dbs();
+  data->resize(pt_dbs_.size());
+
+  for (size_t i = 0; i < pt_dbs_.size(); ++i) {
+    (*data)[i] = static_cast<unsigned char>(pt_dbs_[i]);
+  }
+
+  return proto;
+}
+
+std::unique_ptr<SpiralServer> SpiralServer::DeserializeFromProto(
+    const SpiralServerProto& proto) {
+  size_t raw_db_rows = proto.raw_db_rows();
+  size_t raw_db_bytes = proto.raw_db_bytes();
+
+  DatabaseMetaInfo info(raw_db_rows, raw_db_bytes);
+  Params params = util::GetDefaultParam();
+  size_t pt_nums = params.UpdateByDatabaseInfo(info);
+
+  YACL_ENFORCE_EQ(pt_nums, proto.pt_nums());
+  YACL_ENFORCE_EQ(params.DbDim1(), proto.db_dim1());
+  YACL_ENFORCE_EQ(params.DbDim2(), proto.db_dim2());
+
+  // get data
+  size_t single_pt_db_size = proto.single_pt_db_size();
+  size_t parition_num = proto.partition_num();
+
+  const std::string& data = proto.pt_dbs();
+
+  std::vector<uint8_t> pt_dbs;
+  pt_dbs.reserve(data.size());
+
+  std::transform(data.begin(), data.end(), std::back_inserter(pt_dbs),
+                 [](char c) { return static_cast<uint8_t>(c); });
+
+  YACL_ENFORCE_EQ(single_pt_db_size * parition_num, pt_dbs.size());
+
+  auto server = std::make_unique<SpiralServer>(std::move(params), info);
+  // update server
+  server->SetPtNums(pt_nums);
+  server->SetSinglePtDbSize(single_pt_db_size);
+  server->SetPartitionNum(parition_num);
+  // need convert PtDbsToReorientedDbs
+  server->PtDbsToReorientedDbs(pt_dbs);
+
+  return server;
+}
+
+void SpiralServer::PtDbsToReorientedDbs(const std::vector<uint8_t>& pt_dbs) {
+  // pt_dbs's size should be equal: partition_num * single_pt_db_size
+  YACL_ENFORCE_EQ(pt_dbs.size(), partition_num_ * single_pt_db_size_);
+  // also should be equal: partition_num * (prod * PtCoeffs)
+  size_t prod = 1ULL << (params_.DbDim1() + params_.DbDim2());
+  YACL_ENFORCE_EQ(pt_dbs.size(), partition_num_ * prod * params_.PtCoeffs());
+  YACL_ENFORCE_EQ(single_pt_db_size_, params_.PtCoeffs() * prod);
+
+  // now we hanle each sub pt dbs
+  for (size_t i = 0; i < partition_num_; ++i) {
+    std::vector<uint8_t> tmp(single_pt_db_size_);
+    std::memcpy(tmp.data(), pt_dbs.data() + i * single_pt_db_size_,
+                single_pt_db_size_);
+    // 1D vector to 2D vector
+    const size_t pt_dbs_steps = i * single_pt_db_size_;
+
+    std::vector<std::vector<uint64_t>> sub_pt_db(prod);
+    for (size_t j = 0; j < prod; ++j) {
+      sub_pt_db[j].reserve(params_.PtCoeffs());
+
+      for (size_t k = 0; k < params_.PtCoeffs(); ++k) {
+        sub_pt_db[j].push_back(static_cast<uint64_t>(
+            pt_dbs[pt_dbs_steps + j * params_.PtCoeffs() + k]));
+      }
+    }
+    // now reoriented the sub_pt_db
+    auto reorient_db = ReorientDatabase(params_, sub_pt_db);
+
+    if (i == 0) {
+      reoriented_dbs_.reserve(reorient_db.size() * partition_num_);
+      single_db_size_ = reorient_db.size();
+    }
+    YACL_ENFORCE_EQ(single_db_size_, reorient_db.size());
+
+    reoriented_dbs_.insert(reoriented_dbs_.end(), reorient_db.begin(),
+                           reorient_db.end());
+  }
+
+  database_seted_ = true;
+}
+
+void SpiralServer::Dump(std::ostream& output) const {
+  YACL_ENFORCE(output, "Output stream is not in a good state for writing");
+  YACL_ENFORCE(DbSeted(), "Before dump, database must be seted.");
+
+  auto pir_type_proto = psi::pir::PirTypeToProto(GetPirType());
+
+  google::protobuf::util::SerializeDelimitedToOstream(pir_type_proto, &output);
+  SpiralServerProto proto = SerializeToProto();
+  google::protobuf::util::SerializeDelimitedToOstream(proto, &output);
+}
+
+std::unique_ptr<SpiralServer> SpiralServer::Load(
+    google::protobuf::io::FileInputStream& input) {
+  pir::PirTypeProto pir_type_proto;
+  google::protobuf::util::ParseDelimitedFromZeroCopyStream(&pir_type_proto,
+                                                           &input, nullptr);
+  auto type = psi::pir::ProtoToPirType(pir_type_proto);
+  YACL_ENFORCE(type == pir::PirType::SPIRAL_PIR, "PirType does not match");
+
+  SpiralServerProto proto;
+  google::protobuf::util::ParseDelimitedFromZeroCopyStream(&proto, &input,
+                                                           nullptr);
+  return DeserializeFromProto(proto);
+}
+
+void SpiralServer::GenerateFromRawData(
+    const psi::pir::RawDatabase& raw_database) {
+  // now, we only support the pt modulus bit len = 8;
+  // for reduce the storage size of server dump
+  YACL_ENFORCE_EQ(params_.PtModulusBitLen(), 8u);
+
   size_t partition_byte_len = params_.MaxByteLenOfPt();
+
   // one Pt can hold one row data
   // do not need to partition
   if (partition_byte_len >= raw_database.RowByteLen()) {
-    // reoriented_dbs_.push_back(ReorientRawDb(raw_database.Db()));
+    pt_dbs_ = ConvertRawDbToPtDb(raw_database.Db());
+    single_pt_db_size_ = pt_dbs_.size();
+    partition_num_ = 1;
+    database_seted_ = true;
+    return;
+  }
+  // now we need to Partition the raw database
+  partition_num_ =
+      (raw_database.RowByteLen() + partition_byte_len - 1) / partition_byte_len;
+  auto sub_dbs = raw_database.Partition(partition_byte_len);
+
+  // now we handle each sub db
+  for (size_t j = 0; j < partition_num_; ++j) {
+    std::vector<uint8_t> tmp = ConvertRawDbToPtDb(sub_dbs[j].Db());
+
+    if (j == 0) {
+      pt_dbs_.reserve(tmp.size() * partition_num_);
+      single_pt_db_size_ = tmp.size();
+    }
+    YACL_ENFORCE_EQ(single_pt_db_size_, tmp.size());
+
+    pt_dbs_.insert(pt_dbs_.end(), tmp.begin(), tmp.end());
+  }
+
+  database_seted_ = true;
+}
+
+void SpiralServer::GenerateFromRawDataAndReorient(
+    const psi::pir::RawDatabase& raw_database) {
+  size_t partition_byte_len = params_.MaxByteLenOfPt();
+
+  // one Pt can hold one row data
+  // do not need to partition
+  if (partition_byte_len >= raw_database.RowByteLen()) {
     reoriented_dbs_ = ReorientRawDb(raw_database.Db());
     single_db_size_ = reoriented_dbs_.size();
     database_seted_ = true;
@@ -128,7 +391,6 @@ void SpiralServer::SetDatabase(const pir_utils::RawDatabase& raw_database) {
   auto sub_dbs = raw_database.Partition(partition_byte_len);
 
   // now we handle each sub db
-  // reoriented_dbs_.resize(partition_num_);
   for (size_t j = 0; j < partition_num_; ++j) {
     std::vector<uint64_t> tmp = ReorientRawDb(sub_dbs[j].Db());
 
@@ -139,8 +401,6 @@ void SpiralServer::SetDatabase(const pir_utils::RawDatabase& raw_database) {
     YACL_ENFORCE_EQ(single_db_size_, tmp.size());
 
     reoriented_dbs_.insert(reoriented_dbs_.end(), tmp.begin(), tmp.end());
-
-    // reoriented_dbs_[j] = std::move(ReorientRawDb(sub_dbs[j].Db()));
   }
 
   database_seted_ = true;
@@ -368,6 +628,14 @@ std::vector<PolyMatrixRaw> SpiralServer::ProcessQuery(
     const SpiralQuery& query) const {
   YACL_ENFORCE(database_seted_,
                "Before ProcessQuery, database must be processed");
+  YACL_ENFORCE(pks_seted_, "Before ProcessQuery, PublicKeys must be seted");
+
+#ifdef __AVX2__
+  SPDLOG_INFO("Using Spiral AVX2 version");
+#else
+  SPDLOG_INFO(
+      "Using Spiral Non-AVX2 version, this will be slower than AVX2 version");
+#endif
 
   size_t dim0 = 1 << params_.DbDim1();
   size_t num_per = 1 << params_.DbDim2();
@@ -383,6 +651,86 @@ std::vector<PolyMatrixRaw> SpiralServer::ProcessQuery(
 
   // We default to using QueryExpand technology
   std::tie(v_reg_reoriented, v_folding) = ExpandQuery(query);
+
+  SPDLOG_INFO("Server end to Expand Query, time cost: {} ms", timer.CountMs());
+  timer.Restart();
+
+  auto v_folding_neg = GetVFoldingNeg(v_folding);
+  size_t n_power = params_.N() * params_.N();
+  std::vector<PolyMatrixRaw> v_packed_ct;
+  v_packed_ct.reserve(partition_num_);
+
+  // init only once
+  std::vector<PolyMatrixNtt> intermediate;
+  std::vector<PolyMatrixRaw> intermediate_raw;
+  for (size_t i = 0; i < num_per; ++i) {
+    intermediate.emplace_back(params_.CrtCount(), params_.PolyLen(), 2, 1);
+    intermediate_raw.emplace_back(params_.PolyLen(), 2, 1);
+  }
+
+  // when use yacl::parallel_for, there is no improve
+  for (size_t partiton_idx = 0; partiton_idx < partition_num_; ++partiton_idx) {
+    std::vector<PolyMatrixRaw> v_ct;
+    for (size_t trial = 0; trial < n_power; ++trial) {
+      // the instances is 1, so the ins = 0
+      // so we can remove the ins
+      size_t idx = trial * db_slice_sz;
+      MultiplyRegByDatabase(intermediate, v_reg_reoriented, dim0, num_per, idx,
+                            partiton_idx);
+      // ntt to raw
+      for (size_t i = 0; i < intermediate.size(); ++i) {
+        FromNtt(params_, intermediate_raw[i], intermediate[i]);
+      }
+      // fold
+      FoldCiphertexts(intermediate_raw, v_folding, v_folding_neg);
+      // need deep-copy
+      v_ct.emplace_back(intermediate_raw[0]);
+    }
+    auto packed_ct = Pack(v_ct, v_packing);
+    v_packed_ct.push_back(FromNtt(params_, packed_ct));
+  }
+
+  // modulus switching
+  uint64_t q1 = 4 * params_.PtModulus();
+  uint64_t q2 = kQ2Values[params_.Q2Bits()];
+  for (auto& ct : v_packed_ct) {
+    ct.Rescale(0, 1, params_.Modulus(), q2);
+    ct.Rescale(1, ct.Rows(), params_.Modulus(), q1);
+  }
+
+  SPDLOG_INFO(
+      "Server end to do dot-product between query and database, time cost: {} "
+      "ms",
+      timer.CountMs());
+
+  return v_packed_ct;
+}
+
+std::vector<PolyMatrixRaw> SpiralServer::ProcessQuery(
+    const SpiralQuery& query, const PublicKeys& pks) const {
+  YACL_ENFORCE(database_seted_,
+               "Before ProcessQuery, database must be processed");
+#ifdef __AVX2__
+  SPDLOG_INFO("Using Spiral AVX2 version");
+#else
+  SPDLOG_INFO(
+      "Using Spiral Non-AVX2 version, this will be slower than AVX2 version");
+#endif
+
+  size_t dim0 = 1 << params_.DbDim1();
+  size_t num_per = 1 << params_.DbDim2();
+  size_t db_slice_sz = dim0 * num_per * params_.PolyLen();
+
+  const auto& v_packing = pks.v_packing_;
+
+  std::vector<uint64_t> v_reg_reoriented;
+  std::vector<PolyMatrixNtt> v_folding;
+
+  SPDLOG_INFO("Server begin to Expand Query");
+  yacl::ElapsedTimer timer;
+
+  // We default to using QueryExpand technology
+  std::tie(v_reg_reoriented, v_folding) = ExpandQuery(query, pks);
 
   SPDLOG_INFO("Server end to Expand Query, time cost: {} ms", timer.CountMs());
   timer.Restart();
@@ -463,6 +811,10 @@ void SpiralServer::RegevToGsw(std::vector<PolyMatrixNtt>& v_gsw,
         size_t idx_ct = i * params_.TGsw() + j;
         size_t idx_inp = idx_factor * idx_ct + idx_offset;
 
+        WEAK_ENFORCE(idx_inp < v_inp.size(),
+                     "idx_inp: {}, v.inp.size(): {}, v_gsw.size(): {}", idx_inp,
+                     v_inp.size(), v_gsw.size());
+
         ct.CopyInto(v_inp[idx_inp], 0, 2 * j + 1);
         FromNtt(params_, tmp_ct_raw, v_inp[idx_inp]);
         util::GadgetInvert(params_, ginv_c_inp, tmp_ct_raw);
@@ -476,12 +828,12 @@ void SpiralServer::RegevToGsw(std::vector<PolyMatrixNtt>& v_gsw,
 }
 
 std::pair<std::vector<uint64_t>, std::vector<PolyMatrixNtt>>
-SpiralServer::ExpandQuery(const SpiralQuery& query) const {
+SpiralServer::ExpandQuery(const SpiralQuery& query,
+                          const PublicKeys& pks) const {
   size_t dim0 = 1 << params_.DbDim1();
   size_t further_dims = params_.DbDim2();
   size_t num_bits_to_gen = params_.TGsw() * further_dims + dim0;
   size_t g = arith::Log2Ceil(num_bits_to_gen);
-
   size_t right_expanded = params_.TGsw() * further_dims;
   size_t stop_round = arith::Log2Ceil(right_expanded);
 
@@ -490,6 +842,90 @@ SpiralServer::ExpandQuery(const SpiralQuery& query) const {
   for (size_t i = 0; i < static_cast<size_t>(1) << g; ++i) {
     v.emplace_back(params_.CrtCount(), params_.PolyLen(), 2, 1);
   }
+
+  YACL_ENFORCE((v.size() >> 1) >= dim0, "v.size()/2: {}, v1: {}", v.size() >> 1,
+               dim0);
+  YACL_ENFORCE((v.size() >> 1) >= right_expanded,
+               "v.size()/2: {}, right_expanded(v2 * t_gsw) = {} * {} = {}",
+               v.size() >> 1, further_dims, params_.TGsw(), right_expanded);
+
+  auto query_ct_ntt = ToNtt(params_, query.ct_);
+  v[0].CopyInto(query_ct_ntt, 0, 0);
+
+  const PolyMatrixNtt& v_conversion = pks.v_conversion_[0];
+  const std::vector<PolyMatrixNtt>& v_w_left = pks.v_expansion_left_;
+  const std::vector<PolyMatrixNtt>& v_w_right = pks.v_expansion_right_;
+
+  auto v_neg1 = GetVneg1(params_);
+
+  std::vector<PolyMatrixNtt> v_reg_inp;
+  v_reg_inp.reserve(dim0);
+  std::vector<PolyMatrixNtt> v_gsw_inp;
+  v_gsw_inp.reserve(right_expanded);
+
+  yacl::ElapsedTimer timer;
+
+  if (further_dims > 0) {
+    CoefficientExpansion(v, g, stop_round, v_w_left, v_w_right, v_neg1,
+                         params_.TGsw() * params_.DbDim2());
+    for (size_t i = 0; i < dim0; ++i) {
+      // deep copy
+      v_reg_inp.push_back(std::move(v[2 * i]));
+    }
+    for (size_t i = 0; i < right_expanded; ++i) {
+      WEAK_ENFORCE(2 * i + 1 < v.size());
+      v_gsw_inp.push_back(std::move(v[2 * i + 1]));
+    }
+  } else {
+    CoefficientExpansion(v, g, 0, v_w_left, v_w_right, v_neg1, 0);
+    for (size_t i = 0; i < dim0; ++i) {
+      v_reg_inp.emplace_back(v[i]);
+    }
+  }
+
+  SPDLOG_INFO("Server finished CoefficientExpansion, time: {} ms",
+              timer.CountMs());
+  timer.Restart();
+
+  size_t v_reg_sz = dim0 * 2 * params_.PolyLen();
+  std::vector<uint64_t> v_reg_reoriented(v_reg_sz);
+  ReorientRegCiphertexts(params_, v_reg_reoriented, v_reg_inp);
+
+  SPDLOG_INFO("Server finished ReorientRegCiphertexts, time: {} ms",
+              timer.CountMs());
+  timer.Restart();
+
+  std::vector<PolyMatrixNtt> v_folding;
+  for (size_t i = 0; i < params_.DbDim2(); ++i) {
+    v_folding.emplace_back(params_.CrtCount(), params_.PolyLen(), 2,
+                           2 * params_.TGsw());
+  }
+  RegevToGsw(v_folding, v_gsw_inp, v_conversion, 1, 0);
+  SPDLOG_INFO("Server finished RegevToGsw, time: {} ms", timer.CountMs());
+
+  return std::make_pair(std::move(v_reg_reoriented), std::move(v_folding));
+}
+
+std::pair<std::vector<uint64_t>, std::vector<PolyMatrixNtt>>
+SpiralServer::ExpandQuery(const SpiralQuery& query) const {
+  size_t dim0 = 1 << params_.DbDim1();
+  size_t further_dims = params_.DbDim2();
+  size_t num_bits_to_gen = params_.TGsw() * further_dims + dim0;
+  size_t g = arith::Log2Ceil(num_bits_to_gen);
+  size_t right_expanded = params_.TGsw() * further_dims;
+  size_t stop_round = arith::Log2Ceil(right_expanded);
+
+  std::vector<PolyMatrixNtt> v;
+  v.reserve(static_cast<size_t>(1) << g);
+  for (size_t i = 0; i < static_cast<size_t>(1) << g; ++i) {
+    v.emplace_back(params_.CrtCount(), params_.PolyLen(), 2, 1);
+  }
+
+  YACL_ENFORCE((v.size() >> 1) >= dim0, "v.size()/2: {}, v1: {}", v.size() >> 1,
+               dim0);
+  YACL_ENFORCE((v.size() >> 1) >= right_expanded,
+               "v.size()/2: {}, right_expanded(v2 * t_gsw) = {} * {} = {}",
+               v.size() >> 1, further_dims, params_.TGsw(), right_expanded);
 
   auto query_ct_ntt = ToNtt(params_, query.ct_);
   v[0].CopyInto(query_ct_ntt, 0, 0);
@@ -510,12 +946,12 @@ SpiralServer::ExpandQuery(const SpiralQuery& query) const {
   if (further_dims > 0) {
     CoefficientExpansion(v, g, stop_round, v_w_left, v_w_right, v_neg1,
                          params_.TGsw() * params_.DbDim2());
-
     for (size_t i = 0; i < dim0; ++i) {
       // deep copy
       v_reg_inp.push_back(std::move(v[2 * i]));
     }
     for (size_t i = 0; i < right_expanded; ++i) {
+      WEAK_ENFORCE(2 * i + 1 < v.size());
       v_gsw_inp.push_back(std::move(v[2 * i + 1]));
     }
   } else {

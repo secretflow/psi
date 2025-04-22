@@ -39,11 +39,34 @@ yacl::Buffer SpiralQuery::Serialize() {
 
   return buffer;
 }
+std::string SpiralQuery::SerializeToStr() {
+  SpiralQueryProto proto;
+  // only one possible
+  *proto.mutable_ct() = ct_.ToProto();
+  proto.set_seed(reinterpret_cast<const uint8_t*>(&seed_), sizeof(uint128_t));
+
+  return proto.SerializeAsString();
+}
 
 SpiralQuery SpiralQuery::Deserialize(const Params& params,
                                      const yacl::Buffer& buffer) {
   SpiralQueryProto proto;
   proto.ParseFromArray(buffer.data(), buffer.size());
+
+  SpiralQuery query;
+  query.ct_ = PolyMatrixRaw::FromProto(proto.ct(), params);
+
+  uint128_t seed{0};
+  std::memcpy(&seed, proto.seed().data(), sizeof(uint128_t));
+  query.seed_ = seed;
+
+  return query;
+}
+
+SpiralQuery SpiralQuery::Deserialize(const Params& params,
+                                     const std::string& buffer) {
+  SpiralQueryProto proto;
+  proto.ParseFromString(buffer);
 
   SpiralQuery query;
   query.ct_ = PolyMatrixRaw::FromProto(proto.ct(), params);
@@ -66,11 +89,38 @@ yacl::Buffer SpiralQuery::SerializeRng() {
 
   return buffer;
 }
+std::string SpiralQuery::SerializeRngToStr() {
+  SpiralQueryProto proto;
+  *proto.mutable_ct() = ct_.ToProtoRng();
+
+  proto.set_seed(reinterpret_cast<const uint8_t*>(&seed_), sizeof(uint128_t));
+
+  return proto.SerializeAsString();
+}
 
 SpiralQuery SpiralQuery::DeserializeRng(const Params& params,
                                         const yacl::Buffer& buffer) {
   SpiralQueryProto proto;
   proto.ParseFromArray(buffer.data(), buffer.size());
+
+  // first we construct seed and prg
+  uint128_t seed{0};
+  std::memcpy(&seed, proto.seed().data(), sizeof(uint128_t));
+
+  yacl::crypto::Prg<uint64_t> rng(seed);
+
+  SpiralQuery query;
+  query.seed_ = seed;
+
+  query.ct_ = PolyMatrixRaw::FromProtoRng(proto.ct(), params, rng);
+
+  return query;
+}
+
+SpiralQuery SpiralQuery::DeserializeRng(const Params& params,
+                                        const std::string& buffer) {
+  SpiralQueryProto proto;
+  proto.ParseFromString(buffer);
 
   // first we construct seed and prg
   uint128_t seed{0};
@@ -99,8 +149,8 @@ void SpiralClient::Init() {
       PolyMatrixRaw::Zero(params_.PolyLen(), sk_regev_rows, sk_regev_cols);
 
   dg_ = DiscreteGaussian(params_.NoiseWidth());
-
-  sk_inited_ = false;
+  // Gen secret key for SpiralClient
+  GenSecretKeys();
 }
 
 PolyMatrixRaw SpiralClient::GetFreshGswPublicKey(
@@ -197,14 +247,16 @@ std::vector<PolyMatrixNtt> SpiralClient::GenExpansionParams(
   return res;
 }
 
-PublicKeys SpiralClient::GenKeys(yacl::crypto::Prg<uint64_t>& rng) {
-  // gen sk
-  GenSecretKeys(rng);
+PublicKeys SpiralClient::GenPublicKeys() const {
+  YACL_ENFORCE(sk_inited_,
+               "Before GenPublicKeys, the secret key must be inited.");
 
   auto sk_reg_ntt = ToNtt(params_, sk_reg_);
   auto sk_gsw_ntt = ToNtt(params_, sk_gsw_);
 
   PublicKeys pp;
+  uint128_t seed = yacl::crypto::SecureRandU128();
+  yacl::crypto::Prg<uint64_t> rng(seed);
   uint128_t pub_seed = yacl::crypto::SecureRandU128();
   yacl::crypto::Prg<uint64_t> rng_pub(pub_seed);
 
@@ -363,7 +415,7 @@ std::vector<uint8_t> SpiralClient::DecodeResponse(
     results.push_back(std::move(tmp));
   }
 
-  auto final_result = pir_utils::RawDatabase::Combine(
+  auto final_result = psi::pir::RawDatabase::Combine(
       results, database_info_.byte_size_per_row_);
   return final_result;
 }

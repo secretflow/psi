@@ -23,6 +23,7 @@
 
 #include "spdlog/spdlog.h"
 #include "yacl/base/exception.h"
+#include "yacl/utils/elapsed_timer.h"
 #include "yacl/utils/parallel.h"
 
 using namespace std;
@@ -357,7 +358,7 @@ string SealPir::SerializePlaintexts(
   for (const auto &plain : plains) {
     string plain_bytes = SerializeSealObject<seal::Plaintext>(plain);
 
-    plains_proto.add_data(plain_bytes.data(), plain_bytes.length());
+    plains_proto.add_plains(plain_bytes.data(), plain_bytes.length());
   }
   return plains_proto.SerializeAsString();
 }
@@ -367,13 +368,13 @@ vector<seal::Plaintext> SealPir::DeSerializePlaintexts(
   PlaintextsProto plains_proto;
   plains_proto.ParseFromArray(plaintext_bytes.data(), plaintext_bytes.length());
 
-  vector<seal::Plaintext> plains(plains_proto.data_size());
+  vector<seal::Plaintext> plains(plains_proto.plains_size());
 
-  yacl::parallel_for(0, plains_proto.data_size(),
+  yacl::parallel_for(0, plains_proto.plains_size(),
                      [&](int64_t begin, int64_t end) {
                        for (int i = begin; i < end; ++i) {
                          plains[i] = DeSerializeSealObject<seal::Plaintext>(
-                             plains_proto.data(i), safe_load);
+                             plains_proto.plains(i), safe_load);
                        }
                      });
   return plains;
@@ -392,6 +393,19 @@ yacl::Buffer SealPir::SerializeCiphertexts(
   yacl::Buffer b(ciphers_proto.ByteSizeLong());
   ciphers_proto.SerializePartialToArray(b.data(), b.size());
   return b;
+}
+
+std::string SealPir::SerializeCiphertextsToStr(
+    const vector<seal::Ciphertext> &ciphers) const {
+  CiphertextsProto ciphers_proto;
+
+  for (const auto &cipher : ciphers) {
+    string cipher_bytes = SerializeSealObject<seal::Ciphertext>(cipher);
+
+    ciphers_proto.add_ciphers(cipher_bytes.data(), cipher_bytes.length());
+  }
+
+  return ciphers_proto.SerializeAsString();
 }
 
 vector<seal::Ciphertext> SealPir::DeSerializeCiphertexts(
@@ -414,6 +428,29 @@ vector<seal::Ciphertext> SealPir::DeSerializeCiphertexts(
   ciphers_proto.ParseFromArray(ciphers_buffer.data(), ciphers_buffer.size());
 
   return DeSerializeCiphertexts(ciphers_proto, safe_load);
+}
+
+vector<seal::Ciphertext> SealPir::DeSerializeCiphertexts(
+    const std::string &ciphers_buffer, bool safe_load) const {
+  CiphertextsProto ciphers_proto;
+  ciphers_proto.ParseFromString(ciphers_buffer);
+
+  return DeSerializeCiphertexts(ciphers_proto, safe_load);
+}
+
+std::string SealPir::SerializeQueryToStr(
+    SealPirQueryProto *query_proto,
+    const vector<vector<seal::Ciphertext>> &query_ciphers) const {
+  for (const auto &query_cipher : query_ciphers) {
+    CiphertextsProto *ciphers_proto = query_proto->add_query_cipher();
+    for (const auto &ciphertext : query_cipher) {
+      string cipher_bytes = SerializeSealObject<seal::Ciphertext>(ciphertext);
+
+      ciphers_proto->add_ciphers(cipher_bytes.data(), cipher_bytes.length());
+    }
+  }
+
+  return query_proto->SerializeAsString();
 }
 
 yacl::Buffer SealPir::SerializeQuery(
@@ -439,6 +476,12 @@ yacl::Buffer SealPir::SerializeQuery(
   return SerializeQuery(&query_proto, query_ciphers);
 }
 
+std::string SealPir::SerializeQueryToStr(
+    const vector<vector<seal::Ciphertext>> &query_ciphers) const {
+  SealPirQueryProto query_proto;
+  return SerializeQueryToStr(&query_proto, query_ciphers);
+}
+
 yacl::Buffer SealPir::SerializeSeededQuery(
     SealPirQueryProto *query_proto,
     const vector<vector<string>> &query_ciphers) const {
@@ -454,10 +497,29 @@ yacl::Buffer SealPir::SerializeSeededQuery(
   return b;
 }
 
+std::string SealPir::SerializeSeededQueryToStr(
+    SealPirQueryProto *query_proto,
+    const vector<vector<string>> &query_ciphers) const {
+  for (const auto &query_cipher : query_ciphers) {
+    CiphertextsProto *ciphers_proto = query_proto->add_query_cipher();
+    for (const auto &ciphertext : query_cipher) {
+      ciphers_proto->add_ciphers(ciphertext.data(), ciphertext.length());
+    }
+  }
+
+  return query_proto->SerializeAsString();
+}
+
 yacl::Buffer SealPir::SerializeSeededQuery(
     const vector<vector<string>> &query_ciphers) const {
   SealPirQueryProto query_proto;
   return SerializeSeededQuery(&query_proto, query_ciphers);
+}
+
+std::string SealPir::SerializeSeededQueryToStr(
+    const vector<vector<string>> &query_ciphers) const {
+  SealPirQueryProto query_proto;
+  return SerializeSeededQueryToStr(&query_proto, query_ciphers);
 }
 
 vector<vector<seal::Ciphertext>> SealPir::DeSerializeQuery(
@@ -484,53 +546,95 @@ vector<vector<seal::Ciphertext>> SealPir::DeSerializeQuery(
   return DeSerializeQuery(query_proto, safe_load);
 }
 
-yacl::Buffer SealPir::SerializeReply(
-    SealPirReplyProto *reply_proto,
-    const vector<vector<seal::Ciphertext>> &reply_ciphers) const {
-  for (const auto &reply_cipher : reply_ciphers) {
-    CiphertextsProto *ciphers_proto = reply_proto->add_reply_cipher();
-    for (const auto &ciphertext : reply_cipher) {
+vector<vector<seal::Ciphertext>> SealPir::DeSerializeQuery(
+    const std::string &query_buffer, bool safe_load) const {
+  SealPirQueryProto query_proto;
+  query_proto.ParseFromString(query_buffer);
+
+  return DeSerializeQuery(query_proto, safe_load);
+}
+
+yacl::Buffer SealPir::SerializeResponse(
+    SealPirResponseProto *response_proto,
+    const vector<vector<seal::Ciphertext>> &response_ciphers) const {
+  for (const auto &response_cipher : response_ciphers) {
+    CiphertextsProto *ciphers_proto = response_proto->add_response_cipher();
+    for (const auto &ciphertext : response_cipher) {
       string cipher_bytes = SerializeSealObject<seal::Ciphertext>(ciphertext);
       ciphers_proto->add_ciphers(cipher_bytes.data(), cipher_bytes.length());
     }
   }
-  yacl::Buffer b(reply_proto->ByteSizeLong());
-  reply_proto->SerializePartialToArray(b.data(), b.size());
+  yacl::Buffer b(response_proto->ByteSizeLong());
+  response_proto->SerializePartialToArray(b.data(), b.size());
   return b;
 }
-yacl::Buffer SealPir::SerializeReply(
-    const vector<vector<seal::Ciphertext>> &reply_ciphers) const {
-  SealPirReplyProto reply_proto;
-  return SerializeReply(&reply_proto, reply_ciphers);
+
+std::string SealPir::SerializeResponseToStr(
+    SealPirResponseProto *response_proto,
+    const vector<vector<seal::Ciphertext>> &response_ciphers) const {
+  for (const auto &response_cipher : response_ciphers) {
+    CiphertextsProto *ciphers_proto = response_proto->add_response_cipher();
+    for (const auto &ciphertext : response_cipher) {
+      string cipher_bytes = SerializeSealObject<seal::Ciphertext>(ciphertext);
+      ciphers_proto->add_ciphers(cipher_bytes.data(), cipher_bytes.length());
+    }
+  }
+  return response_proto->SerializeAsString();
 }
-std::vector<std::vector<seal::Ciphertext>> SealPir::DeSerializeReply(
-    const SealPirReplyProto &reply_proto, bool safe_load) const {
-  vector<vector<seal::Ciphertext>> pir_reply(reply_proto.reply_cipher_size());
+
+yacl::Buffer SealPir::SerializeResponse(
+    const vector<vector<seal::Ciphertext>> &response_ciphers) const {
+  SealPirResponseProto response_proto;
+  return SerializeResponse(&response_proto, response_ciphers);
+}
+
+std::string SealPir::SerializeResponseToStr(
+    const vector<vector<seal::Ciphertext>> &response_ciphers) const {
+  SealPirResponseProto response_proto;
+  return SerializeResponseToStr(&response_proto, response_ciphers);
+}
+
+std::vector<std::vector<seal::Ciphertext>> SealPir::DeSerializeResponse(
+    const SealPirResponseProto &response_proto, bool safe_load) const {
+  vector<vector<seal::Ciphertext>> pir_response(
+      response_proto.response_cipher_size());
   yacl::parallel_for(
-      0, reply_proto.reply_cipher_size(), [&](int64_t begin, int64_t end) {
+      0, response_proto.response_cipher_size(),
+      [&](int64_t begin, int64_t end) {
         for (int64_t i = begin; i < end; ++i) {
-          const auto &ciphers = reply_proto.reply_cipher(i);
-          pir_reply[i].resize(ciphers.ciphers_size());
+          const auto &ciphers = response_proto.response_cipher(i);
+          pir_response[i].resize(ciphers.ciphers_size());
           for (int j = 0; j < ciphers.ciphers_size(); ++j) {
-            pir_reply[i][j] = DeSerializeSealObject<seal::Ciphertext>(
+            pir_response[i][j] = DeSerializeSealObject<seal::Ciphertext>(
                 ciphers.ciphers(j), safe_load);
           }
         }
       });
-  return pir_reply;
+  return pir_response;
 }
-std::vector<std::vector<seal::Ciphertext>> SealPir::DeSerializeReply(
-    const yacl::Buffer &reply_buffer, bool safe_load) const {
-  SealPirReplyProto reply_proto;
-  reply_proto.ParseFromArray(reply_buffer.data(), reply_buffer.size());
-  return DeSerializeReply(reply_proto, safe_load);
+
+std::vector<std::vector<seal::Ciphertext>> SealPir::DeSerializeResponse(
+    const yacl::Buffer &response_buffer, bool safe_load) const {
+  SealPirResponseProto response_proto;
+  response_proto.ParseFromArray(response_buffer.data(), response_buffer.size());
+  return DeSerializeResponse(response_proto, safe_load);
+}
+
+std::vector<std::vector<seal::Ciphertext>> SealPir::DeSerializeResponse(
+    const std::string &response_buffer, bool safe_load) const {
+  SealPirResponseProto response_proto;
+  response_proto.ParseFromString(response_buffer);
+  return DeSerializeResponse(response_proto, safe_load);
 }
 
 /**********************************************************************************
 SealPirServer
 **********************************************************************************/
 SealPirServer::SealPirServer(const SealPirOptions &options)
-    : SealPir(options), db_seted_(false) {
+    : SealPir(options),
+      psi::pir::IndexPirDataBase(psi::pir::PirType::SEAL_PIR),
+      db_seted_(false),
+      galois_keys_seted_(false) {
   plaintext_store_.resize(pir_params_.partition_num);
   for_each(plaintext_store_.begin(), plaintext_store_.end(),
            [](shared_ptr<IDbPlaintextStore> &ptr) {
@@ -538,9 +642,9 @@ SealPirServer::SealPirServer(const SealPirOptions &options)
            });
 }
 
-void SealPirServer::SetDatabase(
-    const psi::pir_utils::RawDatabase &raw_database) {
-  vector<psi::pir_utils::RawDatabase> partition_db =
+void SealPirServer::GenerateFromRawData(
+    const psi::pir::RawDatabase &raw_database) {
+  vector<psi::pir::RawDatabase> partition_db =
       raw_database.Partition(pir_params_.partition_size);
   YACL_ENFORCE_EQ(pir_params_.partition_num, partition_db.size());
 
@@ -626,13 +730,8 @@ void SealPirServer::SetDatabase(
         VectorToPlaintext(padding, plain);
         db_vec.push_back(plain);
       }
-
-      yacl::parallel_for(0, db_vec.size(), [&](int64_t begin, int64_t end) {
-        for (uint32_t i = begin; i < end; i++) {
-          evaluator_->transform_to_ntt_inplace(db_vec[i],
-                                               context_->first_parms_id());
-        }
-      });
+      // For reduce the storage，we do not do ntt forward here.
+      // When dump，we do ntt for Plaintext.
       plaintext_store_[partition_idx]->SavePlaintexts(db_vec, db_idx);
     }
   }
@@ -640,7 +739,8 @@ void SealPirServer::SetDatabase(
   db_seted_ = true;
 }
 
-void SealPirServer::SetDatabase(const vector<yacl::ByteContainerView> &db_vec) {
+void SealPirServer::GenerateFromRawData(
+    const vector<yacl::ByteContainerView> &db_vec) {
   vector<vector<uint8_t>> db_flatten_bytes(db_vec.size());
   for (uint32_t i = 0; i < db_vec.size(); ++i) {
     db_flatten_bytes[i].resize(pir_params_.ele_size);
@@ -648,30 +748,163 @@ void SealPirServer::SetDatabase(const vector<yacl::ByteContainerView> &db_vec) {
     memcpy(db_flatten_bytes[i].data(), db_vec[i].data(), db_vec[i].size());
   }
 
-  psi::pir_utils::RawDatabase rawDatabase(std::move(db_flatten_bytes));
+  psi::pir::RawDatabase rawDatabase(std::move(db_flatten_bytes));
 
-  return SetDatabase(rawDatabase);
+  db_seted_ = true;
+  return GenerateFromRawData(rawDatabase);
 }
 
-yacl::Buffer SealPirServer::GenerateIndexResponse(
-    const yacl::Buffer &query_buffer) const {
+SealPirServerProto SealPirServer::SerializeToProto() const {
+  YACL_ENFORCE(db_seted_, "Before serialize, database mut be seted.");
+
+  SealPirServerProto proto;
+
+  proto.set_raw_db_rows(pir_params_.ele_num);
+  proto.set_raw_db_bytes(pir_params_.ele_size);
+
+  proto.set_dim(pir_params_.dimension);
+  for (uint64_t i : pir_params_.dimension_vec) {
+    proto.add_dim_vec(i);
+  }
+
+  proto.set_poly_modulus_degree(enc_params_->poly_modulus_degree());
+  proto.set_logt(floor(log2(enc_params_->plain_modulus().value())));
+
+  proto.set_partition_num(pir_params_.partition_num);
+  proto.set_pt_num(pir_params_.num_of_plaintexts);
+
+  uint64_t db_idx = 0;
+  for (const auto &plaintext_store : plaintext_store_) {
+    PlaintextsProto *plains_proto = proto.add_dbs();
+    for (const auto &pt : plaintext_store->ReadPlaintexts(db_idx)) {
+      string plain_bytes = SerializeSealObject<seal::Plaintext>(pt);
+      plains_proto->add_plains(plain_bytes.data(), plain_bytes.size());
+    }
+  }
+
+  for (const auto &galois_key : galois_keys_) {
+    string galois_key_str = SerializeSealObject<GaloisKeys>(galois_key.second);
+
+    (*proto.mutable_galois_keys())[galois_key.first] = galois_key_str;
+  }
+
+  return proto;
+}
+
+std::unique_ptr<SealPirServer> SealPirServer::DeserializeFromProto(
+    const SealPirServerProto &proto) {
+  SealPirParams pir_params;
+  SealPirOptions options{proto.poly_modulus_degree(), proto.raw_db_rows(),
+                         proto.raw_db_bytes(), proto.dim(), proto.logt()};
+
+  auto server = std::make_unique<SealPirServer>(options);
+
+  YACL_ENFORCE_EQ(server->pir_params_.num_of_plaintexts, proto.pt_num());
+  YACL_ENFORCE_EQ(server->pir_params_.partition_num, proto.partition_num());
+  YACL_ENFORCE_EQ((uint64_t)proto.dim_vec_size(), proto.dim());
+  for (int64_t i = 0; i < proto.dim_vec_size(); ++i) {
+    YACL_ENFORCE_EQ(proto.dim_vec(i), server->pir_params_.dimension_vec[i]);
+  }
+
+  uint64_t db_num = 1;
+  uint64_t db_idx = 0;
+  for (uint64_t i = 0; i < proto.partition_num(); ++i) {
+    server->plaintext_store_[i]->SetSubDbNumber(db_num);
+    const auto &plains_proto = proto.dbs(i);
+
+    for (int64_t j = 0; j < plains_proto.plains_size(); ++j) {
+      auto pt =
+          server->DeSerializeSealObject<Plaintext>(plains_proto.plains(j));
+
+      // do ntt forward
+      if (!pt.is_ntt_form()) {
+        server->evaluator_->transform_to_ntt_inplace(
+            pt, server->context_->first_parms_id());
+      }
+
+      server->plaintext_store_[i]->SavePlaintext(pt, db_idx);
+    }
+  }
+
+  for (const auto &galois_key : proto.galois_keys()) {
+    server->SetGaloisKey(
+        galois_key.first,
+        server->DeSerializeSealObject<GaloisKeys>(galois_key.second));
+  }
+  server->db_seted_ = true;
+  return server;
+}
+
+void SealPirServer::Dump(std::ostream &output) const {
+  YACL_ENFORCE(output, "Output stream is not in a good state for writing");
+  YACL_ENFORCE(DbSeted(), "Before dump, database must be seted.");
+
+  auto pir_type_proto = psi::pir::PirTypeToProto(GetPirType());
+  google::protobuf::util::SerializeDelimitedToOstream(pir_type_proto, &output);
+
+  SealPirServerProto proto = SerializeToProto();
+  google::protobuf::util::SerializeDelimitedToOstream(proto, &output);
+}
+
+std::unique_ptr<SealPirServer> SealPirServer::Load(
+    google::protobuf::io::FileInputStream &input) {
+  pir::PirTypeProto pir_type_proto;
+  google::protobuf::util::ParseDelimitedFromZeroCopyStream(&pir_type_proto,
+                                                           &input, nullptr);
+  auto type = psi::pir::ProtoToPirType(pir_type_proto);
+  YACL_ENFORCE(type == pir::PirType::SEAL_PIR, "PirType does not match");
+
+  SealPirServerProto proto;
+  google::protobuf::util::ParseDelimitedFromZeroCopyStream(&proto, &input,
+                                                           nullptr);
+  return DeserializeFromProto(proto);
+}
+
+yacl::Buffer SealPirServer::Response(const yacl::Buffer &query_buffer,
+                                     const yacl::Buffer &pks_buffer) const {
+  yacl::ElapsedTimer timer;
+
   SealPirQueryProto query_proto;
   query_proto.ParseFromArray(query_buffer.data(), query_buffer.size());
-
   PirQuery query = DeSerializeQuery(query_proto);
-  yacl::Buffer reply_buffer = SerializeReply(GenerateResponse(query, 0));
 
-  return reply_buffer;
+  GaloisKeys pks = DeSerializeSealObject<GaloisKeys>(
+      string((char *)pks_buffer.data(), pks_buffer.size()));
+
+  yacl::Buffer response_buffer =
+      SerializeResponse(GenerateResponse(query, pks));
+
+  SPDLOG_INFO("One index query, time cost: {} ms", timer.CountMs());
+
+  return response_buffer;
 }
 
-SealPir::PirReply SealPirServer::GenerateResponse(
-    const SealPir::PirQuery &query, uint32_t client_id) const {
+std::string SealPirServer::Response(const std::string &query_buffer,
+                                    const std::string &pks_buffer) const {
+  yacl::ElapsedTimer timer;
+
+  SealPirQueryProto query_proto;
+  query_proto.ParseFromString(query_buffer);
+  PirQuery query = DeSerializeQuery(query_proto);
+
+  GaloisKeys pks = DeSerializeSealObject<GaloisKeys>(pks_buffer);
+
+  SPDLOG_INFO("One index query, time cost: {} ms", timer.CountMs());
+
+  return SerializeResponseToStr(GenerateResponse(query, pks));
+}
+
+SealPir::PirResponse SealPirServer::GenerateResponse(
+    const SealPir::PirQuery &query, const GaloisKeys &key) const {
+  YACL_ENFORCE(db_seted_,
+               "Before GenerateResponse, database must be processed");
+
   int N = enc_params_->poly_modulus_degree();
   uint32_t expansion_ratio = pir_params_.expansion_ratio;
   vector<uint64_t> dimension_vec = pir_params_.dimension_vec;
 
-  PirReply reply;
-  reply.reserve(pir_params_.partition_num);
+  PirResponse response;
+  response.reserve(pir_params_.partition_num);
   for (uint64_t partition_idx = 0; partition_idx < pir_params_.partition_num;
        ++partition_idx) {
     uint64_t prod = 1;
@@ -702,7 +935,7 @@ SealPir::PirReply SealPirServer::GenerateResponse(
         }
 
         vector<Ciphertext> part_expanded_query =
-            ExpandQuery(query[i][j], total, client_id);
+            ExpandQuery(query[i][j], total, key);
 
         expanded_query.insert(expanded_query.end(),
                               make_move_iterator(part_expanded_query.begin()),
@@ -753,7 +986,7 @@ SealPir::PirReply SealPirServer::GenerateResponse(
           });
 
       if (i == dimension_vec.size() - 1) {
-        reply.emplace_back(std::move(intermediateCtxts));
+        response.emplace_back(std::move(intermediateCtxts));
         break;
       } else {
         intermediate_plain.clear();
@@ -782,7 +1015,76 @@ SealPir::PirReply SealPirServer::GenerateResponse(
       }
     }
   }
-  return reply;
+  return response;
+}
+
+inline vector<Ciphertext> SealPirServer::ExpandQuery(
+    const seal::Ciphertext &encrypted, uint64_t m,
+    const GaloisKeys &galkey) const {
+  SPDLOG_INFO("expanding query......");
+  int N = enc_params_->poly_modulus_degree();
+
+  uint32_t logm = ceil(log2(m));
+  YACL_ENFORCE_LE(logm, ceil(log2(N)));
+  // handle the case that m = 1, logm = 0
+  if (logm == 0) {
+    vector<Ciphertext> result(1, encrypted);
+    return result;
+  }
+
+  vector<int> galelts;
+  for (int i = 0; i < ceil(log2(N)); ++i) {
+    galelts.push_back((N + seal::util::exponentiate_uint(2, i)) /
+                      seal::util::exponentiate_uint(2, i));
+  }
+
+  vector<Ciphertext> tmp;
+  tmp.push_back(encrypted);
+  Ciphertext tmpctxt_rotated;
+  Ciphertext tmpctxt_shifted;
+  Ciphertext tmpctxt_rotatedshifted;
+
+  for (uint32_t i = 0; i < logm - 1; ++i) {
+    vector<Ciphertext> new_tmp(tmp.size() << 1);
+    int index_raw = (N << 1) - (1ULL << i);
+    int index = (index_raw + N) % (N << 1);
+    for (uint32_t j = 0; j < tmp.size(); ++j) {
+      evaluator_->apply_galois(tmp[j], galelts[i], galkey, tmpctxt_rotated);
+      evaluator_->add(tmp[j], tmpctxt_rotated, new_tmp[j]);
+
+      MultiplyPowerOfX(tmp[j], tmpctxt_shifted, index_raw);
+      MultiplyPowerOfX(tmpctxt_rotated, tmpctxt_rotatedshifted, index);
+      evaluator_->add(tmpctxt_shifted, tmpctxt_rotatedshifted,
+                      new_tmp[j + tmp.size()]);
+    }
+
+    tmp = new_tmp;
+  }
+
+  vector<Ciphertext> new_tmp(tmp.size() << 1);
+  int index_raw = (N << 1) - (1ULL << (logm - 1));
+  int index = (index_raw + N) % (N << 1);
+  // int index = (index_raw * galelts[logm - 1]) % (N << 1);
+  Plaintext two("2");
+
+  for (uint32_t j = 0; j < tmp.size(); ++j) {
+    if (j < (m - (1ULL << (logm - 1)))) {
+      evaluator_->apply_galois(tmp[j], galelts[logm - 1], galkey,
+                               tmpctxt_rotated);
+      evaluator_->add(tmp[j], tmpctxt_rotated, new_tmp[j]);
+
+      MultiplyPowerOfX(tmp[j], tmpctxt_shifted, index_raw);
+      MultiplyPowerOfX(tmpctxt_rotated, tmpctxt_rotatedshifted, index);
+      evaluator_->add(tmpctxt_shifted, tmpctxt_rotatedshifted,
+                      new_tmp[j + tmp.size()]);
+    } else {
+      evaluator_->multiply_plain(tmp[j], two, new_tmp[j]);
+    }
+  }
+
+  vector<Ciphertext> result(new_tmp.begin(), new_tmp.begin() + m);
+
+  return result;
 }
 
 inline vector<Ciphertext> SealPirServer::ExpandQuery(
@@ -815,8 +1117,6 @@ inline vector<Ciphertext> SealPirServer::ExpandQuery(
     vector<Ciphertext> new_tmp(tmp.size() << 1);
     int index_raw = (N << 1) - (1ULL << i);
     int index = (index_raw + N) % (N << 1);
-    // int index = (index_raw * galelts[i]) % (N << 1);
-
     for (uint32_t j = 0; j < tmp.size(); ++j) {
       evaluator_->apply_galois(tmp[j], galelts[i], galkey, tmpctxt_rotated);
       evaluator_->add(tmp[j], tmpctxt_rotated, new_tmp[j]);
@@ -874,8 +1174,27 @@ inline void SealPirServer::MultiplyPowerOfX(const Ciphertext &encrypted,
   }
 }
 
-void SealPirServer::SetGaloisKey(uint32_t client_id, seal::GaloisKeys galkey) {
+void SealPirServer::SetGaloisKey(uint32_t client_id,
+                                 const seal::GaloisKeys &galkey) {
   galois_keys_[client_id] = galkey;
+
+  galois_keys_seted_ = true;
+}
+void SealPirServer::SetGaloisKey(uint32_t client_id,
+                                 const yacl::Buffer &galkey_buffer) {
+  GaloisKeys galkey = DeSerializeSealObject<GaloisKeys>(
+      string((char *)galkey_buffer.data(), galkey_buffer.size()));
+  galois_keys_[client_id] = galkey;
+
+  galois_keys_seted_ = true;
+}
+
+void SealPirServer::SetGaloisKey(uint32_t client_id,
+                                 const std::string &galkey_buffer) {
+  GaloisKeys galkey = DeSerializeSealObject<GaloisKeys>(galkey_buffer);
+  galois_keys_[client_id] = galkey;
+
+  galois_keys_seted_ = true;
 }
 
 string SealPirServer::SerializeDbPlaintext(int db_index) const {
@@ -921,6 +1240,12 @@ yacl::Buffer SealPirClient::GenerateIndexQuery(uint64_t raw_idx) const {
   // we default use the seed to compress our query ciphertext
   yacl::Buffer query_buffer = SerializeSeededQuery(GenerateSeededQuery(pt_idx));
   return query_buffer;
+}
+
+std::string SealPirClient::GenerateIndexQueryStr(uint64_t raw_idx) const {
+  uint64_t pt_idx = GetPtIndex(raw_idx);
+  // we default use the seed to compress our query ciphertext
+  return SerializeSeededQueryToStr(GenerateSeededQuery(pt_idx));
 }
 
 SealPir::PirQuery SealPirClient::GenerateQuery(uint64_t pt_idx) const {
@@ -1003,12 +1328,19 @@ SealPir::PirSeededQuery SealPirClient::GenerateSeededQuery(
 
 vector<uint8_t> SealPirClient::DecodeIndexResponse(
     const yacl::Buffer &response_buffer, uint64_t raw_idx) const {
-  PirReply reply = DeSerializeReply(response_buffer);
-  vector<uint8_t> elems = DecodeResponse(reply, raw_idx);
+  PirResponse response = DeSerializeResponse(response_buffer);
+  vector<uint8_t> elems = DecodeResponse(response, raw_idx);
   return elems;
 }
 
-vector<uint8_t> SealPirClient::DecodeResponse(SealPir::PirReply &response,
+vector<uint8_t> SealPirClient::DecodeIndexResponse(
+    const std::string &response_buffer, uint64_t raw_idx) const {
+  PirResponse response = DeSerializeResponse(response_buffer);
+  vector<uint8_t> elems = DecodeResponse(response, raw_idx);
+  return elems;
+}
+
+vector<uint8_t> SealPirClient::DecodeResponse(SealPir::PirResponse &response,
                                               uint64_t raw_idx) const {
   vector<Plaintext> ptxt = DecodeResponse(response);
   uint64_t offset = GetPtOffset(raw_idx);
@@ -1028,7 +1360,7 @@ vector<uint8_t> SealPirClient::DecodeResponse(SealPir::PirReply &response,
 }
 
 std::vector<seal::Plaintext> SealPirClient::DecodeResponse(
-    SealPir::PirReply &reply) const {
+    SealPir::PirResponse &response) const {
   EncryptionParameters parms;
   parms_id_type parms_id;
   if (pir_params_.enable_mswitching) {
@@ -1044,7 +1376,7 @@ std::vector<seal::Plaintext> SealPirClient::DecodeResponse(
   vector<Plaintext> decoded;
   for (uint64_t partition_idx = 0; partition_idx < pir_params_.partition_num;
        ++partition_idx) {
-    vector<Ciphertext> tmp = reply[partition_idx];
+    vector<Ciphertext> tmp = response[partition_idx];
     uint32_t ct_poly_count = tmp[0].size();
     for (uint32_t i = 0; i < d; ++i) {
       vector<Ciphertext> newtmp;
@@ -1092,6 +1424,16 @@ seal::GaloisKeys SealPirClient::GenerateGaloisKeys() const {
   GaloisKeys gal_keys;
   keygen_->create_galois_keys(galois_elts, gal_keys);
   return gal_keys;
+}
+
+yacl::Buffer SealPirClient::GeneratePksBuffer() const {
+  std::string galois_keys_str =
+      SerializeSealObject<GaloisKeys>(GenerateGaloisKeys());
+  return yacl::Buffer(galois_keys_str.data(), galois_keys_str.size());
+}
+
+std::string SealPirClient::GeneratePksString() const {
+  return SerializeSealObject<GaloisKeys>(GenerateGaloisKeys());
 }
 
 uint64_t SealPirClient::GetPtIndex(uint64_t element_index) const {

@@ -107,8 +107,10 @@ void EcdhUbPsiServer::OfflineTransferCache() {
 }
 
 void EcdhUbPsiServer::Offline() {
-  OfflineGenCache();
-  OfflineTransferCache();
+  SyncWait(lctx_, [&]() {
+    OfflineGenCache();
+    OfflineTransferCache();
+  });
 }
 
 EcdhUbPsiServer::IndexWithCnt EcdhUbPsiServer::TransCacheIndexesToRowIndexs(
@@ -147,9 +149,7 @@ EcdhUbPsiServer::IndexWithCnt EcdhUbPsiServer::TransCacheIndexesToRowIndexs(
 // 2) + send&recv(items * 8B * 2)
 //   ~= 80 * items + constants(1G)
 void EcdhUbPsiServer::Online() {
-  std::shared_ptr<yacl::link::Context> sync_lctx = lctx_->Spawn();
-
-  auto online_proc = std::async([&]() {
+  SyncWait(lctx_, [&]() {
     std::vector<uint8_t> server_private_key;
     if (!config_.server_secret_key_path().empty()) {
       server_private_key =
@@ -200,8 +200,6 @@ void EcdhUbPsiServer::Online() {
     join_processor_->GenerateResult(peer_cnt_info.peer_total_cnt -
                                     stat.peer_intersection_count);
   });
-
-  SyncWait(sync_lctx, &online_proc);
 }
 
 }  // namespace psi::ecdh

@@ -14,18 +14,21 @@
 
 #include "psi/algorithm/pir_interface/pir_db.h"
 
-// 1. "psi/algorithm/pir_interface/pir_db.h"  --->
-// "psi/algorithm/pir_interface/pir_db.h"
-
-// 2. "//psi/algorithm/pir_interface:pir_db",  ---->
-// "//psi/algorithm/pir_interface:pir_db"
-
 #include "absl/types/span.h"
 #include "spdlog/spdlog.h"
 #include "yacl/crypto/tools/prg.h"
 #include "yacl/utils/parallel.h"
 
-namespace psi::pir_utils {
+namespace psi::pir {
+
+// PirTye was defined in the pir_type.pb.h
+PirTypeProto PirTypeToProto(const PirType& type) {
+  PirTypeProto proto;
+  proto.set_type(type);
+  return proto;
+}
+
+PirType ProtoToPirType(const PirTypeProto& proto) { return proto.type(); }
 
 RawDatabase RawDatabase::Random(uint64_t rows, uint64_t row_byte_len) {
   std::vector<std::vector<uint8_t>> db;
@@ -122,4 +125,4 @@ std::vector<RawDatabase> RawDatabase::Partition(
   return result;
 }
 
-}  // namespace psi::pir_utils
+}  // namespace psi::pir

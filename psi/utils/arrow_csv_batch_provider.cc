@@ -31,11 +31,12 @@ namespace psi {
 
 ArrowCsvBatchProvider::ArrowCsvBatchProvider(
     const std::string& file_path, const std::vector<std::string>& keys,
-    size_t batch_size, const std::vector<std::string>& labels)
+    size_t batch_size, const std::vector<std::string>& labels, char delimiter)
     : batch_size_(batch_size),
       file_path_(file_path),
       keys_(keys),
-      labels_(labels) {
+      labels_(labels),
+      delimiter_(delimiter) {
   Init();
 }
 
@@ -120,7 +121,7 @@ void ArrowCsvBatchProvider::ReadBatch(std::vector<std::string>* read_keys,
           values.emplace_back(arrays_[i]->Value(idx_in_batch_));
         }
 
-        read_keys->emplace_back(KeysJoin(values));
+        read_keys->emplace_back(KeysJoin(values, delimiter_));
       }
 
       if (read_labels != nullptr && !labels_.empty()) {
@@ -131,7 +132,7 @@ void ArrowCsvBatchProvider::ReadBatch(std::vector<std::string>* read_keys,
           values.emplace_back(arrays_[i]->Value(idx_in_batch_));
         }
 
-        read_labels->emplace_back(KeysJoin(values));
+        read_labels->emplace_back(KeysJoin(values, delimiter_));
       }
       row_cnt_++;
     }

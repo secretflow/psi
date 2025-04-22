@@ -142,6 +142,7 @@ psi_cc_library(
         "//psi:prelude",
         "//psi/proto:psi_cc_proto",
         "//psi/utils:arrow_csv_batch_provider",
+        "//psi/utils:bucket",
         "//psi/utils:csv_checker",
         "//psi/utils:ec_point_store",
         "//psi/utils:progress",

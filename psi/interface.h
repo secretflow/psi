@@ -23,9 +23,9 @@
 #include "utils/batch_provider.h"
 #include "yacl/link/algorithm/barrier.h"
 
+#include "psi/checkpoint/recovery.h"
 #include "psi/utils/index_store.h"
 #include "psi/utils/join_processor.h"
-#include "psi/utils/recovery.h"
 #include "psi/utils/resource_manager.h"
 
 #include "psi/proto/psi_v2.pb.h"

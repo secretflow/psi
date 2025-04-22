@@ -22,11 +22,11 @@ psi_cc_library(
     hdrs = ["ecdh_psi.h"],
     deps = [
         ":ecdh_logger",
+        "//psi/checkpoint:recovery",
         "//psi/cryptor:cryptor_selector",
         "//psi/utils:batch_provider_impl",
         "//psi/utils:communication",
         "//psi/utils:ec_point_store",
-        "//psi/utils:recovery",
         "@abseil-cpp//absl/strings",
         "@yacl//yacl/link",
         "@yacl//yacl/utils:parallel",
@@ -99,6 +99,7 @@ psi_cc_library(
     hdrs = ["receiver.h"],
     deps = [
         ":common",
+        ":ecdh_psi",
         "//psi:interface",
         "//psi/utils:arrow_csv_batch_provider",
     ],
@@ -110,6 +111,7 @@ psi_cc_library(
     hdrs = ["sender.h"],
     deps = [
         ":common",
+        ":ecdh_psi",
         "//psi:interface",
         "//psi/utils:arrow_csv_batch_provider",
     ],

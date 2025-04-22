@@ -49,10 +49,16 @@ struct SpiralQuery {
 
   yacl::Buffer Serialize();
   yacl::Buffer SerializeRng();
+  std::string SerializeToStr();
+  std::string SerializeRngToStr();
   static SpiralQuery Deserialize(const Params& params,
                                  const yacl::Buffer& buffer);
   static SpiralQuery DeserializeRng(const Params& params,
                                     const yacl::Buffer& buffer);
+  static SpiralQuery Deserialize(const Params& params,
+                                 const std::string& buffer);
+  static SpiralQuery DeserializeRng(const Params& params,
+                                    const std::string& buffer);
 };
 
 class SpiralClient : public psi::pir::IndexPirClient {
@@ -65,6 +71,7 @@ class SpiralClient : public psi::pir::IndexPirClient {
 
     size_t element_byte_len =
         std::min(database_info_.byte_size_per_row_, params_.MaxByteLenOfPt());
+
     partition_num_ =
         (database_info_.byte_size_per_row_ + params_.MaxByteLenOfPt() - 1) /
         params_.MaxByteLenOfPt();
@@ -72,19 +79,21 @@ class SpiralClient : public psi::pir::IndexPirClient {
     element_size_of_pt_ = params_.ElementSizeOfPt(element_byte_len);
   }
 
-  PublicKeys GenKeys(uint128_t seed) {
-    yacl::crypto::Prg<uint64_t> prg(seed);
-    return GenKeys(prg);
+  PublicKeys GenPublicKeys() const;
+
+  yacl::Buffer GeneratePksBuffer() const override {
+    return SerializePublicKeys(params_, GenPublicKeys());
   }
-  PublicKeys GenKeys() { return GenKeys(yacl::crypto::SecureRandU128()); }
+  std::string GeneratePksString() const override {
+    return SerializePublicKeysToStr(params_, GenPublicKeys());
+  }
 
   SpiralQuery GenQuery(size_t raw_idx_target) const {
+    YACL_ENFORCE(database_info_.rows_ > 0);
+    YACL_ENFORCE_LT(raw_idx_target, database_info_.rows_);
+
     size_t pt_idx_target = raw_idx_target / element_size_of_pt_;
     return GenQueryInternal(pt_idx_target);
-  }
-
-  yacl::Buffer GenPublicKeys() {
-    return SerializePublicKeys(params_, GenKeys());
   }
 
   std::vector<uint8_t> DecodeResponse(
@@ -111,6 +120,11 @@ class SpiralClient : public psi::pir::IndexPirClient {
 
     return query.SerializeRng();
   }
+  std::string GenerateIndexQueryStr(uint64_t raw_idx) const override {
+    auto query = GenQuery(raw_idx);
+
+    return query.SerializeRngToStr();
+  }
 
   std::vector<uint8_t> DecodeIndexResponse(const yacl::Buffer& response_buffer,
                                            uint64_t raw_idx) const override {
@@ -118,6 +132,14 @@ class SpiralClient : public psi::pir::IndexPirClient {
 
     return DecodeResponse(response, raw_idx);
   }
+  std::vector<uint8_t> DecodeIndexResponse(const std::string& response_buffer,
+                                           uint64_t raw_idx) const override {
+    auto response = DeserializeResponse(params_, response_buffer);
+
+    return DecodeResponse(response, raw_idx);
+  }
+
+  pir::PirType GetPirType() const override { return pir::PirType::SPIRAL_PIR; }
 
  protected:
   SpiralQuery GenQueryInternal(size_t pt_idx_target) const;
@@ -156,7 +178,6 @@ class SpiralClient : public psi::pir::IndexPirClient {
                                    yacl::crypto::Prg<uint64_t>& rng_pub) const;
 
  private:
-  void Init();
   // core implementation
   void GenSecretKeys(yacl::crypto::Prg<uint64_t>& rng);
 
@@ -167,13 +188,13 @@ class SpiralClient : public psi::pir::IndexPirClient {
 
   void GenSecretKeys() { GenSecretKeys(yacl::crypto::SecureRandU128()); }
 
-  PublicKeys GenKeys(yacl::crypto::Prg<uint64_t>& rng);
+  void Init();
 
   std::vector<PolyMatrixNtt> GenExpansionParams(
       size_t num_exp, size_t m_exp, yacl::crypto::Prg<uint64_t>& rng,
       yacl::crypto::Prg<uint64_t>& rng_pub) const;
 
-  // Params
+  // Paramss
   Params params_;
 
   // just for decode, the given moduli is q2

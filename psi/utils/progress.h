@@ -15,6 +15,7 @@
 #pragma once
 
 #include <atomic>
+#include <functional>
 #include <memory>
 #include <shared_mutex>
 #include <string>
@@ -24,7 +25,7 @@ namespace psi {
 
 class Progress {
  public:
-  enum class Mode {
+  enum class Mode : uint8_t {
     kSingle,
     kSerial,
     kParallel,
@@ -36,13 +37,10 @@ class Progress {
     size_t running;
     size_t percentage;
     std::string description;
-
-    Data()
-        : total(0), finished(0), running(0), percentage(0), description("") {}
   };
 
  public:
-  Progress(std::string description = "");
+  explicit Progress(std::string description = "");
 
   ~Progress() = default;
 
@@ -80,4 +78,5 @@ class Progress {
   std::atomic_bool done_;
 };
 
+using ProgressCallbacks = std::function<void(const Progress::Data&)>;
 }  // namespace psi

@@ -43,19 +43,6 @@ Params GetTestParam() {
                 std::move(poly_matrix_params), std::move(query_params));
 }
 
-Params GetPerformanceImproveParam() {
-  std::size_t poly_len{2048};
-  std::vector<std::uint64_t> moduli{268369921, 249561089};
-
-  double noise_width{6.4};
-
-  PolyMatrixParams poly_matrix_params(2, 256, 21, 4, 8, 8, 4);
-  QueryParams query_params(9, 6, 1);
-
-  return Params(poly_len, std::move(moduli), noise_width,
-                std::move(poly_matrix_params), std::move(query_params));
-}
-
 Params GetDefaultParam() {
   std::size_t poly_len{2048};
   std::vector<std::uint64_t> moduli{268369921, 249561089};
@@ -69,12 +56,25 @@ Params GetDefaultParam() {
                 std::move(poly_matrix_params), std::move(query_params));
 }
 
+Params GetFastParam() {
+  std::size_t poly_len{2048};
+  std::vector<std::uint64_t> moduli{268369921, 249561089};
+
+  double noise_width{6.4};
+
+  PolyMatrixParams poly_matrix_params(2, 256, 21, 4, 8, 8, 4);
+  QueryParams query_params(9, 6, 1);
+
+  return Params(poly_len, std::move(moduli), noise_width,
+                std::move(poly_matrix_params), std::move(query_params));
+}
+
 Params GetFastExpansionTestingParam() {
   std::size_t poly_len{2048};
   std::vector<std::uint64_t> moduli{268369921, 249561089};
   double noise_width{6.4};
 
-  PolyMatrixParams poly_matrix_params(2, 256, 20, 4, 8, 8, 6);
+  PolyMatrixParams poly_matrix_params(2, 256, 20, 4, 8, 8, 4);
 
   QueryParams query_params(6, 2, 1);
 
@@ -173,6 +173,39 @@ std::vector<uint64_t> ConvertBytesToCoeffs(
       rest -= shift;
     }
   }
+  coeff_array[flag] = coeff_array[flag] << room;
+  return coeff_array;
+}
+
+std::vector<uint8_t> ConvertBytesToU8Coeffs(
+    size_t logt, size_t offset, size_t size,
+    const std::vector<uint8_t>& byte_array) {
+  size_t coeff_array_size = arith::UintNum(8 * size, logt);
+  std::vector<uint8_t> coeff_array(coeff_array_size);
+
+  size_t room = logt;
+  size_t flag = 0;
+  for (size_t i = 0; i < size; ++i) {
+    uint32_t src = static_cast<uint32_t>(byte_array[i + offset]);
+
+    size_t rest = 8;
+    while (rest != 0) {
+      if (room == 0) {
+        flag += 1;
+        room = logt;
+      }
+      size_t shift = std::min(room, rest);
+      uint64_t temp = coeff_array[flag] << shift;
+      coeff_array[flag] = temp | (src >> (8 - shift));
+
+      size_t remain = (1 << (8 - shift)) - 1;
+
+      src = (src & remain) << shift;
+      room -= shift;
+      rest -= shift;
+    }
+  }
+
   coeff_array[flag] = coeff_array[flag] << room;
   return coeff_array;
 }

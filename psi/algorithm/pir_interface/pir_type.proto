@@ -1,3 +1,4 @@
+//
 // Copyright 2024 Ant Group Co., Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,36 +12,31 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
 
 syntax = "proto3";
 
-import "psi/apps/pir/apis/common.proto";
+package psi.pir;
 
-package pir;
-
-option cc_generic_services = true;
-
-// Pir client -> [Pir server]
-service PirServerService {
-  rpc Query(QueryRequest) returns (QueryResponse);
+enum PirType{
+  INVALID = 0;
+  SEAL_PIR = 1;
+  SPIRAL_PIR = 2;
 }
 
-message QueryRequest {
-  Header header = 1;
-  RequestInfo info = 2;
-
-  reserved 3 to 9;
-
-  string step = 10;
-  repeated bytes query = 11;
+message PirTypeProto {
+  PirType type = 1;
 }
 
-message QueryResponse {
-  Header header = 1;
-  Status status = 2;
+message CuckooOptionsProto {
+  uint64 num_input = 1;
+  uint64 num_stash = 2;
+  uint64 num_hash = 3;
+  double scale_factor = 4;
+  uint64 max_try_count = 5;
+}
 
-  reserved 3 to 9;
-
-  repeated bytes reply = 10;
+message KwPirOptionsProto {
+  CuckooOptionsProto cuckoo_options = 1;
+  uint64 key_size = 2;
+  uint64 value_size = 3;
 }

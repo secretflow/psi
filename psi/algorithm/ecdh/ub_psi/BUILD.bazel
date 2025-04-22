@@ -79,10 +79,10 @@ psi_cc_library(
     hdrs = ["ecdh_oprf_psi.h"],
     deps = [
         ":ecdh_oprf_selector",
+        ":ub_psi_cache",
         "//psi/utils:batch_provider",
         "//psi/utils:communication",
         "//psi/utils:ec_point_store",
-        "//psi/utils:ub_psi_cache",
         "@abseil-cpp//absl/strings",
         "@yacl//yacl/base:exception",
         "@yacl//yacl/crypto/rand",
@@ -124,8 +124,45 @@ psi_cc_library(
     deps = [
         ":ecdh_oprf_psi",
         "//psi:interface",
+        "//psi/utils:batch_provider_impl",
         "//psi/utils:ec",
         "//psi/utils:resource_manager",
         "//psi/utils:sync",
+    ],
+)
+
+proto_library(
+    name = "ub_psi_cache_proto",
+    srcs = ["ub_psi_cache.proto"],
+)
+
+cc_proto_library(
+    name = "ub_psi_cache_cc_proto",
+    deps = [":ub_psi_cache_proto"],
+)
+
+psi_cc_library(
+    name = "ub_psi_cache",
+    srcs = ["ub_psi_cache.cc"],
+    hdrs = ["ub_psi_cache.h"],
+    deps = [
+        ":ub_psi_cache_cc_proto",
+        "//psi/utils:batch_provider",
+        "//psi/utils:io",
+        "//psi/utils:pb_helper",
+        "//psi/utils:serialize",
+        "@yacl//yacl/base:byte_container_view",
+        "@yacl//yacl/base:exception",
+    ],
+)
+
+psi_cc_test(
+    name = "ub_psi_cache_test",
+    srcs = ["ub_psi_cache_test.cc"],
+    deps = [
+        ":ub_psi_cache",
+        "@abseil-cpp//absl/time",
+        "@yacl//yacl/crypto/rand",
+        "@yacl//yacl/utils:scope_guard",
     ],
 )

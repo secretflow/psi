@@ -18,21 +18,34 @@ syntax = "proto3";
 package psi.sealpir;
 
 message PlaintextsProto {
-  repeated bytes data = 1;
+  repeated bytes plains = 1;
 }
 
 message CiphertextsProto {
   repeated bytes ciphers = 1;
 }
 
-message SealPirReplyProto {
-  repeated CiphertextsProto reply_cipher = 1;
+message SealPirResponseProto {
+  repeated CiphertextsProto response_cipher = 1;
 }
 
 message SealPirQueryProto {
   repeated CiphertextsProto query_cipher = 1;
 }
 
-message SealPirAnswerProto {
-  CiphertextsProto answer = 1;
+message SealPirServerProto {
+  uint64 raw_db_rows = 1;
+  uint64 raw_db_bytes = 2;
+
+  uint32 dim = 4;
+  repeated uint64 dim_vec = 5;
+
+  uint32 poly_modulus_degree = 6;
+  uint32 logt = 7;
+
+  uint64 partition_num = 8;
+  uint64 pt_num = 9;
+
+  repeated PlaintextsProto dbs = 10;
+  map<uint64, bytes> galois_keys = 11;
 }

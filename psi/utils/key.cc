@@ -16,6 +16,9 @@
 
 #include <omp.h>
 
+#include <fstream>
+#include <sstream>
+
 #include "fmt/ranges.h"
 #include "spdlog/spdlog.h"
 #include "yacl/base/exception.h"
@@ -24,6 +27,75 @@
 #include "psi/utils/io.h"
 
 namespace psi {
+
+namespace {
+
+// parse cpuset.cpus format(eg. "0-3,5")
+int ParseCpuset(const std::string& cpuset) {
+  int count = 0;
+  std::stringstream ss(cpuset);
+  std::string item;
+  while (std::getline(ss, item, ',')) {
+    size_t dash = item.find('-');
+    if (dash != std::string::npos) {
+      int start = std::stoi(item.substr(0, dash));
+      int end = std::stoi(item.substr(dash + 1));
+      count += end - start + 1;
+    } else {
+      if (!item.empty()) {
+        count++;
+      }
+    }
+  }
+  return count;
+}
+
+int GetCpuCount() {
+  // 1. check cpuset
+  std::ifstream cpuset_file("/sys/fs/cgroup/cpuset/cpuset.cpus");
+  if (cpuset_file) {
+    std::string cpuset;
+    if (std::getline(cpuset_file, cpuset)) {
+      if (!cpuset.empty() && cpuset != "0") {
+        return ParseCpuset(cpuset);
+      }
+    }
+  }
+
+  // 2. check CPU quota and period
+  // 2.1 cgroup v1
+  std::ifstream quota_file("/sys/fs/cgroup/cpu,cpuacct/cpu.cfs_quota_us");
+  std::ifstream period_file("/sys/fs/cgroup/cpu,cpuacct/cpu.cfs_period_us");
+  if (quota_file && period_file) {
+    int64_t quota;
+    int64_t period;
+    quota_file >> quota;
+    period_file >> period;
+    if (quota > 0 && period > 0) {
+      return static_cast<int>((quota + period - 1) / period);
+    }
+  }
+
+  // 2.2 cgroup v2
+  std::ifstream v2_quota_file("/sys/fs/cgroup/cpu.max");
+  if (v2_quota_file) {
+    std::string quota;
+    quota_file >> quota;
+    if (quota != "max") {
+      int64_t quota_size = std::stoll(quota);
+      int64_t period;
+      v2_quota_file >> period;
+      if (period != 0) {
+        return static_cast<int>((quota_size + period - 1) / period);
+      }
+    }
+  }
+
+  // 4. use hardware_concurrency
+  return std::thread::hardware_concurrency();
+}
+
+}  // namespace
 
 // Multiple-Key out-of-core sort.
 // Out-of-core support reference:
@@ -84,7 +156,7 @@ void MultiKeySort(const std::string& in_csv, const std::string& out_csv,
                "mismatched header, field_names={}, line={}",
                fmt::join(keys, ","), line);
 
-  int mcpus = omp_get_num_procs();
+  int mcpus = GetCpuCount();
 
   // Sort the csv body and append to out csv.
   std::string cmd = fmt::format(
@@ -99,8 +171,8 @@ void MultiKeySort(const std::string& in_csv, const std::string& out_csv,
   YACL_ENFORCE(ret == 0, "failed to execute cmd={}, ret={}", cmd, ret);
 }
 
-std::string KeysJoin(const std::vector<absl::string_view>& keys) {
-  return absl::StrJoin(keys, ",");
+std::string KeysJoin(const std::vector<absl::string_view>& keys, char sep) {
+  return absl::StrJoin(keys, std::string(&sep, 1));
 }
 
 }  // namespace psi

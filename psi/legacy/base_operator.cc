@@ -29,8 +29,7 @@ PsiBaseOperator::PsiBaseOperator(std::shared_ptr<yacl::link::Context> link_ctx)
 
 std::vector<std::string> PsiBaseOperator::Run(
     const std::vector<std::string>& inputs, bool broadcast_result) {
-  auto run_f = std::async([&] { return OnRun(inputs); });
-  auto res = SyncWait(link_ctx_, &run_f);
+  auto res = SyncWait(link_ctx_, [&] { return OnRun(inputs); });
 
   if (broadcast_result) {
     BroadcastResult(link_ctx_, &res);

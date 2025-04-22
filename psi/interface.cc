@@ -22,12 +22,11 @@
 #include "spdlog/spdlog.h"
 #include "utils/index_store.h"
 #include "utils/join_processor.h"
-#include "utils/recovery.h"
 #include "utils/resource_manager.h"
 #include "yacl/base/exception.h"
 #include "yacl/link/link.h"
 
-#include "psi/legacy/bucket_psi.h"
+#include "psi/checkpoint/recovery.h"
 #include "psi/prelude.h"
 #include "psi/trace_categories.h"
 #include "psi/utils/bucket.h"
@@ -79,7 +78,7 @@ void AbstractPsiParty::Init() {
 
   join_processor_ = JoinProcessor::Make(config_, GetTaskDir());
 
-  auto preprocess_f = std::async([&] {
+  SyncWait(lctx_, [&] {
     SPDLOG_INFO("[AbstractPsiParty::Init][Check csv pre-process] start");
 
     // TODO(huocun): construct batch provider according to input_attr field
@@ -91,7 +90,6 @@ void AbstractPsiParty::Init() {
     batch_provider_ = keys_info_->GetKeysProviderWithDupCnt();
     SPDLOG_INFO("[AbstractPsiParty::Init][Check csv pre-process] end");
   });
-  SyncWait(lctx_, &preprocess_f);
 
   if (!config_.skip_duplicates_check()) {
     YACL_ENFORCE(keys_info_->DupKeyCnt() == 0,
@@ -153,7 +151,8 @@ PsiResultReport AbstractPsiParty::Finalize() {
       fmt::format("sorted_intersection_indices_{}.csv", v2::Role_Name(role_));
 
   SPDLOG_INFO("[AbstractPsiParty::Finalize][Generate result] start");
-  auto gen_result_f = std::async([&] {
+
+  SyncWait(lctx_, [&] {
     MultiKeySort(intersection_indices_writer_->path(),
                  sorted_intersection_indices_path,
                  std::vector<std::string>{kIdx}, true, false);
@@ -179,7 +178,6 @@ PsiResultReport AbstractPsiParty::Finalize() {
     }
   });
 
-  SyncWait(lctx_, &gen_result_f);
   SPDLOG_INFO("[AbstractPsiParty::Finalize][Generate result] end");
 
   if (role_ == v2::ROLE_SENDER &&

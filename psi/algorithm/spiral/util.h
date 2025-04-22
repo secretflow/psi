@@ -40,6 +40,10 @@ std::vector<uint64_t> ConvertBytesToCoeffs(
     size_t logt, size_t offset, size_t size,
     const std::vector<uint8_t>& byte_array);
 
+std::vector<uint8_t> ConvertBytesToU8Coeffs(
+    size_t logt, size_t offset, size_t size,
+    const std::vector<uint8_t>& byte_array);
+
 std::vector<uint8_t> ConvertCoeffsToBytes(
     const std::vector<uint64_t>& coeff_array, size_t logt);
 

@@ -37,6 +37,7 @@ void MultiKeySort(const std::string& in_csv, const std::string& out_csv,
                   bool numeric_sort = false, bool unique = false);
 
 // join keys with ","
-std::string KeysJoin(const std::vector<absl::string_view>& keys);
+std::string KeysJoin(const std::vector<absl::string_view>& keys,
+                     char sep = ',');
 
 }  // namespace psi

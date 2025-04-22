@@ -27,7 +27,6 @@
 #include "psi/algorithm/rr22/common.h"
 #include "psi/algorithm/rr22/rr22_psi.h"
 #include "psi/algorithm/rr22/rr22_utils.h"
-#include "psi/legacy/bucket_psi.h"
 #include "psi/prelude.h"
 #include "psi/trace_categories.h"
 #include "psi/utils/bucket.h"
@@ -65,7 +64,7 @@ void Rr22PsiReceiver::PreProcess() {
   if (bucket_count_ > 0) {
     std::vector<std::string> keys(config_.keys().begin(), config_.keys().end());
 
-    auto gen_input_bucket_f = std::async([&] {
+    SyncWait(lctx_, [&] {
       if (recovery_manager_) {
         input_bucket_store_ = CreateCacheFromProvider(
             batch_provider_, recovery_manager_->input_bucket_store_path(),
@@ -76,8 +75,6 @@ void Rr22PsiReceiver::PreProcess() {
             bucket_count_);
       }
     });
-
-    SyncWait(lctx_, &gen_input_bucket_f);
   }
 
   if (recovery_manager_) {
@@ -140,8 +137,7 @@ void Rr22PsiReceiver::Online() {
   Rr22Runner runner(lctx_, rr22_options, input_bucket_store_->BucketNum(),
                     config_.protocol_config().broadcast_result(), pre_f,
                     post_f);
-  auto f = std::async([&] { runner.AsyncRun(bucket_idx, false); });
-  SyncWait(lctx_, &f);
+  SyncWait(lctx_, [&] { runner.AsyncRun(bucket_idx, false); });
   SPDLOG_INFO("[Rr22PsiReceiver::Online] end");
 }
 

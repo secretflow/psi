@@ -19,22 +19,40 @@ package(default_visibility = ["//visibility:public"])
 psi_cc_library(
     name = "kw_pir",
     srcs = ["kw_pir.cc"],
-    hdrs = [
-        "index_pir.h",
-        "kw_pir.h",
-    ],
+    hdrs = ["kw_pir.h"],
     linkopts = [
         "-ldl",
         "-lm",
     ],
     deps = [
-        "pir_db",
+        ":index_pir",
+        ":pir_db",
+        "//psi/algorithm/sealpir:seal_pir",
+        "//psi/algorithm/spiral:spiral_server",
         "//psi/utils:cuckoo_index",
+        "@protobuf",
         "@yacl//yacl/base:byte_container_view",
         "@yacl//yacl/base:exception",
         "@yacl//yacl/base:int128",
         "@yacl//yacl/crypto/rand",
     ],
+)
+
+psi_cc_library(
+    name = "index_pir",
+    hdrs = [
+        "index_pir.h",
+    ],
+)
+
+proto_library(
+    name = "pir_type_proto",
+    srcs = ["pir_type.proto"],
+)
+
+cc_proto_library(
+    name = "pir_type_cc_proto",
+    deps = [":pir_type_proto"],
 )
 
 psi_cc_test(
@@ -46,13 +64,26 @@ psi_cc_test(
     ],
 )
 
+psi_cc_test(
+    name = "kw_pir_no_payload_test",
+    srcs = ["kw_pir_no_payload_test.cc"],
+    deps = [
+        ":kw_pir",
+        "//psi/algorithm/sealpir:seal_pir",
+    ],
+)
+
 psi_cc_library(
     name = "pir_db",
     srcs = ["pir_db.cc"],
     hdrs = ["pir_db.h"],
     deps = [
+        ":pir_type_cc_proto",
         "@abseil-cpp//absl/types:span",
+        "@yacl//yacl/base:buffer",
+        "@yacl//yacl/base:byte_container_view",
         "@yacl//yacl/base:exception",
+        "@yacl//yacl/base:int128",
         "@yacl//yacl/crypto/rand",
         "@yacl//yacl/utils:parallel",
     ],

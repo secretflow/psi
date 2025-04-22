@@ -28,9 +28,9 @@
 
 #include "psi/algorithm/ecdh/ub_psi/ecdh_oprf.h"
 #include "psi/algorithm/ecdh/ub_psi/ecdh_oprf_selector.h"
+#include "psi/algorithm/ecdh/ub_psi/ub_psi_cache.h"
 #include "psi/utils/batch_provider.h"
 #include "psi/utils/ec_point_store.h"
-#include "psi/utils/ub_psi_cache.h"
 
 // basic ecdh-oprf based psi
 // reference:

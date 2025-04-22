@@ -16,7 +16,13 @@
 #include <cstdint>
 #include <vector>
 
+#include "fmt/format.h"
+#include "yacl/base/buffer.h"
+#include "yacl/base/byte_container_view.h"
 #include "yacl/base/exception.h"
+#include "yacl/base/int128.h"
+
+#include "psi/algorithm/pir_interface/pir_type.pb.h"
 
 namespace {
 
@@ -37,7 +43,78 @@ void ValidateDb(const std::vector<std::vector<uint8_t>>& db,
 
 }  // namespace
 
-namespace psi::pir_utils {
+namespace psi::pir {
+// PirTye was defined in the pir_type.pb.h
+PirTypeProto PirTypeToProto(const PirType& type);
+
+PirType ProtoToPirType(const PirTypeProto& proto);
+
+// forward declare
+class RawDatabase;
+
+class KwPirDataBase {
+ public:
+  KwPirDataBase() = default;
+  virtual ~KwPirDataBase() = default;
+
+  // if our setting is no payload, we need to use this function
+  // to init our DB
+  virtual void GenerateFromRawKeyData(
+      const std::vector<yacl::ByteContainerView>& db_vec) = 0;
+
+  // each element is key & value, each value`s length must be same
+  virtual void GenerateFromRawKeyValueData(
+      const std::vector<std::pair<yacl::ByteContainerView,
+                                  yacl::ByteContainerView>>& db_vec) = 0;
+
+  virtual void GenerateFromRawKeyValueData(
+      const std::vector<std::string>& keys,
+      const std::vector<std::string>& values) = 0;
+
+  virtual void GenerateFromRawKeyValueData(
+      const std::vector<uint128_t>& keys,
+      const std::vector<std::string>& values) = 0;
+
+  virtual void Dump(std::ostream& out_stream) const = 0;
+
+  virtual PirType GetPirType() const = 0;
+
+  virtual std::vector<yacl::Buffer> Response(
+      const std::vector<yacl::Buffer>& query_vec,
+      const yacl::Buffer& pks) const = 0;
+
+  virtual std::vector<std::string> Response(
+      const std::vector<std::string>& query_vec,
+      const std::string& pks) const = 0;
+
+  virtual yacl::Buffer Response(const yacl::Buffer& query_buffer,
+                                const yacl::Buffer& pks_buffer) const = 0;
+
+  virtual std::string Response(const std::string& query_buffer,
+                               const std::string& pks_buffer) const = 0;
+};
+
+class IndexPirDataBase {
+ public:
+  IndexPirDataBase(PirType pir_type) : pir_type_(pir_type) {}
+  virtual ~IndexPirDataBase() = default;
+
+  virtual void GenerateFromRawData(const RawDatabase& raw_data) = 0;
+
+  virtual void Dump(std::ostream& out_stream) const = 0;
+
+  PirType GetPirType() const { return pir_type_; };
+
+  virtual bool DbSeted() const = 0;
+
+  virtual yacl::Buffer Response(const yacl::Buffer& query_buffer,
+                                const yacl::Buffer& pks_buffer) const = 0;
+  virtual std::string Response(const std::string& query_buffer,
+                               const std::string& pks_buffer) const = 0;
+
+ protected:
+  PirType pir_type_;
+};
 
 // Raw datbase, n * l , n is the rows, l is the byte len of each row
 class RawDatabase {
@@ -80,4 +157,4 @@ class RawDatabase {
 
   std::vector<std::vector<uint8_t>> db_;
 };
-}  // namespace psi::pir_utils
+}  // namespace psi::pir

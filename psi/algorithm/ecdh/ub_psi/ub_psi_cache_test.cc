@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "psi/utils/ub_psi_cache.h"
+#include "psi/algorithm/ecdh/ub_psi/ub_psi_cache.h"
 
 #include <filesystem>
 #include <iostream>

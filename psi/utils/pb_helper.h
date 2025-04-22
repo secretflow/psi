@@ -13,14 +13,20 @@
 // limitations under the License.
 
 #pragma once
+
 #include "google/protobuf/message.h"
 
 namespace psi {
 
-void DumpPbMessageToJsonFile(google::protobuf::Message& msg,
+void DumpPbMessageToJsonFile(const google::protobuf::Message& msg,
                              const std::string& json_file);
 
 void LoadJsonFileToPbMessage(const std::string& json_file,
                              google::protobuf::Message& msg);
+
+std::string DumpPbMessageToJsonStr(const google::protobuf::Message& msg);
+
+void LoadJsonStrToPbMessage(const std::string& json_str,
+                            google::protobuf::Message& msg);
 
 }  // namespace psi

@@ -286,7 +286,7 @@ class KeyInfo : public Table {
 
   std::shared_ptr<arrow::csv::StreamingReader> GetStreamReader() const;
 
-  static std::shared_ptr<arrow::Schema> Schema();
+  static std::shared_ptr<arrow::Schema> GetSchema();
 
   std::vector<std::string> SourceFileColumns() const;
 

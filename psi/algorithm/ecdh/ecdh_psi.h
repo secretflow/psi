@@ -25,11 +25,11 @@
 #include "yacl/link/link.h"
 
 #include "psi/algorithm/ecdh/ecdh_logger.h"
+#include "psi/checkpoint/recovery.h"
 #include "psi/cryptor/ecc_cryptor.h"
 #include "psi/utils/batch_provider.h"
 #include "psi/utils/communication.h"
 #include "psi/utils/ec_point_store.h"
-#include "psi/utils/recovery.h"
 
 #include "psi/utils/serializable.pb.h"
 

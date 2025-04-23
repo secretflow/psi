@@ -22,7 +22,6 @@
 #include "yacl/base/int128.h"
 
 #include "psi/algorithm/spiral/poly_matrix.h"
-// #include "psi/algorithm/spiral/serialize.h"
 
 namespace psi::spiral {
 

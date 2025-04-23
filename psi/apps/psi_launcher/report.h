@@ -1,4 +1,4 @@
-// Copyright 2024 Ant Group Co., Ltd.
+// Copyright 2025 Ant Group Co., Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,36 +11,24 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
 
-syntax = "proto3";
+#pragma once
 
-import "psi/apps/pir/apis/common.proto";
+#include <cstdint>
 
-package pir;
+namespace psi::api {
 
-option cc_generic_services = true;
+struct PsiExecuteReport {
+  // The data count of input.
+  int64_t original_count = -1;
 
-// Pir client -> [Pir server]
-service PirServerService {
-  rpc Query(QueryRequest) returns (QueryResponse);
-}
+  // The count of intersection. Get `-1` when self party can not get
+  // result.
+  int64_t intersection_count = -1;
 
-message QueryRequest {
-  Header header = 1;
-  RequestInfo info = 2;
+  int64_t original_unique_count = -1;
 
-  reserved 3 to 9;
+  int64_t intersection_unique_count = -1;
+};
 
-  string step = 10;
-  repeated bytes query = 11;
-}
-
-message QueryResponse {
-  Header header = 1;
-  Status status = 2;
-
-  reserved 3 to 9;
-
-  repeated bytes reply = 10;
-}
+}  // namespace psi::api

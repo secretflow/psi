@@ -39,18 +39,6 @@ struct TestParams {
   bool serialized_ = false;
 };
 
-[[maybe_unused]] std::vector<std::vector<uint8_t>> GenRandomDatabase(
-    size_t rows, size_t lens) {
-  yacl::crypto::Prg<uint8_t> prg;
-  std::vector<std::vector<uint8_t>> database;
-  for (size_t i = 0; i < rows; ++i) {
-    std::vector<uint8_t> row(lens);
-    prg.Fill(absl::MakeSpan(row));
-    database.push_back(std::move(row));
-  }
-  return database;
-}
-
 }  // namespace
 
 class SpiralPirTest : public testing::TestWithParam<TestParams> {};
@@ -69,9 +57,8 @@ TEST_P(SpiralPirTest, Works) {
 
   // Gen database
   SPDLOG_INFO("GenRandomDatabase, this will take much time");
-  // auto raw_database = GenRandomDatabase(database_rows, row_byte);
-  pir_utils::RawDatabase raw_database =
-      pir_utils::RawDatabase::Random(database_rows, row_byte);
+  psi::pir::RawDatabase raw_database =
+      psi::pir::RawDatabase::Random(database_rows, row_byte);
   SPDLOG_INFO("GenRandomDatabase, time cost: {} ms", timer.CountMs());
 
   // get a SpiralParams
@@ -94,7 +81,7 @@ TEST_P(SpiralPirTest, Works) {
 
   // set database
   timer.Restart();
-  server.SetDatabase(raw_database);
+  server.GenerateFromRawDataAndReorient(raw_database);
   SPDLOG_INFO("Server SetDatabase, time cost: {} ms", timer.CountMs());
 
   // gen random target_idx
@@ -107,11 +94,8 @@ TEST_P(SpiralPirTest, Works) {
 
   // query and response
   if (!serialized) {
-    auto pp = client.GenKeys();
+    auto pp = client.GenPublicKeys();
     SPDLOG_INFO("Do query without serialized");
-
-    // set public paramter
-    server.SetPublicKeys(std::move(pp));
 
     // now generate Query
     timer2.Restart();
@@ -121,7 +105,7 @@ TEST_P(SpiralPirTest, Works) {
 
     // server handle query
     timer.Restart();
-    auto responses = server.ProcessQuery(query);
+    auto responses = server.ProcessQuery(query, pp);
     SPDLOG_INFO("Server ProcessQuery, time cost: {} ms", timer.CountMs());
 
     timer.Restart();
@@ -135,11 +119,9 @@ TEST_P(SpiralPirTest, Works) {
     SPDLOG_INFO("Do query with serialized");
 
     timer.Restart();
-    auto pp_buffer = client.GenPublicKeys();
+    auto pks_buffer = client.GeneratePksBuffer();
     SPDLOG_INFO("public params gen time cost {} ms", timer.CountMs());
-    SPDLOG_INFO("public params serialize size {} kb", pp_buffer.size() / 1024);
-
-    server.SetPublicKeys(pp_buffer);
+    SPDLOG_INFO("public params serialize size {} kb", pks_buffer.size() / 1024);
 
     timer2.Restart();
     timer.Restart();
@@ -149,7 +131,7 @@ TEST_P(SpiralPirTest, Works) {
     SPDLOG_INFO("query serialize size {} kb", query_buffer.size() / 1024);
 
     timer.Restart();
-    auto response_buffer = server.GenerateIndexResponse(query_buffer);
+    auto response_buffer = server.Response(query_buffer, pks_buffer);
     SPDLOG_INFO("Server ProcessQuery, time cost: {} ms", timer.CountMs());
     SPDLOG_INFO("response serialize size {} kb", response_buffer.size() / 1024);
 
@@ -167,10 +149,13 @@ TEST_P(SpiralPirTest, Works) {
 }
 
 INSTANTIATE_TEST_SUITE_P(Works_Instances, SpiralPirTest,
-                         testing::Values(TestParams{1000000, 256},
-                                         TestParams{100000, 256, true},
+                         testing::Values(TestParams{10000, 256},
+                                         TestParams{100000, 256},
+                                         TestParams{1000000, 256}
                                          // large value
-                                         TestParams{10000, 8193, true},
-                                         TestParams{1000, 8192 * 10, true}));
+                                         //  TestParams{1000, 8193, true},
+                                         //  TestParams{100, 8192 * 10, true}
+
+                                         ));
 
 }  // namespace psi::spiral

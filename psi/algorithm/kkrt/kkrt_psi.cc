@@ -356,7 +356,7 @@ std::pair<std::vector<size_t>, std::vector<uint32_t>> KkrtPsiRecv(
       (kkrt_ot_num + kkrt_ot_batch_size - 1) / kkrt_ot_batch_size;
   for (size_t batch_idx = 0; batch_idx < ot_num_batch; ++batch_idx) {
     const size_t num_this_batch = std::min<size_t>(
-        kkrt_ot_num - batch_idx * kkrt_ot_batch_size, kkrt_ot_batch_size);
+        kkrt_ot_num - (batch_idx * kkrt_ot_batch_size), kkrt_ot_batch_size);
 
     size_t batch_start = batch_idx * kkrt_ot_batch_size;
     for (size_t i = 0; i < num_this_batch; ++i) {

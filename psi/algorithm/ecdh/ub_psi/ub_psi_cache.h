@@ -27,7 +27,7 @@
 #include "psi/utils/batch_provider.h"
 #include "psi/utils/io.h"
 
-#include "psi/utils/ub_psi_cache.pb.h"
+#include "psi/algorithm/ecdh/ub_psi/ub_psi_cache.pb.h"
 
 namespace psi {
 

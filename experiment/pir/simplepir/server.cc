@@ -21,15 +21,15 @@
 
 namespace pir::simple {
 SimplePirServer::SimplePirServer(size_t dimension, uint64_t q, size_t N,
-                                 uint64_t p)
-    : dimension_(dimension), q_(q), N_(N), p_(p) {
+                                 [[maybe_unused]] uint64_t p)
+    : dimension_(dimension), q_(q), N_(N) /*, p_(p)*/ {
   // Checks if N is a perfect square
   YACL_ENFORCE(N > 0, "N must be positive");
   YACL_ENFORCE(N == static_cast<size_t>(sqrt(N)) * static_cast<size_t>(sqrt(N)),
                "N must be a perfect square");
-  YACL_ENFORCE(dimension_ > 0, "Dimension must be positive");
-  YACL_ENFORCE(q_ > 0, "Modulus q must be positive");
-  YACL_ENFORCE(p_ > 0, "Modulus p must be positive");
+  YACL_ENFORCE(dimension > 0, "Dimension must be positive");
+  YACL_ENFORCE(q > 0, "Modulus q must be positive");
+  YACL_ENFORCE(p > 0, "Modulus p must be positive");
 }
 
 void SimplePirServer::SetDatabase(

@@ -17,7 +17,7 @@
 
 #include "psi/algorithm/rr22/rr22_oprf.h"
 #include "psi/algorithm/rr22/rr22_psi.h"
-#include "psi/utils/recovery.h"
+#include "psi/checkpoint/recovery.h"
 
 #include "psi/proto/psi_v2.pb.h"
 

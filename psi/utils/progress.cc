@@ -16,13 +16,14 @@
 
 #include <mutex>
 #include <numeric>
+#include <utility>
 
 #include "fmt/format.h"
 
 namespace psi {
 
 Progress::Progress(std::string description)
-    : description_(description),
+    : description_(std::move(description)),
       percentage_(0),
       mode_(Mode::kSingle),
       done_(false) {}
@@ -39,8 +40,8 @@ void Progress::Done() {
   if (mode_.load() != Mode::kSingle) {
     std::unique_lock lock(rw_mutex_);
 
-    for (size_t i = 0; i < sub_progresses_.size(); i++) {
-      sub_progresses_[i]->Done();
+    for (auto& sub_progresse : sub_progresses_) {
+      sub_progresse->Done();
     }
   }
 
@@ -69,7 +70,7 @@ Progress::Data Progress::Get() {
   std::shared_lock r_lock(rw_mutex_);
 
   size_t total_weight =
-      std::accumulate(weights_.begin(), weights_.end(), size_t(0));
+      std::accumulate(weights_.begin(), weights_.end(), static_cast<size_t>(0));
   size_t total_percent = 0;
   Data out;
 

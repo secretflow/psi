@@ -54,9 +54,22 @@ yacl::Buffer SerializePolyMatrixRaw(const PolyMatrixRaw& poly_matrix) {
 
   return buffer;
 }
+std::string SerializePolyMatrixRawToStr(const PolyMatrixRaw& poly_matrix) {
+  // 1. first construct proto object
+  PolyMatrixProto proto;
+
+  proto.set_rows(poly_matrix.Rows());
+  proto.set_cols(poly_matrix.Cols());
+
+  for (const auto& value : poly_matrix.Data()) {
+    proto.add_data(value);
+  }
+  // then convert to buffer
+  return proto.SerializeAsString();
+}
 
 PolyMatrixRaw DeserializePolyMatrixRaw(const Params& params,
-                                       yacl::Buffer& buffer) {
+                                       const yacl::ByteContainerView& buffer) {
   // first convert buffer into proto object
   PolyMatrixProto proto;
   proto.ParseFromArray(buffer.data(), buffer.size());
@@ -96,7 +109,25 @@ yacl::Buffer SerializePolyMatrixRawRng(const PolyMatrixRaw& poly_matrix,
   return buffer;
 }
 
-PolyMatrixRaw DeserializePolyMatrixRawRng(yacl::Buffer& buffer,
+std::string SerializePolyMatrixRawRngToStr(const PolyMatrixRaw& poly_matrix,
+                                           const Params& params) {
+  // 1. first construct proto object
+  PolyMatrixProto proto;
+
+  proto.set_rows(poly_matrix.Rows() - 1);
+  proto.set_cols(poly_matrix.Cols());
+
+  // skip the first row
+  size_t offset = poly_matrix.Cols() * params.PolyLen();
+
+  for (size_t i = offset; i < poly_matrix.Data().size(); ++i) {
+    proto.add_data(poly_matrix.Data()[i]);
+  }
+  // then convert to buffer
+  return proto.SerializeAsString();
+}
+
+PolyMatrixRaw DeserializePolyMatrixRawRng(yacl::ByteContainerView buffer,
                                           const Params& params,
                                           yacl::crypto::Prg<uint64_t> rng) {
   // first convert buffer into proto object
@@ -155,6 +186,33 @@ yacl::Buffer SerializePublicKeys(const Params& params, const PublicKeys& pks) {
   return buffer;
 }
 
+std::string SerializePublicKeysToStr(const Params& params,
+                                     const PublicKeys& pks) {
+  PublicKeysProto proto;
+
+  for (auto& val : pks.v_packing_) {
+    auto val_raw = FromNtt(params, val);
+    *proto.add_v_packing() = val_raw.ToProto();
+  }
+
+  for (auto& val : pks.v_expansion_left_) {
+    auto val_raw = FromNtt(params, val);
+    *proto.add_v_expansion_left() = val_raw.ToProto();
+  }
+
+  for (auto& val : pks.v_expansion_right_) {
+    auto val_raw = FromNtt(params, val);
+    *proto.add_v_expansion_right() = val_raw.ToProto();
+  }
+
+  for (auto& val : pks.v_conversion_) {
+    auto val_raw = FromNtt(params, val);
+    *proto.add_v_conversion() = val_raw.ToProto();
+  }
+
+  return proto.SerializeAsString();
+}
+
 yacl::Buffer SerializeResponse(const std::vector<PolyMatrixRaw>& responses) {
   SpiralResponseProto proto;
 
@@ -167,8 +225,20 @@ yacl::Buffer SerializeResponse(const std::vector<PolyMatrixRaw>& responses) {
 
   return buffer;
 }
-std::vector<PolyMatrixRaw> DeserializeResponse(const Params& params,
-                                               const yacl::Buffer& buffer) {
+
+std::string SerializeResponseToStr(
+    const std::vector<PolyMatrixRaw>& responses) {
+  SpiralResponseProto proto;
+
+  for (const auto& val : responses) {
+    *proto.add_ct() = val.ToProto();
+  }
+
+  return proto.SerializeAsString();
+}
+
+std::vector<PolyMatrixRaw> DeserializeResponse(
+    const Params& params, const yacl::ByteContainerView& buffer) {
   SpiralResponseProto proto;
   proto.ParseFromArray(buffer.data(), buffer.size());
 
@@ -181,7 +251,8 @@ std::vector<PolyMatrixRaw> DeserializeResponse(const Params& params,
   return result;
 }
 
-PublicKeys DeserializePublicKeys(const Params& params, yacl::Buffer& buffer) {
+PublicKeys DeserializePublicKeys(const Params& params,
+                                 const yacl::ByteContainerView& buffer) {
   PublicKeysProto proto;
   proto.ParseFromArray(buffer.data(), buffer.size());
 

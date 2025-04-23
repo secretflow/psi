@@ -81,7 +81,7 @@ inline void KkrtPsiSend(
     const yacl::crypto::OtRecvStore& ot_recv,
     const std::vector<HashBucketCache::BucketItem>& items_hash) {
   KkrtPsiOptions kkrt_psi_options = GetDefaultKkrtPsiOptions();
-  return KkrtPsiSend(link_ctx, kkrt_psi_options, ot_recv, items_hash);
+  KkrtPsiSend(link_ctx, kkrt_psi_options, ot_recv, items_hash);
 }
 
 inline std::pair<std::vector<size_t>, std::vector<uint32_t>> KkrtPsiRecv(
@@ -97,7 +97,7 @@ inline void KkrtPsiSend(const std::shared_ptr<yacl::link::Context>& link_ctx,
                         const yacl::crypto::OtRecvStore& ot_recv,
                         const std::vector<uint128_t>& items_hash) {
   std::vector<HashBucketCache::BucketItem> items_hash_bucket;
-  for (auto& item : items_hash) {
+  for (const auto& item : items_hash) {
     HashBucketCache::BucketItem bucket_item;
     bucket_item.sec_hash = item;
     items_hash_bucket.push_back(bucket_item);

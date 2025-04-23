@@ -37,11 +37,10 @@ std::optional<std::vector<HashBucketCache::BucketItem>> PrepareBucketData(
     const std::shared_ptr<yacl::link::Context>& lctx,
     HashBucketCache* input_bucket_store) {
   std::vector<HashBucketCache::BucketItem> bucket_items_list;
-  auto load_bucket_f = std::async([&] {
+
+  SyncWait(lctx, [&] {
     bucket_items_list = input_bucket_store->LoadBucketItems(bucket_idx);
   });
-
-  SyncWait(lctx, &load_bucket_f);
 
   size_t min_inputs_size = bucket_items_list.size();
   std::vector<size_t> inputs_size_list =
@@ -134,6 +133,47 @@ void HandleBucketResultByReceiver(
   }
 
   writer->Commit();
+}
+
+bool HashListEqualTest(const std::vector<yacl::Buffer>& hash_list) {
+  YACL_ENFORCE(!hash_list.empty(), "unsupported hash_list size={}",
+               hash_list.size());
+  for (size_t idx = 1; idx < hash_list.size(); idx++) {
+    if (hash_list[idx] == hash_list[0]) {
+      continue;
+    }
+    return false;
+  }
+  return true;
+}
+
+size_t NegotiateBucketNum(const std::shared_ptr<yacl::link::Context>& lctx,
+                          size_t self_items_count, size_t self_bucket_size,
+                          int psi_type) {
+  std::vector<size_t> items_size_list =
+      AllGatherItemsSize(lctx, self_items_count);
+
+  std::vector<size_t> bucket_count_list(items_size_list.size());
+  size_t max_bucket_count = 0;
+  size_t min_item_size = self_items_count;
+
+  for (size_t idx = 0; idx < items_size_list.size(); idx++) {
+    bucket_count_list[idx] =
+        (items_size_list[idx] + self_bucket_size - 1) / self_bucket_size;
+    max_bucket_count = std::max(max_bucket_count, bucket_count_list[idx]);
+    min_item_size = std::min(min_item_size, items_size_list[idx]);
+
+    SPDLOG_INFO("psi protocol={}, rank={} item_size={}", psi_type, idx,
+                items_size_list[idx]);
+  }
+
+  // one party item_size is 0, no need to do intersection
+  if (min_item_size == 0) {
+    SPDLOG_INFO("psi protocol={}, min_item_size=0", psi_type);
+    return 0;
+  }
+
+  return max_bucket_count;
 }
 
 }  // namespace psi

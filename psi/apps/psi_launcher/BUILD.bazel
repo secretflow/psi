@@ -34,13 +34,21 @@ psi_cc_library(
 )
 
 psi_cc_library(
+    name = "report",
+    hdrs = ["report.h"],
+)
+
+psi_cc_library(
     name = "launch",
     srcs = ["launch.cc"],
     hdrs = ["launch.h"],
     deps = [
         ":factory",
+        ":report",
         "//psi:trace_categories",
         "//psi/algorithm/dkpir:entry",
+        "//psi/config:psi_config",
+        "//psi/config:ub_psi_config",
         "//psi/legacy:bucket_psi",
         "//psi/proto:pir_cc_proto",
         "//psi/wrapper/apsi/cli:entry",
@@ -54,6 +62,7 @@ psi_cc_test(
     flaky = True,
     deps = [
         ":factory",
+        ":launch",
         "//psi/utils:arrow_csv_batch_provider",
         "@yacl//yacl/utils:scope_guard",
     ],

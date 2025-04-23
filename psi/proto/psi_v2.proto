@@ -386,52 +386,6 @@ message PsiConfig {
   OutputAttr output_attr = 16;
 }
 
-// Save some critical information for future recovery.
-message RecoveryCheckpoint {
-  enum Stage {
-    STAGE_UNSPECIFIED = 0;
-
-    STAGE_INIT_END = 1;
-
-    STAGE_PRE_PROCESS_END = 2;
-
-    STAGE_ONLINE_START = 3;
-
-    STAGE_ONLINE_END = 4;
-
-    STAGE_POST_PROCESS_END = 5;
-  }
-
-  // Stage of PSI.
-  Stage stage = 1;
-
-  // A copy of origin PSI config.
-  PsiConfig config = 2;
-
-  // Hash digest of input keys.
-  bytes input_hash_digest = 3;
-
-  // Saved dual masked item count from self originally.
-  // PROTOCOL_ECDH only.
-  uint64 ecdh_dual_masked_item_self_count = 4;
-
-  // Saved dual masked item count from peer originally.
-  // PROTOCOL_ECDH only.
-  uint64 ecdh_dual_masked_item_peer_count = 5;
-
-  // Saved parsed bucket count.
-  // PROTOCOL_KKRT and PROTOCOL_RR22 only.
-  uint64 parsed_bucket_count = 6;
-}
-
-message InternalRecoveryRecord {
-  RecoveryCheckpoint.Stage stage = 1;
-
-  uint64 ecdh_dual_masked_item_peer_count = 2;
-
-  uint64 parsed_bucket_count = 3;
-}
-
 // config for unbalanced psi.
 message UbPsiConfig {
   enum Mode {

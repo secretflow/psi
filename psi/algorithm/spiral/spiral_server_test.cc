@@ -127,7 +127,7 @@ void FullProtocolIsCorrect(Params&& params, Params&& params_client,
 
   // new client
   SpiralClientDerive client(std::move(params_client));
-  auto pks = client.GenKeys();
+  auto pks = client.GenPublicKeys();
 
   // genquery
   auto query = client.GenQueryInternal(target_idx);
@@ -136,10 +136,9 @@ void FullProtocolIsCorrect(Params&& params, Params&& params_client,
 
   // new server
   SpiralServer server(std::move(params_server), db);
-  server.SetPublicKeys(std::move(pks));
 
   // gen response
-  auto response = server.ProcessQuery(query);
+  auto response = server.ProcessQuery(query, pks);
 
   // decode
   auto result = client.DecodeResponseInternal(response);
@@ -178,7 +177,7 @@ TEST(SpiralServer, MultiplyRegByDatabase) {
   size_t target_idx_num_per = target_idx % num_per;
   // new client
   SpiralClientDerive client(std::move(params_client));
-  auto pp = client.GenKeys();
+  auto pp = client.GenPublicKeys();
   // random db
   auto [corr_item, db] = GenRandomDbAndGetItem(params, target_idx);
 
@@ -202,7 +201,6 @@ TEST(SpiralServer, MultiplyRegByDatabase) {
         PolyMatrixNtt::Zero(params.CrtCount(), params.PolyLen(), 2, 1));
   }
   SpiralServerDerive server(std::move(params_server), std::move(db));
-  server.SetPublicKeys(std::move(pp));
   // now mul
   server.MultiplyRegByDatabase(out, v_reg_reoriented, dim0, num_per);
   // decrypt
@@ -231,7 +229,7 @@ TEST(SpiralServer, CoefficientExpansion) {
   yacl::crypto::Prg<uint64_t> rng_pub;
 
   SpiralClientDerive client(std::move(params_client));
-  auto pp = client.GenKeys();
+  auto pp = client.GenPublicKeys();
 
   std::vector<PolyMatrixNtt> v(1 << (params.DbDim1() + 1));
   for (size_t i = 0; i < v.size(); ++i) {
@@ -256,7 +254,6 @@ TEST(SpiralServer, CoefficientExpansion) {
   // init server
   std::vector<uint64_t> db;
   SpiralServerDerive server(std::move(params_server), std::move(db));
-  server.SetPublicKeys(std::move(pp));
   // expand to mutli ciphertext
   server.CoefficientExpansion(v, params.G(), params.StopRound(), v_w_left,
                               v_w_right, v_neg1,
@@ -282,8 +279,9 @@ TEST(SpiralServer, RegevToGsw) {
   yacl::crypto::Prg<uint64_t> rng_pub;
 
   // new client
-  SpiralClientDerive client(std::move(params_client));
-  auto pp = client.GenKeys();
+  SpiralClientDerive client(std::move(params_client),
+                            DatabaseMetaInfo{100, 256});
+  auto pp = client.GenPublicKeys();
 
   // function
   auto enc_constant = [&](uint64_t val) {
@@ -312,7 +310,7 @@ TEST(SpiralServer, RegevToGsw) {
   // new Server
   std::vector<uint64_t> db;
   SpiralServerDerive server(std::move(params_server), std::move(db));
-  server.SetPublicKeys(std::move(pp));
+
   // regev to gsw
   server.RegevToGsw(v_gsw, v_inp_1, v, 1, 0);
   EXPECT_EQ(1, DecGsw(params, v_gsw[0], client));
@@ -336,8 +334,9 @@ TEST(SpiralServer, FoldCiphertexts) {
   size_t targrt_idx = rng() % (dim0 * num_per);
   size_t target_idx_num_per = targrt_idx % num_per;
   // new client
-  SpiralClientDerive client(std::move(params_client));
-  auto pp = client.GenKeys();
+  SpiralClientDerive client(std::move(params_client),
+                            DatabaseMetaInfo{dim0 * num_per, 64});
+  auto pp = client.GenPublicKeys();
   auto query = client.GenQueryInternal(targrt_idx);
 
   std::vector<PolyMatrixNtt> v_reg;
@@ -395,7 +394,6 @@ TEST(SpiralServer, FoldCiphertexts) {
   // new Server
   std::vector<uint64_t> db;
   SpiralServerDerive server(std::move(params_server), std::move(db));
-  server.SetPublicKeys(std::move(pp));
   // now folding
   server.FoldCiphertexts(v_regev_raw, v_folding, v_folding_neg);
 

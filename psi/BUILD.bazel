@@ -22,6 +22,7 @@ psi_cc_library(
         "prelude.h",
     ],
     deps = [
+        "//psi/checkpoint:checkpoint_cc_proto",
         "//psi/proto:psi_cc_proto",
         "//psi/proto:psi_v2_cc_proto",
     ],
@@ -32,12 +33,13 @@ psi_cc_library(
     srcs = ["interface.cc"],
     hdrs = ["interface.h"],
     deps = [
+        ":prelude",
         ":trace_categories",
-        "//psi/legacy:bucket_psi",
+        "//psi/checkpoint:recovery",
         "//psi/proto:psi_v2_cc_proto",
+        "//psi/utils:bucket",
         "//psi/utils:index_store",
         "//psi/utils:join_processor",
-        "//psi/utils:recovery",
         "//psi/utils:resource_manager",
         "//psi/utils:table_utils",
         "@abseil-cpp//absl/status",

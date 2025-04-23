@@ -165,7 +165,7 @@ std::string Sender::RunQuery(const std::string &query_str) {
     // need powers all the way up to Qᵢ^max_items_per_bin. We don't store the
     // zeroth power. If Paterson-Stockmeyer is used, then only a subset of the
     // powers will be populated.
-    vector<CiphertextPowers> all_powers(bundle_idx_count);
+    std::vector<CiphertextPowers> all_powers(bundle_idx_count);
 
     // Initialize powers
     for (CiphertextPowers &powers : all_powers) {

@@ -54,12 +54,12 @@ constexpr size_t kMaxLoop{1};
 
 TEST(Client, QuerySerialize) {
   // get a SpiralParams
-  auto params = util::GetPerformanceImproveParam();
-  auto params2 = util::GetPerformanceImproveParam();
+  auto params = util::GetDefaultParam();
+  auto params2 = util::GetDefaultParam();
 
   // new client
-  SpiralClientDerive client(std::move(params2));
-  client.GenKeys();
+  SpiralClientDerive client(std::move(params2), DatabaseMetaInfo{100, 256});
+  client.GenPublicKeys();
 
   // gen random target_idx
   std::random_device rd;
@@ -83,12 +83,12 @@ TEST(Client, QuerySerialize) {
 
 TEST(Client, PolyMatrixRawRngSerialize) {
   // get a SpiralParams
-  auto params = util::GetPerformanceImproveParam();
-  auto params2 = util::GetPerformanceImproveParam();
+  auto params = util::GetDefaultParam();
+  auto params2 = util::GetDefaultParam();
 
   // new client
-  SpiralClientDerive client(std::move(params2));
-  client.GenKeys();
+  SpiralClientDerive client(std::move(params2), DatabaseMetaInfo{100, 256});
+  client.GenPublicKeys();
 
   // gen random target_idx
   std::random_device rd;
@@ -114,12 +114,12 @@ TEST(Client, PolyMatrixRawRngSerialize) {
 
 TEST(Client, QueryRngSerialize) {
   // get a SpiralParams
-  auto params = util::GetPerformanceImproveParam();
-  auto params2 = util::GetPerformanceImproveParam();
+  auto params = util::GetDefaultParam();
+  auto params2 = util::GetDefaultParam();
 
   // new client
-  SpiralClientDerive client(std::move(params2));
-  client.GenKeys();
+  SpiralClientDerive client(std::move(params2), DatabaseMetaInfo{100, 256});
+  client.GenPublicKeys();
 
   // gen random target_idx
   std::random_device rd;
@@ -143,12 +143,12 @@ TEST(Client, QueryRngSerialize) {
 
 TEST(Client, PublicParamsSerialize) {
   // get a SpiralParams
-  auto params = util::GetPerformanceImproveParam();
-  auto params2 = util::GetPerformanceImproveParam();
+  auto params = util::GetDefaultParam();
+  auto params2 = util::GetDefaultParam();
   // new client
-  SpiralClientDerive client(std::move(params2));
+  SpiralClientDerive client(std::move(params2), DatabaseMetaInfo{100, 256});
   for (size_t i = 0; i < kMaxLoop; ++i) {
-    auto pp = client.GenKeys();
+    auto pp = client.GenPublicKeys();
     auto buffer = SerializePublicKeys(params, pp);
 
     SPDLOG_DEBUG("public params buffer size: {} kb", buffer.size() / 1024);

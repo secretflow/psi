@@ -57,7 +57,7 @@ UniqueKeyTable::UniqueKeyTable(std::string path, std::string format,
 SortedTableKeysInfoProvider::SortedTableKeysInfoProvider(std::string path,
                                                          size_t batch_size)
     : KeysInfoProvider(std::move(path), batch_size) {
-  reader_ = MakeCsvReader(path_, KeyInfo::Schema());
+  reader_ = MakeCsvReader(path_, KeyInfo::GetSchema());
   ReadFutureBatch();
 };
 
@@ -271,7 +271,7 @@ SortedTable::SortedTable(const std::string& path, std::string format,
                          const std::vector<std::string>& keys)
     : TableWithKeys(path, std::move(format)), keys_(keys) {}
 
-std::shared_ptr<arrow::Schema> KeyInfo::Schema() {
+std::shared_ptr<arrow::Schema> KeyInfo::GetSchema() {
   return arrow::schema({arrow::field(KeyInfo::kKey, arrow::utf8()),
                         arrow::field(KeyInfo::kStartIndex, arrow::int64()),
                         arrow::field(KeyInfo::kDupCnt, arrow::int64())});
@@ -446,7 +446,7 @@ std::shared_ptr<KeysInfoProvider> KeyInfo::GetBatchProvider(
 }
 
 std::shared_ptr<arrow::csv::StreamingReader> KeyInfo::GetStreamReader() const {
-  return MakeCsvReader(path_, Schema());
+  return MakeCsvReader(path_, GetSchema());
 }
 
 ResultDumper::ResultDumper(std::string intersect_path, std::string except_path)

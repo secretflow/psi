@@ -159,16 +159,6 @@ cc_proto_library(
     deps = [":table_utils_proto"],
 )
 
-proto_library(
-    name = "ub_psi_cache_proto",
-    srcs = ["ub_psi_cache.proto"],
-)
-
-cc_proto_library(
-    name = "ub_psi_cache_cc_proto",
-    deps = [":ub_psi_cache_proto"],
-)
-
 psi_cc_test(
     name = "csv_checker_test",
     srcs = ["csv_checker_test.cc"],
@@ -245,32 +235,6 @@ psi_cc_library(
 )
 
 psi_cc_library(
-    name = "ub_psi_cache",
-    srcs = ["ub_psi_cache.cc"],
-    hdrs = ["ub_psi_cache.h"],
-    deps = [
-        ":batch_provider",
-        ":io",
-        ":pb_helper",
-        ":serialize",
-        ":ub_psi_cache_cc_proto",
-        "@yacl//yacl/base:byte_container_view",
-        "@yacl//yacl/base:exception",
-    ],
-)
-
-psi_cc_test(
-    name = "ub_psi_cache_test",
-    srcs = ["ub_psi_cache_test.cc"],
-    deps = [
-        ":ub_psi_cache",
-        "@abseil-cpp//absl/time",
-        "@yacl//yacl/crypto/rand",
-        "@yacl//yacl/utils:scope_guard",
-    ],
-)
-
-psi_cc_library(
     name = "progress",
     srcs = ["progress.cc"],
     hdrs = ["progress.h"],
@@ -337,41 +301,15 @@ psi_cc_test(
 )
 
 psi_cc_library(
-    name = "recovery",
-    srcs = [
-        "recovery.cc",
-    ],
-    hdrs = [
-        "recovery.h",
-    ],
-    deps = [
-        ":io",
-        "//psi/cryptor:ecc_cryptor",
-        "//psi/proto:psi_v2_cc_proto",
-        "@yacl//yacl/base:exception",
-        "@yacl//yacl/link",
-    ],
-)
-
-psi_cc_test(
-    name = "recovery_test",
-    srcs = ["recovery_test.cc"],
-    deps = [
-        ":recovery",
-        "//psi/cryptor:cryptor_selector",
-    ],
-)
-
-psi_cc_library(
     name = "bucket",
     srcs = ["bucket.cc"],
     hdrs = ["bucket.h"],
     deps = [
         ":hash_bucket_cache",
         ":index_store",
-        ":recovery",
         ":sync",
         "//psi:prelude",
+        "//psi/checkpoint:recovery",
         "//psi/proto:psi_v2_cc_proto",
     ],
 )

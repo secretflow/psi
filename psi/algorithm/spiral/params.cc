@@ -85,7 +85,7 @@ void Params::ComputeId() {
   std::memcpy(&id_, digest.data(), sizeof(uint64_t));
 }
 
-std::size_t Params::ElementSizeOfPt(size_t element_byte_len) {
+std::size_t Params::ElementSizeOfPt(size_t element_byte_len) const {
   // one element needs how many coeffs
   size_t coeff_size_of_element =
       arith::UintNum(8 * element_byte_len, PtModulusBitLen());
@@ -94,16 +94,16 @@ std::size_t Params::ElementSizeOfPt(size_t element_byte_len) {
   size_t element_size_of_pt = PtCoeffs() / coeff_size_of_element;
 
   // at least, one plaintext must hold one element
-  YACL_ENFORCE_GT(element_size_of_pt, static_cast<size_t>(0));
+  element_size_of_pt = std::max<size_t>(element_size_of_pt, 1u);
 
   return element_size_of_pt;
 }
 
-void Params::UpdateByDatabaseInfo(const DatabaseMetaInfo& database_info) {
+size_t Params::UpdateByDatabaseInfo(const DatabaseMetaInfo& database_info) {
+  SPDLOG_INFO("rows: {}, byte_per_row: {}", database_info.rows_,
+              database_info.byte_size_per_row_);
   // here, we only consider one row of raw data can be holded by one plaintext
   // in SpiralPIR
-
-  // size_t element_byte_len = database_info.byte_size_per_row_;
 
   // if the byte_size_per_row_ > MaxByteLenOfPt, we use the min
   size_t element_byte_len =
@@ -123,8 +123,10 @@ void Params::UpdateByDatabaseInfo(const DatabaseMetaInfo& database_info) {
   size_t v2 = 0;
   // now we need to adjust the v1 & v2 to satisfy 2^(v1 + v2) >= plaintext
   if (plaintext_size <= 4) {
-    v1 = 1;
+    v1 = 2;
     v2 = 1;
+    // reduce t_gsw to satisfy related conditions
+    poly_matrix_params_.t_gsw_ = 4;
   } else {
     uint64_t log2 = arith::Log2Ceil(static_cast<uint64_t>(plaintext_size));
     v1 = static_cast<size_t>(log2 * 0.6);
@@ -138,9 +140,12 @@ void Params::UpdateByDatabaseInfo(const DatabaseMetaInfo& database_info) {
   SetDbDim1(v1);
   SetDbDim2(v2);
 
-  YACL_ENFORCE(IsValid(), "Current params object is not valid, please check");
+  ValidCheck();
+
   // reset id
   ComputeId();
+
+  return plaintext_size;
 }
 
 std::uint64_t Params::CrtCompose2(std::uint64_t x, std::uint64_t y) const {

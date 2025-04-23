@@ -18,7 +18,7 @@
 
 #include "gtest/gtest.h"
 
-namespace psi::pir_utils {
+namespace psi::pir {
 
 TEST(RawDatabase, Work) {
   RawDatabase db = RawDatabase::Random(100, 256);
@@ -43,7 +43,8 @@ TEST(RawDatabase, Partition) {
             (row_byte_len + partition_byte_len - 1) / partition_byte_len);
 
   partition_byte_len = 257;
-  ASSERT_THROW(db.Partition(partition_byte_len), yacl::EnforceNotMet);
+  sub_dbs = db.Partition(partition_byte_len);
+  ASSERT_EQ(sub_dbs.size(), 1u);
 
   // large num 100-kb
   row_byte_len = 102400;
@@ -79,4 +80,4 @@ TEST(RawDatabase, Combine) {
   ASSERT_EQ(combine, db.At(idx));
 }
 
-}  // namespace psi::pir_utils
+}  // namespace psi::pir

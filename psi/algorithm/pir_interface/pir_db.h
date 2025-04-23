@@ -16,7 +16,13 @@
 #include <cstdint>
 #include <vector>
 
+#include "fmt/format.h"
+#include "yacl/base/buffer.h"
+#include "yacl/base/byte_container_view.h"
 #include "yacl/base/exception.h"
+#include "yacl/base/int128.h"
+
+#include "psi/algorithm/pir_interface/pir_type.pb.h"
 
 namespace {
 
@@ -37,7 +43,40 @@ void ValidateDb(const std::vector<std::vector<uint8_t>>& db,
 
 }  // namespace
 
-namespace psi::pir_utils {
+namespace psi::pir {
+// PirTye was defined in the pir_type.pb.h
+PirTypeProto PirTypeToProto(const PirType& type);
+
+PirType ProtoToPirType(const PirTypeProto& proto);
+
+// forward declare
+class RawDatabase;
+
+class IndexPirDataBase {
+ public:
+  explicit IndexPirDataBase(PirType pir_type) : pir_type_(pir_type) {}
+  virtual ~IndexPirDataBase() = default;
+
+  virtual void GenerateFromRawData(const RawDatabase& raw_data) = 0;
+
+  virtual void GenerateFromSimpleHashTable(const RawDatabase& raw_data) = 0;
+
+  virtual void Dump(std::ostream& out_stream) const = 0;
+
+  PirType GetPirType() const { return pir_type_; };
+
+  virtual std::size_t MaxElementsOfOnePt() const = 0;
+
+  virtual bool DbSeted() const = 0;
+
+  virtual yacl::Buffer Response(const yacl::ByteContainerView& query_buffer,
+                                const yacl::Buffer& pks_buffer) const = 0;
+  virtual std::string Response(const yacl::ByteContainerView& query_buffer,
+                               const std::string& pks_buffer) const = 0;
+
+ protected:
+  PirType pir_type_;
+};
 
 // Raw datbase, n * l , n is the rows, l is the byte len of each row
 class RawDatabase {
@@ -80,4 +119,4 @@ class RawDatabase {
 
   std::vector<std::vector<uint8_t>> db_;
 };
-}  // namespace psi::pir_utils
+}  // namespace psi::pir

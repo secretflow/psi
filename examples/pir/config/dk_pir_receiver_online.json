@@ -1,0 +1,29 @@
+{
+  "dk_pir_receiver_config": {
+    "threads": 1,
+    "curve_type": "CURVE_FOURQ",
+    "query_file": "/temp/duplicate_key_query.csv",
+    "params_file": "/temp/100-1-300.json",
+    "tmp_folder": "/temp/tmp/",
+    "result_file": "/temp/tmp/result.csv",
+    "key": "id",
+    "labels": [
+      "label1", 
+      "label2", 
+      "label3"
+    ]
+  },
+  "link_config": {
+    "parties": [
+      {
+        "id": "sender",
+        "host": "127.0.0.1:5300"
+      },
+      {
+        "id": "receiver",
+        "host": "127.0.0.1:5400"
+      }
+    ]
+  },
+  "self_link_party": "receiver"
+}

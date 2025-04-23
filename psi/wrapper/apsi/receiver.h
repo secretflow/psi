@@ -243,6 +243,12 @@ class Receiver {
       const ::apsi::receiver::IndexTranslationTable &itt,
       const std::vector<::apsi::ResultPart> &result) const;
 
+  void process_result_worker(std::atomic<std::uint32_t> &package_count,
+                             std::vector<::apsi::receiver::MatchRecord> &mrs,
+                             const std::vector<::apsi::LabelKey> &label_keys,
+                             const ::apsi::receiver::IndexTranslationTable &itt,
+                             ::apsi::network::Channel &chl) const;
+
  private:
   /**
   Recomputes the PowersDag. The function returns the depth of the PowersDag. In
@@ -251,12 +257,6 @@ class Receiver {
   reconfigure the PowersDag.
   */
   std::uint32_t reset_powers_dag(const std::set<std::uint32_t> &source_powers);
-
-  void process_result_worker(std::atomic<std::uint32_t> &package_count,
-                             std::vector<::apsi::receiver::MatchRecord> &mrs,
-                             const std::vector<::apsi::LabelKey> &label_keys,
-                             const ::apsi::receiver::IndexTranslationTable &itt,
-                             ::apsi::network::Channel &chl) const;
 
   void initialize();
 

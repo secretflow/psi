@@ -398,3 +398,25 @@ psi_cc_test(
         "@yacl//yacl/crypto/rand",
     ],
 )
+
+psi_cc_library(
+    name = "csv_converter",
+    srcs = ["csv_converter.cc"],
+    hdrs = ["csv_converter.h"],
+    deps = [
+        "//psi/wrapper/apsi/utils:common",
+        "@org_apache_arrow//:arrow",
+        "@yacl//yacl/base:exception",
+    ],
+)
+
+psi_cc_test(
+    name = "csv_converter_test",
+    srcs = ["csv_converter_test.cc"],
+    deps = [
+        ":arrow_csv_batch_provider",
+        ":csv_converter",
+        ":random_str",
+        "@com_google_googletest//:gtest",
+    ],
+)

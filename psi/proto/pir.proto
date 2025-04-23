@@ -16,6 +16,8 @@
 
 syntax = "proto3";
 
+import "psi/proto/psi.proto";
+
 package psi;
 
 // NOTE(junfeng): We provide a config identical to original APSI CLI.
@@ -123,6 +125,104 @@ message ApsiReceiverConfig {
 
   // The number of query in a batch. default 1.
   uint32 query_batch_size = 10;
+}
+
+message DkPirSenderConfig {
+  enum Mode {
+    MODE_UNSPECIFIED = 0;
+    MODE_OFFLINE = 1;
+    MODE_ONLINE = 2;
+  }
+  Mode mode = 1;
+
+  // Number of threads to use
+  uint32 threads = 2;
+
+  // One of 'all', 'debug', 'info' (default), 'warning', 'error', 'off'. For
+  // APSI only.
+  string log_level = 3;
+
+  // Log file path. For APSI only.
+  string log_file = 4;
+
+  // Path to a JSON file describing the parameters to be used by the sender.
+  // Not required if db_file points to a serialized SenderDB.
+  string params_file = 5;
+
+  // Source file used to genenerate sender db.
+  // Currently only support csv file.
+  string source_file = 6;
+
+  // Save the SenderDB for data in the given file.
+  string value_sdb_out_file = 7;
+
+  // Save the SenderDB for row count in the given file.
+  string count_sdb_out_file = 8;
+
+  // Save the secret key of phe
+  string secret_key_file = 9;
+
+  // Save the total row count of query
+  string result_file = 10;
+
+  // Folder to save temporary file
+  string tmp_folder = 11;
+
+  // The key column name of input data
+  string key = 12;
+
+  // The label columns name of input data. This item cannot be empty.
+  repeated string labels = 13;
+
+  // The elliptic curve cryptography used in Elgamal. If skip_count_check is
+  // false, this is a must-have option. The current support is "CURVE_FOURQ" and
+  // "CURVE_SM2".
+  .psi.CurveType curve_type = 14;
+
+  // If true, the check of row count will be skiped.
+  bool skip_count_check = 15;
+}
+
+message DkPirReceiverConfig {
+  // Number of threads to use
+  uint32 threads = 1;
+
+  // One of 'all', 'debug', 'info' (default), 'warning', 'error', 'off'. For
+  // APSI only.
+  string log_level = 2;
+
+  // Log file path. For APSI only.
+  string log_file = 3;
+
+  // Path to a JSON file describing the parameters to be used by the sender.
+  // If not set, receiver will ask sender, which results in additional
+  // communication.
+  string params_file = 4;
+
+  // Path to a text file containing query data (one per line).
+  // Header is not needed.
+  string query_file = 5;
+
+  // Path to a file where intersection result will be written.
+  string result_file = 6;
+
+  // Folder to save temporary file
+  string tmp_folder = 7;
+
+  // The key column name of source file
+  string key = 8;
+
+  // The label columns name which receiver want to query. This item cannot be
+  // empty.
+  repeated string labels = 9;
+
+  // The elliptic curve cryptography used in Elgamal. If skip_count_check is
+  // false, this is a must-have option. The current support is "CURVE_FOURQ" and
+  // "CURVE_SM2".
+  .psi.CurveType curve_type = 10;
+
+  // If true, the check of row count will be skiped.
+  bool skip_count_check = 11;
 }
 
 // The report of pir task.

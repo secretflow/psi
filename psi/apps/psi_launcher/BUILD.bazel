@@ -46,6 +46,7 @@ psi_cc_library(
         ":factory",
         ":report",
         "//psi:trace_categories",
+        "//psi/algorithm/dkpir:entry",
         "//psi/config:psi_config",
         "//psi/config:ub_psi_config",
         "//psi/legacy:bucket_psi",

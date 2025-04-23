@@ -121,6 +121,18 @@ int main(int argc, char* argv[]) {
     YACL_ENFORCE(google::protobuf::util::MessageToJsonString(
                      report, &report_json, json_print_options)
                      .ok());
+  } else if (launch_config.has_dk_pir_sender_config()) {
+    psi::PirResultReport report =
+        psi::RunDkPir(launch_config.dk_pir_sender_config(), lctx);
+    YACL_ENFORCE(google::protobuf::util::MessageToJsonString(
+                     report, &report_json, json_print_options)
+                     .ok());
+  } else if (launch_config.has_dk_pir_receiver_config()) {
+    psi::PirResultReport report =
+        psi::RunDkPir(launch_config.dk_pir_receiver_config(), lctx);
+    YACL_ENFORCE(google::protobuf::util::MessageToJsonString(
+                     report, &report_json, json_print_options)
+                     .ok());
   } else {
     SPDLOG_WARN("No runtime config is provided.");
   }

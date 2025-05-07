@@ -72,8 +72,6 @@ void EcdhPsiReceiver::PreProcess() {
     psi_options_.target_rank = yacl::link::kAllRank;
   }
 
-  psi_options_.ic_mode = false;
-
   if (recovery_manager_) {
     self_ec_point_store_ = std::make_shared<HashBucketEcPointStore>(
         recovery_manager_->ecdh_dual_masked_self_cache_path(), kDefaultBinNum,

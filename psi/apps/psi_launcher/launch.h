@@ -33,8 +33,7 @@ namespace psi {
 PsiResultReport RunLegacyPsi(const BucketPsiConfig& bucket_psi_config,
                              const std::shared_ptr<yacl::link::Context>& lctx,
                              ProgressCallbacks progress_callbacks = nullptr,
-                             int64_t callbacks_interval_ms = 5 * 1000,
-                             bool ic_mode = false);
+                             int64_t callbacks_interval_ms = 5 * 1000);
 
 PsiResultReport RunPsi(const v2::PsiConfig& psi_config,
                        const std::shared_ptr<yacl::link::Context>& lctx);

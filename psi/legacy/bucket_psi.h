@@ -50,8 +50,7 @@ size_t FilterFileByIndices(const std::string& input, const std::string& output,
 
 std::unique_ptr<CsvChecker> CheckInput(
     std::shared_ptr<yacl::link::Context> lctx, const std::string& input_path,
-    const std::vector<std::string>& selected_fields, bool precheck_required,
-    bool ic_mode);
+    const std::vector<std::string>& selected_fields, bool precheck_required);
 
 template <typename T>
 size_t GenerateResult(const std::string& input_path,
@@ -103,11 +102,8 @@ void GetResultIndices(const std::vector<std::string>& item_data_list,
 
 class BucketPsi {
  public:
-  // ic_mode: 互联互通模式，对方可以是非隐语应用
-  // Interconnection mode, the other side can be non-secretflow application
   explicit BucketPsi(BucketPsiConfig config,
-                     std::shared_ptr<yacl::link::Context> lctx,
-                     bool ic_mode = false);
+                     std::shared_ptr<yacl::link::Context> lctx);
   ~BucketPsi() = default;
 
   PsiResultReport Run(ProgressCallbacks progress_callbacks = nullptr,
@@ -129,7 +125,6 @@ class BucketPsi {
                                      uint64_t self_items_count);
 
   BucketPsiConfig config_;
-  bool ic_mode_;
 
   std::shared_ptr<yacl::link::Context> lctx_;
 

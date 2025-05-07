@@ -46,10 +46,6 @@ struct EcdhPsiOptions {
   // Provides the link for the rank world.
   std::shared_ptr<yacl::link::Context> link_ctx;
 
-  // ic_mode = true: 互联互通模式，对方可以是非隐语应用
-  // Interconnection mode, the other side can be non-secretflow application
-  bool ic_mode = false;
-
   // Provides private inputs for ecdh-psi.
   std::shared_ptr<IEccCryptor> ecc_cryptor;
 

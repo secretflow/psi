@@ -63,7 +63,9 @@ struct UbPsiExecuteConfig {
 
   UbPsiRole role = UbPsiRole::ROLE_UNSPECIFIED;
 
-  bool recevie_result = false;
+  bool server_receive_result = false;
+
+  bool client_receive_result = false;
 
   std::string cache_path;
 

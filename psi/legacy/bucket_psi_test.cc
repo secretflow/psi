@@ -36,7 +36,6 @@ struct TestParams {
   PsiType psi_protocol;
   size_t num_bins;
   bool should_sort;
-  bool run_in_ic_mode;
   uint32_t expect_result_size;
 };
 
@@ -112,7 +111,7 @@ TEST_P(StreamTaskPsiTest, Works) {
     config.set_bucket_size(3);
     config.set_curve_type(CurveType::CURVE_25519);
 
-    BucketPsi ctx(config, lctxs[idx], params.run_in_ic_mode);
+    BucketPsi ctx(config, lctxs[idx]);
     return ctx.Run();
   };
 
@@ -158,7 +157,7 @@ TEST_P(StreamTaskPsiTest, BroadcastFalse) {
     config.set_bucket_size(1);
     config.set_curve_type(CurveType::CURVE_25519);
 
-    BucketPsi ctx(config, lctxs[idx], params.run_in_ic_mode);
+    BucketPsi ctx(config, lctxs[idx]);
     return ctx.Run();
   };
 
@@ -202,7 +201,6 @@ INSTANTIATE_TEST_SUITE_P(
             PsiType::ECDH_PSI_3PC,
             64,
             true,
-            false,
             3,
         },
         TestParams{
@@ -219,7 +217,6 @@ INSTANTIATE_TEST_SUITE_P(
             PsiType::ECDH_PSI_NPC,
             64,
             true,
-            false,
             3,
         },
         TestParams{
@@ -236,7 +233,6 @@ INSTANTIATE_TEST_SUITE_P(
             PsiType::KKRT_PSI_NPC,
             64,
             true,
-            false,
             3,
         },
 
@@ -250,7 +246,6 @@ INSTANTIATE_TEST_SUITE_P(
             PsiType::ECDH_PSI_3PC,
             64,
             true,
-            false,
             0,
         },
         TestParams{
@@ -263,7 +258,6 @@ INSTANTIATE_TEST_SUITE_P(
             PsiType::ECDH_PSI_NPC,
             64,
             true,
-            false,
             0,
         },
         TestParams{
@@ -276,7 +270,6 @@ INSTANTIATE_TEST_SUITE_P(
             PsiType::KKRT_PSI_NPC,
             64,
             true,
-            false,
             0,
         },
 
@@ -289,7 +282,6 @@ INSTANTIATE_TEST_SUITE_P(
             PsiType::ECDH_PSI_3PC,
             64,
             true,
-            false,
             1,
         },
         TestParams{
@@ -301,7 +293,6 @@ INSTANTIATE_TEST_SUITE_P(
             PsiType::ECDH_PSI_NPC,
             64,
             true,
-            false,
             1,
         },
         TestParams{
@@ -313,7 +304,6 @@ INSTANTIATE_TEST_SUITE_P(
             PsiType::KKRT_PSI_NPC,
             64,
             true,
-            false,
             1,
         }));
 

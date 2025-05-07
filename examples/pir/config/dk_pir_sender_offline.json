@@ -10,8 +10,8 @@
     "secret_key_file": "/temp/tmp/phe_secret_key.key",
     "key": "id",
     "labels": [
-      "label1", 
-      "label2", 
+      "label1",
+      "label2",
       "label3"
     ]
   }

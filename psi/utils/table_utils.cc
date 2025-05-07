@@ -410,7 +410,7 @@ std::shared_ptr<KeyInfo> KeyInfo::Make(
   proto::KeyInfoMeta meta;
   auto keys_hash = hash.CumulativeHash();
   meta.mutable_keys_hash()->assign(keys_hash.begin(), keys_hash.end());
-  meta.set_duplicate_key_cnt(lines);
+  meta.set_duplicate_key_cnt(0);
   meta.set_unique_key_cnt(lines);
   meta.set_original_cnt(lines);
   meta.set_source_file_size(

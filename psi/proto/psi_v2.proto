@@ -337,8 +337,7 @@ message PsiConfig {
   // Logging level.
   DebugOptions debug_options = 7;
 
-  // If true, the check of duplicated items will be skiped.
-  bool skip_duplicates_check = 8;
+  reserved 8;
 
   reserved 9;
 

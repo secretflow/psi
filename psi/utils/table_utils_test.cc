@@ -81,6 +81,7 @@ TEST_F(TableUtilTest, TableToCsv) {
       SortedTable::Make(table, sorted_csv_path_.string(), {"id", "id2"});
 
   auto key_info = KeyInfo::Make(sort_table, key_info_path_.string());
+  EXPECT_EQ(key_info->DupKeyCnt(), 2);
 
   auto provider = key_info->GetKeysProviderWithDupCnt();
   auto batch = provider->ReadNextBatchWithDupCnt();
@@ -106,6 +107,8 @@ TEST_F(TableUtilTest, UniqueTableToCsv) {
       UniqueKeyTable::Make(unique_key_csv_path_.string(), "csv", {"id", "id2"});
 
   auto key_info = KeyInfo::Make(unique_table);
+
+  EXPECT_EQ(key_info->DupKeyCnt(), 0);
 
   auto provider = key_info->GetKeysProviderWithDupCnt();
   auto batch = provider->ReadNextBatchWithDupCnt();

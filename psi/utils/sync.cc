@@ -20,6 +20,18 @@
 
 namespace psi {
 
+std::vector<bool> AllGatherFlag(
+    const std::shared_ptr<yacl::link::Context>& link_ctx, bool self_flag) {
+  std::vector<bool> flag_list(link_ctx->WorldSize());
+  uint8_t int_flage = self_flag ? 1 : 0;
+  std::vector<yacl::Buffer> buffer_list =
+      yacl::link::AllGather(link_ctx, {&int_flage, 1}, "PSI:SYNC_FLAG");
+  for (size_t idx = 0; idx < buffer_list.size(); idx++) {
+    flag_list[idx] = (buffer_list[idx].data<uint8_t>()[0] == 1);
+  }
+  return flag_list;
+}
+
 std::vector<size_t> AllGatherItemsSize(
     const std::shared_ptr<yacl::link::Context>& link_ctx, size_t self_size) {
   std::vector<size_t> items_size_list(link_ctx->WorldSize());

@@ -7,12 +7,34 @@
 > - `[API]` prefix for API changes.
 > - `[Improvement]` prefix for implementation improvement.
 
-## v0.5.0.dev241107
+- [API] delete `skip_duplicates_check` in psi_v2 config.
 
-- `[API]` delete legacy ub psi function.
-- `[API]` output csv null_rep can be specified.
-- `[Feature]` join can be done with one receiver.
-- `[Feature]` join can be done with ub psi protocol.
+## v0.5.0beta
+
+- [API] delete legacy ub psi function.
+- [API] output csv null_rep can be specified.
+- [Feature] join can be done with one receiver.
+- [Feature] join can be done with ub psi protocol.
+- [Improvement] RR22 enhancement
+- [Drop] ic_mode
+
+## v0.4.2beta
+
+- [API] pir experimental params
+- [API] ecdh `batch_size`
+- [Improvement] APSI group mode
+- [Improvement] tmp dir cleanup
+- [Improvement] refactor csv reader
+
+## v0.4.0beta
+
+- [API] remove BC22 protocol
+- [API] add entrypoint for docker file.
+- [API] allow passing config JSON directly to main.
+- [Bugfix] fix ic mode.
+- [Bugfix] fix RR22, SealPIR and APSI.
+- [Improvement] upgrade yacl to 0.4.5b1.
+- [Improvement] upgrade download uri of xz.
 
 ## v0.4.0.dev240801
 

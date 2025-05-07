@@ -67,7 +67,6 @@ struct PsiDataBatch {
 
   std::unordered_map<uint32_t, uint32_t> duplicate_item_cnt;
 
-  // deprecated. use IcPsiBatchSerializer instead.
   yacl::Buffer Serialize() const {
     proto::PsiDataBatchProto proto;
     proto.set_type(type);
@@ -84,7 +83,6 @@ struct PsiDataBatch {
     return buf;
   }
 
-  // deprecated. use IcPsiBatchSerializer instead.
   static PsiDataBatch Deserialize(const yacl::Buffer& buf) {
     proto::PsiDataBatchProto proto;
     proto.ParseFromArray(buf.data(), buf.size());
@@ -101,14 +99,6 @@ struct PsiDataBatch {
 
     return batch;
   }
-};
-
-// Serialize data using an interconnection standard protocol
-class IcPsiBatchSerializer {
- public:
-  // support interconnection standard.
-  static yacl::Buffer Serialize(PsiDataBatch&& batch);
-  static PsiDataBatch Deserialize(yacl::ByteContainerView buf);
 };
 
 std::shared_ptr<yacl::link::Context> CreateP2PLinkCtx(

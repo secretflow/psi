@@ -148,7 +148,7 @@ PsiResultReport RunUbPsi(const v2::UbPsiConfig& ub_psi_config,
 PsiResultReport RunLegacyPsi(const BucketPsiConfig& bucket_psi_config,
                              const std::shared_ptr<yacl::link::Context>& lctx,
                              ProgressCallbacks progress_callbacks,
-                             int64_t callbacks_interval_ms, bool ic_mode) {
+                             int64_t callbacks_interval_ms) {
   google::protobuf::util::JsonPrintOptions json_print_options;
   json_print_options.preserve_proto_field_names = true;
 
@@ -158,7 +158,7 @@ PsiResultReport RunLegacyPsi(const BucketPsiConfig& bucket_psi_config,
                    .ok());
   SPDLOG_INFO("LEGACY PSI config: {}", config_json);
 
-  BucketPsi bucket_psi(bucket_psi_config, lctx, ic_mode);
+  BucketPsi bucket_psi(bucket_psi_config, lctx);
   return bucket_psi.Run(progress_callbacks, callbacks_interval_ms);
 }
 
@@ -501,6 +501,8 @@ v2::UbPsiConfig UbExecConfToUbconf(
                        : v2::Role::ROLE_CLIENT);
   ub_conf.set_server_secret_key_path(exec_config.server_params.secret_key_path);
   ub_conf.set_cache_path(exec_config.cache_path);
+  ub_conf.set_server_get_result(exec_config.server_receive_result);
+  ub_conf.set_client_get_result(exec_config.client_receive_result);
 
   // input
   ub_conf.mutable_input_config()->set_type(
@@ -527,15 +529,9 @@ v2::UbPsiConfig UbExecConfToUbconf(
     if (exec_config.join_conf.left_side_rank == lctx->Rank()) {
       left_side = v2::Role::ROLE_SERVER;
     }
-    if (exec_config.recevie_result) {
-      ub_conf.set_server_get_result(true);
-    }
   } else {
     if (exec_config.join_conf.left_side_rank != lctx->Rank()) {
       left_side = v2::Role::ROLE_SERVER;
-    }
-    if (exec_config.recevie_result) {
-      ub_conf.set_client_get_result(true);
     }
   }
   ub_conf.set_left_side(left_side);

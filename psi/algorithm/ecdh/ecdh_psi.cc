@@ -44,10 +44,6 @@ EcdhPsiContext::EcdhPsiContext(EcdhPsiOptions options)
 }
 
 void EcdhPsiContext::CheckConfig() {
-  if (options_.ic_mode) {
-    return;
-  }
-
   // Sanity check: the `target_rank` and 'curve_type' should match.
   std::string my_config =
       fmt::format("target_rank={},curve={}", options_.target_rank,
@@ -322,7 +318,6 @@ void SendBatchImpl(
     const std::shared_ptr<yacl::link::Context>& link_ctx, std::string_view type,
     int32_t batch_idx, std::string_view tag) {
   auto batch = BatchData<T>(batch_items, duplicate_item_cnt, type, batch_idx);
-  // TODO(huocun) : fix interconnection protocol
   link_ctx->SendAsyncThrottled(link_ctx->NextRank(), batch.Serialize(), tag);
 }
 
@@ -342,7 +337,6 @@ void SendBatchNonBlockImpl(
     const std::shared_ptr<yacl::link::Context>& link_ctx, std::string_view type,
     int32_t batch_idx, std::string_view tag) {
   auto batch = BatchData<T>(batch_items, duplicate_item_cnt, type, batch_idx);
-  // TODO(huocun) : fix interconnection protocol
   link_ctx->SendAsync(link_ctx->NextRank(), batch.Serialize(), tag);
 }
 template <typename T>
@@ -357,7 +351,6 @@ void SendBatchNonBlockImpl(const std::vector<T>& batch_items,
 void RecvBatchImpl(const std::shared_ptr<yacl::link::Context>& link_ctx,
                    int32_t batch_idx, std::string_view tag,
                    std::vector<std::string>* items) {
-  // FIXME(huocun) : fix interconnection protocol
   PsiDataBatch batch =
       PsiDataBatch::Deserialize(link_ctx->Recv(link_ctx->NextRank(), tag));
 
@@ -376,7 +369,6 @@ void RecvBatchImpl(const std::shared_ptr<yacl::link::Context>& link_ctx,
                    int32_t batch_idx, std::string_view tag,
                    std::vector<std::string>& items,
                    std::unordered_map<uint32_t, uint32_t>& duplicate_item_cnt) {
-  // TODO(huocun) : fix interconnection protocol
   PsiDataBatch batch =
       PsiDataBatch::Deserialize(link_ctx->Recv(link_ctx->NextRank(), tag));
 

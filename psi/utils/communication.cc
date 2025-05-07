@@ -17,8 +17,6 @@
 #include "spdlog/spdlog.h"
 #include "yacl/base/exception.h"
 
-#include "interconnection/runtime/ecdh_psi.pb.h"
-
 namespace psi {
 
 std::shared_ptr<yacl::link::Context> CreateP2PLinkCtx(
@@ -42,35 +40,6 @@ std::shared_ptr<yacl::link::Context> CreateP2PLinkCtx(
   } else {
     return link_ctx;
   }
-}
-
-yacl::Buffer IcPsiBatchSerializer::Serialize(PsiDataBatch&& batch) {
-  org::interconnection::v2::runtime::EcdhPsiCipherBatch proto;
-  proto.set_type(batch.type);
-  proto.set_batch_index(batch.batch_index);
-  proto.set_is_last_batch(batch.is_last_batch);
-
-  proto.set_count(batch.item_num);
-  proto.set_ciphertext(std::move(batch.flatten_bytes));
-
-  yacl::Buffer buf(proto.ByteSizeLong());
-  proto.SerializeToArray(buf.data(), buf.size());
-  return buf;
-}
-
-PsiDataBatch IcPsiBatchSerializer::Deserialize(yacl::ByteContainerView buf) {
-  org::interconnection::v2::runtime::EcdhPsiCipherBatch proto;
-  YACL_ENFORCE(proto.ParseFromArray(buf.data(), buf.size()),
-               "parse EcdhPsiCipherBatch proto fail");
-
-  PsiDataBatch batch;
-  batch.item_num = proto.count();
-  batch.flatten_bytes = std::move(*proto.mutable_ciphertext());
-  batch.is_last_batch = proto.is_last_batch();
-
-  batch.type = proto.type();
-  batch.batch_index = proto.batch_index();
-  return batch;
 }
 
 }  // namespace psi

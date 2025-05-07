@@ -54,7 +54,6 @@ We use the config file to specify different PSI protocols and input data.
     "debug_options": {
       "trace_path": "/home/zuoxian/v2psi/sender/sender.trace"
     },
-    "skip_duplicates_check": false,
     "disable_alignment": false,
     "advanced_join_type": "ADVANCED_JOIN_TYPE_UNSPECIFIED",
     "left_side": "ROLE_RECEIVER",
@@ -103,7 +102,6 @@ We use the config file to specify different PSI protocols and input data.
     "debug_options": {
       "trace_path": "/home/zuoxian/v2psi/receiver/receiver.trace"
     },
-    "skip_duplicates_check": false,
     "disable_alignment": false,
     "advanced_join_type": "ADVANCED_JOIN_TYPE_UNSPECIFIED",
     "left_side": "ROLE_RECEIVER",

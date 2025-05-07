@@ -88,6 +88,14 @@ psi_cc_library(
     ],
 )
 
+psi_cc_test(
+    name = "join_processor_test",
+    srcs = ["join_processor_test.cc"],
+    deps = [
+        ":join_processor",
+    ],
+)
+
 psi_cc_library(
     name = "join_processor",
     srcs = ["join_processor.cc"],
@@ -351,17 +359,11 @@ psi_cc_library(
     ],
 )
 
-cc_proto_library(
-    name = "ic_protocol_psi_cc_proto",
-    deps = ["@org_interconnection//interconnection/runtime:ecdh_psi"],
-)
-
 psi_cc_library(
     name = "communication",
     srcs = ["communication.cc"],
     hdrs = ["communication.h"],
     deps = [
-        ":ic_protocol_psi_cc_proto",
         ":serialize",
         "@yacl//yacl/base:exception",
         "@yacl//yacl/link",

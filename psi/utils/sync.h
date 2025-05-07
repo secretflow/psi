@@ -98,4 +98,7 @@ void BroadcastResult(const std::shared_ptr<yacl::link::Context>& link_ctx,
                      std::vector<std::string>* res,
                      std::unordered_map<uint32_t, uint32_t>* res_dup_cnt);
 
+std::vector<bool> AllGatherFlag(
+    const std::shared_ptr<yacl::link::Context>& link_ctx, bool self_flag);
+
 }  // namespace psi

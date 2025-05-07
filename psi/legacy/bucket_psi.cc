@@ -233,8 +233,7 @@ size_t FilterFileByIndices(const std::string& input, const std::string& output,
 
 std::unique_ptr<CsvChecker> CheckInput(
     std::shared_ptr<yacl::link::Context> lctx, const std::string& input_path,
-    const std::vector<std::string>& selected_fields, bool precheck_required,
-    bool ic_mode) {
+    const std::vector<std::string>& selected_fields, bool precheck_required) {
   // input dataset pre check
   SPDLOG_INFO("Begin sanity check for input file: {}, precheck_switch:{}",
               input_path, precheck_required);
@@ -244,11 +243,7 @@ std::unique_ptr<CsvChecker> CheckInput(
                                            !precheck_required);
   };
   // keep alive
-  if (ic_mode) {
-    csv_check_f();
-  } else {
-    SyncWait(lctx, std::move(csv_check_f));
-  }
+  SyncWait(lctx, std::move(csv_check_f));
   SPDLOG_INFO("End sanity check for input file: {}, size={}", input_path,
               checker->data_count());
 
@@ -256,8 +251,8 @@ std::unique_ptr<CsvChecker> CheckInput(
 }
 
 BucketPsi::BucketPsi(BucketPsiConfig config,
-                     std::shared_ptr<yacl::link::Context> lctx, bool ic_mode)
-    : config_(std::move(config)), ic_mode_(ic_mode), lctx_(std::move(lctx)) {
+                     std::shared_ptr<yacl::link::Context> lctx)
+    : config_(std::move(config)), lctx_(std::move(lctx)) {
   if (config_.psi_type() != PsiType::ECDH_OPRF_UB_PSI_2PC_GEN_CACHE) {
     Init();
   }
@@ -295,15 +290,13 @@ PsiResultReport BucketPsi::Run(ProgressCallbacks progress_callbacks,
     progress->NextSubProgress("Precheck");
     auto checker =
         CheckInput(lctx_, config_.input_params().path(), selected_fields_,
-                   config_.input_params().precheck(), ic_mode_);
+                   config_.input_params().precheck());
     report.set_original_count(checker->data_count());
 
     // gather others hash digest
-    if (!ic_mode_) {
-      std::vector<yacl::Buffer> digest_buf_list = yacl::link::AllGather(
-          lctx_, checker->hash_digest(), "PSI:SYNC_DIGEST");
-      digest_equal = HashListEqualTest(digest_buf_list);
-    }
+    std::vector<yacl::Buffer> digest_buf_list =
+        yacl::link::AllGather(lctx_, checker->hash_digest(), "PSI:SYNC_DIGEST");
+    digest_equal = HashListEqualTest(digest_buf_list);
 
     // run psi
     auto psi_progress = progress->NextSubProgress("RunPsi");
@@ -366,10 +359,8 @@ void BucketPsi::Init() {
   }
   SPDLOG_INFO("bucket size set to {}", config_.bucket_size());
 
-  if (!ic_mode_) {
-    // Test connection.
-    lctx_->ConnectToMesh();
-  }
+  // Test connection.
+  lctx_->ConnectToMesh();
 
   MemoryPsiConfig config;
   config.set_psi_type(config_.psi_type());

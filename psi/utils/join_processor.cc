@@ -272,7 +272,7 @@ KeyInfo::StatInfo JoinProcessor::DealResultIndex(IndexReader& index) {
   auto stat = GetUniqueKeysInfo()->ApplyPeerDupCnt(index, dumper);
   dumper.Flush();
   if (is_input_key_unique_ && align_output_) {
-    if (!sorted_intersect_path_.empty()) {
+    if (stat.join_intersection_count != 0 && !sorted_intersect_path_.empty()) {
       Table::MakeFromCsv(sorted_intersect_path_)
           ->SortInplace(GetInputTable()->Columns());
     }

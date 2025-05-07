@@ -1791,7 +1791,8 @@ TEST_F(ExecuteConfTransTest, Ub) {
   api::ub::UbPsiExecuteConfig exec_conf{
       .mode = api::ub::UbPsiExecuteConfig::Mode::MODE_FULL,
       .role = api::ub::UbPsiRole::ROLE_SERVER,
-      .recevie_result = true,
+      .server_receive_result = true,
+      .client_receive_result = true,
       .cache_path = "/tmp/server_cache.sf",
       .input_params =
           api::InputParams{
@@ -1824,9 +1825,10 @@ TEST_F(ExecuteConfTransTest, Ub) {
   EXPECT_EQ(ub_conf.server_secret_key_path(),
             exec_conf.server_params.secret_key_path);
   EXPECT_EQ(ub_conf.cache_path(), exec_conf.cache_path);
-  EXPECT_EQ(ub_conf.server_get_result(), exec_conf.recevie_result);
+  EXPECT_EQ(ub_conf.server_get_result(), exec_conf.server_receive_result);
+  EXPECT_EQ(ub_conf.client_get_result(), exec_conf.client_receive_result);
   EXPECT_EQ(ub_conf.server_get_result(), true);
-  EXPECT_EQ(ub_conf.client_get_result(), false);
+  EXPECT_EQ(ub_conf.client_get_result(), true);
   EXPECT_EQ(ub_conf.disable_alignment(),
             exec_conf.output_params.disable_alignment);
   EXPECT_EQ(ub_conf.output_config().path(), exec_conf.output_params.path);

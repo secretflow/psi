@@ -8,13 +8,11 @@
     - [DebugOptions](#debugoptions)
     - [EcdhConfig](#ecdhconfig)
     - [InputAttr](#inputattr)
-    - [InternalRecoveryRecord](#internalrecoveryrecord)
     - [IoConfig](#ioconfig)
     - [KkrtConfig](#kkrtconfig)
     - [OutputAttr](#outputattr)
     - [ProtocolConfig](#protocolconfig)
     - [PsiConfig](#psiconfig)
-    - [RecoveryCheckpoint](#recoverycheckpoint)
     - [RecoveryConfig](#recoveryconfig)
     - [Rr22Config](#rr22config)
     - [UbPsiConfig](#ubpsiconfig)
@@ -25,7 +23,6 @@
     - [IoType](#iotype)
     - [Protocol](#protocol)
     - [PsiConfig.AdvancedJoinType](#psiconfigadvancedjointype)
-    - [RecoveryCheckpoint.Stage](#recoverycheckpointstage)
     - [Role](#role)
     - [UbPsiConfig.Mode](#ubpsiconfigmode)
 
@@ -81,19 +78,6 @@ Configs for ECDH protocol.
 | Field | Type | Description |
 | ----- | ---- | ----------- |
 | keys_unique | [ bool](#bool) | Keys in input file are unique. If not set, use default value: false. |
- <!-- end Fields -->
- <!-- end HasFields -->
-
-
-### InternalRecoveryRecord
-
-
-
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| stage | [ RecoveryCheckpoint.Stage](#recoverycheckpointstage) | none |
-| ecdh_dual_masked_item_peer_count | [ uint64](#uint64) | none |
-| parsed_bucket_count | [ uint64](#uint64) | none |
  <!-- end Fields -->
  <!-- end HasFields -->
 
@@ -304,7 +288,6 @@ The output of right side is
 | output_config | [ IoConfig](#ioconfig) | Configs for output. |
 | keys | [repeated string](#string) | keys for intersection. |
 | debug_options | [ DebugOptions](#debugoptions) | Logging level. |
-| skip_duplicates_check | [ bool](#bool) | If true, the check of duplicated items will be skiped. |
 | disable_alignment | [ bool](#bool) | It true, output is not promised to be aligned. |
 | recovery_config | [ RecoveryConfig](#recoveryconfig) | Configs for recovery. |
 | advanced_join_type | [ PsiConfig.AdvancedJoinType](#psiconfigadvancedjointype) | none |
@@ -312,22 +295,6 @@ The output of right side is
 | check_hash_digest | [ bool](#bool) | Check if hash digest of keys from parties are equal to determine whether to early-stop. |
 | input_attr | [ InputAttr](#inputattr) | Input attributes. |
 | output_attr | [ OutputAttr](#outputattr) | Output attributes. |
- <!-- end Fields -->
- <!-- end HasFields -->
-
-
-### RecoveryCheckpoint
-Save some critical information for future recovery.
-
-
-| Field | Type | Description |
-| ----- | ---- | ----------- |
-| stage | [ RecoveryCheckpoint.Stage](#recoverycheckpointstage) | Stage of PSI. |
-| config | [ PsiConfig](#psiconfig) | A copy of origin PSI config. |
-| input_hash_digest | [ bytes](#bytes) | Hash digest of input keys. |
-| ecdh_dual_masked_item_self_count | [ uint64](#uint64) | Saved dual masked item count from self originally. PROTOCOL_ECDH only. |
-| ecdh_dual_masked_item_peer_count | [ uint64](#uint64) | Saved dual masked item count from peer originally. PROTOCOL_ECDH only. |
-| parsed_bucket_count | [ uint64](#uint64) | Saved parsed bucket count. PROTOCOL_KKRT and PROTOCOL_RR22 only. |
  <!-- end Fields -->
  <!-- end HasFields -->
 
@@ -433,21 +400,6 @@ right party is revealed to left party.
 
 
 
-### RecoveryCheckpoint.Stage
-
-
-| Name | Number | Description |
-| ---- | ------ | ----------- |
-| STAGE_UNSPECIFIED | 0 | none |
-| STAGE_INIT_END | 1 | none |
-| STAGE_PRE_PROCESS_END | 2 | none |
-| STAGE_ONLINE_START | 3 | none |
-| STAGE_ONLINE_END | 4 | none |
-| STAGE_POST_PROCESS_END | 5 | none |
-
-
-
-
 ### Role
 Role of parties.
 
@@ -457,7 +409,7 @@ Role of parties.
 | ROLE_RECEIVER | 1 | receiver In 2P symmetric PSI, receivers would always receive the result in the origin protocol. |
 | ROLE_SENDER | 2 | sender In 2P symmetric PSI, senders are the other participants apart from receiver. |
 | ROLE_SERVER | 3 | server In 2P unbalanced PSI, servers own a much larger dataset. |
-| ROLE_CLIENT | 4 | client In 2P unbalanced PSI, clients own a much smaller dataset. |
+| ROLE_CLIENT | 4 | server In 2P unbalanced PSI, clients own a much smaller dataset. |
 
 
 
@@ -497,4 +449,3 @@ Role of parties.
 | <div><h4 id="bool" /></div><a name="bool" /> bool |  | bool | boolean | boolean |
 | <div><h4 id="string" /></div><a name="string" /> string | A string must always contain UTF-8 encoded or 7-bit ASCII text. | string | String | str/unicode |
 | <div><h4 id="bytes" /></div><a name="bytes" /> bytes | May contain any arbitrary sequence of bytes. | string | ByteString | str |
-

@@ -287,10 +287,10 @@ uint64_t DkPirReceiver::SaveResult(
       orig_items_, items, intersection, shuffle_seed, shuffle_counter,
       tmp_result_file, options_.skip_count_check);
 
-  psi::ApsiCsvConverter recevier_result_converter(tmp_result_file, "key",
+  psi::ApsiCsvConverter receiver_result_converter(tmp_result_file, "key",
                                                   {"value"});
   uint64_t row_count =
-      ::seal::util::safe_cast<uint64_t>(recevier_result_converter.ExtractResult(
+      ::seal::util::safe_cast<uint64_t>(receiver_result_converter.ExtractResult(
           options_.result_file, options_.key, options_.labels));
 
   return row_count;

@@ -40,7 +40,6 @@ To launch PSI, please check LaunchConfig at :doc:`/reference/launch_config`.
                 "debug_options": {
                     "trace_path": "/root/receiver/receiver.trace"
                 },
-                "skip_duplicates_check": false,
                 "disable_alignment": false,
                 "advanced_join_type": "ADVANCED_JOIN_TYPE_UNSPECIFIED",
                 "left_side": "ROLE_RECEIVER",
@@ -90,7 +89,6 @@ To launch PSI, please check LaunchConfig at :doc:`/reference/launch_config`.
                 "debug_options": {
                     "trace_path": "/root/sender/sender.trace"
                 },
-                "skip_duplicates_check": false,
                 "disable_alignment": false,
                 "advanced_join_type": "ADVANCED_JOIN_TYPE_UNSPECIFIED",
                 "left_side": "ROLE_RECEIVER",

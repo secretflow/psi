@@ -91,17 +91,18 @@ void AbstractPsiParty::Init() {
     SPDLOG_INFO("[AbstractPsiParty::Init][Check csv pre-process] end");
   });
 
-  if (!config_.skip_duplicates_check()) {
-    YACL_ENFORCE(keys_info_->DupKeyCnt() == 0,
-                 "input file {} contains duplicates keys",
-                 config_.input_config().path());
-  }
-
   // Check if the input are the same between receiver and sender.
+  // current only support unique keys input check
+  // TODO(huocun): support dup keys input
   if (config_.check_hash_digest()) {
-    std::vector<yacl::Buffer> digest_buf_list = yacl::link::AllGather(
-        lctx_, {keys_hash_.data(), keys_hash_.size()}, "PSI:SYNC_DIGEST");
-    digest_equal_ = HashListEqualTest(digest_buf_list);
+    auto unique_flag = AllGatherFlag(lctx_, keys_info_->DupKeyCnt() == 0);
+    auto all_unique = std::all_of(unique_flag.begin(), unique_flag.end(),
+                                  [](auto flag) { return flag; });
+    if (all_unique) {
+      std::vector<yacl::Buffer> digest_buf_list = yacl::link::AllGather(
+          lctx_, {keys_hash_.data(), keys_hash_.size()}, "PSI:SYNC_DIGEST");
+      digest_equal_ = HashListEqualTest(digest_buf_list);
+    }
   }
 
   std::filesystem::path intersection_indices_writer_path =
@@ -217,21 +218,10 @@ void AbstractPsiParty::CheckSelfConfig() {
   YACL_ENFORCE_EQ(static_cast<int>(keys_set.size()), config_.keys().size(),
                   "Duplicated key is not allowed.");
 
-  if (!config_.skip_duplicates_check() &&
-      config_.advanced_join_type() !=
-          v2::PsiConfig::ADVANCED_JOIN_TYPE_UNSPECIFIED) {
-    SPDLOG_WARN(
-        "The check of duplicated items will be skiped while advanced join "
-        "is enabled. ");
-
-    config_.set_skip_duplicates_check(true);
-  }
-
   if (!config_.check_hash_digest() && config_.recovery_config().enabled()) {
     SPDLOG_WARN(
         "check_hash_digest turns off while recovery is enabled. "
         "check_hash_digest is modified to true for robustness.");
-
     config_.set_check_hash_digest(true);
   }
 }
@@ -244,7 +234,6 @@ void AbstractPsiParty::CheckPeerConfig() {
   config.mutable_output_config()->Clear();
   config.mutable_keys()->Clear();
   config.mutable_debug_options()->Clear();
-  config.set_skip_duplicates_check(false);
   config.set_disable_alignment(false);
   config.mutable_input_attr()->set_keys_unique(false);
 

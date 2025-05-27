@@ -12,11 +12,11 @@ Welcome to SecretFlow PSI Library. There are multiple methods to use PSI/PIR.
 
 * Applications
 
-    * `SCQL <https://www.secretflow.org.cn/docs/scql/latest/zh-Hans>`_ integrates this library to do JOIN operations.
+    * `SCQL <https://www.secretflow.org.cn/en/docs/scql/main/>`_ integrates this library to do JOIN operations.
     * `SecretPad <https://www.secretflow.org.cn/docs/quickstart/mvp-platform>`_ provides PSI component.
 
 
-For `PSI`, we have a developing :doc:`v2 PSI <reference/psi_v2_config>`, and we recommend using it.
+For `PSI`, we have a developing :doc:`v2 PSI <https://www.secretflow.org.cn//docs/psi/v0.5.0b0/reference/psi_v2_config>`, and we recommend using it.
 
 +------------------------+------------------------------------------------+---------------------------------------------+
 |                        | PSI v1 APIs(Deprecated)                        | PSI v2 APIs                                 |
@@ -59,33 +59,33 @@ Python packages
 SPU
 """
 
-Please check `SPU Installation Guidelines <https://www.secretflow.org.cn/docs/spu/latest/en-US/getting_started/install>`_.
+Please check `SPU Installation Guidelines <https://www.secretflow.org.cn/en/docs/spu/main/getting_started/install>`_.
 
-APIs: https://www.secretflow.org.cn/docs/spu/latest/en-US/reference/py_api
+APIs: https://www.secretflow.org.cn/en/docs/spu/0.9.3b0/reference/py_api
 
 SecretFlow
 """"""""""
 
-Please check `SecretFlow Installation page <https://www.secretflow.org.cn/docs/secretflow/latest/en-US/getting_started/installation>`_.
+Please check `SecretFlow Installation page <https://www.secretflow.org.cn/en/docs/secretflow/main/getting_started/installation>`_.
 
 APIs:
 
 - PSI v1:
-    - (Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_df
-    - (Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_csv
-    - (Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_join_df
-    - (Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_join_csv
+    - (Deprecated) https://www.secretflow.org.cn/en/docs/secretflow/main/source/secretflow#secretflow.SPU.psi_df
+    - (Deprecated) https://www.secretflow.org.cn/en/docs/secretflow/main/source/secretflow#secretflow.SPU.psi_csv
+    - (Deprecated) https://www.secretflow.org.cn/en/docs/secretflow/main/source/secretflow#secretflow.SPU.psi_join_df
+    - (Deprecated) https://www.secretflow.org.cn/en/docs/secretflow/main/source/secretflow#secretflow.SPU.psi_join_csv
 
 - PSI v2:
-    - https://www.secretflow.org.cn/en/docs/secretflow/main/source/secretflow.device.device.device#secretflow.device.device.spu.SPU.psi
+    - https://www.secretflow.org.cn/en/docs/secretflow/main/source/secretflow#secretflow.SPU.psi_v2
 
 - PIR:
-    - (Deleted) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.pir_setup
-    - (Deleted) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.pir_query
-    - (Deleted) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.pir_memory_query
-    - :doc:`pir config <https://www.secretflow.org.cn/en/docs/psi/v0.5.0b0/reference/pir_config>`
+    - (Deleted) https://www.secretflow.org.cn/en/docs/secretflow/main/source/secretflow#secretflow.SPU.pir_setup
+    - (Deleted) https://www.secretflow.org.cn/en/docs/secretflow/main/source/secretflow#secretflow.SPU.pir_query
+    - (Deleted) https://www.secretflow.org.cn/en/docs/secretflow/main/source/secretflow#secretflow.SPU.pir_memory_query
+    - PIR Configuration: https://www.secretflow.org.cn/en/docs/psi/v0.5.0b0/reference/pir_config
 
-- Component: https://www.secretflow.org.cn/docs/secretflow/latest/en-US/component/comp_list#psi
+- Component: https://www.secretflow.org.cn/en/docs/secretflow/main/component/comp_list#psi
 
 Applications
 ^^^^^^^^^^^^
@@ -93,11 +93,11 @@ Applications
 SCQL
 """"
 
-Please check `SCQL Quickstart tutorial <https://www.secretflow.org.cn/docs/scql/latest/en-US/intro/tutorial>`_.
+Please check `SCQL Quickstart tutorial <https://www.secretflow.org.cn/en/docs/scql/main/intro/tutorial>`_.
 
 Featured operators using PSI:
-    - https://www.secretflow.org.cn/docs/scql/latest/en-US/reference/operators#in
-    - https://www.secretflow.org.cn/docs/scql/latest/en-US/reference/operators#join
+    - https://www.secretflow.org.cn/en/docs/scql/main/reference/operators#in
+    - https://www.secretflow.org.cn/en/docs/scql/main/reference/operators#join
 
 SecretPad
 """""""""

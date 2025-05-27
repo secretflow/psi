@@ -46,111 +46,109 @@ msgstr "`SecretFlow <https://pypi.org/project/secretflow/>`_ 在 SPU 基础上�
 
 #: ../../getting_started.rst:13
 msgid "Applications"
-msgstr "应用程序"
+msgstr "相关应用"
 
 #: ../../getting_started.rst:15
-msgid "`SCQL <https://www.secretflow.org.cn/docs/scql/latest/zh-Hans>`_ integrates this library to do JOIN operations."
-msgstr "`SCQL <https://www.secretflow.org.cn/docs/scql/latest/zh-Hans>`_ 集成了此库以实现 JOIN 操作。"
+msgid "`SCQL <https://www.secretflow.org.cn/en/docs/scql/main/>`_ integrates this library to do JOIN operations."
+msgstr "`SCQL <https://www.secretflow.org.cn/zh-CN/docs/scql/main/>`_ 集成了此库以实现 JOIN 操作。"
 
 #: ../../getting_started.rst:16
 msgid "`SecretPad <https://www.secretflow.org.cn/docs/quickstart/mvp-platform>`_ provides PSI component."
 msgstr "`SecretPad <https://www.secretflow.org.cn/docs/quickstart/mvp-platform>`_ 提供 PSI 组件。"
 
-#: ../../getting_started.rst:17
-msgid "`Easy PSI <https://www.secretflow.org.cn/zh-CN/docs/easy-psi/>`_ provides most functionality of this library with User Interface."
-msgstr "`Easy PSI <https://www.secretflow.org.cn/zh-CN/docs/easy-psi/>`_ 通过用户界面提供本库的大部分功能。"
+#: ../../getting_started.rst:19
+msgid "For `PSI`, we have a developing :doc:`v2 PSI <https://www.secretflow.org.cn//docs/psi/v0.5.0b0/reference/psi_v2_config>`, and we recommend using it."
+msgstr "关于 PSI，目前我们正在开发 v2 版本的 `PSI <https://www.secretflow.org.cn/zh-CN/docs/psi/v0.5.0b0/reference/psi_v2_config>`_， 并推荐您使用此版本。"
 
+#: ../../getting_started.rst:22
+msgid "Deprecated"
+msgstr "不推荐使用"
 
-#: ../../getting_started.rst:20
-msgid "For `PSI`, we have a developing :doc:`v2 PSI <reference/psi_v2_config>`, and we recommend using it."
-msgstr "关于 PSI，目前我们正在开发 v2 版本的 `PSI <https://www.secretflow.org.cn/en/docs/psi/v0.5.0b0/reference/psi_v2_config>`_， 并推荐您使用此版本。"
-
-
-#: ../../getting_started.rst:23
+#: ../../getting_started.rst:22
 msgid "PSI v1 APIs(Deprecated)"
-msgstr "PSI v1 APIs(Deprecated)"
+msgstr "PSI v1 APIs(不推荐使用)"
 
-#: ../../getting_started.rst:23
+#: ../../getting_started.rst:22
 msgid "PSI v2 APIs"
 msgstr "PSI v2 APIs"
 
-#: ../../getting_started.rst:25
+#: ../../getting_started.rst:24
 msgid "Supported Protocols"
 msgstr "支持的协议"
 
-#: ../../getting_started.rst:25
+#: ../../getting_started.rst:24
 msgid "ECDH, KKRT, ECDH_OPRF_UB, DP_PSI, RR22"
 msgstr "ECDH, KKRT, ECDH_OPRF_UB, DP_PSI, RR22"
 
-#: ../../getting_started.rst:25
+#: ../../getting_started.rst:24
 msgid "ECDH, KKRT, RR22, ECDH_OPRF_UB"
 msgstr "CDH, KKRT, RR22, ECDH_OPRF_UB"
 
-#: ../../getting_started.rst:27
+#: ../../getting_started.rst:26
 msgid "CSV parser"
 msgstr "CSV 解析器"
 
-#: ../../getting_started.rst:27
+#: ../../getting_started.rst:26
 msgid "Support a subset of csv files."
 msgstr "支持部分 CSV 文件"
 
-#: ../../getting_started.rst:27
+#: ../../getting_started.rst:26
 msgid "Apache Arrow, support all legal csv files."
 msgstr "基于 Apache Arrow，支持所有合法 CSV 文件"
 
-#: ../../getting_started.rst:29
+#: ../../getting_started.rst:28
 msgid "Recovery after failure"
 msgstr "故障恢复能力"
 
-#: ../../getting_started.rst:29 ../../getting_started.rst:31
+#: ../../getting_started.rst:28 ../../getting_started.rst:30
 msgid "Unsupported"
 msgstr "暂不支持"
 
-#: ../../getting_started.rst:29 ../../getting_started.rst:31
+#: ../../getting_started.rst:28 ../../getting_started.rst:30
 msgid "Supported"
 msgstr "支持"
 
-#: ../../getting_started.rst:31
+#: ../../getting_started.rst:30
 msgid "Support duplicated keys"
 msgstr "支持重复键"
 
-#: ../../getting_started.rst:33 
+#: ../../getting_started.rst:32
 msgid "Release Docker"
-msgstr "发布 Docker 镜像"
+msgstr "已发布的 Docker 镜像"
 
-#: ../../getting_started.rst:33
+#: ../../getting_started.rst:32
 msgid "Not provided"
 msgstr "暂未提供"
 
-#: ../../getting_started.rst:33
+#: ../../getting_started.rst:32
 msgid "Provided"
 msgstr "已提供"
 
-#: ../../getting_started.rst:35
+#: ../../getting_started.rst:34
 msgid "Python Binding"
 msgstr "支持 Python 绑定"
 
-#: ../../getting_started.rst:35
+#: ../../getting_started.rst:34
 msgid "with SPU"
 msgstr "通过 SPU 实现"
 
 
-#: ../../getting_started.rst:39
+#: ../../getting_started.rst:38
 msgid "Installation"
 msgstr "安装说明"
 
 
-#: ../../getting_started.rst:42
+#: ../../getting_started.rst:41
 msgid "C++ binaries"
 msgstr "C++ 二进制文件"
 
 
-#: ../../getting_started.rst:45
+#: ../../getting_started.rst:44
 msgid "Release Docker"
-msgstr "发布版 Docker 镜像"
+msgstr "已发布的 Docker 镜像"
 
 
-#: ../../getting_started.rst:48
+#: ../../getting_started.rst:47
 msgid ""
 "Please check official release docker image at `dockerhub "
 "<https://hub.docker.com/r/secretflow/psi-anolis8>`_. We also have mirrors"
@@ -161,103 +159,118 @@ msgstr ""
 " 我们也提供了阿里云镜像: `psi-anolis8 <secretflow-registry.cn-"
 "hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8>`_。"
 
-#: ../../getting_started/.rst:51
+#: ../../getting_started/.rst:50
 msgid "Building from Source"
 msgstr "源码编译"
 
 
-#: ../../getting_started.rst:54
+#: ../../getting_started.rst:53
 msgid "Please see :ref:`building`."
 msgstr "请参考文档：:ref:`building`。"
 
 
-#: ../../getting_started.rst:57
+#: ../../getting_started.rst:56
 msgid "Python packages"
 msgstr "Python 包"
 
 
-#: ../../getting_started.rst:60
+#: ../../getting_started.rst:59
 msgid "SPU"
 msgstr "SPU"
 
 
-#: ../../getting_started.rst:63
-msgid "Please check `SPU Installation Guidelines <https://www.secretflow.org.cn/docs/spu/latest/en-US/getting_started/install>`_."
-msgstr "请参考 `SPU 安装指南 <https://www.secretflow.org.cn/docs/spu/latest/en-US/getting_started/install>`_。"
+#: ../../getting_started.rst:62
+msgid "Please check `SPU Installation Guidelines <https://www.secretflow.org.cn/en/docs/spu/main/getting_started/install>`_."
+msgstr "请参考 `SPU 安装指南 <https://www.secretflow.org.cn/zh-CN/docs/spu/main/getting_started/install>`_。"
 
 
-#: ../../getting_started.rst:65
-msgid "APIs: https://www.secretflow.org.cn/docs/spu/latest/en-US/reference/py_api"
-msgstr "API 文档：https://www.secretflow.org.cn/docs/spu/latest/en-US/reference/py_api"
+#: ../../getting_started.rst:64
+msgid "APIs: https://www.secretflow.org.cn/en/docs/spu/0.9.3b0/reference/py_api"
+msgstr "API 文档：https://www.secretflow.org.cn/zh-CN/docs/spu/main/reference/py_api"
 
 
-#: ../../getting_started.rst:67
+#: ../../getting_started.rst:66
 msgid "SecretFlow"
 msgstr "SecretFlow"
 
-#: ../../getting_started.rst:70
-msgid "Please check `SecretFlow Installation page <https://www.secretflow.org.cn/docs/secretflow/latest/en-US/getting_started/installation>`_."
-msgstr "请参考 `SecretFlow 安装说明 <https://www.secretflow.org.cn/docs/secretflow/latest/en-US/getting_started/installatio>`_。"
+#: ../../getting_started.rst:69
+msgid "Please check `SecretFlow Installation page <https://www.secretflow.org.cn/en/docs/secretflow/main/getting_started/installation>`_."
+msgstr "请参考 `SecretFlow 安装说明 <https://www.secretflow.org.cn/zh-CN/docs/secretflow/main/getting_started/installation>`_。"
 
 
-#: ../../getting_started.rst:72
+#: ../../getting_started.rst:71
 msgid "APIs:"
 msgstr "API 文档："
 
 
-#: ../../getting_started.rst:74
+#: ../../getting_started.rst:73
 msgid "- PSI v1:"
 msgstr "- PSI v1:"
 
+#: ../../getting_started.rst:74
+msgid "Deprecated"
+msgstr "不推荐使用"
+
+#: ../../getting_started.rst:74
+msgid "(Deprecated) https://www.secretflow.org.cn/en/docs/secretflow/main/source/secretflow#secretflow.SPU.psi_df"
+msgstr "(不推荐使用) https://www.secretflow.org.cn/zh-CN/docs/secretflow/main/source/secretflow#secretflow.SPU.psi_df"
 
 #: ../../getting_started.rst:75
-msgid "(Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_df"
-msgstr "(Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_df"
+msgid "(Deprecated) https://www.secretflow.org.cn/en/docs/secretflow/main/source/secretflow#secretflow.SPU.psi_csv"
+msgstr "(不推荐使用) https://www.secretflow.org.cn/zh-CN/docs/secretflow/main/source/secretflow#secretflow.SPU.psi_csv"
 
 #: ../../getting_started.rst:76
-msgid "(Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_csv"
-msgstr "(Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_csv"
+msgid "(Deprecated) https://www.secretflow.org.cn/en/docs/secretflow/main/source/secretflow#secretflow.SPU.psi_join_df"
+msgstr "(不推荐使用) https://www.secretflow.org.cn/zh-CN/docs/secretflow/main/source/secretflow#secretflow.SPU.psi_join_df"
 
 #: ../../getting_started.rst:77
-msgid "(Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_join_df"
-msgstr "(Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_join_df"
+msgid "(Deprecated) https://www.secretflow.org.cn/en/docs/secretflow/main/source/secretflow#secretflow.SPU.psi_join_csv"
+msgstr "(不推荐使用) https://www.secretflow.org.cn/zh-CN/docs/secretflow/main/source/secretflow#secretflow.SPU.psi_join_csv"
 
-#: ../../getting_started.rst:78
-msgid "(Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_join_csv"
-msgstr "(Deprecated) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_join_csv"
-
-#: ../../getting_started.rst:80
+#: ../../getting_started.rst:79
 msgid "PSI v2:"
 msgstr "PSI v2:"
 
-#: ../../getting_started.rst:81
-msgid "https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_v2"
-msgstr "https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.psi_v2"
+#: ../../getting_started.rst:80
+msgid "https://www.secretflow.org.cn/en/docs/secretflow/main/source/secretflow#secretflow.SPU.psi_v2"
+msgstr "https://www.secretflow.org.cn/zh-CN/docs/secretflow/main/source/secretflow#secretflow.SPU.psi_v2"
 
-#: ../../getting_started.rst:83
+#: ../../getting_started.rst:82
 msgid "PIR:"
 msgstr "PIR:"
 
+#: ../../getting_started.rst:83
+msgid "(Deleted) https://www.secretflow.org.cn/en/docs/secretflow/main/source/secretflow#secretflow.SPU.pir_setup"
+msgstr "(已弃用) https://www.secretflow.org.cn/zh-CN/docs/secretflow/main/source/secretflow#secretflow.SPU.pir_setup"
+
 #: ../../getting_started.rst:84
-msgid "(Deleted) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.pir_setup"
-msgstr "(Deleted) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.pir_setup"
+msgid "(Deleted) https://www.secretflow.org.cn/en/docs/secretflow/main/source/secretflow#secretflow.SPU.pir_query"
+msgstr "(已弃用) https://www.secretflow.org.cn/zh-CN/docs/secretflow/main/source/secretflow#secretflow.SPU.pir_query"
 
 #: ../../getting_started.rst:85
-msgid "(Deleted) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.pir_query"
-msgstr "(Deleted) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.pir_query"
+msgid "(Deleted) https://www.secretflow.org.cn/en/docs/secretflow/main/source/secretflow#secretflow.SPU.pir_memory_query"
+msgstr "(已弃用) https://www.secretflow.org.cn/zh-CN/docs/secretflow/main/source/secretflow#secretflow.SPU.pir_memory_query"
 
 #: ../../getting_started.rst:86
-msgid "(Deleted) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.pir_memory_query"
-msgstr "(Deleted) https://www.secretflow.org.cn/docs/secretflow/latest/en-US/source/secretflow#secretflow.SPU.pir_memory_query"
+msgid "Configuration>"
+msgstr "配置项"
+
+#: ../../getting_started.rst:86
+msgid "PIR Configuration: https://www.secretflow.org.cn/en/docs/psi/v0.5.0b0/reference/pir_config"
+msgstr "PIR 配置项：https://www.secretflow.org.cn/zh-CN/docs/psi/v0.5.0b0/reference/pir_config"
 
 #: ../../getting_started.rst:88
-msgid "Component:"
-msgstr "组件列表："
+msgid "Component"
+msgstr "组件列表"
+
+#: ../../getting_started.rst:88
+msgid "Component: https://www.secretflow.org.cn/en/docs/secretflow/main/component/comp_list#psi"
+msgstr "组件列表：https://www.secretflow.org.cn/zh-CN/docs/secretflow/main/component/comp_list#psi"
 
 
 #: ../../getting_started.rst:90
 msgid "Applications"
-msgstr "应用程序"
+msgstr "应用"
 
 
 #: ../../getting_started.rst:93
@@ -267,8 +280,8 @@ msgstr "SCQL"
 
 
 #: ../../getting_started.rst:96
-msgid "Please check `SCQL Quickstart tutorial <https://www.secretflow.org.cn/docs/scql/latest/en-US/intro/tutorial>`_."
-msgstr "请参考 `SCQL 快速入门教程 <https://www.secretflow.org.cn/docs/scql/latest/en-US/intro/tutorial>`_。"
+msgid "Please check `SCQL Quickstart tutorial <https://www.secretflow.org.cn/en/docs/scql/main/intro/tutorial>`_."
+msgstr "请参考 `SCQL 快速入门教程 <https://www.secretflow.org.cn/zh-CN/docs/scql/main/intro/tutorial>`_。"
 
 
 #: ../../getting_started.rst:98
@@ -277,13 +290,13 @@ msgstr "PSI 相关算子参考："
 
 
 #: ../../getting_started.rst:99
-msgid "    - https://www.secretflow.org.cn/docs/scql/latest/en-US/reference/operators#in"
-msgstr "    - https://www.secretflow.org.cn/docs/scql/latest/en-US/reference/operators#in"
+msgid "    - https://www.secretflow.org.cn/en/docs/scql/main/reference/operators#in"
+msgstr "    - https://www.secretflow.org.cn/zh-CN/docs/scql/main/reference/operators#in"
 
 
 #: ../../getting_started.rst:100
-msgid "    - https://www.secretflow.org.cn/docs/scql/latest/en-US/reference/operators#join"
-msgstr "    - https://www.secretflow.org.cn/docs/scql/latest/en-US/reference/operators#join"
+msgid "    - https://www.secretflow.org.cn/en/docs/scql/main/reference/operators#join"
+msgstr "    - https://www.secretflow.org.cn/zh-CN/docs/scql/main/reference/operators#join"
 
 
 #: ../../getting_started.rst:102

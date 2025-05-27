@@ -57,8 +57,8 @@ msgid "`SecretPad <https://www.secretflow.org.cn/docs/quickstart/mvp-platform>`_
 msgstr "`SecretPad <https://www.secretflow.org.cn/docs/quickstart/mvp-platform>`_ 提供 PSI 组件。"
 
 #: ../../getting_started.rst:19
-msgid "For `PSI`, we have a developing :doc:`v2 PSI <https://www.secretflow.org.cn//docs/psi/v0.5.0b0/reference/psi_v2_config>`, and we recommend using it."
-msgstr "关于 PSI，目前我们正在开发 v2 版本的 `PSI <https://www.secretflow.org.cn/zh-CN/docs/psi/v0.5.0b0/reference/psi_v2_config>`_， 并推荐您使用此版本。"
+msgid "For `PSI`, we have a developing :doc:`v2 PSI <reference/psi_v2_config>`, and we recommend using it."
+msgstr "关于 PSI，目前我们正在开发 v2 版本的 `PSI <reference/psi_v2_config>`_， 并推荐您使用此版本。"
 
 #: ../../getting_started.rst:22
 msgid "Deprecated"
@@ -185,7 +185,7 @@ msgstr "请参考 `SPU 安装指南 <https://www.secretflow.org.cn/zh-CN/docs/sp
 
 
 #: ../../getting_started.rst:64
-msgid "APIs: https://www.secretflow.org.cn/en/docs/spu/0.9.3b0/reference/py_api"
+msgid "APIs: https://www.secretflow.org.cn/en/docs/spu/main/reference/py_api"
 msgstr "API 文档：https://www.secretflow.org.cn/zh-CN/docs/spu/main/reference/py_api"
 
 

@@ -16,7 +16,7 @@ Welcome to SecretFlow PSI Library. There are multiple methods to use PSI/PIR.
     * `SecretPad <https://www.secretflow.org.cn/docs/quickstart/mvp-platform>`_ provides PSI component.
 
 
-For `PSI`, we have a developing :doc:`v2 PSI <https://www.secretflow.org.cn//docs/psi/v0.5.0b0/reference/psi_v2_config>`, and we recommend using it.
+For `PSI`, we have a developing :doc:`v2 PSI <reference/psi_v2_config>`, and we recommend using it.
 
 +------------------------+------------------------------------------------+---------------------------------------------+
 |                        | PSI v1 APIs(Deprecated)                        | PSI v2 APIs                                 |
@@ -61,7 +61,7 @@ SPU
 
 Please check `SPU Installation Guidelines <https://www.secretflow.org.cn/en/docs/spu/main/getting_started/install>`_.
 
-APIs: https://www.secretflow.org.cn/en/docs/spu/0.9.3b0/reference/py_api
+APIs: https://www.secretflow.org.cn/en/docs/spu/main/reference/py_api
 
 SecretFlow
 """"""""""

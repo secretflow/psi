@@ -156,8 +156,8 @@ msgid ""
 "hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8`."
 msgstr ""
 "请查看官方发布镜像 `dockerhub <https://hub.docker.com/r/secretflow/psi-anolis8>`_，"
-" 我们也提供了阿里云镜像: `psi-anolis8 <secretflow-registry.cn-"
-"hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8>`_。"
+" 我们也提供了阿里云镜像: `secretflow-registry.cn-"
+"hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8`。"
 
 #: ../../getting_started/.rst:50
 msgid "Building from Source"

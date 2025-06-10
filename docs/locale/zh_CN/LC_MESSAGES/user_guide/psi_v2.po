@@ -32,8 +32,8 @@ msgid ""
 " at Alibaba Cloud: `secretflow-registry.cn-"
 "hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8`."
 msgstr ""
-"我们提供了发行镜像 `dockerhub <https://hub.docker.com/r/secretflow/psi-anolis8>`_."
-" 还有阿里云镜像: `secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow"
+"我们在 `dockerhub <https://hub.docker.com/r/secretflow/psi-anolis8>`_ 提供了发行镜像，"
+" 也在阿里云提供了镜像: `secretflow-registry.cn-hangzhou.cr.aliyuncs.com/secretflow"
 "/psi-anolis8`."
 
 #: ../../user_guide/psi_v2.rst:11
@@ -42,21 +42,21 @@ msgstr "准备数据和配置"
 
 #: ../../user_guide/psi_v2.rst:13
 msgid "Please check details of configs at :ref:`here <PsiConfig>`."
-msgstr "细节请参考：  :ref:`here <PsiConfig>` 。"
+msgstr "细节请参考：:ref:`这里 <PsiConfig>` 。"
 
 #: ../../user_guide/psi_v2.rst:15
 msgid ""
 "To launch PSI, please check LaunchConfig at "
 ":doc:`/reference/launch_config`."
-msgstr "要启动PSI, 可以查看 :doc:`/reference/launch_config` 。"
+msgstr "要启动PSI，可以查看 :doc:`/reference/launch_config` 。"
 
 #: ../../user_guide/psi_v2.rst:18 ../../user_guide/psi_v2.rst:123
 msgid "receiver.config"
-msgstr ""
+msgstr "receiver.config"
 
 #: ../../user_guide/psi_v2.rst:68 ../../user_guide/psi_v2.rst:125
 msgid "sender.config"
-msgstr ""
+msgstr "sender.config"
 
 #: ../../user_guide/psi_v2.rst:118
 msgid "You need to prepare following files:"
@@ -64,55 +64,55 @@ msgstr "需要准备以下文件："
 
 #: ../../user_guide/psi_v2.rst:121
 msgid "File Name"
-msgstr ""
+msgstr "文件名称"
 
 #: ../../user_guide/psi_v2.rst:121
 msgid "Location"
-msgstr ""
+msgstr "文件位置"
 
 #: ../../user_guide/psi_v2.rst:121
 msgid "Description"
-msgstr ""
+msgstr "描述"
 
 #: ../../user_guide/psi_v2.rst:123
 msgid "/tmp/receiver/receiver.config"
-msgstr ""
+msgstr "/tmp/receiver/receiver.config"
 
 #: ../../user_guide/psi_v2.rst:123
 msgid "Config for receiver."
-msgstr ""
+msgstr "接收方配置。"
 
 #: ../../user_guide/psi_v2.rst:125
 msgid "/tmp/sender/sender.config"
-msgstr ""
+msgstr "/tmp/sender/sender.config"
 
 #: ../../user_guide/psi_v2.rst:125
 msgid "Config for sender."
-msgstr ""
+msgstr "发送方配置。"
 
 #: ../../user_guide/psi_v2.rst:127
 msgid "receiver_input.csv"
-msgstr ""
+msgstr "receiver_input.csv"
 
 #: ../../user_guide/psi_v2.rst:127
 msgid "/tmp/receiver/receiver_input.config"
-msgstr ""
+msgstr "/tmp/receiver/receiver_input.config"
 
 #: ../../user_guide/psi_v2.rst:127
 msgid "Input for receiver. Make sure the file contains two id keys - id0 and id1."
-msgstr "receiver方输入，请确保文件有id0列和id1列。"
+msgstr "接收方输入，请确保文件有id0列和id1列。"
 
 #: ../../user_guide/psi_v2.rst:129
 msgid "sender_input.csv"
-msgstr ""
+msgstr "sender_input.csv"
 
 #: ../../user_guide/psi_v2.rst:129
 msgid "/tmp/sender/sender_input.config"
-msgstr ""
+msgstr "/tmp/sender/sender_input.config"
 
 #: ../../user_guide/psi_v2.rst:129
 msgid "Input for sender. Make sure the file contains two id keys - id0 and id1."
-msgstr "sender方输入，请确保文件有id0列和id1列。"
+msgstr "发出方输入，请确保文件有id0列和id1列。"
 
 #: ../../user_guide/psi_v2.rst:134
 msgid "Run PSI"
@@ -151,7 +151,7 @@ msgid ""
 msgstr ""
 "请阅读 `README "
 "<https://github.com/secretflow/psi/tree/main/examples/psi/README.md>`_, "
-"更多demo配置可以查看 `psi config "
+"更多示例配置可以查看 `psi config "
 "<https://github.com/secretflow/psi/tree/main/examples/psi/config>`_."
 
 #: ../../user_guide/psi_v2.rst:165
@@ -162,7 +162,7 @@ msgstr "非平衡PSI"
 msgid ""
 "To launch PSI, please check LaunchConfig at "
 ":doc:`/reference/launch_config` and :ref:`here <UbPsiConfig>`."
-msgstr "要启动非平衡PSI，请参考 :doc:`/reference/launch_config` 和 :ref:`here <UbPsiConfig>`."
+msgstr "要启动非平衡PSI，请参考 :doc:`/reference/launch_config` 和 :ref:`这里 <UbPsiConfig>`."
 
 #: ../../user_guide/psi_v2.rst:169
 msgid ""
@@ -178,30 +178,26 @@ msgstr "配置示例："
 
 #: ../../user_guide/psi_v2.rst:173
 msgid "server"
-msgstr ""
+msgstr "服务器端"
 
 #: ../../user_guide/psi_v2.rst:174
 msgid "https://github.com/secretflow/psi/tree/main/examples/psi/config/ecdh_server_offline.json"
-msgstr ""
+msgstr "https://github.com/secretflow/psi/tree/main/examples/psi/config/ecdh_server_offline.json"
 
 #: ../../user_guide/psi_v2.rst:175
 msgid "https://github.com/secretflow/psi/tree/main/examples/psi/config/ecdh_server_online.json"
-msgstr ""
+msgstr "https://github.com/secretflow/psi/tree/main/examples/psi/config/ecdh_server_online.json"
 
 #: ../../user_guide/psi_v2.rst:177
 msgid "client"
-msgstr ""
+msgstr "客户端"
 
 #: ../../user_guide/psi_v2.rst:178
 msgid "https://github.com/secretflow/psi/tree/main/examples/psi/config/ecdh_client_offline.json"
-msgstr ""
+msgstr "https://github.com/secretflow/psi/tree/main/examples/psi/config/ecdh_client_offline.json"
 
 #: ../../user_guide/psi_v2.rst:179
 msgid "https://github.com/secretflow/psi/tree/main/examples/psi/config/ecdh_client_online.json"
-msgstr ""
+msgstr "https://github.com/secretflow/psi/tree/main/examples/psi/config/ecdh_client_online.json"
 
-#~ msgid ""
-#~ "请阅读 `例子 "
-#~ "<https://github.com/secretflow/psi/tree/main/examples/psi/README.md>`_."
-#~ msgstr ""
 

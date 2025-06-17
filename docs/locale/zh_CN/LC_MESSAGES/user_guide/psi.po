@@ -23,7 +23,7 @@ msgstr "PSI v1 快速入门（已废弃）"
 
 #: ../../user_guide/psi.rst:4
 msgid "Quick start with Private Set Intersection (PSI) V1 APIs."
-msgstr "隐私集合求交（PSI）接口快速入门。"
+msgstr "隐私集合求 (PSI) V1 接口快速入门。"
 
 #: ../../user_guide/psi.rst:8
 msgid "Supported Protocols"
@@ -66,7 +66,7 @@ msgstr "ECDH-PSI"
 #: ../../user_guide/psi.rst:21 ../../user_guide/psi.rst:23
 #: ../../user_guide/psi.rst:27
 msgid "Semi-Honest"
-msgstr "半诚实"
+msgstr "半诚实模型"
 
 #: ../../user_guide/psi.rst:17 ../../user_guide/psi.rst:19
 #: ../../user_guide/psi.rst:21 ../../user_guide/psi.rst:23
@@ -104,7 +104,7 @@ msgstr "`Mini-PSI`_"
 
 #: ../../user_guide/psi.rst:25
 msgid "Malicious"
-msgstr "恶意"
+msgstr "恶意模型"
 
 #: ../../user_guide/psi.rst:27
 msgid "`DP-PSI`_"
@@ -235,7 +235,7 @@ msgstr "基准测试"
 
 #: ../../user_guide/psi.rst:95
 msgid "benchmark result without data load time"
-msgstr "基准测试结果不计入数据加载时间"
+msgstr "数据加载时间不计入基准测试结果"
 
 #: ../../user_guide/psi.rst:98
 msgid "ECDH PSI Benchmark"

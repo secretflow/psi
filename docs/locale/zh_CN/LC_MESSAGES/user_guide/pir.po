@@ -43,7 +43,7 @@ msgstr "服务器数量"
 
 #: ../../user_guide/pir.rst:12
 msgid "SealPIR(later)"
-msgstr "SealPIR(最新)"
+msgstr "SealPIR（后续更新）"
 
 #: ../../user_guide/pir.rst:12
 msgid "Index PIR"
@@ -133,11 +133,11 @@ msgid ""
 "If you want to try a similar CLI like APSI, you could compile the source "
 "code by"
 msgstr ""
-"如果你想要尝试一个类似 APSI 的 CLI，可以通过如下方式编译源代："
+"如果你想要尝试一个类似 APSI 的 CLI，可以通过如下方式编译源代码："
 
 #: ../../user_guide/pir.rst:54
 msgid "And get CLI parameters like this:"
-msgstr "然后通过如下方式获取命令行参："
+msgstr "然后通过如下方式获取命令行参数："
 
 #: ../../user_guide/pir.rst:65
 msgid "Prepare data and config"

@@ -19,15 +19,15 @@ msgstr ""
 
 #: ../../user_guide/psi.rst:2
 msgid "PSI v1 QuickStart (Deprecated)"
-msgstr ""
+msgstr "PSI v1 快速入门（已废弃）"
 
 #: ../../user_guide/psi.rst:4
 msgid "Quick start with Private Set Intersection (PSI) V1 APIs."
-msgstr ""
+msgstr "隐私集合求 (PSI) V1 接口快速入门。"
 
 #: ../../user_guide/psi.rst:8
 msgid "Supported Protocols"
-msgstr ""
+msgstr "支持的协议"
 
 #: ../../user_guide/psi.rst:10
 msgid ""
@@ -37,80 +37,85 @@ msgid ""
 "should try the BaRK-OPRF based PSI :psi_code_host:`KKRT-PSI "
 "</blob/master/psi/algorithm/kkrt/kkrt_psi.h>`."
 msgstr ""
+"如果带宽受限，协议 :psi_code_host:`ECDH-PSI "
+"</blob/master/psi/algorithm/ecdh/ecdh_psi.h>` 更具优势。如果计算资源受限，"
+"推荐你尝试基于 BaRK-OPRF 的 PSI 方案 :psi_code_host:`KKRT-PSI "
+"</blob/master/psi/algorithm/kkrt/kkrt_psi.h>`。"
 
 #: ../../user_guide/psi.rst:15
 msgid "PSI protocols"
-msgstr ""
+msgstr "PSI 协议"
 
 #: ../../user_guide/psi.rst:15
 msgid "Threat Model"
-msgstr ""
+msgstr "威胁模型"
 
 #: ../../user_guide/psi.rst:15
 msgid "Party Number"
-msgstr ""
+msgstr "参与方数量"
 
 #: ../../user_guide/psi.rst:15
 msgid "PsiTypeCode"
-msgstr ""
+msgstr "PSI 类型码"
 
 #: ../../user_guide/psi.rst:17
 msgid "ECDH-PSI"
-msgstr ""
+msgstr "ECDH-PSI"
 
 #: ../../user_guide/psi.rst:17 ../../user_guide/psi.rst:19
 #: ../../user_guide/psi.rst:21 ../../user_guide/psi.rst:23
 #: ../../user_guide/psi.rst:27
 msgid "Semi-Honest"
-msgstr ""
+msgstr "半诚实模型"
 
 #: ../../user_guide/psi.rst:17 ../../user_guide/psi.rst:19
 #: ../../user_guide/psi.rst:21 ../../user_guide/psi.rst:23
 #: ../../user_guide/psi.rst:25 ../../user_guide/psi.rst:27
 msgid "2P"
-msgstr ""
+msgstr "两方"
 
 #: ../../user_guide/psi.rst:17
 msgid "1"
-msgstr ""
+msgstr "1"
 
 #: ../../user_guide/psi.rst:19
 msgid "ECDH-OPRF-PSI"
-msgstr ""
+msgstr "ECDH-OPRF-PSI"
 
 #: ../../user_guide/psi.rst:21
 msgid "`KKRT`_"
-msgstr ""
+msgstr "`KKRT`_"
 
 #: ../../user_guide/psi.rst:21
 msgid "2"
-msgstr ""
+msgstr "2"
 
 #: ../../user_guide/psi.rst:23
 msgid "`PCG_PSI`_"
-msgstr ""
+msgstr "`PCG_PSI`_"
 
 #: ../../user_guide/psi.rst:23
 msgid "3"
-msgstr ""
+msgstr "3"
 
 #: ../../user_guide/psi.rst:25
 msgid "`Mini-PSI`_"
-msgstr ""
+msgstr "`Mini-PSI`_"
 
 #: ../../user_guide/psi.rst:25
 msgid "Malicious"
-msgstr ""
+msgstr "恶意模型"
 
 #: ../../user_guide/psi.rst:27
 msgid "`DP-PSI`_"
-msgstr ""
+msgstr "`DP-PSI`_"
 
 #: ../../user_guide/psi.rst:30
 msgid ""
 "MPC and PSI protocols are designed for specific Security model (or Threat"
 " Models)."
 msgstr ""
+"MPC 和 PSI 协议是针对特定的安全模型（或威胁模型）而设计的。"
 
 #: ../../user_guide/psi.rst:32
 msgid ""
@@ -118,56 +123,63 @@ msgid ""
 "adversaries. Adversaries of semi-honest model and malicious model are "
 "Semi-honest Adversary and Malicious Adversary."
 msgstr ""
+"通常认为，安全模型旨在刻画敌手的能力。半诚实模型和恶意模型下的敌手，"
+"分别被称为半诚实敌手和恶意敌手。"
 
 #: ../../user_guide/psi.rst:36
 msgid ""
 "`Semi-honest Adversary "
 "<https://wiki.mpcalliance.org/semi_honest_adversary.html>`_"
 msgstr ""
+"`半诚实敌手 "
+"<https://wiki.mpcalliance.org/semi_honest_adversary.html>`_"
 
 #: ../../user_guide/psi.rst:37
 msgid ""
 "`Malicious Adversary "
 "<https://wiki.mpcalliance.org/malicious_adversary.html>`_"
 msgstr ""
+"`恶意敌手 "
+"<https://wiki.mpcalliance.org/malicious_adversary.html>`_"
 
 #: ../../user_guide/psi.rst:39
 msgid ""
 "Semi-Honest PSI Must not be used in Malicious environment, may be "
 "attacked and leak information."
 msgstr ""
+"切勿在恶意环境中使用半诚实 PSI 协议，否则其可能遭受攻击并导致信息泄露。"
 
 #: ../../user_guide/psi.rst:41
 msgid "Our implementation of ECDH-PSI protocol supports multiple ECC curves:"
-msgstr ""
+msgstr "我们实现的 ECDH-PSI 协议支持多种椭圆曲线："
 
 #: ../../user_guide/psi.rst:43
 msgid "`Curve25519 <https://en.wikipedia.org/wiki/Curve25519>`_"
-msgstr ""
+msgstr "`Curve25519 <https://en.wikipedia.org/wiki/Curve25519>`_"
 
 #: ../../user_guide/psi.rst:44
 msgid "`Secp256k1 <https://en.bitcoin.it/wiki/Secp256k1>`_"
-msgstr ""
+msgstr "`Secp256k1 <https://en.bitcoin.it/wiki/Secp256k1>`_"
 
 #: ../../user_guide/psi.rst:45
 msgid "`FourQ <https://en.wikipedia.org/wiki/FourQ>`_"
-msgstr ""
+msgstr "`FourQ <https://en.wikipedia.org/wiki/FourQ>`_"
 
 #: ../../user_guide/psi.rst:46
 msgid "`SM2 <https://www.cryptopp.com/wiki/SM2>`_"
-msgstr ""
+msgstr "`SM2 <https://www.cryptopp.com/wiki/SM2>`_"
 
 #: ../../user_guide/psi.rst:53
 msgid "Please check :doc:`/development/psi_protocol_intro` for details."
-msgstr ""
+msgstr "详情请查阅文档 :doc:`/development/psi_protocol_intro`。"
 
 #: ../../user_guide/psi.rst:56
 msgid "Prepare data and config"
-msgstr ""
+msgstr "准备数据和配置"
 
 #: ../../user_guide/psi.rst:58
 msgid "Please check details of configs at :doc:`/reference/psi_config`."
-msgstr ""
+msgstr "配置详情请查阅文档 :doc:`/reference/psi_config`。"
 
 #: ../../user_guide/psi.rst:60
 msgid ""
@@ -175,10 +187,12 @@ msgid ""
 ":doc:`/reference/launch_config` and fillin "
 "**runtime_config.legacy_psi_config**."
 msgstr ""
+"若要启动 PSI，请参考文档 :doc:`/reference/launch_config` 中的启动配置并填写 "
+"**runtime_config.legacy_psi_config** 字段。"
 
 #: ../../user_guide/psi.rst:63
 msgid "Release Docker"
-msgstr ""
+msgstr "Docker 镜像"
 
 #: ../../user_guide/psi.rst:65
 msgid ""
@@ -187,163 +201,168 @@ msgid ""
 " at Alibaba Cloud: secretflow-registry.cn-"
 "hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8."
 msgstr ""
+"请在 `dockerhub <https://hub.docker.com/r/secretflow/psi-anolis8>`_ 上查看"
+"官方发布版 docker 镜像。我们在阿里云也设有镜像源：secretflow-registry.cn-"
+"hangzhou.cr.aliyuncs.com/secretflow/psi-anolis8。"
 
 #: ../../user_guide/psi.rst:68
 msgid "Run PSI"
-msgstr ""
+msgstr "运行 PSI"
 
 #: ../../user_guide/psi.rst:70
 msgid "In the first terminal, run the following command::"
-msgstr ""
+msgstr "在第一个终端中，运行如下命令："
 
 #: ../../user_guide/psi.rst:75
 msgid "In the other terminal, run the following command simultaneously::"
-msgstr ""
+msgstr "在另一个终端中，同时运行如下命令："
 
 #: ../../user_guide/psi.rst:81
 msgid "Building from source"
-msgstr ""
+msgstr "源码编译"
 
 #: ../../user_guide/psi.rst:83
 msgid "You could build psi binary with bazel::"
-msgstr ""
+msgstr "你可以通过 bazel 编译 psi 二进制文件："
 
 #: ../../user_guide/psi.rst:88
 msgid "Then use binary with::"
-msgstr ""
+msgstr "然后通过如下命令使用二进制文件："
 
 #: ../../user_guide/psi.rst:93
 msgid "Benchmark"
-msgstr ""
+msgstr "基准测试"
 
 #: ../../user_guide/psi.rst:95
 msgid "benchmark result without data load time"
-msgstr ""
+msgstr "数据加载时间不计入基准测试结果"
 
 #: ../../user_guide/psi.rst:98
 msgid "ECDH PSI Benchmark"
-msgstr ""
+msgstr "ECDH PSI 基准测试"
 
 #: ../../user_guide/psi.rst:100
 msgid ""
 ":psi_code_host:`DH-PSI benchmark code "
 "<blob/main/psi/algorithm/ecdh/ecdh_psi_benchmark.cc>`"
 msgstr ""
+":psi_code_host:`DH-PSI benchmark code "
+"<blob/main/psi/algorithm/ecdh/ecdh_psi_benchmark.cc>`"
 
 #: ../../user_guide/psi.rst:102
 msgid "cpu limited by docker(--cpu)"
-msgstr ""
+msgstr "通过 docker 限制 cpu 资源 (--cpu)"
 
 #: ../../user_guide/psi.rst:105 ../../user_guide/psi.rst:118
 msgid "Intel(R) Xeon(R) Platinum"
-msgstr ""
+msgstr "Intel(R) Xeon(R) Platinum"
 
 #: ../../user_guide/psi.rst:105 ../../user_guide/psi.rst:118
 msgid "cpu"
-msgstr ""
+msgstr "cpu"
 
 #: ../../user_guide/psi.rst:105 ../../user_guide/psi.rst:118
 #: ../../user_guide/psi.rst:145
 msgid "2^20"
-msgstr ""
+msgstr "2^20"
 
 #: ../../user_guide/psi.rst:105 ../../user_guide/psi.rst:118
 msgid "2^21"
-msgstr ""
+msgstr "2^21"
 
 #: ../../user_guide/psi.rst:105 ../../user_guide/psi.rst:118
 #: ../../user_guide/psi.rst:145
 msgid "2^22"
-msgstr ""
+msgstr "2^22"
 
 #: ../../user_guide/psi.rst:105 ../../user_guide/psi.rst:118
 msgid "2^23"
-msgstr ""
+msgstr "2^23"
 
 #: ../../user_guide/psi.rst:105 ../../user_guide/psi.rst:118
 #: ../../user_guide/psi.rst:145
 msgid "2^24"
-msgstr ""
+msgstr "2^24"
 
 #: ../../user_guide/psi.rst:108
 msgid "8269CY CPU @ 2.50GHz"
-msgstr ""
+msgstr "8269CY CPU @ 2.50GHz"
 
 #: ../../user_guide/psi.rst:110
 msgid "with curve25519-donna"
-msgstr ""
+msgstr "使用 curve25519-donna"
 
 #: ../../user_guide/psi.rst:107 ../../user_guide/psi.rst:120
 msgid "4c"
-msgstr ""
+msgstr "4c"
 
 #: ../../user_guide/psi.rst:107
 msgid "40.181s"
-msgstr ""
+msgstr "40.181s"
 
 #: ../../user_guide/psi.rst:107
 msgid "81.227s"
-msgstr ""
+msgstr "81.227s"
 
 #: ../../user_guide/psi.rst:107
 msgid "163.509s"
-msgstr ""
+msgstr "163.509s"
 
 #: ../../user_guide/psi.rst:107
 msgid "330.466s"
-msgstr ""
+msgstr "330.466s"
 
 #: ../../user_guide/psi.rst:107
 msgid "666.807s"
-msgstr ""
+msgstr "666.807s"
 
 #: ../../user_guide/psi.rst:109 ../../user_guide/psi.rst:122
 msgid "8c"
-msgstr ""
+msgstr "8c"
 
 #: ../../user_guide/psi.rst:109
 msgid "20.682s"
-msgstr ""
+msgstr "20.682s"
 
 #: ../../user_guide/psi.rst:109
 msgid "42.054s"
-msgstr ""
+msgstr "42.054s"
 
 #: ../../user_guide/psi.rst:109
 msgid "85.272s"
-msgstr ""
+msgstr "85.272s"
 
 #: ../../user_guide/psi.rst:109
 msgid "173.836s"
-msgstr ""
+msgstr "173.836s"
 
 #: ../../user_guide/psi.rst:109
 msgid "354.842s"
-msgstr ""
+msgstr "354.842s"
 
 #: ../../user_guide/psi.rst:111 ../../user_guide/psi.rst:124
 msgid "16c"
-msgstr ""
+msgstr "16c"
 
 #: ../../user_guide/psi.rst:111
 msgid "11.639s"
-msgstr ""
+msgstr "11.639s"
 
 #: ../../user_guide/psi.rst:111
 msgid "23.670s"
-msgstr ""
+msgstr "23.670s"
 
 #: ../../user_guide/psi.rst:111
 msgid "48.965s"
-msgstr ""
+msgstr "48.965s"
 
 #: ../../user_guide/psi.rst:111
 msgid "100.903s"
-msgstr ""
+msgstr "100.903s"
 
 #: ../../user_guide/psi.rst:111
 msgid "208.156s"
-msgstr ""
+msgstr "208.156s"
 
 #: ../../user_guide/psi.rst:114
 msgid ""
@@ -352,216 +371,221 @@ msgid ""
 "crypto-reference/top/multi-buffer-cryptography-functions/montgomery-"
 "curve25519-elliptic-curve-functions.html>`_"
 msgstr ""
+"`ipp-crypto Multi-buffer Functions "
+"<https://www.intel.com/content/www/us/en/develop/documentation/ipp-"
+"crypto-reference/top/multi-buffer-cryptography-functions/montgomery-"
+"curve25519-elliptic-curve-functions.html>`_"
 
 #: ../../user_guide/psi.rst:121
 msgid "8369B CPU @ 2.70GHz"
-msgstr ""
+msgstr "8369B CPU @ 2.70GHz"
 
 #: ../../user_guide/psi.rst:123
 msgid "curve25519(ipp-crypto)"
-msgstr ""
+msgstr "curve25519(ipp-crypto)"
 
 #: ../../user_guide/psi.rst:120
 msgid "7.37s"
-msgstr ""
+msgstr "7.37s"
 
 #: ../../user_guide/psi.rst:120
 msgid "15.32s"
-msgstr ""
+msgstr "15.32s"
 
 #: ../../user_guide/psi.rst:120
 msgid "31.932s"
-msgstr ""
+msgstr "31.932s"
 
 #: ../../user_guide/psi.rst:120
 msgid "66.802s"
-msgstr ""
+msgstr "66.802s"
 
 #: ../../user_guide/psi.rst:120
 msgid "139.994s"
-msgstr ""
+msgstr "139.994s"
 
 #: ../../user_guide/psi.rst:122
 msgid "4.3s"
-msgstr ""
+msgstr "4.3s"
 
 #: ../../user_guide/psi.rst:122
 msgid "9.095s"
-msgstr ""
+msgstr "9.095s"
 
 #: ../../user_guide/psi.rst:122
 msgid "18.919s"
-msgstr ""
+msgstr "18.919s"
 
 #: ../../user_guide/psi.rst:122
 msgid "40.828s"
-msgstr ""
+msgstr "40.828s"
 
 #: ../../user_guide/psi.rst:122
 msgid "87.649s"
-msgstr ""
+msgstr "87.649s"
 
 #: ../../user_guide/psi.rst:124
 msgid "2.921s"
-msgstr ""
+msgstr "2.921s"
 
 #: ../../user_guide/psi.rst:124
 msgid "6.081s"
-msgstr ""
+msgstr "6.081s"
 
 #: ../../user_guide/psi.rst:124
 msgid "13.186s"
-msgstr ""
+msgstr "13.186s"
 
 #: ../../user_guide/psi.rst:124
 msgid "29.614s"
-msgstr ""
+msgstr "29.614s"
 
 #: ../../user_guide/psi.rst:124
 msgid "65.186s"
-msgstr ""
+msgstr "65.186s"
 
 #: ../../user_guide/psi.rst:128
 msgid "KKRT PSI Benchmark"
-msgstr ""
+msgstr "KKRT PSI 基准测试"
 
 #: ../../user_guide/psi.rst:130
 msgid "All of our experiments use a single thread for each party."
-msgstr ""
+msgstr "在我们的所有实验里，各参与方均采用单线程模式运行。"
 
 #: ../../user_guide/psi.rst:132
 msgid ""
 "If the bandwidth is enough, the upstream could try to perform multi-"
 "threading optimizations"
-msgstr ""
+msgstr "如果带宽充足，那么上游就可以尝试进行多线程优化。"
 
 #: ../../user_guide/psi.rst:134
 msgid ""
 "bandwidth limited by `wondershaper "
 "<https://github.com/magnific0/wondershaper/>`_."
-msgstr ""
+msgstr "通过 `wondershaper "
+"<https://github.com/magnific0/wondershaper/>`_ 限制带宽。"
 
 #: ../../user_guide/psi.rst:136
 msgid "10Mbps = 10240Kbps, 100Mbps = 102400Kbps, 1000Mbps = 1024000Kbps"
-msgstr ""
+msgstr "10Mbps = 10240Kbps, 100Mbps = 102400Kbps, 1000Mbps = 1024000Kbps"
 
 #: ../../user_guide/psi.rst:142
 msgid "Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz"
-msgstr ""
+msgstr "Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz"
 
 #: ../../user_guide/psi.rst:145
 msgid "bandwidth"
-msgstr ""
+msgstr "带宽"
 
 #: ../../user_guide/psi.rst:145
 msgid "phase"
-msgstr ""
+msgstr "阶段"
 
 #: ../../user_guide/psi.rst:145
 msgid "2^18"
-msgstr ""
+msgstr "2^18"
 
 #: ../../user_guide/psi.rst:148
 msgid "LAN"
-msgstr ""
+msgstr "局域网"
 
 #: ../../user_guide/psi.rst:147 ../../user_guide/psi.rst:151
 #: ../../user_guide/psi.rst:155
 msgid "offline"
-msgstr ""
+msgstr "离线阶段"
 
 #: ../../user_guide/psi.rst:147 ../../user_guide/psi.rst:151
 msgid "0.012s"
-msgstr ""
+msgstr "0.012s"
 
 #: ../../user_guide/psi.rst:147 ../../user_guide/psi.rst:151
 msgid "0.014s"
-msgstr ""
+msgstr "0.014s"
 
 #: ../../user_guide/psi.rst:149 ../../user_guide/psi.rst:153
 #: ../../user_guide/psi.rst:157
 msgid "online"
-msgstr ""
+msgstr "在线阶段"
 
 #: ../../user_guide/psi.rst:149
 msgid "0.495s"
-msgstr ""
+msgstr "0.495s"
 
 #: ../../user_guide/psi.rst:149
 msgid "2.474s"
-msgstr ""
+msgstr "2.474s"
 
 #: ../../user_guide/psi.rst:149
 msgid "10.765s"
-msgstr ""
+msgstr "10.765s"
 
 #: ../../user_guide/psi.rst:149
 msgid "44.368s"
-msgstr ""
+msgstr "44.368s"
 
 #: ../../user_guide/psi.rst:152
 msgid "100Mbps"
-msgstr ""
+msgstr "100Mbps"
 
 #: ../../user_guide/psi.rst:151
 msgid "0.024s"
-msgstr ""
+msgstr "0.024s"
 
 #: ../../user_guide/psi.rst:153
 msgid "2.694s"
-msgstr ""
+msgstr "2.694s"
 
 #: ../../user_guide/psi.rst:153
 msgid "11.048s"
-msgstr ""
+msgstr "11.048s"
 
 #: ../../user_guide/psi.rst:153
 msgid "46.983s"
-msgstr ""
+msgstr "46.983s"
 
 #: ../../user_guide/psi.rst:153
 msgid "192.37s"
-msgstr ""
+msgstr "192.37s"
 
 #: ../../user_guide/psi.rst:156
 msgid "10Mbps"
-msgstr ""
+msgstr "10Mbps"
 
 #: ../../user_guide/psi.rst:155
 msgid "0.016s"
-msgstr ""
+msgstr "0.016s"
 
 #: ../../user_guide/psi.rst:155
 msgid "0.019s"
-msgstr ""
+msgstr "0.019s"
 
 #: ../../user_guide/psi.rst:155
 msgid "0.0312s"
-msgstr ""
+msgstr "0.0312s"
 
 #: ../../user_guide/psi.rst:155
 msgid "0.018s"
-msgstr ""
+msgstr "0.018s"
 
 #: ../../user_guide/psi.rst:157
 msgid "25.434s"
-msgstr ""
+msgstr "25.434s"
 
 #: ../../user_guide/psi.rst:157
 msgid "100.68s"
-msgstr ""
+msgstr "100.68s"
 
 #: ../../user_guide/psi.rst:157
 msgid "415.94s"
-msgstr ""
+msgstr "415.94s"
 
 #: ../../user_guide/psi.rst:157
 msgid "1672.21s"
-msgstr ""
+msgstr "1672.21s"
 
 #: ../../user_guide/psi.rst:162
 msgid "Security Tips"
-msgstr ""
+msgstr "安全提示"
 
 #: ../../user_guide/psi.rst:164
 msgid ""
@@ -570,6 +594,8 @@ msgid ""
 "using KKRT16 PSI protocol as one-way PSI, i.e., one party gets the final "
 "intersection result."
 msgstr ""
+"警告：KKRT16 协议是一种半诚实模型下的 PSI 协议，在恶意模型下可能会受到攻击。"
+"我们建议将 KKRT16 PSI 协议用作单向 PSI，即只有一方能获得最终的交集结果。"
 
 #~ msgid ""
 #~ "The :psi_code_host:`ECDH-PSI "

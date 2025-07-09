@@ -21,7 +21,7 @@
 
 namespace psi::ecdh {
 
-class EcdhUbPsiClient final : public AbstractUbPsiClient {
+class EcdhUbPsiClient : public AbstractUbPsiClient {
  public:
   explicit EcdhUbPsiClient(const v2::UbPsiConfig &config,
                            std::shared_ptr<yacl::link::Context> lctx = nullptr);
@@ -38,7 +38,7 @@ class EcdhUbPsiClient final : public AbstractUbPsiClient {
 
   void Offline() override;
 
- private:
+ protected:
   std::string GetServerCachePath() const;
 
   EcdhOprfPsiOptions psi_options_;

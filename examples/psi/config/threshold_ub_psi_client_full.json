@@ -1,0 +1,33 @@
+{
+  "ub_psi_config": {
+    "mode": "MODE_FULL",
+    "role": "ROLE_CLIENT",
+    "cache_path": "/temp/client_cache",
+    "input_config": {
+      "type": "IO_TYPE_FILE_CSV",
+      "path": "/temp/client_input.csv"
+    },
+    "keys": ["id_0", "id_1"],
+    "output_config": {
+      "type": "IO_TYPE_FILE_CSV",
+      "path": "/temp/client_output.csv"
+    },
+    "intersection_threshold": 50,
+    "count_path": "/temp/client_count.csv",
+    "server_get_result": true,
+    "client_get_result": true
+  },
+  "link_config": {
+    "parties": [
+      {
+        "id": "server",
+        "host": "127.0.0.1:5300"
+      },
+      {
+        "id": "client",
+        "host": "127.0.0.1:5400"
+      }
+    ]
+  },
+  "self_link_party": "client"
+}

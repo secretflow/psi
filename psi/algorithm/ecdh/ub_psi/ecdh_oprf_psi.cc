@@ -300,14 +300,15 @@ EcdhOprfPsiServer::RecvBlindAndShuffleSendEvaluate() {
     batch_count++;
     cnt_info.peer_unique_cnt += num_items;
   }
+  cnt_info.peer_total_cnt += cnt_info.peer_unique_cnt;
   SPDLOG_INFO(
       "recv Blind finished, batch_count={}, unique_items: {}, total_items: {}",
       batch_count, cnt_info.peer_unique_cnt, cnt_info.peer_total_cnt);
 
   std::vector<size_t> shuffle_index(evaluated_items.size());
   std::iota(shuffle_index.begin(), shuffle_index.end(), 0);
-  std::mt19937 g(yacl::crypto::SecureRandU64());
-  std::shuffle(shuffle_index.begin(), shuffle_index.end(), g);
+  yacl::crypto::YaclReplayUrbg<uint32_t> gen(shuffle_seed_, shuffle_counter_);
+  std::shuffle(shuffle_index.begin(), shuffle_index.end(), gen);
 
   cnt_info.peer_dup_cnt.reserve(evaluated_items.size());
   for (size_t i = 0; i != shuffle_index.size(); ++i) {
@@ -342,6 +343,41 @@ EcdhOprfPsiServer::RecvBlindAndShuffleSendEvaluate() {
   SPDLOG_INFO("send evaluated finished, batch_count={}, item_count: {}",
               batch_count, item_count);
   return cnt_info;
+}
+
+void EcdhOprfPsiServer::RecvShuffledIndexesAndSendRestoredIndexes(
+    uint32_t client_unique_count) {
+  std::vector<uint32_t> client_indexes;
+  auto buf = options_.online_link->Recv(options_.online_link->NextRank(),
+                                        "client shuffled indexes");
+  client_indexes = utils::DeserializeIndexes(buf);
+
+  std::vector<uint32_t> shuffle_indexes(client_unique_count);
+  std::iota(shuffle_indexes.begin(), shuffle_indexes.end(), 0);
+  yacl::crypto::YaclReplayUrbg<uint32_t> gen(shuffle_seed_, shuffle_counter_);
+  std::shuffle(shuffle_indexes.begin(), shuffle_indexes.end(), gen);
+
+  // restore client's indexes
+  for (size_t i = 0; i < client_indexes.size(); ++i) {
+    client_indexes[i] = shuffle_indexes[client_indexes[i]];
+  }
+
+  // send client's restored indexes
+  options_.online_link->SendAsyncThrottled(
+      options_.online_link->NextRank(), utils::SerializeIndexes(client_indexes),
+      "send restored indexes");
+  SPDLOG_INFO("Send restored indexes finished");
+}
+
+uint32_t EcdhOprfPsiServer::RecvIntersectionUniqueKeyCount() {
+  uint32_t real_intersection_unique_key_count = 0;
+  auto buf = options_.online_link->Recv(options_.online_link->NextRank(),
+                                        "recv unique key count");
+  YACL_ENFORCE(buf.size() == sizeof(uint32_t));
+  std::memcpy(&real_intersection_unique_key_count, buf.data(),
+              sizeof(uint32_t));
+
+  return real_intersection_unique_key_count;
 }
 
 EcdhOprfPsiServer::IndexInfo EcdhOprfPsiServer::RecvCacheIndexes() {
@@ -497,14 +533,14 @@ void EcdhOprfPsiClient::RecvFinalEvaluatedItems(
 
 void EcdhOprfPsiClient::SendServerCacheIndexes(
     const std::vector<uint32_t>& peer_indexes,
-    const std::vector<uint32_t>& self_indexe) {
+    const std::vector<uint32_t>& self_indexes) {
   SPDLOG_INFO("Start SendServerCacheIndexes");
   options_.online_link->SendAsyncThrottled(
       options_.online_link->NextRank(), utils::SerializeIndexes(peer_indexes),
       "cache indexes");
-  options_.online_link->SendAsyncThrottled(options_.online_link->NextRank(),
-                                           utils::SerializeIndexes(self_indexe),
-                                           "client indexes");
+  options_.online_link->SendAsyncThrottled(
+      options_.online_link->NextRank(), utils::SerializeIndexes(self_indexes),
+      "client indexes");
   SPDLOG_INFO("End SendServerCacheIndexes, {}", peer_indexes.size());
 }
 
@@ -695,4 +731,32 @@ void EcdhOprfPsiClient::SendIntersectionMaskedItems(
   return;
 }
 
+void EcdhOprfPsiClient::SendClientShuffledIndexes(
+    const std::vector<uint32_t>& self_indexes) {
+  SPDLOG_INFO("Start SendClientShuffledIndexes");
+  options_.online_link->SendAsyncThrottled(
+      options_.online_link->NextRank(), utils::SerializeIndexes(self_indexes),
+      "send shuffled indexes");
+  SPDLOG_INFO("End SendClientShuffledIndexes, send {} indexes",
+              self_indexes.size());
+}
+
+std::vector<uint32_t> EcdhOprfPsiClient::RecvClientRestoredIndexes() {
+  std::vector<uint32_t> restored_indexes;
+  auto buf = options_.online_link->Recv(options_.online_link->NextRank(),
+                                        "recv restored indexes");
+  restored_indexes = utils::DeserializeIndexes(buf);
+  SPDLOG_INFO("Recv restored indexes, size: {}", restored_indexes.size());
+
+  return restored_indexes;
+}
+
+void EcdhOprfPsiClient::SendIntersectionUniqueKeyCount(
+    uint32_t real_intersection_unique_key_count) {
+  options_.online_link->SendAsyncThrottled(
+      options_.online_link->NextRank(),
+      yacl::ByteContainerView(&real_intersection_unique_key_count,
+                              sizeof(uint32_t)),
+      "send unique key count");
+}
 }  // namespace psi::ecdh

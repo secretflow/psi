@@ -50,7 +50,7 @@ static void BM_ThresholdEcdhUbPsi(benchmark::State &state) {
 
     psi::v2::UbPsiConfig server_config;
     psi::v2::UbPsiConfig client_config;
-    
+
     psi::ecdh::GenerateUbPsiConfig(tmp_folder, items_server, items_client,
                                    threshold, server_config, client_config);
 

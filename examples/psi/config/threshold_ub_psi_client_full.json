@@ -2,18 +2,18 @@
   "ub_psi_config": {
     "mode": "MODE_FULL",
     "role": "ROLE_CLIENT",
-    "cache_path": "/temp/client_cache",
+    "cache_path": "/tmp/client_cache",
     "input_config": {
       "type": "IO_TYPE_FILE_CSV",
-      "path": "/temp/client_input.csv"
+      "path": "/tmp/client_input.csv"
     },
     "keys": ["id_0", "id_1"],
     "output_config": {
       "type": "IO_TYPE_FILE_CSV",
-      "path": "/temp/client_output.csv"
+      "path": "/tmp/client_output.csv"
     },
     "intersection_threshold": 50,
-    "count_path": "/temp/client_count.csv",
+    "count_path": "/tmp/client_count.csv",
     "server_get_result": true,
     "client_get_result": true
   },

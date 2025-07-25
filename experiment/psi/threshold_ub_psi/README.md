@@ -1,60 +1,59 @@
-# 带阈值的非平衡PSI方案
+# Threshold Unbalanced Private Set Intersection
 
-## 应用场景
+## Introduction
 
-带阈值PSI，指对于PSI任务，支持用户设置最大的交集量级（阈值），并满足用户侧获取的交集量级=min(设置的阈值，实际的交集量)。与此同时，双方不能获得超出阈值的那部分交集（假设实际交集100w，阈值为10w，则双方无法获知剩余90w交集的具体内容）。本方案是对隐语非平衡PSI方案进行的功能拓展。
+Threshold Private Set Intersection (Threshold PSI) allows users to set an intersection threshold to limit the size of the intersection. Specifically, the final intersection size is the smaller count between the threshold and the actual intersection size. Additionally, both parties are restricted from accessing any part of the intersection beyond the defined threshold. This protocol is a functional extension based on Unbalanced PSI.
 
-## 方案简述
+## Threshold UB PSI
 
-假设服务端 $P_1$ 拥有大小为 $n_1$ 的集合 $X$ ，客户端 $P_2$ 拥有大小为 $n_2$ 的集合 $Y$ ，其中 $n_1 \gg n_2$ 。
+$P_1$ and $P_2$ are the participants in the protocol, where $P_1$ is the server and $P_2$ is the client. $X$ and $Y$ are the respective input sets of $P_1$ and $P_2$ , with size $n_1 = \left\vert X \right\vert$ and $n_2 = \left\vert Y \right\vert$ , where $n_1 \gg n_2$ .
 
-### 离线阶段
+### Offline Phase
 
-$P_1$ 随机选取 $\alpha \gets \mathbb{Z}_q$ ，对于 $1 \le i \le n_1$ ，计算 $tx_i = H_2(H_1(x_i)^\alpha)$ 并将集合 $TX = \{tx_1,tx_2,...,tx_{n_1}\}$ 在shuffle后发送给  $P_2$ 。
+$P_1$ randomly chooses $\alpha \gets \mathbb{Z}_q$ . For $1 \le i \le n_1$ , $P_1$ compute $tx_i = H_2(H_1(x_i)^\alpha)$ and send the set $TX = \{tx_1,tx_2,...,tx_{n_1}\}$ to $P_2$ in shuffled order.
 
-### 在线阶段
+### Online Phase
 
-1. 对于 $1 \le j \le n_2$ ， $P_2$ 随机选取 $\beta \gets \mathbb{Z}_q$ ，计算 $a_j = H_1(y_j)^{\beta}$ ，并将集合 $\{a_1,a_2,...,a_{n_2}\}$ 发送给 $P_1$ 。
-2. 对于 $1 \le j \le n_2$ ， $P_1$ 计算 $a_j' = ({a_j})^{\alpha}$ ，将集合 $\{a_1',a_2',...,a'_{n_2} \}$ shuffle后发送给 $P_2$ 。
-3. 对于 $1 \le j \le n_2$ ， $P_2$ 计算 $ty_j=H_2(({a_j'})^{1/{\beta}})$ ， 得到集合 $TY=\{{ty}_1,{ty}_2,...,{ty}_{n_2}\}$ 。 $P_2$ 可根据阈值对交集 $TY \cap TX$ 进行截取，并将截断后的索引集合发送给 $P_1$ 。
-4. $P_1$ 根据第二步中的shuffle关系还原索引集合，并将还原后的索引集合发送给 $P_2$ 。
-5. $P_2$ 通过还原后的索引集合获取交集。
+1. For $1 \le j \le n_2$ , $P_2$ randomly chooses $\beta \gets \mathbb{Z}_q$ , compute $a_j = H_1(y_j)^{\beta}$ , and send the set $\{a_1,a_2,...,a_{n_2}\}$ to $P_1$ .
+2. For $1 \le j \le n_2$ , $P_1$ computes $a_j' = ({a_j})^{\alpha}$ . Then it samples a random permutation $\pi$ and send the permuted set $\pi(\{a_1',a_2',...,a'_{n_2}\})$ to $P_2$.
+3. For $1 \le j \le n_2$ , $P_2$ computes $ty_j = H_2(({a_j'})^{1/{\beta}})$ and gets the set $TY = \{{ty}_1,{ty}_2,...,{ty}_{n_2}\}$ . $P_2$ can truncate the intersection $TY \cap TX$ based on the threshold and send the truncated index set to $P_1$ .
+4. $P_1$ restores the index set based on the permutation $\pi$ from the second step and sends the restored index set to $P_2$ .
+5. $P_2$ obtains the intersection through the restored index set.
 
-## 全流程测试
+## Test
 
-1. 编译
+1. Compile the binary
 
     ```bash
     bazel build //psi/apps/psi_launcher:main
     ```
 
-2. 生成测试数据
+2. Generate test data
 
     ```bash
     $ python examples/psi/generate_psi_data.py --receiver_item_cnt 1e3 \
         --sender_item_cnt 1e6 --intersection_cnt 1e2 --id_cnt 2 \
-        --receiver_path /temp/client_input.csv \
-        --sender_path /temp/server_input.csv \
-        --intersection_path /temp/intersection.csv
+        --receiver_path /tmp/client_input.csv \
+        --sender_path /tmp/server_input.csv \
+        --intersection_path /tmp/intersection.csv
     ```
 
-3. 服务端生成私钥
+3. Generate secret key for server
 
     ```bash
-    openssl rand 32 > /temp/server_secret_key.key
+    openssl rand 32 > /tmp/server_secret_key.key
     ```
 
-4. 运行PSI
+4. Launch Threshold UB PSI
 
-    在服务端终端，运行
+    For server terminal,
 
     ```bash
     ./bazel-bin/psi/apps/psi_launcher/main --config $(pwd)/examples/psi/config/threshold_ub_psi_server_full.json
     ```
 
-    在客户端终端，运行
+    For client terminal,
 
     ```bash
     ./bazel-bin/psi/apps/psi_launcher/main --config $(pwd)/examples/psi/config/threshold_ub_psi_client_full.json
     ```
-

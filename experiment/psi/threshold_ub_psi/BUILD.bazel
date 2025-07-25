@@ -32,6 +32,7 @@ psi_cc_library(
     hdrs = ["client.h"],
     deps = [
         ":common",
+        ":threshold_ecdh_oprf_psi",
         "//psi/algorithm/ecdh/ub_psi:client",
         "//psi/utils:sync",
     ],
@@ -43,9 +44,21 @@ psi_cc_library(
     hdrs = ["server.h"],
     deps = [
         ":common",
+        ":threshold_ecdh_oprf_psi",
         "//psi/algorithm/ecdh/ub_psi:server",
         "//psi/utils:ec",
         "//psi/utils:sync",
+    ],
+)
+
+psi_cc_library(
+    name = "threshold_ecdh_oprf_psi",
+    srcs = ["threshold_ecdh_oprf_psi.cc"],
+    hdrs = ["threshold_ecdh_oprf_psi.h"],
+    deps = [
+        "//psi/algorithm/ecdh/ub_psi:ecdh_oprf_psi",
+        "//psi/utils:serialize",
+        "@yacl//yacl/crypto/rand",
     ],
 )
 

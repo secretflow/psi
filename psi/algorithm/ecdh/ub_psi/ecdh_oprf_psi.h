@@ -97,19 +97,19 @@ struct EcdhOprfPsiOptions {
 class EcdhOprfPsiServer {
  public:
   explicit EcdhOprfPsiServer(const EcdhOprfPsiOptions& options)
-      : options_(options),
+      : shuffle_seed_(yacl::crypto::SecureRandSeed()),
+        shuffle_counter_(yacl::crypto::SecureRandU64()),
+        options_(options),
         oprf_server_(
-            CreateEcdhOprfServer(options.oprf_type, options.curve_type)),
-        shuffle_seed_(yacl::crypto::SecureRandSeed()),
-        shuffle_counter_(yacl::crypto::SecureRandU64()) {}
+            CreateEcdhOprfServer(options.oprf_type, options.curve_type)) {}
 
   EcdhOprfPsiServer(const EcdhOprfPsiOptions& options,
                     yacl::ByteContainerView private_key)
-      : options_(options),
+      : shuffle_seed_(yacl::crypto::SecureRandSeed()),
+        shuffle_counter_(yacl::crypto::SecureRandU64()),
+        options_(options),
         oprf_server_(CreateEcdhOprfServer(private_key, options.oprf_type,
-                                          options.curve_type)),
-        shuffle_seed_(yacl::crypto::SecureRandSeed()),
-        shuffle_counter_(yacl::crypto::SecureRandU64()) {}
+                                          options.curve_type)) {}
 
   /**
    * @brief FullEvaluate for server side data
@@ -173,28 +173,15 @@ class EcdhOprfPsiServer {
   std::pair<std::vector<uint64_t>, size_t> RecvIntersectionMaskedItems(
       const std::shared_ptr<IShuffledBatchProvider>& cache_provider);
 
-  /**
-   * @brief recv client's shuffled indexes, use shuffled_seed to restore
-   * indexes, then send restored indexes to client
-   *
-   * @param client_unique_count which is used to generate shuffle index
-   */
-  void RecvShuffledIndexesAndSendRestoredIndexes(uint32_t client_unique_count);
-
-  /**
-   * @brief recv the count of unique keys in the actual intersection
-   *
-   */
-  uint32_t RecvIntersectionUniqueKeyCount();
+ protected:
+  // the seed used to shuffle client's indexes
+  uint128_t shuffle_seed_;
+  uint64_t shuffle_counter_;
 
  private:
   EcdhOprfPsiOptions options_;
 
   std::shared_ptr<IEcdhOprfServer> oprf_server_;
-
-  // the seed used to shuffle client's indexes
-  uint128_t shuffle_seed_;
-  uint64_t shuffle_counter_;
 };
 
 class EcdhOprfPsiClient {
@@ -247,25 +234,6 @@ class EcdhOprfPsiClient {
 
   void SendServerCacheIndexes(const std::vector<uint32_t>& peer_indexes,
                               const std::vector<uint32_t>& self_indexes);
-
-  /**
-   * @brief send client's shuffled indexes
-   *
-   */
-  void SendClientShuffledIndexes(const std::vector<uint32_t>& self_indexes);
-
-  /**
-   * @brief recv client's restored indexes
-   *
-   */
-  std::vector<uint32_t> RecvClientRestoredIndexes();
-
-  /**
-   * @brief send the count of unique keys in the actual intersection
-   *
-   */
-  void SendIntersectionUniqueKeyCount(
-      uint32_t real_intersection_unique_key_count);
 
   size_t GetCompareLength() const { return compare_length_; }
 

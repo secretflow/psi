@@ -15,6 +15,7 @@
 #include "experiment/psi/threshold_ub_psi/server.h"
 
 #include "experiment/psi/threshold_ub_psi/common.h"
+#include "experiment/psi/threshold_ub_psi/threshold_ecdh_oprf_psi.h"
 
 #include "psi/utils/ec.h"
 #include "psi/utils/sync.h"
@@ -40,19 +41,19 @@ void ThresholdEcdhUbPsiServer::Online() {
     report_.set_original_count(keys_info->OriginCnt());
     report_.set_original_key_count(keys_info->KeyCnt());
 
-    std::shared_ptr<EcdhOprfPsiServer> server =
-        GetOprfServer(server_private_key);
+    std::shared_ptr<ThresholdEcdhOprfPsiServer> server =
+        std::make_shared<ThresholdEcdhOprfPsiServer>(psi_options_,
+                                                     server_private_key);
 
     // server recv client's first blinded items y^r and evaluate items y^rs
-    EcdhOprfPsiServer::PeerCntInfo peer_cnt_info;
+    ThresholdEcdhOprfPsiServer::PeerCntInfo peer_cnt_info;
     peer_cnt_info = server->RecvBlindAndShuffleSendEvaluate();
     SPDLOG_INFO("End send shuffle evaluate items.");
 
     // The indexes are restored only when the client needs to obtain the
     // intersection
     if (config_.client_get_result()) {
-      server->RecvShuffledIndexesAndSendRestoredIndexes(
-          peer_cnt_info.peer_unique_cnt);
+      server->RecvAndRestoreIndexes(peer_cnt_info.peer_unique_cnt);
     }
 
     if (!config_.server_get_result()) {
@@ -64,6 +65,7 @@ void ThresholdEcdhUbPsiServer::Online() {
         server->RecvIntersectionUniqueKeyCount();
     SPDLOG_INFO("End recv cached indexes and intersection count.");
 
+    // Check whether the intersection size meets expectations
     uint32_t threshold = config_.intersection_threshold();
     uint32_t target_intersection_unique_key_count =
         std::min(threshold, real_intersection_unique_key_count);
@@ -72,18 +74,25 @@ void ThresholdEcdhUbPsiServer::Online() {
 
     YACL_ENFORCE(final_intersection_unique_key_count ==
                      target_intersection_unique_key_count,
-                 "The threshold setting has not taken effect");
+                 "The threshold has not taken effect, target size is {}, "
+                 "but the final size is {}",
+                 target_intersection_unique_key_count,
+                 final_intersection_unique_key_count);
 
+    // server computes the duplicate counts of the intersection elements in the
+    // client's set
     std::unordered_map<uint32_t, uint32_t> shuffle_index_cnt_map;
     for (size_t i = 0; i != index_info.cache_index.size(); ++i) {
       shuffle_index_cnt_map[index_info.cache_index[i]] =
           peer_cnt_info.peer_dup_cnt[index_info.client_index[i]];
     }
 
+    // server restored the shuffled intersection indexes
     auto index_with_cnt = TransCacheIndexesToRowIndexs(shuffle_index_cnt_map);
 
     MemoryIndexReader reader(index_with_cnt.index, index_with_cnt.peer_dup_cnt);
 
+    // server deals with the intersection and save the result
     auto stat = join_processor_->DealResultIndex(reader);
     SPDLOG_INFO("join stat: {}", stat.ToString());
     report_.set_intersection_count(stat.self_intersection_count);

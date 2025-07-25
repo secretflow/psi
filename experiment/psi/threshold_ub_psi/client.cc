@@ -15,6 +15,7 @@
 #include "experiment/psi/threshold_ub_psi/client.h"
 
 #include "experiment/psi/threshold_ub_psi/common.h"
+#include "experiment/psi/threshold_ub_psi/threshold_ecdh_oprf_psi.h"
 
 #include "psi/utils/sync.h"
 
@@ -30,8 +31,8 @@ void ThresholdEcdhUbPsiClient::Online() {
     // Assume y is the client's data, r is the client's private key, and s is
     // the server's private key.
     auto private_key = yacl::crypto::SecureRandBytes(kEccKeySize);
-    std::shared_ptr<EcdhOprfPsiClient> dh_oprf_psi_client_online =
-        std::make_shared<EcdhOprfPsiClient>(psi_options_, private_key);
+    std::shared_ptr<ThresholdEcdhOprfPsiClient> dh_oprf_psi_client_online =
+        std::make_shared<ThresholdEcdhOprfPsiClient>(psi_options_, private_key);
 
     auto key_info = join_processor_->GetUniqueKeysInfo();
     report_.set_original_key_count(key_info->KeyCnt());
@@ -78,13 +79,14 @@ void ThresholdEcdhUbPsiClient::Online() {
     // The indexes are restored only when the client needs to obtain the
     // intersection
     if (config_.client_get_result()) {
-      dh_oprf_psi_client_online->SendClientShuffledIndexes(
+      dh_oprf_psi_client_online->SendShuffledIndexes(
           intersection_info.self_indices);
       client_restored_indexes =
-          dh_oprf_psi_client_online->RecvClientRestoredIndexes();
+          dh_oprf_psi_client_online->RecvRestoredIndexes();
       YACL_ENFORCE(
           client_restored_indexes.size() == final_intersection_unique_key_count,
-          "index size not match");
+          "index size not match, target size is {}, but received size is {}",
+          final_intersection_unique_key_count, client_restored_indexes.size());
     }
 
     if (config_.server_get_result()) {

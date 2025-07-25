@@ -79,7 +79,7 @@ class ThresholdEcdhOprfPsiClient : public EcdhOprfPsiClient {
   void SendIntersectionUniqueKeyCount(
       uint32_t real_intersection_unique_key_count);
 
-  private:
+ private:
   std::shared_ptr<yacl::link::Context> online_link_;
 };
 

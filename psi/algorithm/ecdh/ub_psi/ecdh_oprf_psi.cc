@@ -300,14 +300,15 @@ EcdhOprfPsiServer::RecvBlindAndShuffleSendEvaluate() {
     batch_count++;
     cnt_info.peer_unique_cnt += num_items;
   }
+  cnt_info.peer_total_cnt += cnt_info.peer_unique_cnt;
   SPDLOG_INFO(
       "recv Blind finished, batch_count={}, unique_items: {}, total_items: {}",
       batch_count, cnt_info.peer_unique_cnt, cnt_info.peer_total_cnt);
 
   std::vector<size_t> shuffle_index(evaluated_items.size());
   std::iota(shuffle_index.begin(), shuffle_index.end(), 0);
-  std::mt19937 g(yacl::crypto::SecureRandU64());
-  std::shuffle(shuffle_index.begin(), shuffle_index.end(), g);
+  yacl::crypto::YaclReplayUrbg<uint32_t> gen(shuffle_seed_, shuffle_counter_);
+  std::shuffle(shuffle_index.begin(), shuffle_index.end(), gen);
 
   cnt_info.peer_dup_cnt.reserve(evaluated_items.size());
   for (size_t i = 0; i != shuffle_index.size(); ++i) {
@@ -497,14 +498,14 @@ void EcdhOprfPsiClient::RecvFinalEvaluatedItems(
 
 void EcdhOprfPsiClient::SendServerCacheIndexes(
     const std::vector<uint32_t>& peer_indexes,
-    const std::vector<uint32_t>& self_indexe) {
+    const std::vector<uint32_t>& self_indexes) {
   SPDLOG_INFO("Start SendServerCacheIndexes");
   options_.online_link->SendAsyncThrottled(
       options_.online_link->NextRank(), utils::SerializeIndexes(peer_indexes),
       "cache indexes");
-  options_.online_link->SendAsyncThrottled(options_.online_link->NextRank(),
-                                           utils::SerializeIndexes(self_indexe),
-                                           "client indexes");
+  options_.online_link->SendAsyncThrottled(
+      options_.online_link->NextRank(), utils::SerializeIndexes(self_indexes),
+      "client indexes");
   SPDLOG_INFO("End SendServerCacheIndexes, {}", peer_indexes.size());
 }
 

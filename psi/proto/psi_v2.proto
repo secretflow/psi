@@ -459,4 +459,15 @@ message UbPsiConfig {
 
   // Output attributes.
   OutputAttr output_attr = 15;
+
+  // The threshold of the intersection; the number of unique keys in the
+  // intersection will not exceed this value. If this item is not configured,
+  // excute the standard ub_psi. Required for MODE_ONLINE and MODE_FULL.
+  uint32 intersection_threshold = 16;
+
+  // If the intersection result is restricted by the threshold, you can choose
+  // to store the number of unique keys in the actual intersection and the
+  // number of unique keys in the final intersection into count_path. Required
+  // for MODE_ONLINE and MODE_FULL.
+  string count_path = 17;
 }

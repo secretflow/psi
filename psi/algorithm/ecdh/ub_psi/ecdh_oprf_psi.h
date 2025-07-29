@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "yacl/base/byte_container_view.h"
+#include "yacl/crypto/rand/rand.h"
 #include "yacl/link/link.h"
 
 #include "psi/algorithm/ecdh/ub_psi/ecdh_oprf.h"
@@ -96,13 +97,17 @@ struct EcdhOprfPsiOptions {
 class EcdhOprfPsiServer {
  public:
   explicit EcdhOprfPsiServer(const EcdhOprfPsiOptions& options)
-      : options_(options),
+      : shuffle_seed_(yacl::crypto::SecureRandSeed()),
+        shuffle_counter_(yacl::crypto::SecureRandU64()),
+        options_(options),
         oprf_server_(
             CreateEcdhOprfServer(options.oprf_type, options.curve_type)) {}
 
   EcdhOprfPsiServer(const EcdhOprfPsiOptions& options,
                     yacl::ByteContainerView private_key)
-      : options_(options),
+      : shuffle_seed_(yacl::crypto::SecureRandSeed()),
+        shuffle_counter_(yacl::crypto::SecureRandU64()),
+        options_(options),
         oprf_server_(CreateEcdhOprfServer(private_key, options.oprf_type,
                                           options.curve_type)) {}
 
@@ -168,6 +173,11 @@ class EcdhOprfPsiServer {
   std::pair<std::vector<uint64_t>, size_t> RecvIntersectionMaskedItems(
       const std::shared_ptr<IShuffledBatchProvider>& cache_provider);
 
+ protected:
+  // the seed used to shuffle client's indexes
+  uint128_t shuffle_seed_;
+  uint64_t shuffle_counter_;
+
  private:
   EcdhOprfPsiOptions options_;
 
@@ -223,7 +233,7 @@ class EcdhOprfPsiClient {
       const std::shared_ptr<IBasicBatchProvider>& batch_provider);
 
   void SendServerCacheIndexes(const std::vector<uint32_t>& peer_indexes,
-                              const std::vector<uint32_t>& self_indexe);
+                              const std::vector<uint32_t>& self_indexes);
 
   size_t GetCompareLength() const { return compare_length_; }
 

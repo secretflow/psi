@@ -23,7 +23,7 @@
 
 namespace psi::ecdh {
 
-class EcdhUbPsiServer final : public AbstractUbPsiServer {
+class EcdhUbPsiServer : public AbstractUbPsiServer {
  public:
   explicit EcdhUbPsiServer(const v2::UbPsiConfig& config,
                            std::shared_ptr<yacl::link::Context> lctx = nullptr);
@@ -40,7 +40,7 @@ class EcdhUbPsiServer final : public AbstractUbPsiServer {
 
   void Offline() override;
 
- private:
+ protected:
   struct IndexWithCnt {
     std::vector<uint32_t> index;
     std::vector<uint32_t> peer_dup_cnt;

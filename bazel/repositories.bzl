@@ -20,7 +20,6 @@ def psi_deps():
     _com_github_microsoft_kuku()
     _com_google_flatbuffers()
 
-    _com_github_google_perfetto()
     _com_github_floodyberry_curve25519_donna()
 
     _com_github_zeromq_cppzmq()
@@ -76,20 +75,6 @@ def _com_google_flatbuffers():
             "rm src/BUILD.bazel",
         ],
         build_file = "//bazel:flatbuffers.BUILD",
-    )
-
-def _com_github_google_perfetto():
-    maybe(
-        http_archive,
-        name = "perfetto",
-        urls = [
-            "https://github.com/google/perfetto/archive/refs/tags/v41.0.tar.gz",
-        ],
-        sha256 = "4c8fe8a609fcc77ca653ec85f387ab6c3a048fcd8df9275a1aa8087984b89db8",
-        strip_prefix = "perfetto-41.0",
-        patch_args = ["-p1"],
-        patches = ["//bazel/patches:perfetto.patch"],
-        build_file = "//bazel:perfetto.BUILD",
     )
 
 def _com_github_floodyberry_curve25519_donna():

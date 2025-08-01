@@ -49,7 +49,6 @@ use_repo(
     "apsi",
     "curve25519-donna",
     "kuku",
-    "perfetto",
 )
 
 new_local_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:local.bzl", "new_local_repository")
@@ -67,6 +66,7 @@ new_local_repository(
 )
 
 bazel_dep(name = "kuscia", version = "0.14.0b0")
+bazel_dep(name = "perfetto", version = "41.0")
 
 # test
 bazel_dep(name = "googletest", version = "1.15.2", dev_dependency = True, repo_name = "com_google_googletest")

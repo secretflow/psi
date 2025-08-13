@@ -95,11 +95,11 @@ def _com_github_zeromq_cppzmq():
         http_archive,
         name = "com_github_zeromq_cppzmq",
         build_file = "//bazel:cppzmq.BUILD",
-        strip_prefix = "cppzmq-4.10.0",
-        sha256 = "c81c81bba8a7644c84932225f018b5088743a22999c6d82a2b5f5cd1e6942b74",
+        strip_prefix = "cppzmq-4.11.0",
+        sha256 = "0fff4ff311a7c88fdb76fceefba0e180232d56984f577db371d505e4d4c91afd",
         type = ".tar.gz",
         urls = [
-            "https://github.com/zeromq/cppzmq/archive/refs/tags/v4.10.0.tar.gz",
+            "https://github.com/zeromq/cppzmq/archive/refs/tags/v4.11.0.tar.gz",
         ],
     )
 

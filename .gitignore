@@ -18,7 +18,6 @@ Pipfile
 
 # bazel
 bazel-*
-MODULE.bazel.lock
 
 # cmake related
 abseil-cpp

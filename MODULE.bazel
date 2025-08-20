@@ -42,6 +42,11 @@ bazel_dep(name = "gsl", version = "4.0.0")
 bazel_dep(name = "log4cplus", version = "2.1.1")
 bazel_dep(name = "seal", version = "4.1.1")
 
+single_version_override(
+    module_name = "openssl",
+    version = "3.3.2.bcr.1",
+)
+
 # non mododule dependencies
 non_module_dependencies = use_extension("//bazel:defs.bzl", "non_module_dependencies")
 use_repo(

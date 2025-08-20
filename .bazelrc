@@ -17,7 +17,6 @@ common --experimental_cc_shared_library
 
 common --registry=https://raw.githubusercontent.com/secretflow/bazel-registry/main
 common --registry=https://bcr.bazel.build
-common --registry=https://baidu.github.io/babylon/registry
 
 build --incompatible_new_actions_api=false
 build --copt=-fdiagnostics-color=always

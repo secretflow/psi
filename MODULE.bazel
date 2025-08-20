@@ -11,7 +11,7 @@ module(
     compatibility_level = 1,
 )
 
-bazel_dep(name = "yacl", version = "0.4.5b10-nightly-20250110")
+bazel_dep(name = "yacl", version = "0.4.5b11-nightly-20250514")
 bazel_dep(name = "heu", version = "0.6.0.dev20250123")
 bazel_dep(name = "platforms", version = "0.0.11")
 bazel_dep(name = "apple_support", version = "1.17.1")

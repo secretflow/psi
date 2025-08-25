@@ -402,7 +402,7 @@ void Rr22OprfReceiver::Init(const std::shared_ptr<yacl::link::Context>& lctx,
                             size_t init_size, size_t num_threads) {
   num_threads_ = num_threads;
   if (mode_ == Rr22PsiMode::FastMode) {
-    uint128_t baxos_seed = 1;
+    uint128_t baxos_seed = yacl::crypto::SecureRandU128();
     yacl::ByteContainerView paxos_seed_buf(&baxos_seed, sizeof(uint128_t));
 
     lctx->SendAsyncThrottled(lctx->NextRank(), paxos_seed_buf,

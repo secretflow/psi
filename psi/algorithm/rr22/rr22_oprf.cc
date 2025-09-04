@@ -132,8 +132,7 @@ std::vector<uint128_t> Rr22OprfSender::Send(
 }
 
 void Rr22OprfSender::Init(const std::shared_ptr<yacl::link::Context>& lctx,
-                          size_t init_size, size_t num_threads) {
-  init_size_ = init_size;
+                          size_t peer_size, size_t num_threads) {
   num_threads_ = num_threads;
   if (mode_ == Rr22PsiMode::FastMode) {
     uint128_t baxos_seed;
@@ -147,7 +146,7 @@ void Rr22OprfSender::Init(const std::shared_ptr<yacl::link::Context>& lctx,
 
     std::memcpy(&baxos_seed, baxos_seed_buf.data(), baxos_seed_buf.size());
 
-    baxos_.Init(init_size_, bin_size_, kPaxosWeight, ssp_,
+    baxos_.Init(peer_size, bin_size_, kPaxosWeight, ssp_,
                 okvs::PaxosParam::DenseType::GF128, baxos_seed);
     paxos_size_ = baxos_.size();
     SPDLOG_INFO("paxos_size:{}", paxos_size_);
@@ -173,7 +172,7 @@ void Rr22OprfSender::Init(const std::shared_ptr<yacl::link::Context>& lctx,
 
     std::memcpy(&paxos_seed, paxos_seed_buf.data(), paxos_seed_buf.size());
 
-    paxos_.Init(init_size_, kPaxosWeight, ssp_,
+    paxos_.Init(peer_size, kPaxosWeight, ssp_,
                 okvs::PaxosParam::DenseType::Binary, paxos_seed);
 
     paxos_size_ = paxos_.size();
@@ -399,7 +398,7 @@ std::vector<uint128_t> Rr22OprfSender::Eval(
 }
 
 void Rr22OprfReceiver::Init(const std::shared_ptr<yacl::link::Context>& lctx,
-                            size_t init_size, size_t num_threads) {
+                            size_t self_size, size_t num_threads) {
   num_threads_ = num_threads;
   if (mode_ == Rr22PsiMode::FastMode) {
     uint128_t baxos_seed = yacl::crypto::SecureRandU128();
@@ -407,7 +406,7 @@ void Rr22OprfReceiver::Init(const std::shared_ptr<yacl::link::Context>& lctx,
 
     lctx->SendAsyncThrottled(lctx->NextRank(), paxos_seed_buf,
                              fmt::format("send baxos_seed_buf"));
-    baxos_.Init(init_size, bin_size_, kPaxosWeight, ssp_,
+    baxos_.Init(self_size, bin_size_, kPaxosWeight, ssp_,
                 okvs::PaxosParam::DenseType::GF128, baxos_seed);
     paxos_size_ = baxos_.size();
     SPDLOG_INFO("baxos_size:{}", paxos_size_);
@@ -429,7 +428,7 @@ void Rr22OprfReceiver::Init(const std::shared_ptr<yacl::link::Context>& lctx,
                              fmt::format("send paxos_seed_buf"));
     // here we must use DenseType::Binary for supporting EncodeU64, which
     // should used in LowComm
-    paxos_.Init(init_size, kPaxosWeight, ssp_,
+    paxos_.Init(self_size, kPaxosWeight, ssp_,
                 okvs::PaxosParam::DenseType::Binary, paxos_seed);
     paxos_size_ = paxos_.size();
 

@@ -37,12 +37,12 @@ namespace {
 
 std::tuple<std::vector<uint128_t>, std::vector<uint128_t>,
            std::vector<uint32_t>>
-GenerateTestData(size_t item_size, double p = 0.5) {
+GenerateTestData(size_t receiver_size, size_t sender_size, double p = 0.5) {
   uint128_t seed = yacl::MakeUint128(0, 0);
   yacl::crypto::Prg<uint128_t> prng(seed);
 
-  std::vector<uint128_t> inputs_a(item_size);
-  std::vector<uint128_t> inputs_b(item_size);
+  std::vector<uint128_t> inputs_a(receiver_size);
+  std::vector<uint128_t> inputs_b(sender_size);
 
   prng.Fill(absl::MakeSpan(inputs_a));
   prng.Fill(absl::MakeSpan(inputs_b));
@@ -51,7 +51,8 @@ GenerateTestData(size_t item_size, double p = 0.5) {
   std::bernoulli_distribution dist(p);
 
   std::vector<uint32_t> indices;
-  for (size_t i = 0; i < item_size; ++i) {
+  size_t min_size = std::min(receiver_size, sender_size);
+  for (size_t i = 0; i < min_size; ++i) {
     if (dist(std_rand)) {
       inputs_b[i] = inputs_a[i];
       indices.push_back(i);
@@ -61,7 +62,8 @@ GenerateTestData(size_t item_size, double p = 0.5) {
 }
 
 struct TestParams {
-  uint64_t items_num;
+  uint64_t receiver_items_num;
+  uint64_t sender_items_num;
 
   Rr22PsiMode mode = Rr22PsiMode::FastMode;
 
@@ -80,13 +82,12 @@ TEST_P(Rr22PsiTest, CorrectTest) {
   uint128_t seed = yacl::MakeUint128(0, 0);
   yacl::crypto::Prg<uint128_t> prng(seed);
 
-  size_t item_size = params.items_num;
-
   std::vector<uint128_t> inputs_a;
   std::vector<uint128_t> inputs_b;
   std::vector<uint32_t> indices;
 
-  std::tie(inputs_a, inputs_b, indices) = GenerateTestData(item_size);
+  std::tie(inputs_a, inputs_b, indices) =
+      GenerateTestData(params.receiver_items_num, params.sender_items_num);
 
   Rr22PsiOptions psi_options(40, 0, true);
 
@@ -156,7 +157,8 @@ TEST_P(Rr22PsiTest, CorrectTest) {
 
 INSTANTIATE_TEST_SUITE_P(
     CorrectTest_Instances, Rr22PsiTest,
-    testing::Values(TestParams{1 << 17, Rr22PsiMode::FastMode},
-                    TestParams{1 << 17, Rr22PsiMode::FastMode, true},
-                    TestParams{1 << 17, Rr22PsiMode::LowCommMode}));
+    testing::Values(TestParams{1 << 17, 1 << 17, Rr22PsiMode::FastMode},
+                    TestParams{1 << 17, 1 << 20, Rr22PsiMode::FastMode},
+                    TestParams{1 << 17, 1 << 17, Rr22PsiMode::FastMode, true},
+                    TestParams{1 << 17, 1 << 17, Rr22PsiMode::LowCommMode}));
 }  // namespace psi::rr22

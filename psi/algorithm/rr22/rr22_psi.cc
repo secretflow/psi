@@ -91,8 +91,7 @@ void BucketRr22Sender::Prepare(
       inputs_hash_[i] = yacl::crypto::Blake3_128(bucket_items_[i].base64_data);
     }
   });
-  oprf_sender_.Init(lctx, std::max(self_size_, peer_size_),
-                    rr22_options_.num_threads);
+  oprf_sender_.Init(lctx, peer_size_, rr22_options_.num_threads);
 }
 
 void BucketRr22Sender::RunOprf(
@@ -133,18 +132,13 @@ void BucketRr22Receiver::Prepare(
     return;
   }
 
-  inputs_hash_ = std::vector<uint128_t>(std::max(peer_size_, self_size_));
+  inputs_hash_ = std::vector<uint128_t>(self_size_);
   yacl::parallel_for(0, bucket_items_.size(), [&](int64_t begin, int64_t end) {
     for (int64_t i = begin; i < end; ++i) {
       inputs_hash_[i] = yacl::crypto::Blake3_128(bucket_items_[i].base64_data);
     }
   });
-  if (peer_size_ > self_size_) {
-    for (size_t idx = self_size_; idx < peer_size_; idx++) {
-      inputs_hash_[idx] = yacl::crypto::SecureRandU128();
-    }
-  }
-  oprf_receiver_.Init(lctx, inputs_hash_.size(), rr22_options_.num_threads);
+  oprf_receiver_.Init(lctx, self_size_, rr22_options_.num_threads);
 }
 
 void BucketRr22Receiver::RunOprf(

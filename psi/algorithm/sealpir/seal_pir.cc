@@ -17,6 +17,7 @@
 #include <memory.h>
 
 #include <algorithm>
+#include <cstddef>
 #include <functional>
 #include <span>
 #include <utility>
@@ -1181,17 +1182,31 @@ inline vector<Ciphertext> SealPirServer::ExpandQuery(
 inline void SealPirServer::MultiplyPowerOfX(const Ciphertext &encrypted,
                                             Ciphertext &destination,
                                             uint32_t index) const {
-  int N = enc_params_->poly_modulus_degree();
+  size_t N = enc_params_->poly_modulus_degree();
   size_t coeff_mod_cnt = enc_params_->coeff_modulus().size() - 1;
   size_t encrypted_cnt = encrypted.size();
 
   destination = encrypted;
-
+  uint32_t actual_index = index % N;
+  // avoid exception in SEAL debug mode
   for (size_t i = 0; i < encrypted_cnt; ++i) {
     for (size_t j = 0; j < coeff_mod_cnt; ++j) {
-      seal::util::negacyclic_shift_poly_coeffmod(
-          encrypted.data(i) + (j * N), N, index,
-          enc_params_->coeff_modulus()[j], destination.data(i) + (j * N));
+      if (index >= N) {
+        // negate coefficients when index >= N
+        vector<uint64_t> temp_data(N);
+        for (size_t k = 0; k < N; ++k) {
+          temp_data[k] = enc_params_->coeff_modulus()[j].value() -
+                         encrypted.data(i)[j * N + k];
+        }
+        seal::util::negacyclic_shift_poly_coeffmod(
+            temp_data.data(), N, actual_index, enc_params_->coeff_modulus()[j],
+            destination.data(i) + (j * N));
+      } else {
+        // direct shift when index < N
+        seal::util::negacyclic_shift_poly_coeffmod(
+            encrypted.data(i) + (j * N), N, actual_index,
+            enc_params_->coeff_modulus()[j], destination.data(i) + (j * N));
+      }
     }
   }
 }

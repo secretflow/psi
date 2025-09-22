@@ -49,7 +49,7 @@ auto SyncWait(const std::shared_ptr<yacl::link::Context>& lctx, F&& func,
   auto fut = std::async(std::launch::async, std::forward<F>(func),
                         std::forward<Args>(args)...);
 
-  std::conditional_t<!std::is_void_v<R>, R, std::monostate> res;
+  std::conditional_t<!std::is_void_v<R>, R, std::monostate> res{};
 
   while (true) {
     if (!done) {

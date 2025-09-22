@@ -7,7 +7,7 @@
 
 module(
     name = "psi",
-    version = "0.6.0.dev250507",
+    version = "0.6.0.dev250922",
     compatibility_level = 1,
 )
 

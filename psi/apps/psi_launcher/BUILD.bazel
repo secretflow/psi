@@ -21,6 +21,8 @@ psi_cc_library(
     srcs = ["factory.cc"],
     hdrs = ["factory.h"],
     deps = [
+        "//experiment/psi/threshold_ecdh_psi:receiver",
+        "//experiment/psi/threshold_ecdh_psi:sender",
         "//experiment/psi/threshold_ub_psi:client",
         "//experiment/psi/threshold_ub_psi:server",
         "//psi/algorithm/ecdh:receiver",

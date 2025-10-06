@@ -21,14 +21,14 @@
 
 namespace psi::ecdh {
 
-class EcdhPsiSender final : public AbstractPsiSender {
+class EcdhPsiSender : public AbstractPsiSender {
  public:
   explicit EcdhPsiSender(const v2::PsiConfig &config,
                          std::shared_ptr<yacl::link::Context> lctx = nullptr);
 
   ~EcdhPsiSender() override = default;
 
- private:
+ protected:
   void Init() override;
 
   void PreProcess() override;

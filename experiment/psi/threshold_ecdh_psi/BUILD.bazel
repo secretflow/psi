@@ -1,0 +1,74 @@
+# Copyright 2025
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library", "psi_cc_test")
+
+package(default_visibility = ["//visibility:public"])
+
+psi_cc_library(
+    name = "common",
+    srcs = ["common.cc"],
+    hdrs = ["common.h"],
+    deps = [
+      "//psi/utils:io",
+    ]
+)
+
+psi_cc_library(
+    name = "receiver",
+    srcs = ["receiver.cc"],
+    hdrs = ["receiver.h"],
+    deps = [
+        ":common",
+        ":threshold_ecdh_psi",
+        "//psi/utils:serialize",
+        "//psi/algorithm/ecdh:receiver",
+        "//psi/utils:sync",
+    ],
+)
+
+psi_cc_library(
+    name = "sender",
+    srcs = ["sender.cc"],
+    hdrs = ["sender.h"],
+    deps = [
+        ":common",
+        ":threshold_ecdh_psi",
+        ":threshold_ecdh_psi_cache",
+        "//psi/utils:serialize",
+        "//psi/algorithm/ecdh:sender",
+        "//psi/utils:sync",
+    ],
+)
+
+psi_cc_library(
+  name = "threshold_ecdh_psi_cache",
+  srcs = ["threshold_ecdh_psi_cache.cc"],
+  hdrs = ["threshold_ecdh_psi_cache.h"],
+  deps = [
+    "//psi/utils:batch_provider",
+    "//psi/utils:io",
+  ],
+)
+
+psi_cc_library(
+  name = "threshold_ecdh_psi",
+    srcs = ["threshold_ecdh_psi.cc"],
+    hdrs = ["threshold_ecdh_psi.h"],
+    deps = [
+        ":threshold_ecdh_psi_cache",
+        "//psi/algorithm/ecdh:ecdh_psi",
+        "@yacl//yacl/crypto/rand",
+    ],
+)

@@ -258,6 +258,13 @@ void Sender::RunQuery(
   vector<future<void>> futures;
   std::vector<::apsi::ResultPart> rps;
   std::mutex rps_mutex;
+  std::mutex send_mutex;
+
+  auto thread_safe_send_rp_fun = [&](::apsi::network::Channel &channel,
+                                     ::apsi::ResultPart rp) {
+    std::lock_guard<std::mutex> lock(send_mutex);
+    send_rp_fun(channel, std::move(rp));
+  };
 
   for (size_t bundle_idx = 0; bundle_idx < bundle_idx_count; bundle_idx++) {
     auto bundle_caches =
@@ -265,7 +272,8 @@ void Sender::RunQuery(
     for (auto &cache : bundle_caches) {
       futures.push_back(tpm.thread_pool().enqueue([&, bundle_idx, cache]() {
         ProcessBinBundleCache(sender_db, crypto_context, cache, all_powers, chl,
-                              send_rp_fun, static_cast<uint32_t>(bundle_idx),
+                              thread_safe_send_rp_fun,
+                              static_cast<uint32_t>(bundle_idx),
                               query.compr_mode(), pool, rps_mutex,
                               streaming_result ? nullptr : &rps);
       }));

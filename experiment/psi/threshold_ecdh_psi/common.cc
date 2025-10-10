@@ -17,6 +17,9 @@
 #include "spdlog/spdlog.h"
 
 #include "psi/utils/io.h"
+#include "psi/utils/test_utils.h"
+
+#include "psi/proto/psi.pb.h"
 
 namespace psi::ecdh {
 void SaveIntersectionCount(const std::string &count_path, uint32_t real_count,
@@ -28,5 +31,49 @@ void SaveIntersectionCount(const std::string &count_path, uint32_t real_count,
 
   ofs->Close();
   SPDLOG_INFO("Save intersection count to {}", count_path);
+}
+
+void GeneratePsiConfig(const std::filesystem::path &tmp_folder,
+                       const std::vector<std::string> &items_sender,
+                       const std::vector<std::string> &items_receiver,
+                       uint32_t threshold, v2::PsiConfig &sender_config,
+                       v2::PsiConfig &receiver_config) {
+  std::string sender_input_path = tmp_folder / "sender_input.csv";
+  std::string receiver_input_path = tmp_folder / "receiver_input.csv";
+  std::string sender_output_path = tmp_folder / "sender_output.csv";
+  std::string receiver_output_path = tmp_folder / "receiver_output.csv";
+  std::string sender_cache_path = tmp_folder / "sender_cache";
+  std::string receiver_cache_path = tmp_folder / "receiver_cache";
+
+  test::WriteCsvFile(sender_input_path, items_sender);
+  test::WriteCsvFile(receiver_input_path, items_receiver);
+
+  sender_config.mutable_protocol_config()->set_protocol(
+      v2::Protocol::PROTOCOL_ECDH);
+  sender_config.mutable_protocol_config()->mutable_ecdh_config()->set_curve(
+      CurveType::CURVE_FOURQ);
+  sender_config.mutable_protocol_config()->set_role(v2::Role::ROLE_SENDER);
+  sender_config.mutable_protocol_config()->set_broadcast_result(true);
+  sender_config.mutable_input_config()->set_type(v2::IoType::IO_TYPE_FILE_CSV);
+  sender_config.mutable_input_config()->set_path(sender_input_path);
+  sender_config.mutable_output_config()->set_type(v2::IoType::IO_TYPE_FILE_CSV);
+  sender_config.mutable_output_config()->set_path(sender_output_path);
+  sender_config.add_keys("id");
+  sender_config.set_intersection_threshold(threshold);
+
+  receiver_config.mutable_protocol_config()->set_protocol(
+      v2::Protocol::PROTOCOL_ECDH);
+  receiver_config.mutable_protocol_config()->mutable_ecdh_config()->set_curve(
+      CurveType::CURVE_FOURQ);
+  receiver_config.mutable_protocol_config()->set_role(v2::Role::ROLE_RECEIVER);
+  receiver_config.mutable_protocol_config()->set_broadcast_result(true);
+  receiver_config.mutable_input_config()->set_type(
+      v2::IoType::IO_TYPE_FILE_CSV);
+  receiver_config.mutable_input_config()->set_path(receiver_input_path);
+  receiver_config.mutable_output_config()->set_type(
+      v2::IoType::IO_TYPE_FILE_CSV);
+  receiver_config.mutable_output_config()->set_path(receiver_output_path);
+  receiver_config.add_keys("id");
+  receiver_config.set_intersection_threshold(threshold);
 }
 }  // namespace psi::ecdh

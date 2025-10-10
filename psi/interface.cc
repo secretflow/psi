@@ -236,6 +236,7 @@ void AbstractPsiParty::CheckPeerConfig() {
   config.mutable_debug_options()->Clear();
   config.set_disable_alignment(false);
   config.mutable_input_attr()->set_keys_unique(false);
+  config.mutable_count_path()->clear();
 
   // Recovery must be enabled by all parties at the same time.
   config.mutable_recovery_config()->set_folder("");

@@ -23,6 +23,7 @@ psi_cc_library(
     deps = [
         "//psi/proto:psi_v2_cc_proto",
         "//psi/utils:io",
+        "//psi/utils:test_utils",
     ],
 )
 

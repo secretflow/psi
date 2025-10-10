@@ -84,7 +84,7 @@ void ThresholdEcdhPsiCtx::MaskAndShufflePeer(
         dual_masked_peers.emplace_back(std::move(cipher));
       }
 
-      // Sender shuffle receiver's dual masked items
+      // Sender shuffle receiver's dual masked items.
       std::vector<uint32_t> shuffled_indices(dual_masked_peers.size());
       std::iota(shuffled_indices.begin(), shuffled_indices.end(), 0);
       yacl::crypto::YaclReplayUrbg<uint32_t> gen(yacl::crypto::SecureRandSeed(),
@@ -94,12 +94,12 @@ void ThresholdEcdhPsiCtx::MaskAndShufflePeer(
       std::vector<uint32_t> dup_cnts(dual_masked_peers.size());
       shuffled_items.resize(dual_masked_peers.size());
 
-      // Convert unordered_map to vector to improve efficiency,需要shuffle?
+      // Convert unordered_map to vector to improve efficiency.
       for (auto& [k, v] : duplicate_item_cnt) {
         dup_cnts[k] = v;
       }
 
-      // Sender store index, shuffled index and duplicate cnt in cache
+      // Sender store index, shuffled index and duplicate cnt in cache.
       for (size_t i = 0; i < dual_masked_peers.size(); ++i) {
         shuffled_items[i] = std::move(dual_masked_peers[shuffled_indices[i]]);
         cache->SaveData(item_count + i, item_count + shuffled_indices[i],

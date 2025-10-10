@@ -227,6 +227,7 @@ psi_cc_library(
         "test_utils.h",
     ],
     deps = [
+        ":io",
         "//psi/proto:psi_cc_proto",
         "@yacl//yacl/crypto/hash:hash_utils",
     ],

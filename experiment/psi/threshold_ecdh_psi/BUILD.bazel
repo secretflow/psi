@@ -21,7 +21,10 @@ psi_cc_library(
     srcs = ["common.cc"],
     hdrs = ["common.h"],
     deps = [
+      "//psi/proto:psi_v2_cc_proto",
+      "//psi/proto:psi_cc_proto",
       "//psi/utils:io",
+      "//psi/utils:test_utils",
     ]
 )
 
@@ -70,5 +73,31 @@ psi_cc_library(
         ":threshold_ecdh_psi_cache",
         "//psi/algorithm/ecdh:ecdh_psi",
         "@yacl//yacl/crypto/rand",
+    ],
+)
+
+psi_cc_binary(
+    name = "threshold_ecdh_psi_benchmark",
+    srcs = ["threshold_ecdh_psi_benchmark.cc"],
+    deps = ["@com_github_google_benchmark//:benchmark_main"] + [
+        ":receiver",
+        ":common",
+        ":sender",
+        "//psi/utils:test_utils",
+        "//psi/utils:random_str",
+        "@yacl//yacl/link",
+    ],
+)
+
+psi_cc_test(
+    name = "threshold_ecdh_psi_test",
+    srcs = ["threshold_ecdh_psi_test.cc"],
+    deps = [
+        ":sender",
+        ":common",
+        ":receiver",
+        "//psi/utils:random_str",
+        "//psi/utils:test_utils",
+        "@yacl//yacl/link",
     ],
 )

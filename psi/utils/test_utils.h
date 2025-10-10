@@ -21,6 +21,8 @@
 
 #include "yacl/crypto/hash/hash_utils.h"
 
+#include "psi/utils/io.h"
+
 #include "psi/proto/psi.pb.h"
 
 namespace psi::test {
@@ -64,6 +66,16 @@ inline std::optional<CurveType> GetOverrideCurveType() {
     }
   }
   return {};
+}
+
+inline void WriteCsvFile(const std::string &file_path,
+                         const std::vector<std::string> &items) {
+  auto out = io::BuildOutputStream(io::FileIoOptions(file_path));
+  out->Write("id\n");
+  for (const auto &data : items) {
+    out->Write(fmt::format("{}\n", data));
+  }
+  out->Close();
 }
 
 }  // namespace psi::test

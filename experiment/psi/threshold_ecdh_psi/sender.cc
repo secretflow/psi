@@ -84,6 +84,9 @@ void ThresholdEcdhPsiSender::RestoreAndSendIndex(
   std::vector<uint32_t> peer_shuffled_index;
   std::vector<uint32_t> self_index;
 
+  // We use `real_intersection_count` to represent the intersection unique key
+  // count without threshold limitation, and `final_intersection_count` to
+  // represent the intersection unique key count with threshold limitation.
   uint32_t final_intersection_count = 0;
   uint32_t real_intersection_count = 0;
   uint32_t target_intersection_count = 0;

@@ -17,6 +17,7 @@
 #include "spdlog/spdlog.h"
 
 #include "psi/utils/io.h"
+#include "psi/utils/test_utils.h"
 
 namespace psi::ecdh {
 
@@ -31,16 +32,6 @@ void SaveIntersectCount(const std::string &count_path, uint32_t real_count,
   SPDLOG_INFO("Save intersect count to {}", count_path);
 }
 
-void WriteCsvFile(const std::string &file_path,
-                  const std::vector<std::string> &items) {
-  auto out = io::BuildOutputStream(io::FileIoOptions(file_path));
-  out->Write("id\n");
-  for (const auto &data : items) {
-    out->Write(fmt::format("{}\n", data));
-  }
-  out->Close();
-}
-
 void GenerateUbPsiConfig(const std::filesystem::path &tmp_folder,
                          const std::vector<std::string> &items_server,
                          const std::vector<std::string> &items_client,
@@ -53,8 +44,8 @@ void GenerateUbPsiConfig(const std::filesystem::path &tmp_folder,
   std::string server_cache_path = tmp_folder / "server_cache";
   std::string client_cache_path = tmp_folder / "client_cache";
 
-  WriteCsvFile(server_input_path, items_server);
-  WriteCsvFile(client_input_path, items_client);
+  test::WriteCsvFile(server_input_path, items_server);
+  test::WriteCsvFile(client_input_path, items_client);
 
   server_config.set_mode(v2::UbPsiConfig::MODE_FULL);
   server_config.set_role(v2::Role::ROLE_SERVER);

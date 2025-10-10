@@ -27,13 +27,8 @@ namespace psi::ecdh {
 void SaveIntersectCount(const std::string &count_path, uint32_t real_count,
                         uint32_t final_count);
 
-// The following methods are used for test and benchmark
-
-// Write test data to a csv file
-void WriteCsvFile(const std::string &file_path,
-                  const std::vector<std::string> &items);
-
-// Generate UbPsiConfig for test and benchmark
+// Generate UbPsiConfig for test and benchmark, this method is used for test and
+// benchmark
 void GenerateUbPsiConfig(const std::filesystem::path &tmp_folder,
                          const std::vector<std::string> &items_server,
                          const std::vector<std::string> &items_client,

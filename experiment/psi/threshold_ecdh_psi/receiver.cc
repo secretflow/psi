@@ -81,15 +81,15 @@ void ThresholdEcdhPsiReceiver::ComputeAndStoreIndex(
   self->Flush();
   peer->Flush();
 
-  // We use `real_intersection_count` to represent the intersection count
-  // without threshold limitation, and `final_intersection_count` to represent
-  // the intersection count with threshold limitation.
+  // We use `real_intersection_count` to represent the intersection unique key
+  // count without threshold limitation, and `final_intersection_count` to
+  // represent the intersection unique key count with threshold limitation.
   uint32_t real_intersection_count = 0;
   uint32_t final_intersection_count = 0;
 
-  std::vector<uint32_t> self_shuffled_index(threshold_);
-  std::vector<uint32_t> peer_index(threshold_);
-  std::vector<uint32_t> peer_dup_cnt(threshold_);
+  std::vector<uint32_t> self_shuffled_index;
+  std::vector<uint32_t> peer_index;
+  std::vector<uint32_t> peer_dup_cnt;
 
   // Receiver compute the intersection whose size does not exceed the threshold.
   for (size_t bin_idx = 0; bin_idx < self->num_bins(); ++bin_idx) {
@@ -108,9 +108,9 @@ void ThresholdEcdhPsiReceiver::ComputeAndStoreIndex(
         real_intersection_count++;
 
         if (final_intersection_count < threshold_) {
-          self_shuffled_index[final_intersection_count] = item.index;
-          peer_index[final_intersection_count] = peer->index;
-          peer_dup_cnt[final_intersection_count] = peer->extra_dup_cnt;
+          self_shuffled_index.emplace_back(item.index);
+          peer_index.emplace_back(peer->index);
+          peer_dup_cnt.emplace_back(peer->extra_dup_cnt);
 
           final_intersection_count++;
         } else {

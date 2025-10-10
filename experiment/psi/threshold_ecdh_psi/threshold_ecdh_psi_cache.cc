@@ -104,6 +104,7 @@ void ThresholdEcdhPsiCache::SaveData(size_t index, size_t shuffle_index,
       .shuffle_index = static_cast<uint32_t>(shuffle_index),
       .dup_cnt = dup_cnt};
   out_stream_->Write(&cache_item, sizeof(ThresholdEcdhPsiCacheItem));
+  cache_cnt_++;
 }
 
 void ThresholdEcdhPsiCache::Flush() {

@@ -32,8 +32,8 @@ class ThresholdEcdhPsiReceiver : public EcdhPsiReceiver {
   // Receiver compute the shuffle indexes of intersection items, select no more
   // than t indexes, and send them to sender, where t is the intersection
   // threshold. After receiving the original indexes, receiver save them. If
-  // sender can touch the intersection, receiver will send no more than the
-  // threshold of sender's intersection indexes to sender.
+  // sender can touch the intersection, receiver will send the corresponding
+  // intersection indexes to sender.
   void ComputeAndStoreIndex(const std::shared_ptr<HashBucketEcPointStore>& self,
                             const std::shared_ptr<HashBucketEcPointStore>& peer,
                             const std::shared_ptr<IndexWriter>& index_writer);

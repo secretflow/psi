@@ -386,12 +386,12 @@ message PsiConfig {
 
   // The threshold of the intersection; the number of unique keys in the
   // intersection will not exceed this value. If this item is not configured,
-  // excute the standard ub_psi. Required for PROTOCOL_ECDH.
+  // excute the standard ub_psi. Supported for PROTOCOL_ECDH.
   uint32 intersection_threshold = 17;
 
   // If the intersection result is restricted by the threshold, you can choose
   // to store the number of unique keys in the actual intersection and the
-  // number of unique keys in the final intersection into count_path. Required 
+  // number of unique keys in the final intersection into count_path. Supported 
   // for PROTOCOL_ECDH.
   string count_path = 18;
 }

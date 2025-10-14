@@ -1,0 +1,36 @@
+{
+  "psi_config": {
+    "protocol_config": {
+      "protocol": "PROTOCOL_ECDH",
+      "ecdh_config": {
+        "curve": "CURVE_FOURQ"
+      },
+      "role": "ROLE_RECEIVER",
+      "broadcast_result": true
+    },
+    "input_config": {
+      "type": "IO_TYPE_FILE_CSV",
+      "path": "/tmp/receiver_input.csv"
+    },
+    "output_config": {
+      "type": "IO_TYPE_FILE_CSV",
+      "path": "/tmp/receiver_output.csv"
+    },
+    "keys": ["id_0", "id_1"],
+    "intersection_threshold": 50,
+    "count_path": "/tmp/receiver_count.csv"
+  },
+  "link_config": {
+    "parties": [
+      {
+        "id": "receiver",
+        "host": "127.0.0.1:5300"
+      },
+      {
+        "id": "sender",
+        "host": "127.0.0.1:5400"
+      }
+    ]
+  },
+  "self_link_party": "receiver"
+}

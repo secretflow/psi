@@ -18,7 +18,6 @@
 #include "psi/apps/psi_launcher/launch.h"
 
 #include <fstream>
-#include <chrono>
 
 #include "boost/algorithm/string.hpp"
 #include "google/protobuf/util/json_util.h"
@@ -116,17 +115,9 @@ PsiResultReport RunPsi(const v2::PsiConfig& psi_config,
                    .ok());
   SPDLOG_INFO("PSI config: {}", config_json);
 
-  auto start = std::chrono::high_resolution_clock::now();
-
   std::unique_ptr<AbstractPsiParty> psi_party =
       createPsiParty(psi_config, lctx);
   PsiResultReport report = psi_party->Run();
-
-  auto end = std::chrono::high_resolution_clock::now();
-  auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start);
-  int minutes = duration.count() / 60;
-  int seconds = duration.count() % 60;
-  SPDLOG_INFO("PSI 总执行时间: {} 分 {} 秒", minutes, seconds);
 
   StopTracing(std::move(tracing_session),
               psi_config.debug_options().trace_path().empty()

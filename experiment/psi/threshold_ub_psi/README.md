@@ -10,12 +10,12 @@ $P_1$ and $P_2$ are the participants in the protocol, where $P_1$ is the server 
 
 ### Offline Phase
 
-$P_1$ randomly chooses $\alpha \gets Z_q$ . For $1 \le i \le n_1$ , $P_1$ compute $tx_i = H_2(H_1(x_i)^\alpha)$ and send the set $TX = \\{tx_1,tx_2,...,tx_{n_1}\\}$ to $P_2$ in shuffled order.
+$P_1$ randomly chooses $\alpha \gets Z_q$ . For $1 \le i \le n_1$ , $P_1$ computes $tx_i = H_2(H_1(x_i)^\alpha)$ and sends the set $TX = \\{tx_1,tx_2,...,tx_{n_1}\\}$ to $P_2$ in shuffled order.
 
 ### Online Phase
 
-1. For $1 \le j \le n_2$ , $P_2$ randomly chooses $\beta \gets Z_q$ , compute $a_j = H_1(y_j)^{\beta}$ , and send the set $\\{a_1,a_2,...,a_{n_2}\\}$ to $P_1$ .
-2. For $1 \le j \le n_2$ , $P_1$ computes $a_j' = ({a_j})^{\alpha}$ . Then it samples a random permutation $\pi$ and send the permuted set $\pi(\\{a_1',a_2',...,a'_{n_2}\\})$ to $P_2$.
+1. For $1 \le j \le n_2$ , $P_2$ randomly chooses $\beta \gets Z_q$ , computes $a_j = H_1(y_j)^{\beta}$ , and sends the set $\\{a_1,a_2,...,a_{n_2}\\}$ to $P_1$ .
+2. For $1 \le j \le n_2$ , $P_1$ computes $a_j' = ({a_j})^{\alpha}$ . Then it samples a random permutation $\pi$ and sends the permuted set $\pi(\\{a_1',a_2',...,a'_{n_2}\\})$ to $P_2$.
 3. For $1 \le j \le n_2$ , $P_2$ computes $ty_j = H_2(({a_j'})^{1/{\beta}})$ and gets the set $TY = \\{ ty_1,ty_2 ,..., ty_{n_2} \\}$ . $P_2$ can truncate the intersection $TY \cap TX$ based on the threshold and send the truncated index set to $P_1$ .
 4. $P_1$ restores the index set based on the permutation $\pi$ from the second step and sends the restored index set to $P_2$ .
 5. $P_2$ obtains the intersection through the restored index set.

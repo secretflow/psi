@@ -161,7 +161,7 @@ void ThresholdEcdhPsiSender::SendRestoredIndex(
   index_link_ctx_->SendAsyncThrottled(
       index_link_ctx_->NextRank(), utils::SerializeIndexes(peer_restored_index),
       "send receiver's restored indexes");
-  SPDLOG_INFO("Send receiver's restored indexes to sender");
+  SPDLOG_INFO("Send receiver's restored indexes to receiver");
 }
 
 std::pair<std::vector<uint32_t>, uint32_t>

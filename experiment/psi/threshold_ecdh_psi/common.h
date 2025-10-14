@@ -22,13 +22,13 @@
 #include "psi/proto/psi_v2.pb.h"
 
 namespace psi::ecdh {
-// The client or server may need to know the size of the real intersection and
-// the size of the intersection after being restricted by threshold.
+// The receiver or sender may need to know the size of the real intersection and
+// the size of the intersection after being restricted by the threshold.
 void SaveIntersectionCount(const std::string &count_path, uint32_t real_count,
                            uint32_t final_count);
 
 // Generate PsiConfig for test and benchmark, this method is used for test and
-// benchmark
+// benchmark.
 void GeneratePsiConfig(const std::filesystem::path &tmp_folder,
                        const std::vector<std::string> &items_sender,
                        const std::vector<std::string> &items_receiver,

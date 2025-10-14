@@ -21,11 +21,11 @@ psi_cc_library(
     srcs = ["common.cc"],
     hdrs = ["common.h"],
     deps = [
-      "//psi/proto:psi_v2_cc_proto",
-      "//psi/proto:psi_cc_proto",
-      "//psi/utils:io",
-      "//psi/utils:test_utils",
-    ]
+        "//psi/proto:psi_cc_proto",
+        "//psi/proto:psi_v2_cc_proto",
+        "//psi/utils:io",
+        "//psi/utils:test_utils",
+    ],
 )
 
 psi_cc_library(
@@ -35,8 +35,8 @@ psi_cc_library(
     deps = [
         ":common",
         ":threshold_ecdh_psi",
-        "//psi/utils:serialize",
         "//psi/algorithm/ecdh:receiver",
+        "//psi/utils:serialize",
         "//psi/utils:sync",
     ],
 )
@@ -49,24 +49,24 @@ psi_cc_library(
         ":common",
         ":threshold_ecdh_psi",
         ":threshold_ecdh_psi_cache",
-        "//psi/utils:serialize",
         "//psi/algorithm/ecdh:sender",
+        "//psi/utils:serialize",
         "//psi/utils:sync",
     ],
 )
 
 psi_cc_library(
-  name = "threshold_ecdh_psi_cache",
-  srcs = ["threshold_ecdh_psi_cache.cc"],
-  hdrs = ["threshold_ecdh_psi_cache.h"],
-  deps = [
-    "//psi/utils:batch_provider",
-    "//psi/utils:io",
-  ],
+    name = "threshold_ecdh_psi_cache",
+    srcs = ["threshold_ecdh_psi_cache.cc"],
+    hdrs = ["threshold_ecdh_psi_cache.h"],
+    deps = [
+        "//psi/utils:batch_provider",
+        "//psi/utils:io",
+    ],
 )
 
 psi_cc_library(
-  name = "threshold_ecdh_psi",
+    name = "threshold_ecdh_psi",
     srcs = ["threshold_ecdh_psi.cc"],
     hdrs = ["threshold_ecdh_psi.h"],
     deps = [
@@ -93,9 +93,9 @@ psi_cc_test(
     name = "threshold_ecdh_psi_test",
     srcs = ["threshold_ecdh_psi_test.cc"],
     deps = [
-        ":sender",
         ":common",
         ":receiver",
+        ":sender",
         "//psi/utils:random_str",
         "//psi/utils:test_utils",
         "@yacl//yacl/link",

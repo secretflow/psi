@@ -251,7 +251,7 @@ void RunSender(const EcdhPsiOptions& options,
   std::vector<std::future<void>> tasks;
   tasks.emplace_back(std::move(f_mask_self));
   tasks.emplace_back(std::move(f_mask_peer));
-  
+
   std::vector<std::exception_ptr> exceptions(2, nullptr);
   std::vector<std::string> task_names = {"MaskSelf", "MaskAndShufflePeer"};
 

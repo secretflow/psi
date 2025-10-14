@@ -51,7 +51,7 @@ static void BM_ThresholdEcdhPsi(benchmark::State &state) {
     psi::v2::PsiConfig receiver_config;
 
     psi::ecdh::GeneratePsiConfig(tmp_folder, items_sender, items_receiver,
-                                   threshold, sender_config, receiver_config);
+                                 threshold, sender_config, receiver_config);
 
     auto proc_sender = [&](const psi::v2::PsiConfig &psi_config,
                            const std::shared_ptr<yacl::link::Context> &lctx) {
@@ -60,7 +60,7 @@ static void BM_ThresholdEcdhPsi(benchmark::State &state) {
     };
 
     auto proc_receiver = [&](const psi::v2::PsiConfig &psi_config,
-                           const std::shared_ptr<yacl::link::Context> &lctx) {
+                             const std::shared_ptr<yacl::link::Context> &lctx) {
       psi::ecdh::ThresholdEcdhPsiReceiver receiver(psi_config, lctx);
       receiver.Run();
     };
@@ -86,7 +86,7 @@ static void BM_ThresholdEcdhPsi(benchmark::State &state) {
 }  // namespace
 
 BENCHMARK(BM_ThresholdEcdhPsi)
-    ->Args({1000000, 1000000, 1000})      // 100w-100w, threshold:1000
-    ->Args({1000000, 1000000, 10000})     // 100w-100w, threshold:10000
+    ->Args({1000000, 1000000, 1000})     // 100w-100w, threshold:1000
+    ->Args({1000000, 1000000, 10000})    // 100w-100w, threshold:10000
     ->Args({5000000, 5000000, 10000})    // 500w-500w, threshold:10000
     ->Args({5000000, 5000000, 100000});  // 500w-500w, threshold:100000

@@ -32,7 +32,7 @@ namespace psi::ecdh {
 
 namespace {
 
-std::unordered_set<std::string> ReadCsvRow(const std::string &file_path) {
+std::unordered_set<std::string> ReadCsvRow(const std::string& file_path) {
   std::unordered_set<std::string> lines;
   std::ifstream file(file_path);
   std::string line;
@@ -71,14 +71,14 @@ TEST_P(ThresholdEcdhPsiTest, Works) {
   GeneratePsiConfig(tmp_folder, params.items_sender, params.items_receiver,
                     params.threshold, sender_config, receiver_config);
 
-  auto proc_sender = [&](const v2::PsiConfig &psi_config,
-                         const std::shared_ptr<yacl::link::Context> &lctx) {
+  auto proc_sender = [&](const v2::PsiConfig& psi_config,
+                         const std::shared_ptr<yacl::link::Context>& lctx) {
     ThresholdEcdhPsiSender sender(psi_config, lctx);
     sender.Run();
   };
 
-  auto proc_receiver = [&](const v2::PsiConfig &psi_config,
-                           const std::shared_ptr<yacl::link::Context> &lctx) {
+  auto proc_receiver = [&](const v2::PsiConfig& psi_config,
+                           const std::shared_ptr<yacl::link::Context>& lctx) {
     ThresholdEcdhPsiReceiver receiver(psi_config, lctx);
     receiver.Run();
   };
@@ -103,7 +103,7 @@ TEST_P(ThresholdEcdhPsiTest, Works) {
   // Verify that the restricted intersection is a subset of the real
   // intersection
   std::sort(real_intersection.begin(), real_intersection.end());
-  for (auto &item : result_sender) {
+  for (auto& item : result_sender) {
     EXPECT_TRUE(std::binary_search(real_intersection.begin(),
                                    real_intersection.end(), item));
   }
@@ -119,7 +119,6 @@ TEST_P(ThresholdEcdhPsiTest, Works) {
     std::error_code ec;
     std::filesystem::remove_all(tmp_folder, ec);
     if (ec.value() != 0) {
-      std::cout << "can not remove temp file folder" << std::endl;
       SPDLOG_WARN("can not remove temp file folder: {}, msg: {}",
                   tmp_folder.string(), ec.message());
     }

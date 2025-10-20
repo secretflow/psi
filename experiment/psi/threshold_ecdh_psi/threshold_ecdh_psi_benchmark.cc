@@ -28,7 +28,7 @@
 #include "psi/proto/psi_v2.pb.h"
 
 namespace {
-static void BM_ThresholdEcdhPsi(benchmark::State &state) {
+static void BM_ThresholdEcdhPsi(benchmark::State& state) {
   for (auto _ : state) {
     state.PauseTiming();
     auto ctxs = yacl::link::test::SetupWorld(2);
@@ -53,14 +53,14 @@ static void BM_ThresholdEcdhPsi(benchmark::State &state) {
     psi::ecdh::GeneratePsiConfig(tmp_folder, items_sender, items_receiver,
                                  threshold, sender_config, receiver_config);
 
-    auto proc_sender = [&](const psi::v2::PsiConfig &psi_config,
-                           const std::shared_ptr<yacl::link::Context> &lctx) {
+    auto proc_sender = [&](const psi::v2::PsiConfig& psi_config,
+                           const std::shared_ptr<yacl::link::Context>& lctx) {
       psi::ecdh::ThresholdEcdhPsiSender sender(psi_config, lctx);
       sender.Run();
     };
 
-    auto proc_receiver = [&](const psi::v2::PsiConfig &psi_config,
-                             const std::shared_ptr<yacl::link::Context> &lctx) {
+    auto proc_receiver = [&](const psi::v2::PsiConfig& psi_config,
+                             const std::shared_ptr<yacl::link::Context>& lctx) {
       psi::ecdh::ThresholdEcdhPsiReceiver receiver(psi_config, lctx);
       receiver.Run();
     };
@@ -76,7 +76,6 @@ static void BM_ThresholdEcdhPsi(benchmark::State &state) {
       std::error_code ec;
       std::filesystem::remove_all(tmp_folder, ec);
       if (ec.value() != 0) {
-        std::cout << "can not remove temp file folder" << std::endl;
         SPDLOG_WARN("can not remove temp file folder: {}, msg: {}",
                     tmp_folder.string(), ec.message());
       }

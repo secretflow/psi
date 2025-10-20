@@ -30,8 +30,8 @@ ThresholdEcdhPsiReceiver::ThresholdEcdhPsiReceiver(
 }
 
 void ThresholdEcdhPsiReceiver::Online() {
-  TRACE_EVENT("online", "ThresholdEcdhPsiSender::Online");
-  SPDLOG_INFO("[ThresholdEcdhPsiSender::Online] start");
+  TRACE_EVENT("online", "ThresholdEcdhPsiReceiver::Online");
+  SPDLOG_INFO("[ThresholdEcdhPsiReceiver::Online] start");
 
   if (digest_equal_) {
     return;
@@ -50,7 +50,7 @@ void ThresholdEcdhPsiReceiver::Online() {
     recovery_manager_->MarkOnlineEnd();
   }
 
-  SPDLOG_INFO("[ThresholdEcdhPsiSender::Online] end");
+  SPDLOG_INFO("[ThresholdEcdhPsiReceiver::Online] end");
 }
 
 void ThresholdEcdhPsiReceiver::PostProcess() {
@@ -113,8 +113,6 @@ void ThresholdEcdhPsiReceiver::ComputeAndStoreIndex(
           peer_dup_cnt.emplace_back(peer->extra_dup_cnt);
 
           final_intersection_count++;
-        } else {
-          continue;
         }
       }
     }

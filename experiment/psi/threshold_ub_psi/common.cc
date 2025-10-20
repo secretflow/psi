@@ -21,7 +21,7 @@
 
 namespace psi::ecdh {
 
-void SaveIntersectCount(const std::string &count_path, uint32_t real_count,
+void SaveIntersectCount(const std::string& count_path, uint32_t real_count,
                         uint32_t final_count) {
   auto ofs = io::BuildOutputStream(io::FileIoOptions(count_path));
 
@@ -32,11 +32,11 @@ void SaveIntersectCount(const std::string &count_path, uint32_t real_count,
   SPDLOG_INFO("Save intersect count to {}", count_path);
 }
 
-void GenerateUbPsiConfig(const std::filesystem::path &tmp_folder,
-                         const std::vector<std::string> &items_server,
-                         const std::vector<std::string> &items_client,
-                         uint32_t threshold, v2::UbPsiConfig &server_config,
-                         v2::UbPsiConfig &client_config) {
+void GenerateUbPsiConfig(const std::filesystem::path& tmp_folder,
+                         const std::vector<std::string>& items_server,
+                         const std::vector<std::string>& items_client,
+                         uint32_t threshold, v2::UbPsiConfig& server_config,
+                         v2::UbPsiConfig& client_config) {
   std::string server_input_path = tmp_folder / "server_input.csv";
   std::string client_input_path = tmp_folder / "client_input.csv";
   std::string server_output_path = tmp_folder / "server_output.csv";

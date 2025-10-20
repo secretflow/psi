@@ -24,13 +24,13 @@
 namespace psi::ecdh {
 // The receiver or sender may need to know the size of the real intersection and
 // the size of the intersection after being restricted by the threshold.
-void SaveIntersectionCount(const std::string &count_path, uint32_t real_count,
+void SaveIntersectionCount(const std::string& count_path, uint32_t real_count,
                            uint32_t final_count);
 
 // Generate PsiConfig for test and benchmark.
-void GeneratePsiConfig(const std::filesystem::path &tmp_folder,
-                       const std::vector<std::string> &items_sender,
-                       const std::vector<std::string> &items_receiver,
-                       uint32_t threshold, v2::PsiConfig &sender_config,
-                       v2::PsiConfig &receiver_config);
+void GeneratePsiConfig(const std::filesystem::path& tmp_folder,
+                       const std::vector<std::string>& items_sender,
+                       const std::vector<std::string>& items_receiver,
+                       uint32_t threshold, v2::PsiConfig& sender_config,
+                       v2::PsiConfig& receiver_config);
 }  // namespace psi::ecdh

@@ -22,7 +22,7 @@
 #include "psi/proto/psi.pb.h"
 
 namespace psi::ecdh {
-void SaveIntersectionCount(const std::string &count_path, uint32_t real_count,
+void SaveIntersectionCount(const std::string& count_path, uint32_t real_count,
                            uint32_t final_count) {
   auto ofs = io::BuildOutputStream(io::FileIoOptions(count_path));
 
@@ -33,17 +33,15 @@ void SaveIntersectionCount(const std::string &count_path, uint32_t real_count,
   SPDLOG_INFO("Save intersection count to {}", count_path);
 }
 
-void GeneratePsiConfig(const std::filesystem::path &tmp_folder,
-                       const std::vector<std::string> &items_sender,
-                       const std::vector<std::string> &items_receiver,
-                       uint32_t threshold, v2::PsiConfig &sender_config,
-                       v2::PsiConfig &receiver_config) {
+void GeneratePsiConfig(const std::filesystem::path& tmp_folder,
+                       const std::vector<std::string>& items_sender,
+                       const std::vector<std::string>& items_receiver,
+                       uint32_t threshold, v2::PsiConfig& sender_config,
+                       v2::PsiConfig& receiver_config) {
   std::string sender_input_path = tmp_folder / "sender_input.csv";
   std::string receiver_input_path = tmp_folder / "receiver_input.csv";
   std::string sender_output_path = tmp_folder / "sender_output.csv";
   std::string receiver_output_path = tmp_folder / "receiver_output.csv";
-  std::string sender_cache_path = tmp_folder / "sender_cache";
-  std::string receiver_cache_path = tmp_folder / "receiver_cache";
 
   test::WriteCsvFile(sender_input_path, items_sender);
   test::WriteCsvFile(receiver_input_path, items_receiver);

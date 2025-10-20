@@ -386,7 +386,7 @@ message PsiConfig {
 
   // The threshold of the intersection; the number of unique keys in the
   // intersection will not exceed this value. If this item is not configured,
-  // excute the standard ub_psi. Supported for PROTOCOL_ECDH.
+  // execute the standard ecdh_psi. Supported for PROTOCOL_ECDH.
   uint32 intersection_threshold = 17;
 
   // If the intersection result is restricted by the threshold, you can choose
@@ -473,7 +473,7 @@ message UbPsiConfig {
 
   // The threshold of the intersection; the number of unique keys in the
   // intersection will not exceed this value. If this item is not configured,
-  // excute the standard ub_psi. Required for MODE_ONLINE and MODE_FULL.
+  // execute the standard ub_psi. Required for MODE_ONLINE and MODE_FULL.
   uint32 intersection_threshold = 16;
 
   // If the intersection result is restricted by the threshold, you can choose

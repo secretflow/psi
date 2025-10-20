@@ -29,7 +29,7 @@
 #include "psi/proto/psi_v2.pb.h"
 
 namespace {
-static void BM_ThresholdEcdhUbPsi(benchmark::State &state) {
+static void BM_ThresholdEcdhUbPsi(benchmark::State& state) {
   for (auto _ : state) {
     state.PauseTiming();
     auto ctxs = yacl::link::test::SetupWorld(2);
@@ -54,14 +54,14 @@ static void BM_ThresholdEcdhUbPsi(benchmark::State &state) {
     psi::ecdh::GenerateUbPsiConfig(tmp_folder, items_server, items_client,
                                    threshold, server_config, client_config);
 
-    auto proc_server = [&](const psi::v2::UbPsiConfig &ub_psi_config,
-                           const std::shared_ptr<yacl::link::Context> &lctx) {
+    auto proc_server = [&](const psi::v2::UbPsiConfig& ub_psi_config,
+                           const std::shared_ptr<yacl::link::Context>& lctx) {
       psi::ecdh::ThresholdEcdhUbPsiServer server(ub_psi_config, lctx);
       server.Run();
     };
 
-    auto proc_client = [&](const psi::v2::UbPsiConfig &ub_psi_config,
-                           const std::shared_ptr<yacl::link::Context> &lctx) {
+    auto proc_client = [&](const psi::v2::UbPsiConfig& ub_psi_config,
+                           const std::shared_ptr<yacl::link::Context>& lctx) {
       psi::ecdh::ThresholdEcdhUbPsiClient client(ub_psi_config, lctx);
       client.Run();
     };
@@ -77,7 +77,6 @@ static void BM_ThresholdEcdhUbPsi(benchmark::State &state) {
       std::error_code ec;
       std::filesystem::remove_all(tmp_folder, ec);
       if (ec.value() != 0) {
-        std::cout << "can not remove temp file folder" << std::endl;
         SPDLOG_WARN("can not remove temp file folder: {}, msg: {}",
                     tmp_folder.string(), ec.message());
       }

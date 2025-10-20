@@ -32,7 +32,7 @@ namespace psi::ecdh {
 
 namespace {
 
-std::unordered_set<std::string> ReadCsvRow(const std::string &file_path) {
+std::unordered_set<std::string> ReadCsvRow(const std::string& file_path) {
   std::unordered_set<std::string> lines;
   std::ifstream file(file_path);
   std::string line;
@@ -71,14 +71,14 @@ TEST_P(ThresholdEcdhUbPsiTest, Works) {
   GenerateUbPsiConfig(tmp_folder, params.items_server, params.items_client,
                       params.threshold, server_config, client_config);
 
-  auto proc_server = [&](const v2::UbPsiConfig &ub_psi_config,
-                         const std::shared_ptr<yacl::link::Context> &lctx) {
+  auto proc_server = [&](const v2::UbPsiConfig& ub_psi_config,
+                         const std::shared_ptr<yacl::link::Context>& lctx) {
     ThresholdEcdhUbPsiServer server(ub_psi_config, lctx);
     server.Run();
   };
 
-  auto proc_client = [&](const v2::UbPsiConfig &ub_psi_config,
-                         const std::shared_ptr<yacl::link::Context> &lctx) {
+  auto proc_client = [&](const v2::UbPsiConfig& ub_psi_config,
+                         const std::shared_ptr<yacl::link::Context>& lctx) {
     ThresholdEcdhUbPsiClient client(ub_psi_config, lctx);
     client.Run();
   };
@@ -104,7 +104,7 @@ TEST_P(ThresholdEcdhUbPsiTest, Works) {
   // intersection
   std::sort(real_intersection.begin(), real_intersection.end());
 
-  for (auto &item : result_server) {
+  for (auto& item : result_server) {
     EXPECT_TRUE(std::binary_search(real_intersection.begin(),
                                    real_intersection.end(), item));
   }
@@ -119,7 +119,6 @@ TEST_P(ThresholdEcdhUbPsiTest, Works) {
     std::error_code ec;
     std::filesystem::remove_all(tmp_folder, ec);
     if (ec.value() != 0) {
-      std::cout << "can not remove temp file folder" << std::endl;
       SPDLOG_WARN("can not remove temp file folder: {}, msg: {}",
                   tmp_folder.string(), ec.message());
     }

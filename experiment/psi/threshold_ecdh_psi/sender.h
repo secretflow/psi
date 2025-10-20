@@ -41,11 +41,11 @@ class ThresholdEcdhPsiSender : public EcdhPsiSender {
   // Sender send receiver's restored indexes to receiver.
   void SendRestoredIndex(const std::vector<uint32_t>& peer_restored_index);
 
-  // Sender recv receiver's shuffled indexes.
+  // Sender recv receiver's shuffled indexes and the count of unique keys in the
+  // real intersection.
   std::pair<std::vector<uint32_t>, uint32_t> RecvShuffledIndexAndCount();
 
-  // Sender recv receiver's intersection index and the count of unique keys in
-  // the real intersection.
+  // Sender recv its own intersection indexes.
   std::vector<uint32_t> RecvSelfIndex();
 
   uint32_t threshold_;

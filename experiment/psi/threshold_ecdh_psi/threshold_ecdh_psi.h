@@ -26,7 +26,7 @@ class ThresholdEcdhPsiCtx : public EcdhPsiContext {
   ~ThresholdEcdhPsiCtx() = default;
 
   // Sender recv receiver's masked items, mask them again then shuffle and send
-  // them back. The receiver's index, shuffled index and duplicate count is
+  // them back. The receiver's indexes, shuffled indexes and duplicate count is
   // stored in `ThresholdEcdhPsiCache`. The implementation refers to
   // `EcdhPsiContext::MaskPeer`.
   void MaskAndShufflePeer(const std::shared_ptr<ThresholdEcdhPsiCache>& cache);

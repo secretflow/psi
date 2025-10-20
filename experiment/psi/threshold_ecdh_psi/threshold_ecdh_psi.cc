@@ -99,7 +99,7 @@ void ThresholdEcdhPsiCtx::MaskAndShufflePeer(
         dup_cnts[k] = v;
       }
 
-      // Sender store index, shuffled index and duplicate cnt in cache.
+      // Sender store indexes, shuffled indexes and duplicate cnt in cache.
       for (size_t i = 0; i < dual_masked_peers.size(); ++i) {
         shuffled_items[i] = std::move(dual_masked_peers[shuffled_indices[i]]);
         cache->SaveData(item_count + i, item_count + shuffled_indices[i],

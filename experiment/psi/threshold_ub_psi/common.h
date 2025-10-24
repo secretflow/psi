@@ -27,7 +27,8 @@ namespace psi::ecdh {
 void SaveIntersectCount(const std::string& count_path, uint32_t real_count,
                         uint32_t final_count);
 
-// Generate UbPsiConfig for test and benchmark.
+// Generate UbPsiConfig. This method is only used for threshold ub psi test and
+// benchmark.
 void GenerateUbPsiConfig(const std::filesystem::path& tmp_folder,
                          const std::vector<std::string>& items_server,
                          const std::vector<std::string>& items_client,

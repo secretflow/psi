@@ -27,7 +27,8 @@ namespace psi::ecdh {
 void SaveIntersectionCount(const std::string& count_path, uint32_t real_count,
                            uint32_t final_count);
 
-// Generate PsiConfig for test and benchmark.
+// Generate PsiConfig. This method is only used for threshold ecdh psi test and
+// benchmark.
 void GeneratePsiConfig(const std::filesystem::path& tmp_folder,
                        const std::vector<std::string>& items_sender,
                        const std::vector<std::string>& items_receiver,

@@ -42,9 +42,10 @@ void GeneratePsiConfig(const std::filesystem::path& tmp_folder,
   std::string receiver_input_path = tmp_folder / "receiver_input.csv";
   std::string sender_output_path = tmp_folder / "sender_output.csv";
   std::string receiver_output_path = tmp_folder / "receiver_output.csv";
+  std::string header = "id";
 
-  test::WriteCsvFile(sender_input_path, items_sender);
-  test::WriteCsvFile(receiver_input_path, items_receiver);
+  test::WriteCsvFile(sender_input_path, header, items_sender);
+  test::WriteCsvFile(receiver_input_path, header, items_receiver);
 
   sender_config.mutable_protocol_config()->set_protocol(
       v2::Protocol::PROTOCOL_ECDH);

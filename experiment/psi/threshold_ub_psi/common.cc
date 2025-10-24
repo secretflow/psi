@@ -43,9 +43,10 @@ void GenerateUbPsiConfig(const std::filesystem::path& tmp_folder,
   std::string client_output_path = tmp_folder / "client_output.csv";
   std::string server_cache_path = tmp_folder / "server_cache";
   std::string client_cache_path = tmp_folder / "client_cache";
+  std::string header = "id";
 
-  test::WriteCsvFile(server_input_path, items_server);
-  test::WriteCsvFile(client_input_path, items_client);
+  test::WriteCsvFile(server_input_path, header, items_server);
+  test::WriteCsvFile(client_input_path, header, items_client);
 
   server_config.set_mode(v2::UbPsiConfig::MODE_FULL);
   server_config.set_role(v2::Role::ROLE_SERVER);

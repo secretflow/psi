@@ -36,11 +36,11 @@ inline std::vector<std::string> CreateRangeItems(size_t begin, size_t size) {
 }
 
 inline std::vector<std::string> GetIntersection(
-    const std::vector<std::string> &items_a,
-    const std::vector<std::string> &items_b) {
+    const std::vector<std::string>& items_a,
+    const std::vector<std::string>& items_b) {
   std::set<std::string> set(items_a.begin(), items_a.end());
   std::vector<std::string> ret;
-  for (const auto &s : items_b) {
+  for (const auto& s : items_b) {
     if (set.count(s) != 0) {
       ret.push_back(s);
     }
@@ -57,7 +57,7 @@ inline std::vector<uint128_t> CreateItemHashes(size_t begin, size_t size) {
 }
 
 inline std::optional<CurveType> GetOverrideCurveType() {
-  if (const auto *env = std::getenv("OVERRIDE_CURVE")) {
+  if (const auto* env = std::getenv("OVERRIDE_CURVE")) {
     if (std::strcmp(env, "25519") == 0) {
       return CurveType::CURVE_25519;
     }
@@ -68,11 +68,12 @@ inline std::optional<CurveType> GetOverrideCurveType() {
   return {};
 }
 
-inline void WriteCsvFile(const std::string &file_path,
-                         const std::vector<std::string> &items) {
+inline void WriteCsvFile(const std::string& file_path,
+                         const std::string& header,
+                         const std::vector<std::string>& items) {
   auto out = io::BuildOutputStream(io::FileIoOptions(file_path));
-  out->Write("id\n");
-  for (const auto &data : items) {
+  out->Write(fmt::format("{}\n", header));
+  for (const auto& data : items) {
     out->Write(fmt::format("{}\n", data));
   }
   out->Close();

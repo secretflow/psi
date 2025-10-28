@@ -17,27 +17,15 @@ load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library", "psi_cc_test")
 package(default_visibility = ["//visibility:public"])
 
 psi_cc_library(
-    name = "common",
-    srcs = ["common.cc"],
-    hdrs = ["common.h"],
-    deps = [
-        "//psi/proto:psi_cc_proto",
-        "//psi/proto:psi_v2_cc_proto",
-        "//psi/utils:io",
-        "//psi/utils:test_utils",
-    ],
-)
-
-psi_cc_library(
     name = "receiver",
     srcs = ["receiver.cc"],
     hdrs = ["receiver.h"],
     deps = [
-        ":common",
         ":threshold_ecdh_psi",
         "//psi/algorithm/ecdh:receiver",
         "//psi/utils:serialize",
         "//psi/utils:sync",
+        "//psi/utils:table_utils",
     ],
 )
 
@@ -46,12 +34,12 @@ psi_cc_library(
     srcs = ["sender.cc"],
     hdrs = ["sender.h"],
     deps = [
-        ":common",
         ":threshold_ecdh_psi",
         ":threshold_ecdh_psi_cache",
         "//psi/algorithm/ecdh:sender",
         "//psi/utils:serialize",
         "//psi/utils:sync",
+        "//psi/utils:table_utils",
     ],
 )
 
@@ -81,7 +69,6 @@ psi_cc_binary(
     srcs = ["threshold_ecdh_psi_benchmark.cc"],
     deps = ["@com_github_google_benchmark//:benchmark_main"] + [
         ":receiver",
-        ":common",
         ":sender",
         "//psi/utils:test_utils",
         "//psi/utils:random_str",
@@ -93,7 +80,6 @@ psi_cc_test(
     name = "threshold_ecdh_psi_test",
     srcs = ["threshold_ecdh_psi_test.cc"],
     deps = [
-        ":common",
         ":receiver",
         ":sender",
         "//psi/utils:random_str",

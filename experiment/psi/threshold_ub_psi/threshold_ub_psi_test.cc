@@ -17,7 +17,6 @@
 #include <vector>
 
 #include "experiment/psi/threshold_ub_psi/client.h"
-#include "experiment/psi/threshold_ub_psi/common.h"
 #include "experiment/psi/threshold_ub_psi/server.h"
 #include "gtest/gtest.h"
 #include "yacl/link/test_util.h"
@@ -68,8 +67,9 @@ TEST_P(ThresholdEcdhUbPsiTest, Works) {
   v2::UbPsiConfig server_config;
   v2::UbPsiConfig client_config;
 
-  GenerateUbPsiConfig(tmp_folder, params.items_server, params.items_client,
-                      params.threshold, server_config, client_config);
+  test::GenerateUbPsiConfig(tmp_folder, params.items_server,
+                            params.items_client, params.threshold,
+                            server_config, client_config);
 
   auto proc_server = [&](const v2::UbPsiConfig& ub_psi_config,
                          const std::shared_ptr<yacl::link::Context>& lctx) {

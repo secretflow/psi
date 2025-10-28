@@ -17,7 +17,6 @@
 #include <vector>
 
 #include "benchmark/benchmark.h"
-#include "experiment/psi/threshold_ecdh_psi/common.h"
 #include "experiment/psi/threshold_ecdh_psi/receiver.h"
 #include "experiment/psi/threshold_ecdh_psi/sender.h"
 #include "yacl/link/test_util.h"
@@ -50,7 +49,7 @@ static void BM_ThresholdEcdhPsi(benchmark::State& state) {
     psi::v2::PsiConfig sender_config;
     psi::v2::PsiConfig receiver_config;
 
-    psi::ecdh::GeneratePsiConfig(tmp_folder, items_sender, items_receiver,
+    psi::test::GeneratePsiConfig(tmp_folder, items_sender, items_receiver,
                                  threshold, sender_config, receiver_config);
 
     auto proc_sender = [&](const psi::v2::PsiConfig& psi_config,

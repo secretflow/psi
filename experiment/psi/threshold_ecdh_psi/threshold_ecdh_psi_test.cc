@@ -16,7 +16,6 @@
 #include <string>
 #include <vector>
 
-#include "experiment/psi/threshold_ecdh_psi/common.h"
 #include "experiment/psi/threshold_ecdh_psi/receiver.h"
 #include "experiment/psi/threshold_ecdh_psi/sender.h"
 #include "gtest/gtest.h"
@@ -68,8 +67,9 @@ TEST_P(ThresholdEcdhPsiTest, Works) {
   v2::PsiConfig sender_config;
   v2::PsiConfig receiver_config;
 
-  GeneratePsiConfig(tmp_folder, params.items_sender, params.items_receiver,
-                    params.threshold, sender_config, receiver_config);
+  test::GeneratePsiConfig(tmp_folder, params.items_sender,
+                          params.items_receiver, params.threshold,
+                          sender_config, receiver_config);
 
   auto proc_sender = [&](const v2::PsiConfig& psi_config,
                          const std::shared_ptr<yacl::link::Context>& lctx) {

@@ -18,7 +18,6 @@
 
 #include "benchmark/benchmark.h"
 #include "experiment/psi/threshold_ub_psi/client.h"
-#include "experiment/psi/threshold_ub_psi/common.h"
 #include "experiment/psi/threshold_ub_psi/server.h"
 #include "yacl/link/test_util.h"
 
@@ -51,7 +50,7 @@ static void BM_ThresholdEcdhUbPsi(benchmark::State& state) {
     psi::v2::UbPsiConfig server_config;
     psi::v2::UbPsiConfig client_config;
 
-    psi::ecdh::GenerateUbPsiConfig(tmp_folder, items_server, items_client,
+    psi::test::GenerateUbPsiConfig(tmp_folder, items_server, items_client,
                                    threshold, server_config, client_config);
 
     auto proc_server = [&](const psi::v2::UbPsiConfig& ub_psi_config,

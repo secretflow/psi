@@ -17,25 +17,14 @@ load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library", "psi_cc_test")
 package(default_visibility = ["//visibility:public"])
 
 psi_cc_library(
-    name = "common",
-    srcs = ["common.cc"],
-    hdrs = ["common.h"],
-    deps = [
-        "//psi/proto:psi_v2_cc_proto",
-        "//psi/utils:io",
-        "//psi/utils:test_utils",
-    ],
-)
-
-psi_cc_library(
     name = "client",
     srcs = ["client.cc"],
     hdrs = ["client.h"],
     deps = [
-        ":common",
         ":threshold_ecdh_oprf_psi",
         "//psi/algorithm/ecdh/ub_psi:client",
         "//psi/utils:sync",
+        "//psi/utils:table_utils",
     ],
 )
 
@@ -44,11 +33,11 @@ psi_cc_library(
     srcs = ["server.cc"],
     hdrs = ["server.h"],
     deps = [
-        ":common",
         ":threshold_ecdh_oprf_psi",
         "//psi/algorithm/ecdh/ub_psi:server",
         "//psi/utils:ec",
         "//psi/utils:sync",
+        "//psi/utils:table_utils",
     ],
 )
 
@@ -68,7 +57,6 @@ psi_cc_binary(
     srcs = ["threshold_ub_psi_benchmark.cc"],
     deps = ["@com_github_google_benchmark//:benchmark_main"] + [
         ":client",
-        ":common",
         ":server",
         "//psi/utils:test_utils",
         "//psi/utils:random_str",
@@ -81,7 +69,6 @@ psi_cc_test(
     srcs = ["threshold_ub_psi_test.cc"],
     deps = [
         ":client",
-        ":common",
         ":server",
         "//psi/utils:random_str",
         "//psi/utils:test_utils",

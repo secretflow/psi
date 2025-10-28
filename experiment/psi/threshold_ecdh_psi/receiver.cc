@@ -14,12 +14,12 @@
 
 #include "experiment/psi/threshold_ecdh_psi/receiver.h"
 
-#include "experiment/psi/threshold_ecdh_psi/common.h"
 #include "experiment/psi/threshold_ecdh_psi/threshold_ecdh_psi.h"
 
 #include "psi/trace_categories.h"
 #include "psi/utils/serialize.h"
 #include "psi/utils/sync.h"
+#include "psi/utils/table_utils.h"
 
 namespace psi::ecdh {
 ThresholdEcdhPsiReceiver::ThresholdEcdhPsiReceiver(
@@ -141,8 +141,8 @@ void ThresholdEcdhPsiReceiver::ComputeAndStoreIndex(
   index_writer->Commit();
 
   if (!config_.count_path().empty()) {
-    SaveIntersectionCount(config_.count_path(), real_intersection_count,
-                          final_intersection_count);
+    SaveIntersectCount(config_.count_path(), real_intersection_count,
+                       final_intersection_count);
   }
 }
 

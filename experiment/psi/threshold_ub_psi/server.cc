@@ -14,11 +14,11 @@
 
 #include "experiment/psi/threshold_ub_psi/server.h"
 
-#include "experiment/psi/threshold_ub_psi/common.h"
 #include "experiment/psi/threshold_ub_psi/threshold_ecdh_oprf_psi.h"
 
 #include "psi/utils/ec.h"
 #include "psi/utils/sync.h"
+#include "psi/utils/table_utils.h"
 
 namespace psi::ecdh {
 

@@ -16,6 +16,8 @@
 
 #include <memory>
 
+#include "experiment/psi/threshold_ecdh_psi/receiver.h"
+#include "experiment/psi/threshold_ecdh_psi/sender.h"
 #include "experiment/psi/threshold_ub_psi/client.h"
 #include "experiment/psi/threshold_ub_psi/server.h"
 #include "yacl/base/exception.h"
@@ -37,9 +39,18 @@ std::unique_ptr<AbstractPsiParty> createPsiParty(
     case v2::Protocol::PROTOCOL_ECDH: {
       switch (config.protocol_config().role()) {
         case v2::Role::ROLE_RECEIVER:
-          return std::make_unique<ecdh::EcdhPsiReceiver>(config, lctx);
+          if (config.intersection_threshold() == 0) {
+            return std::make_unique<ecdh::EcdhPsiReceiver>(config, lctx);
+          } else {
+            return std::make_unique<ecdh::ThresholdEcdhPsiReceiver>(config,
+                                                                    lctx);
+          }
         case v2::Role::ROLE_SENDER:
-          return std::make_unique<ecdh::EcdhPsiSender>(config, lctx);
+          if (config.intersection_threshold() == 0) {
+            return std::make_unique<ecdh::EcdhPsiSender>(config, lctx);
+          } else {
+            return std::make_unique<ecdh::ThresholdEcdhPsiSender>(config, lctx);
+          }
         default:
           YACL_THROW("Role is invalid.");
       }

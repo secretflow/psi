@@ -21,14 +21,14 @@
 
 namespace psi::ecdh {
 
-class EcdhPsiReceiver final : public AbstractPsiReceiver {
+class EcdhPsiReceiver : public AbstractPsiReceiver {
  public:
   explicit EcdhPsiReceiver(const v2::PsiConfig &config,
                            std::shared_ptr<yacl::link::Context> lctx = nullptr);
 
   ~EcdhPsiReceiver() override = default;
 
- private:
+ protected:
   void Init() override;
 
   void PreProcess() override;

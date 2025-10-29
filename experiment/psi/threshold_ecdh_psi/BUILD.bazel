@@ -17,47 +17,59 @@ load("//bazel:psi.bzl", "psi_cc_binary", "psi_cc_library", "psi_cc_test")
 package(default_visibility = ["//visibility:public"])
 
 psi_cc_library(
-    name = "client",
-    srcs = ["client.cc"],
-    hdrs = ["client.h"],
+    name = "receiver",
+    srcs = ["receiver.cc"],
+    hdrs = ["receiver.h"],
     deps = [
-        ":threshold_ecdh_oprf_psi",
-        "//psi/algorithm/ecdh/ub_psi:client",
-        "//psi/utils:sync",
-        "//psi/utils:table_utils",
-    ],
-)
-
-psi_cc_library(
-    name = "server",
-    srcs = ["server.cc"],
-    hdrs = ["server.h"],
-    deps = [
-        ":threshold_ecdh_oprf_psi",
-        "//psi/algorithm/ecdh/ub_psi:server",
-        "//psi/utils:ec",
-        "//psi/utils:sync",
-        "//psi/utils:table_utils",
-    ],
-)
-
-psi_cc_library(
-    name = "threshold_ecdh_oprf_psi",
-    srcs = ["threshold_ecdh_oprf_psi.cc"],
-    hdrs = ["threshold_ecdh_oprf_psi.h"],
-    deps = [
-        "//psi/algorithm/ecdh/ub_psi:ecdh_oprf_psi",
+        ":threshold_ecdh_psi",
+        "//psi/algorithm/ecdh:receiver",
         "//psi/utils:serialize",
+        "//psi/utils:sync",
+        "//psi/utils:table_utils",
+    ],
+)
+
+psi_cc_library(
+    name = "sender",
+    srcs = ["sender.cc"],
+    hdrs = ["sender.h"],
+    deps = [
+        ":threshold_ecdh_psi",
+        ":threshold_ecdh_psi_cache",
+        "//psi/algorithm/ecdh:sender",
+        "//psi/utils:serialize",
+        "//psi/utils:sync",
+        "//psi/utils:table_utils",
+    ],
+)
+
+psi_cc_library(
+    name = "threshold_ecdh_psi_cache",
+    srcs = ["threshold_ecdh_psi_cache.cc"],
+    hdrs = ["threshold_ecdh_psi_cache.h"],
+    deps = [
+        "//psi/utils:batch_provider",
+        "//psi/utils:io",
+    ],
+)
+
+psi_cc_library(
+    name = "threshold_ecdh_psi",
+    srcs = ["threshold_ecdh_psi.cc"],
+    hdrs = ["threshold_ecdh_psi.h"],
+    deps = [
+        ":threshold_ecdh_psi_cache",
+        "//psi/algorithm/ecdh:ecdh_psi",
         "@yacl//yacl/crypto/rand",
     ],
 )
 
 psi_cc_binary(
-    name = "threshold_ub_psi_benchmark",
-    srcs = ["threshold_ub_psi_benchmark.cc"],
+    name = "threshold_ecdh_psi_benchmark",
+    srcs = ["threshold_ecdh_psi_benchmark.cc"],
     deps = ["@com_github_google_benchmark//:benchmark_main"] + [
-        ":client",
-        ":server",
+        ":receiver",
+        ":sender",
         "//psi/utils:test_utils",
         "//psi/utils:random_str",
         "@yacl//yacl/link",
@@ -65,11 +77,11 @@ psi_cc_binary(
 )
 
 psi_cc_test(
-    name = "threshold_ub_psi_test",
-    srcs = ["threshold_ub_psi_test.cc"],
+    name = "threshold_ecdh_psi_test",
+    srcs = ["threshold_ecdh_psi_test.cc"],
     deps = [
-        ":client",
-        ":server",
+        ":receiver",
+        ":sender",
         "//psi/utils:random_str",
         "//psi/utils:test_utils",
         "@yacl//yacl/link",

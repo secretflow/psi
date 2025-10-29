@@ -40,6 +40,12 @@ constexpr size_t kBatchSize = 1 << 16;
 
 std::string MakeQuotedCsvLine(const std::vector<std::string>& columns);
 
+// Save the size of the real intersection and the size of the intersection after
+// being restricted by the threshold. This function is only used in threshold
+// ecdh psi and threshold ub psi.
+void SaveIntersectCount(const std::string& count_path, uint32_t real_count,
+                        uint32_t final_count);
+
 class Table {
  public:
   static std::shared_ptr<Table> MakeFromCsv(const std::string& path);

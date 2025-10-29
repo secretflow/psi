@@ -16,8 +16,8 @@
 #include <string>
 #include <vector>
 
-#include "experiment/psi/threshold_ub_psi/client.h"
-#include "experiment/psi/threshold_ub_psi/server.h"
+#include "experiment/psi/threshold_ecdh_psi/receiver.h"
+#include "experiment/psi/threshold_ecdh_psi/sender.h"
 #include "gtest/gtest.h"
 #include "yacl/link/test_util.h"
 
@@ -45,14 +45,14 @@ std::unordered_set<std::string> ReadCsvRow(const std::string& file_path) {
 }  // namespace
 
 struct TestParams {
-  std::vector<std::string> items_server;
-  std::vector<std::string> items_client;
+  std::vector<std::string> items_sender;
+  std::vector<std::string> items_receiver;
   uint32_t threshold;
 };
 
-class ThresholdEcdhUbPsiTest : public ::testing::TestWithParam<TestParams> {};
+class ThresholdEcdhPsiTest : public ::testing::TestWithParam<TestParams> {};
 
-TEST_P(ThresholdEcdhUbPsiTest, Works) {
+TEST_P(ThresholdEcdhPsiTest, Works) {
   auto params = GetParam();
   auto ctxs = yacl::link::test::SetupWorld(2);
 
@@ -61,57 +61,57 @@ TEST_P(ThresholdEcdhUbPsiTest, Works) {
                                    uuid_str};
   std::filesystem::create_directories(tmp_folder);
 
-  std::string server_output_path = tmp_folder / "server_output.csv";
-  std::string client_output_path = tmp_folder / "client_output.csv";
+  std::string sender_output_path = tmp_folder / "sender_output.csv";
+  std::string receiver_output_path = tmp_folder / "receiver_output.csv";
 
-  v2::UbPsiConfig server_config;
-  v2::UbPsiConfig client_config;
+  v2::PsiConfig sender_config;
+  v2::PsiConfig receiver_config;
 
-  test::GenerateUbPsiConfig(tmp_folder, params.items_server,
-                            params.items_client, params.threshold,
-                            server_config, client_config);
+  test::GeneratePsiConfig(tmp_folder, params.items_sender,
+                          params.items_receiver, params.threshold,
+                          sender_config, receiver_config);
 
-  auto proc_server = [&](const v2::UbPsiConfig& ub_psi_config,
+  auto proc_sender = [&](const v2::PsiConfig& psi_config,
                          const std::shared_ptr<yacl::link::Context>& lctx) {
-    ThresholdEcdhUbPsiServer server(ub_psi_config, lctx);
-    server.Run();
+    ThresholdEcdhPsiSender sender(psi_config, lctx);
+    sender.Run();
   };
 
-  auto proc_client = [&](const v2::UbPsiConfig& ub_psi_config,
-                         const std::shared_ptr<yacl::link::Context>& lctx) {
-    ThresholdEcdhUbPsiClient client(ub_psi_config, lctx);
-    client.Run();
+  auto proc_receiver = [&](const v2::PsiConfig& psi_config,
+                           const std::shared_ptr<yacl::link::Context>& lctx) {
+    ThresholdEcdhPsiReceiver receiver(psi_config, lctx);
+    receiver.Run();
   };
 
-  std::future<void> fa = std::async(proc_server, server_config, ctxs[0]);
-  std::future<void> fb = std::async(proc_client, client_config, ctxs[1]);
+  std::future<void> fa = std::async(proc_sender, sender_config, ctxs[0]);
+  std::future<void> fb = std::async(proc_receiver, receiver_config, ctxs[1]);
 
   fa.get();
   fb.get();
 
   std::vector<std::string> real_intersection =
-      test::GetIntersection(params.items_server, params.items_client);
+      test::GetIntersection(params.items_sender, params.items_receiver);
 
-  std::unordered_set<std::string> result_server =
-      ReadCsvRow(server_output_path);
-  std::unordered_set<std::string> result_client =
-      ReadCsvRow(client_output_path);
+  std::unordered_set<std::string> result_sender =
+      ReadCsvRow(sender_output_path);
+  std::unordered_set<std::string> result_receiver =
+      ReadCsvRow(receiver_output_path);
 
   // Verify that the intersection of both parties is consistent
-  EXPECT_EQ(result_server, result_client);
+  EXPECT_EQ(result_sender, result_receiver);
 
   // Verify that the restricted intersection is a subset of the real
   // intersection
   std::sort(real_intersection.begin(), real_intersection.end());
-
-  for (auto& item : result_server) {
+  for (auto& item : result_sender) {
     EXPECT_TRUE(std::binary_search(real_intersection.begin(),
                                    real_intersection.end(), item));
   }
+
   // Verify that the size of the restricted intersection meets expectations
   uint32_t real_intersection_count = real_intersection.size();
   uint32_t target_size = std::min(real_intersection_count, params.threshold);
-  EXPECT_EQ(result_server.size(), target_size);
+  EXPECT_EQ(result_sender.size(), target_size);
 
   psi::ResourceManager::GetInstance().RemoveAllResource();
 
@@ -126,7 +126,7 @@ TEST_P(ThresholdEcdhUbPsiTest, Works) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    Works_Instances, ThresholdEcdhUbPsiTest,
+    Works_Instances, ThresholdEcdhPsiTest,
     testing::Values(TestParams{{"a", "b"}, {"b", "c"}, 1},   //
                     TestParams{{"a", "b"}, {"b", "c"}, 10},  //
                     TestParams{{"a", "b"}, {"c", "d"}, 1},   //
@@ -150,5 +150,4 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{test::CreateRangeItems(0, 10000),
                                test::CreateRangeItems(1, 10000), 10000}  //
                     ));
-
 }  // namespace psi::ecdh

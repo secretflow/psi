@@ -14,14 +14,14 @@
 
 #include "experiment/psi/threshold_ub_psi/client.h"
 
-#include "experiment/psi/threshold_ub_psi/common.h"
 #include "experiment/psi/threshold_ub_psi/threshold_ecdh_oprf_psi.h"
 
 #include "psi/utils/sync.h"
+#include "psi/utils/table_utils.h"
 
 namespace psi::ecdh {
 ThresholdEcdhUbPsiClient::ThresholdEcdhUbPsiClient(
-    const v2::UbPsiConfig &config, std::shared_ptr<yacl::link::Context> lctx)
+    const v2::UbPsiConfig& config, std::shared_ptr<yacl::link::Context> lctx)
     : EcdhUbPsiClient(config, std::move(lctx)) {}
 
 void ThresholdEcdhUbPsiClient::Online() {
@@ -125,7 +125,7 @@ void ThresholdEcdhUbPsiClient::Online() {
 }
 
 void ThresholdEcdhUbPsiClient::ResizeIntersection(
-    IntersectionIndexInfo &intersection_info, uint32_t final_count) {
+    IntersectionIndexInfo& intersection_info, uint32_t final_count) {
   intersection_info.self_indices.resize(final_count);
   intersection_info.peer_indices.resize(final_count);
   intersection_info.self_dup_cnt.resize(final_count);

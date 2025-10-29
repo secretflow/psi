@@ -120,7 +120,7 @@ void EcdhPsiContext::MaskSelf(
     if (batch_items.empty()) {
       SPDLOG_INFO("MaskSelf:{} --finished, batch_count={}, self_item_count={}",
                   Id(), batch_count, item_count);
-      if (options_.statistics) {
+      if (options_.statistics != nullptr) {
         options_.statistics->self_item_count = item_count;
       }
       break;

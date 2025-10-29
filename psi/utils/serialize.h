@@ -20,6 +20,9 @@
 #include <vector>
 
 #include "yacl/base/buffer.h"
+#include "yacl/base/exception.h"
+
+#include "psi/algorithm/types.h"
 
 #include "psi/utils/serializable.pb.h"
 
@@ -39,7 +42,10 @@ inline size_t DeserializeSize(const yacl::Buffer& buf) {
   return proto.input_size();
 }
 
-inline yacl::Buffer SerializeIndexes(const std::vector<uint32_t>& index) {
+template <typename T, std::enable_if_t<std::is_same_v<T, uint32_t> ||
+                                           std::is_same_v<T, uint64_t>,
+                                       int> = 0>
+inline yacl::Buffer SerializeIndexes(const std::vector<T>& index) {
   proto::IndexesProto proto;
   proto.mutable_indexes()->Assign(index.begin(), index.end());
   yacl::Buffer buf(proto.ByteSizeLong());
@@ -47,22 +53,26 @@ inline yacl::Buffer SerializeIndexes(const std::vector<uint32_t>& index) {
   return buf;
 }
 
-inline std::vector<uint32_t> DeserializeIndexes(const yacl::Buffer& buf) {
+template <typename T, std::enable_if_t<std::is_same_v<T, uint32_t> ||
+                                           std::is_same_v<T, uint64_t>,
+                                       int> = 0>
+inline std::vector<T> DeserializeIndexes(const yacl::Buffer& buf) {
   proto::IndexesProto proto;
   proto.ParseFromArray(buf.data(), buf.size());
-  std::vector<uint32_t> size(proto.indexes_size());
+  std::vector<T> size(proto.indexes_size());
   std::copy(proto.indexes().begin(), proto.indexes().end(), size.begin());
   return size;
 }
 
 inline yacl::Buffer SerializeStrItems(
     const std::vector<std::string>& items,
-    const std::unordered_map<uint32_t, uint32_t>& duplicate_item_cnt = {}) {
-  proto::StrItemsProtoWithCnt proto;
+    const std::unordered_map<ItemIndexType, ItemCntType>& duplicate_item_cnt =
+        {}) {
+  proto::StrItemsProto proto;
   for (const auto& item : items) {
     proto.add_items(item);
   }
-  for (auto& [k, v] : duplicate_item_cnt) {
+  for (const auto& [k, v] : duplicate_item_cnt) {
     proto.mutable_duplicate_item_cnt()->insert({k, v});
   }
 
@@ -71,10 +81,11 @@ inline yacl::Buffer SerializeStrItems(
   return buf;
 }
 
-inline void DeserializeStrItems(
-    const yacl::Buffer& buf, std::vector<std::string>* items,
-    std::unordered_map<uint32_t, uint32_t>* duplicate_item_cnt = nullptr) {
-  proto::StrItemsProtoWithCnt proto;
+inline void DeserializeStrItems(const yacl::Buffer& buf,
+                                std::vector<std::string>* items,
+                                std::unordered_map<ItemIndexType, ItemCntType>*
+                                    duplicate_item_cnt = nullptr) {
+  proto::StrItemsProto proto;
   proto.ParseFromArray(buf.data(), buf.size());
   items->reserve(proto.items_size());
   for (auto item : proto.items()) {
@@ -90,24 +101,21 @@ inline void DeserializeStrItems(
 }
 
 inline yacl::Buffer SerializeItemsCnt(
-    const std::unordered_map<uint32_t, uint32_t>& duplicate_item_cnt) {
+    const std::unordered_map<ItemIndexType, ItemCntType>& duplicate_item_cnt) {
   proto::ItemsCntProto proto;
-
-  for (auto& [k, v] : duplicate_item_cnt) {
+  for (const auto& [k, v] : duplicate_item_cnt) {
     proto.mutable_duplicate_item_cnt()->insert({k, v});
   }
-
   yacl::Buffer buf(proto.ByteSizeLong());
   proto.SerializeToArray(buf.data(), buf.size());
   return buf;
 }
 
-inline std::unordered_map<uint32_t, uint32_t> DeserializeItemsCnt(
+inline std::unordered_map<ItemIndexType, ItemCntType> DeserializeItemsCnt(
     const yacl::Buffer& buf) {
-  std::unordered_map<uint32_t, uint32_t> duplicate_item_cnt;
+  std::unordered_map<ItemIndexType, ItemCntType> duplicate_item_cnt;
   proto::ItemsCntProto proto;
   proto.ParseFromArray(buf.data(), buf.size());
-
   for (auto& [k, v] : *proto.mutable_duplicate_item_cnt()) {
     duplicate_item_cnt[k] = v;
   }

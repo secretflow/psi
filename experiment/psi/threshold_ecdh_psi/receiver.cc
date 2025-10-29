@@ -172,7 +172,7 @@ std::vector<uint32_t> ThresholdEcdhPsiReceiver::RecvRestoredIndex() {
   std::vector<uint32_t> self_restored_index;
   auto buffer = index_link_ctx_->Recv(index_link_ctx_->NextRank(),
                                       "recv restored indexes");
-  self_restored_index = utils::DeserializeIndexes(buffer);
+  self_restored_index = utils::DeserializeIndexes<uint32_t>(buffer);
   SPDLOG_INFO("Recv restored indexes, size: {}", self_restored_index.size());
 
   return self_restored_index;

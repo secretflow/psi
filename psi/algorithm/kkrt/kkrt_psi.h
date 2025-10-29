@@ -14,17 +14,13 @@
 
 #pragma once
 
-#include <algorithm>
-#include <functional>
 #include <memory>
-#include <string>
-#include <unordered_map>
 #include <vector>
 
 #include "yacl/kernel/type/ot_store.h"
 #include "yacl/link/link.h"
 
-#include "psi/utils/bucket.h"
+#include "psi/algorithm/psi_io.h"
 
 //
 // implementation of KKRT16 PSI protocol
@@ -65,23 +61,47 @@ KkrtPsiOptions GetDefaultKkrtPsiOptions();
 // sender and receiver psi input data shoud be prepocessed using hash algorithm.
 // like sha256 or blake2/blake3 hash algorithm or aes_ecb(key, x)^x
 //
-void KkrtPsiSend(const std::shared_ptr<yacl::link::Context>& link_ctx,
-                 const KkrtPsiOptions& kkrt_psi_options,  // with kkrt options
-                 const yacl::crypto::OtRecvStore& ot_recv,
-                 const std::vector<HashBucketCache::BucketItem>& items_hash);
 
-std::pair<std::vector<size_t>, std::vector<uint32_t>> KkrtPsiRecv(
+std::vector<PsiResultIndex> KkrtPsiRecvIndices(
     const std::shared_ptr<yacl::link::Context>& link_ctx,
-    const KkrtPsiOptions& kkrt_psi_options,  // with kkrt options
+    const KkrtPsiOptions& kkrt_psi_options,
     const yacl::crypto::OtSendStore& ot_send,
     const std::vector<uint128_t>& items_hash);
 
-inline void KkrtPsiSend(
+void KkrtPsiSend(const std::shared_ptr<yacl::link::Context>& link_ctx,
+                 const KkrtPsiOptions& kkrt_psi_options,
+                 const yacl::crypto::OtRecvStore& ot_recv,
+                 const std::vector<PsiItemHash>& items);
+
+// pair first: item index,
+// pair second: item extra duplication count (0: item unique)
+inline std::pair<std::vector<size_t>, std::vector<uint32_t>> KkrtPsiRecv(
     const std::shared_ptr<yacl::link::Context>& link_ctx,
-    const yacl::crypto::OtRecvStore& ot_recv,
-    const std::vector<HashBucketCache::BucketItem>& items_hash) {
+    const KkrtPsiOptions& kkrt_psi_options,  // with kkrt options
+    const yacl::crypto::OtSendStore& ot_send,
+    const std::vector<uint128_t>& items_hash) {
+  auto result_indices =
+      KkrtPsiRecvIndices(link_ctx, kkrt_psi_options, ot_send, items_hash);
+
+  std::vector<size_t> item_indices;
+  item_indices.reserve(result_indices.size());
+  std::vector<uint32_t> item_extra_dup_cnts(result_indices.size(), 0);
+
+  for (size_t i = 0; i != result_indices.size(); ++i) {
+    item_indices.emplace_back(result_indices[i].data);
+    if (result_indices[i].peer_item_cnt > 1) {
+      item_extra_dup_cnts[i] = result_indices[i].peer_item_cnt - 1;
+    }
+  }
+
+  return {item_indices, item_extra_dup_cnts};
+}
+
+inline void KkrtPsiSend(const std::shared_ptr<yacl::link::Context>& link_ctx,
+                        const yacl::crypto::OtRecvStore& ot_recv,
+                        const std::vector<PsiItemHash>& items) {
   KkrtPsiOptions kkrt_psi_options = GetDefaultKkrtPsiOptions();
-  KkrtPsiSend(link_ctx, kkrt_psi_options, ot_recv, items_hash);
+  KkrtPsiSend(link_ctx, kkrt_psi_options, ot_recv, items);
 }
 
 inline std::pair<std::vector<size_t>, std::vector<uint32_t>> KkrtPsiRecv(
@@ -92,17 +112,17 @@ inline std::pair<std::vector<size_t>, std::vector<uint32_t>> KkrtPsiRecv(
   return KkrtPsiRecv(link_ctx, kkrt_psi_options, ot_send, items_hash);
 }
 
-// inline functions
 inline void KkrtPsiSend(const std::shared_ptr<yacl::link::Context>& link_ctx,
                         const yacl::crypto::OtRecvStore& ot_recv,
                         const std::vector<uint128_t>& items_hash) {
-  std::vector<HashBucketCache::BucketItem> items_hash_bucket;
+  std::vector<PsiItemHash> items;
+  items.reserve(items_hash.size());
   for (const auto& item : items_hash) {
-    HashBucketCache::BucketItem bucket_item;
-    bucket_item.sec_hash = item;
-    items_hash_bucket.push_back(bucket_item);
+    PsiItemHash hash;
+    hash.data = item;
+    items.emplace_back(std::move(hash));
   }
-  KkrtPsiSend(link_ctx, ot_recv, items_hash_bucket);
+  KkrtPsiSend(link_ctx, ot_recv, items);
 }
 
 }  // namespace psi::kkrt

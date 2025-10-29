@@ -41,11 +41,6 @@ void HandleBucketResultBySender(
 void HandleBucketResultByReceiver(
     bool broadcast_result, const std::shared_ptr<yacl::link::Context>& lctx,
     const std::vector<HashBucketCache::BucketItem>& result_list,
-    IndexWriter* writer);
-
-void HandleBucketResultByReceiver(
-    bool broadcast_result, const std::shared_ptr<yacl::link::Context>& lctx,
-    const std::vector<HashBucketCache::BucketItem>& result_list,
     const std::vector<uint32_t>& peer_extra_dup_cnt, IndexWriter* writer);
 
 bool HashListEqualTest(const std::vector<yacl::Buffer>& hash_list);

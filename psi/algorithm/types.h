@@ -1,5 +1,4 @@
-//
-// Copyright 2022 Ant Group Co., Ltd.
+// Copyright 2025 Ant Group Co., Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,34 +11,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
 
-syntax = "proto3";
+#pragma once
 
-package psi.proto;
+#include "yacl/base/int128.h"
 
-message SizeProto {
-  uint64 input_size = 1;
-}
+namespace psi {
 
-message PsiDataBatchProto {
-  uint32 item_num = 1;
-  bytes flatten_bytes = 2;
-  bool is_last_batch = 3;
-  uint32 batch_index = 4;
-  string type = 5;
-  map<uint32, uint32> duplicate_item_cnt = 6;
-}
+using ItemIndexType = uint64_t;
+using ItemCntType = uint32_t;
+using HashType = uint128_t;
 
-message StrItemsProto {
-  repeated string items = 1;
-  map<uint64, uint32> duplicate_item_cnt = 2;
-}
-
-message ItemsCntProto {
-  map<uint64, uint32> duplicate_item_cnt = 2;
-}
-
-message IndexesProto {
-  repeated uint64 indexes = 1;
-}
+}  // namespace psi

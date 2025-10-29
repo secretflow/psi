@@ -21,11 +21,10 @@
 #include <memory>
 #include <mutex>
 #include <string>
-#include <tuple>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 
+#include "psi/algorithm/psi_io.h"
 #include "psi/utils/batch_provider.h"
 #include "psi/utils/io.h"
 
@@ -33,7 +32,8 @@ namespace psi {
 
 class MemoryBatchProvider : public IBasicBatchProvider,
                             public ILabeledBatchProvider,
-                            public IShuffledBatchProvider {
+                            public IShuffledBatchProvider,
+                            public IDataProvider {
  public:
   MemoryBatchProvider(const std::vector<std::string>& items, size_t batch_size,
                       const std::vector<std::string>& labels = {},
@@ -53,6 +53,13 @@ class MemoryBatchProvider : public IBasicBatchProvider,
   [[nodiscard]] const std::vector<std::string>& labels() const;
 
   [[nodiscard]] const std::vector<size_t>& shuffled_indices() const;
+
+  std::vector<PsiItemData> ReadNext(size_t size) override;
+
+  std::vector<PsiItemData> ReadAll() override;
+
+ private:
+  std::vector<std::string> ReadNextImpl(size_t size);
 
  private:
   const size_t batch_size_;
@@ -106,6 +113,22 @@ class SimpleShuffledBatchProvider : public IShuffledBatchProvider {
   RawBatch buffer_;
 
   bool read_end_ = false;
+};
+
+class MemoryDataStore : public IDataStore {
+ public:
+  explicit MemoryDataStore(const std::vector<std::string>& items) {
+    provider_ = std::make_shared<MemoryBatchProvider>(items, 256);
+  }
+
+  [[nodiscard]] size_t GetBucketNum() const override { return 1; };
+
+  std::shared_ptr<IDataProvider> Load(size_t /*tag*/) override {
+    return provider_;
+  }
+
+ private:
+  std::shared_ptr<MemoryBatchProvider> provider_;
 };
 
 }  // namespace psi

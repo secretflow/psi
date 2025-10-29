@@ -43,7 +43,7 @@ void MemoryEcPointStore::Save(const std::string& ciphertext,
   if (duplicate_cnt > 0) {
     item_extra_dup_cnt_map_[store_.size()] = duplicate_cnt;
   }
-  store_.push_back(std::move(ciphertext));
+  store_.push_back(ciphertext);
   item_cnt_++;
 }
 

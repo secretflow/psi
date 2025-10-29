@@ -48,13 +48,14 @@ std::vector<size_t> AllGatherItemsSize(
 
 void BroadcastResult(const std::shared_ptr<yacl::link::Context>& link_ctx,
                      std::vector<std::string>* res) {
-  std::unordered_map<uint32_t, uint32_t> res_dup_cnt;
+  std::unordered_map<ItemIndexType, ItemCntType> res_dup_cnt;
   BroadcastResult(link_ctx, res, &res_dup_cnt);
 }
 
-void BroadcastResult(const std::shared_ptr<yacl::link::Context>& link_ctx,
-                     std::vector<std::string>* res,
-                     std::unordered_map<uint32_t, uint32_t>* res_dup_cnt) {
+void BroadcastResult(
+    const std::shared_ptr<yacl::link::Context>& link_ctx,
+    std::vector<std::string>* res,
+    std::unordered_map<ItemIndexType, ItemCntType>* res_dup_cnt) {
   size_t max_size = res->size();
   size_t broadcast_rank = 0;
   std::vector<size_t> res_size_list = AllGatherItemsSize(link_ctx, res->size());

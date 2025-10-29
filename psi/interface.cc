@@ -30,15 +30,16 @@
 #include "psi/prelude.h"
 #include "psi/trace_categories.h"
 #include "psi/utils/bucket.h"
+#include "psi/utils/index_store.h"
+#include "psi/utils/join_processor.h"
 #include "psi/utils/key.h"
 #include "psi/utils/random_str.h"
+#include "psi/utils/resource_manager.h"
 #include "psi/utils/sync.h"
 
 #include "psi/proto/psi_v2.pb.h"
 
 namespace psi {
-
-constexpr size_t kIndexWriterBatchSize = 1 << 10;
 
 AbstractPsiParty::AbstractPsiParty(const v2::PsiConfig &config, v2::Role role,
                                    std::shared_ptr<yacl::link::Context> lctx)
@@ -110,7 +111,7 @@ void AbstractPsiParty::Init() {
       fmt::format("intersection_indices_{}.csv", v2::Role_Name(role_));
 
   intersection_indices_writer_ = std::make_shared<IndexWriter>(
-      intersection_indices_writer_path, kIndexWriterBatchSize,
+      intersection_indices_writer_path, kIndexWriterCacheSize,
       trunc_intersection_indices_);
 
   if (digest_equal_) {
@@ -118,7 +119,7 @@ void AbstractPsiParty::Init() {
     // FIXME(huocun): This is broken now.
     for (int64_t i = 0; i < report_.original_key_count(); i++) {
       if (intersection_indices_writer_->WriteCache(i) ==
-          kIndexWriterBatchSize) {
+          kIndexWriterCacheSize) {
         intersection_indices_writer_->Commit();
       }
     }

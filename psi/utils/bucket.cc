@@ -71,7 +71,7 @@ void HandleBucketResultBySender(
     IndexWriter* writer) {
   if (broadcast_result) {
     std::vector<std::string> result_list;
-    std::unordered_map<uint32_t, uint32_t> duplicate_item_cnt;
+    std::unordered_map<uint64_t, uint32_t> duplicate_item_cnt;
 
     BroadcastResult(lctx, &result_list, &duplicate_item_cnt);
 
@@ -104,20 +104,11 @@ void HandleBucketResultBySender(
 void HandleBucketResultByReceiver(
     bool broadcast_result, const std::shared_ptr<yacl::link::Context>& lctx,
     const std::vector<HashBucketCache::BucketItem>& result_list,
-    IndexWriter* writer) {
-  std::vector<uint32_t> duplicate_item_cnt(result_list.size(), 0);
-  HandleBucketResultByReceiver(broadcast_result, lctx, result_list,
-                               duplicate_item_cnt, writer);
-}
-
-void HandleBucketResultByReceiver(
-    bool broadcast_result, const std::shared_ptr<yacl::link::Context>& lctx,
-    const std::vector<HashBucketCache::BucketItem>& result_list,
     const std::vector<uint32_t>& peer_extra_dup_cnt, IndexWriter* writer) {
   if (broadcast_result) {
     std::vector<std::string> item_data_list;
     item_data_list.reserve(result_list.size());
-    std::unordered_map<uint32_t, uint32_t> duplicate_item_cnt;
+    std::unordered_map<uint64_t, uint32_t> duplicate_item_cnt;
     for (size_t i = 0; i != result_list.size(); ++i) {
       item_data_list.emplace_back(result_list[i].base64_data);
       if (result_list[i].extra_dup_cnt > 0) {

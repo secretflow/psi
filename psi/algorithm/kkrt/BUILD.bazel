@@ -21,7 +21,7 @@ psi_cc_library(
     srcs = ["kkrt_psi.cc"],
     hdrs = ["kkrt_psi.h"],
     deps = [
-        "//psi/utils:bucket",
+        "//psi/algorithm:psi_io",
         "//psi/utils:communication",
         "//psi/utils:cuckoo_index",
         "//psi/utils:serialize",
@@ -85,5 +85,26 @@ psi_cc_library(
         ":kkrt_psi",
         "//psi:interface",
         "//psi/utils:arrow_csv_batch_provider",
+    ],
+)
+
+psi_cc_library(
+    name = "kkrt_operator",
+    srcs = ["kkrt_operator.cc"],
+    hdrs = ["kkrt_operator.h"],
+    deps = [
+        ":common",
+        ":kkrt_psi",
+        "//psi/algorithm:psi_operator",
+    ],
+)
+
+psi_cc_test(
+    name = "kkrt_operator_test",
+    srcs = ["kkrt_operator_test.cc"],
+    deps = [
+        ":kkrt_operator",
+        "//psi/utils:batch_provider_impl",
+        "//psi/utils:test_utils",
     ],
 )

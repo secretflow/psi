@@ -57,6 +57,7 @@ struct PsiDataBatch {
   // Metadata.
   // Batch index. Start from 0.
   int32_t batch_index = 0;
+
   bool is_last_batch = false;
 
   // The type hint for each message.

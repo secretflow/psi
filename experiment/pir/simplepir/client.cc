@@ -120,29 +120,19 @@ void SimplePirClient::PrecomputeDiscreteGaussian(int radius, double sigma) {
 }
 
 std::vector<int> SimplePirClient::SampleGaussian(size_t num_samples) {
-  const size_t num_bins = gaussian_distribution_.size();
   const int max_k = (gaussian_distribution_.size() - 1) / 2;
-
-  // Generates samples with center adjustment
   std::vector<int> samples(num_samples);
-  for (size_t i = 0; i < num_samples; i++) {
-    uint64_t rand_val = yacl::crypto::RandU64();
-    constexpr double scale =
-        1.0 / (1ULL << 53);  // Scale factor for double conversion
-    double scaled_val = static_cast<double>(rand_val >> 11) * scale;
 
-    int low = 0, high = num_bins - 1;
-    int result = 0;
-    while (low <= high) {
-      int mid = low + (high - low) / 2;
-      if (scaled_val > cumulative_distribution_[mid]) {
-        low = mid + 1;
-        result = mid + 1;
-      } else {
-        high = mid - 1;
-      }
-    }
-    samples[i] = (result > 0) ? (result - 1 - max_k) : 0;
+  for (size_t i = 0; i < num_samples; ++i) {
+    uint64_t rand_val = yacl::crypto::RandU64();
+    constexpr double scale = 1.0 / (1ULL << 53);
+    double u = static_cast<double>(rand_val >> 11) * scale;
+
+    auto it = std::upper_bound(cumulative_distribution_.begin(),
+                               cumulative_distribution_.end(), u);
+
+    size_t bin_index = std::distance(cumulative_distribution_.begin(), it);
+    samples[i] = static_cast<int>(bin_index) - max_k;
   }
 
   return samples;

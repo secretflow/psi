@@ -52,14 +52,9 @@ uint64_t InnerProductModq(const std::vector<uint64_t> &row,
   for (size_t i = 0; i < len; i++) {
     // 128-bit multiplication to prevent overflow
     uint128_t product = static_cast<uint128_t>(row[i]) * col[i];
-
-    product %= q;
     result += product;
-
-    // Final reduction ensures result ∈ [0, q)
-    result %= q;
   }
 
-  return static_cast<uint64_t>(result);
+  return static_cast<uint64_t>(result % q);
 }
 }  // namespace pir::simple

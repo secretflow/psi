@@ -147,7 +147,7 @@ class MemoryIndexReader : public IndexReader {
 class MemoryResultReceiver : public IResultReceiver {
  public:
   MemoryResultReceiver() = default;
-  ~MemoryResultReceiver() = default;
+  virtual ~MemoryResultReceiver() = default;
 
   void Add(PsiResultIndex index) override {
     datas_.emplace_back(std::move(index));

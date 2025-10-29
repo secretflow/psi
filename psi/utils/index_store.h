@@ -171,7 +171,7 @@ class MemoryResultStore : public IResultStore {
   MemoryResultStore() : receiver_(std::make_shared<MemoryResultReceiver>()) {}
   ~MemoryResultStore() = default;
 
-  size_t GetBucketNum() const override { return 1; }
+  [[nodiscard]] size_t GetBucketNum() const override { return 1; }
 
   std::shared_ptr<IResultReceiver> GetReceiver(size_t /*tag*/) override {
     return receiver_;

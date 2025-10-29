@@ -121,7 +121,7 @@ class MemoryDataStore : public IDataStore {
     provider_ = std::make_shared<MemoryBatchProvider>(items, 256);
   }
 
-  [[nodiscard]] size_t GetBucketNum() const override { return 1; };
+  [[nodiscard]] size_t GetBucketNum() const override { return 1; }
 
   std::shared_ptr<IDataProvider> Load(size_t /*tag*/) override {
     return provider_;

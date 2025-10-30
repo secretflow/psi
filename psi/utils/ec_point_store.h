@@ -69,6 +69,10 @@ class MemoryEcPointStore : public IEcPointStore {
 
   std::vector<std::string>& content() { return store_; }
 
+  const std::unordered_map<uint32_t, uint32_t>& GetDupMap() {
+    return item_extra_dup_cnt_map_;
+  }
+
   void Flush() override {}
 
   uint64_t ItemCount() override { return item_cnt_; }

@@ -149,7 +149,6 @@ class IEcdhOprfClient : public IEcdhOprf {
 
   ~IEcdhOprfClient() override = default;
 
-  //
   /**
    * @brief Blind the input, use client temp private key
    *

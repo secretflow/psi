@@ -26,7 +26,7 @@ void ThresholdEcdhOprfPsiServer::RecvAndRestoreIndexes(
   std::vector<uint32_t> client_indexes;
   auto buf =
       online_link_->Recv(online_link_->NextRank(), "client shuffled indexes");
-  client_indexes = utils::DeserializeIndexes(buf);
+  client_indexes = utils::DeserializeIndexes<uint32_t>(buf);
 
   std::vector<uint32_t> shuffle_indexes(client_unique_count);
   std::iota(shuffle_indexes.begin(), shuffle_indexes.end(), 0);
@@ -69,7 +69,7 @@ std::vector<uint32_t> ThresholdEcdhOprfPsiClient::RecvRestoredIndexes() {
   std::vector<uint32_t> restored_indexes;
   auto buf =
       online_link_->Recv(online_link_->NextRank(), "recv restored indexes");
-  restored_indexes = utils::DeserializeIndexes(buf);
+  restored_indexes = utils::DeserializeIndexes<uint32_t>(buf);
   SPDLOG_INFO("Recv restored indexes, size: {}", restored_indexes.size());
 
   return restored_indexes;

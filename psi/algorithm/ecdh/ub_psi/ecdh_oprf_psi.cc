@@ -349,11 +349,11 @@ EcdhOprfPsiServer::IndexInfo EcdhOprfPsiServer::RecvCacheIndexes() {
   IndexInfo index_info;
   auto buf = options_.online_link->Recv(options_.online_link->NextRank(),
                                         "cache indexes");
-  index_info.cache_index = utils::DeserializeIndexes(buf);
+  index_info.cache_index = utils::DeserializeIndexes<uint32_t>(buf);
   SPDLOG_INFO("Recv cache index: size: {}", index_info.cache_index.size());
   buf = options_.online_link->Recv(options_.online_link->NextRank(),
                                    "client indexes");
-  index_info.client_index = utils::DeserializeIndexes(buf);
+  index_info.client_index = utils::DeserializeIndexes<uint32_t>(buf);
   SPDLOG_INFO("Recv client index: size: {}", index_info.client_index.size());
 
   YACL_ENFORCE_EQ(index_info.client_index.size(),

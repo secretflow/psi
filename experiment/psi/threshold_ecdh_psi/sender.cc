@@ -171,7 +171,7 @@ ThresholdEcdhPsiSender::RecvShuffledIndexAndCount() {
 
   auto index_buffer = index_link_ctx_->Recv(index_link_ctx_->NextRank(),
                                             "recv receiver's shuffled indexes");
-  peer_shuffled_index = utils::DeserializeIndexes(index_buffer);
+  peer_shuffled_index = utils::DeserializeIndexes<uint32_t>(index_buffer);
 
   auto count_buffer = index_link_ctx_->Recv(index_link_ctx_->NextRank(),
                                             "recv real intersection count");
@@ -188,7 +188,7 @@ std::vector<uint32_t> ThresholdEcdhPsiSender::RecvSelfIndex() {
 
   auto buffer = index_link_ctx_->Recv(index_link_ctx_->NextRank(),
                                       "recv sender's indexes");
-  self_index = utils::DeserializeIndexes(buffer);
+  self_index = utils::DeserializeIndexes<uint32_t>(buffer);
   SPDLOG_INFO("Recv self intersection indexes");
 
   return self_index;

@@ -116,3 +116,23 @@ psi_cc_library(
         "//psi/utils:arrow_csv_batch_provider",
     ],
 )
+
+psi_cc_library(
+    name = "ecdh_operator",
+    srcs = ["ecdh_operator.cc"],
+    hdrs = ["ecdh_operator.h"],
+    deps = [
+        ":common",
+        ":ecdh_psi",
+        "//psi/algorithm:psi_operator",
+    ],
+)
+
+psi_cc_test(
+    name = "ecdh_operator_test",
+    srcs = ["ecdh_operator_test.cc"],
+    deps = [
+        ":ecdh_operator",
+        "//psi/utils:test_utils",
+    ],
+)

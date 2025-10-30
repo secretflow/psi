@@ -25,6 +25,8 @@
 
 #include "yacl/link/link.h"
 
+#include "psi/algorithm/types.h"
+
 #include "psi/utils/serializable.pb.h"
 
 namespace psi {
@@ -94,9 +96,10 @@ std::vector<size_t> AllGatherItemsSize(
 void BroadcastResult(const std::shared_ptr<yacl::link::Context>& link_ctx,
                      std::vector<std::string>* res);
 
-void BroadcastResult(const std::shared_ptr<yacl::link::Context>& link_ctx,
-                     std::vector<std::string>* res,
-                     std::unordered_map<uint32_t, uint32_t>* res_dup_cnt);
+void BroadcastResult(
+    const std::shared_ptr<yacl::link::Context>& link_ctx,
+    std::vector<std::string>* res,
+    std::unordered_map<ItemIndexType, ItemCntType>* res_dup_cnt);
 
 std::vector<bool> AllGatherFlag(
     const std::shared_ptr<yacl::link::Context>& link_ctx, bool self_flag);

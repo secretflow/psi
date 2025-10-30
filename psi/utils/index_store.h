@@ -28,15 +28,20 @@
 #include "arrow/ipc/api.h"
 #include "yacl/base/exception.h"
 
+#include "psi/algorithm/psi_io.h"
+
 namespace psi {
 
 constexpr char kIdx[] = "psi_index";
 constexpr char kPeerCnt[] = "psi_peer_cnt";
 
+constexpr size_t kIndexWriterCacheSize = 1 << 10;
+
 class IndexWriter {
  public:
   explicit IndexWriter(const std::filesystem::path& path,
-                       size_t batch_size = 10000, bool trunc = false);
+                       size_t cache_size = kIndexWriterCacheSize,
+                       bool trunc = false);
 
   ~IndexWriter();
 
@@ -137,6 +142,45 @@ class MemoryIndexReader : public IndexReader {
   };
 
   std::vector<IndexItem> items_;
+};
+
+class MemoryResultReceiver : public IResultReceiver {
+ public:
+  MemoryResultReceiver() = default;
+  virtual ~MemoryResultReceiver() = default;
+
+  void Add(PsiResultIndex index) override {
+    datas_.emplace_back(std::move(index));
+  }
+  void Add(std::vector<PsiResultIndex> indices) override {
+    datas_.reserve(datas_.size() + indices.size());
+    datas_.insert(datas_.end(), std::make_move_iterator(indices.begin()),
+                  std::make_move_iterator(indices.end()));
+  }
+
+  void Finish() override {}
+
+  std::vector<PsiResultIndex> datas() const { return datas_; }
+
+ private:
+  std::vector<PsiResultIndex> datas_;
+};
+
+class MemoryResultStore : public IResultStore {
+ public:
+  MemoryResultStore() : receiver_(std::make_shared<MemoryResultReceiver>()) {}
+  ~MemoryResultStore() = default;
+
+  [[nodiscard]] size_t GetBucketNum() const override { return 1; }
+
+  std::shared_ptr<IResultReceiver> GetReceiver(size_t /*tag*/) override {
+    return receiver_;
+  }
+
+  std::vector<PsiResultIndex> GetData() { return receiver_->datas(); }
+
+ private:
+  std::shared_ptr<MemoryResultReceiver> receiver_;
 };
 
 }  // namespace psi

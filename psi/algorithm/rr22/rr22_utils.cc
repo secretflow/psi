@@ -136,7 +136,7 @@ std::pair<std::vector<uint32_t>, std::vector<uint32_t>> GetIntersectionReceiver(
     auto buffer = yacl::Buffer(peer_indices.data(),
                                peer_indices.size() * sizeof(uint32_t));
     lctx->SendAsyncThrottled(lctx->NextRank(), buffer, "broadcast_result");
-    std::unordered_map<uint32_t, uint32_t> self_cnt_map;
+    std::unordered_map<uint64_t, uint32_t> self_cnt_map;
     for (size_t i = 0; i < self_cnt.size(); ++i) {
       if (self_cnt[i] > 0) {
         self_cnt_map[i] = self_cnt[i];
@@ -249,7 +249,7 @@ std::pair<std::vector<uint32_t>, std::vector<uint32_t>> GetIntersectionSender(
   yacl::ByteContainerView send_buffer(data_ptr, self_oprfs.size() * mask_size);
   lctx->SendAsyncThrottled(lctx->NextRank(), send_buffer,
                            fmt::format("oprf_value"));
-  std::unordered_map<uint32_t, uint32_t> self_cnt;
+  std::unordered_map<uint64_t, uint32_t> self_cnt;
   for (size_t i = 0; i != items.size(); ++i) {
     if (items[i].extra_dup_cnt > 0) {
       self_cnt[i] = items[i].extra_dup_cnt;
@@ -257,7 +257,7 @@ std::pair<std::vector<uint32_t>, std::vector<uint32_t>> GetIntersectionSender(
   }
   lctx->SendAsyncThrottled(lctx->NextRank(), utils::SerializeItemsCnt(self_cnt),
                            fmt::format("items_cnt"));
-  std::unordered_map<uint32_t, uint32_t> items_cnt;
+  std::unordered_map<uint64_t, uint32_t> items_cnt;
   if (broadcast_result) {
     auto buffer = lctx->Recv(lctx->NextRank(), "broadcast_result");
     result.resize(buffer.size() / sizeof(uint32_t));

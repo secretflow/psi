@@ -14,7 +14,6 @@
 
 load("@rules_cc//cc:defs.bzl", "cc_proto_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
-load("@yacl//bazel:yacl.bzl", "AES_COPT_FLAGS")
 load("//bazel:psi.bzl", "psi_cc_library", "psi_cc_test")
 
 package(default_visibility = ["//visibility:public"])
@@ -143,6 +142,7 @@ psi_cc_library(
     hdrs = ["serialize.h"],
     deps = [
         ":serializable_cc_proto",
+        "//psi/algorithm:types",
         "@yacl//yacl/base:buffer",
     ],
 )
@@ -204,6 +204,7 @@ psi_cc_library(
         ":arrow_csv_batch_provider",
         ":io",
         ":key",
+        "//psi/algorithm:psi_io",
         "@abseil-cpp//absl/strings",
         "@yacl//yacl/base:exception",
         "@yacl//yacl/crypto/rand",
@@ -240,6 +241,7 @@ psi_cc_library(
     hdrs = ["sync.h"],
     deps = [
         ":serialize",
+        "//psi/algorithm:types",
         "@yacl//yacl/link",
     ],
 )
@@ -297,6 +299,7 @@ psi_cc_library(
     hdrs = ["index_store.h"],
     deps = [
         ":io",
+        "//psi/algorithm:psi_io",
         "@org_apache_arrow//:arrow",
         "@yacl//yacl/base:exception",
     ],

@@ -160,3 +160,22 @@ psi_cc_library(
         "//psi/utils:arrow_csv_batch_provider",
     ],
 )
+
+psi_cc_library(
+    name = "rr22_operator",
+    srcs = ["rr22_operator.cc"],
+    hdrs = ["rr22_operator.h"],
+    deps = [
+        ":rr22_psi",
+        "//psi/algorithm:psi_operator",
+    ],
+)
+
+psi_cc_test(
+    name = "rr22_operator_test",
+    srcs = ["rr22_operator_test.cc"],
+    deps = [
+        ":rr22_operator",
+        "//psi/utils:batch_provider_impl",
+    ],
+)

@@ -123,9 +123,17 @@ void KkrtPsiSender::Online() {
     auto& bucket_items = *bucket_items_list;
 
     SyncWait(lctx_, [&] {
-      CalcBucketItemSecHash(bucket_items);
+      std::vector<PsiItemHash> item_hash_list(bucket_items.size());
+      yacl::parallel_for(
+          0, bucket_items.size(), [&](int64_t begin, int64_t end) {
+            for (int64_t i = begin; i < end; ++i) {
+              item_hash_list[i].data =
+                  yacl::crypto::Blake3_128(bucket_items[i].base64_data);
+              item_hash_list[i].cnt = bucket_items[i].extra_dup_cnt + 1;
+            }
+          });
 
-      KkrtPsiSend(lctx_, *ot_recv_, bucket_items);
+      KkrtPsiSend(lctx_, *ot_recv_, item_hash_list);
     });
 
     SyncWait(lctx_, [&] {

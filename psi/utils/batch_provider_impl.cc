@@ -58,13 +58,7 @@ MemoryBatchProvider::MemoryBatchProvider(const std::vector<std::string>& items,
 }
 
 std::vector<std::string> MemoryBatchProvider::ReadNextBatch() {
-  std::vector<std::string> batch;
-  YACL_ENFORCE(cursor_index_ <= items_.size());
-  size_t n_items = std::min(batch_size_, items_.size() - cursor_index_);
-  batch.insert(batch.end(), items_.begin() + cursor_index_,
-               items_.begin() + cursor_index_ + n_items);
-  cursor_index_ += n_items;
-  return batch;
+  return ReadNextImpl(batch_size_);
 }
 
 std::pair<std::vector<std::string>, std::vector<std::string>>
@@ -129,6 +123,34 @@ const std::vector<size_t>& MemoryBatchProvider::shuffled_indices() const {
   } else {
     return buffer_shuffled_indices_;
   }
+}
+
+std::vector<PsiItemData> MemoryBatchProvider::ReadNext(size_t size) {
+  auto batch = ReadNextImpl(size);
+  std::vector<PsiItemData> datas(batch.size());
+  for (size_t i = 0; i != batch.size(); ++i) {
+    datas[i].buf = std::move(batch[i]);
+  }
+  return datas;
+}
+
+std::vector<PsiItemData> MemoryBatchProvider::ReadAll() {
+  std::vector<PsiItemData> datas(items_.size());
+  for (size_t i = 0; i != items_.size(); ++i) {
+    datas[i].buf = items_[i];
+  }
+  return datas;
+}
+
+std::vector<std::string> MemoryBatchProvider::ReadNextImpl(size_t batch_size) {
+  std::vector<std::string> batch;
+  YACL_ENFORCE(cursor_index_ <= items_.size());
+  size_t n_items = std::min(batch_size, items_.size() - cursor_index_);
+  batch.reserve(n_items);
+  batch.insert(batch.end(), items_.begin() + cursor_index_,
+               items_.begin() + cursor_index_ + n_items);
+  cursor_index_ += n_items;
+  return batch;
 }
 
 SimpleShuffledBatchProvider::SimpleShuffledBatchProvider(

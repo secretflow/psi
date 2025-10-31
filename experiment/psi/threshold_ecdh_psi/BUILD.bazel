@@ -87,3 +87,13 @@ psi_cc_test(
         "@yacl//yacl/link",
     ],
 )
+
+psi_cc_test(
+    name = "threshold_ecdh_psi_cache_test",
+    srcs = ["threshold_ecdh_psi_cache_test.cc"],
+    deps = [
+        ":threshold_ecdh_psi_cache",
+        "//psi/utils:random_str",
+        "@yacl//yacl/crypto/rand",
+    ],
+)

@@ -7,7 +7,7 @@
 1. Compile the binary
 
     ```bash
-    bazel build //psi:main -c opt
+    bazel build //psi/apps/psi_launcher:main -c opt
     ```
 
 2. Generate test data
@@ -49,7 +49,7 @@
 1. Compile the binary
 
     ```bash
-    bazel build //psi:main -c opt
+    bazel build //psi/apps/psi_launcher:main -c opt
     ```
 
 2. Generate test data

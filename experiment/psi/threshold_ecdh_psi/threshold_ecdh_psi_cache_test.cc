@@ -30,6 +30,15 @@ TEST(ThresholdEcdhPsiCacheTest, Works) {
                                    uuid_str};
   std::filesystem::create_directories(tmp_folder);
 
+  ON_SCOPE_EXIT([&] {
+    std::error_code ec;
+    std::filesystem::remove_all(tmp_folder, ec);
+    if (ec.value() != 0) {
+      SPDLOG_WARN("can not remove temp file folder: {}, msg: {}",
+                  tmp_folder.string(), ec.message());
+    }
+  });
+
   // Generate test data.
   size_t data_count = 50;
 
@@ -64,15 +73,6 @@ TEST(ThresholdEcdhPsiCacheTest, Works) {
   for (size_t i = 0; i < data_count; ++i) {
     EXPECT_EQ(origin_indexes[i], batch_indices[i]);
     EXPECT_EQ(shuffled_indexes[i], shuffled_indices[i]);
-  }
-
-  {
-    std::error_code ec;
-    std::filesystem::remove_all(tmp_folder, ec);
-    if (ec.value() != 0) {
-      SPDLOG_WARN("can not remove temp file folder: {}, msg: {}",
-                  tmp_folder.string(), ec.message());
-    }
   }
 }
 }  // namespace psi::ecdh

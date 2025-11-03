@@ -128,10 +128,23 @@ void Rr22PsiSender::Online() {
         }
       };
 
+  std::vector<uint32_t> self_sizes(input_bucket_store_->BucketNum());
+  for (size_t i = 0; i < self_sizes.size(); i++) {
+    self_sizes[i] = input_bucket_store_->GetBucketSize(i);
+  }
+  std::vector<uint32_t> peer_sizes(input_bucket_store_->BucketNum());
+  yacl::ByteContainerView buffer(self_sizes.data(),
+                                 self_sizes.size() * sizeof(uint32_t));
+  auto data = yacl::link::AllGather(lctx_, buffer, "exchange size");
+  std::memcpy(peer_sizes.data(), data[lctx_->NextRank()].data(),
+              self_sizes.size() * sizeof(uint32_t));
+  DataSizeFunc datasize_func = [&](size_t bucket_idx) {
+    return std::make_pair(self_sizes[bucket_idx], peer_sizes[bucket_idx]);
+  };
   Rr22Runner runner(lctx_, rr22_options, input_bucket_store_->BucketNum(),
-                    config_.protocol_config().broadcast_result(), pre_f,
-                    post_f);
-  SyncWait(lctx_, [&] { runner.AsyncRun(bucket_idx, true); });
+                    config_.protocol_config().broadcast_result(), pre_f, post_f,
+                    datasize_func);
+  SyncWait(lctx_, [&] { runner.AsyncRun(bucket_idx, true, true); });
   SPDLOG_INFO("[Rr22PsiSender::Online] end");
 }
 

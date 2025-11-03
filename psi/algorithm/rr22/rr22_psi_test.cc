@@ -117,6 +117,9 @@ TEST_P(Rr22PsiTest, CorrectTest) {
           }
         }
       };
+  DataSizeFunc receiver_datasize_f = [&](size_t) {
+    return std::make_pair(inputs_a.size(), inputs_b.size());
+  };
   PreProcessFunc sender_pre_f = [&](size_t) {
     std::vector<HashBucketCache::BucketItem> bucket_items(inputs_b.size());
     for (size_t i = 0; i < inputs_b.size(); ++i) {
@@ -130,16 +133,21 @@ TEST_P(Rr22PsiTest, CorrectTest) {
       [&](size_t, const std::vector<HashBucketCache::BucketItem>&,
           const std::vector<uint32_t>&,
           const std::vector<uint32_t>&) { return; };
+
+  DataSizeFunc sender_datasize_f = [&](size_t) {
+    return std::make_pair(inputs_b.size(), inputs_a.size());
+  };
+
   auto psi_receiver_proc = std::async([&] {
     Rr22Runner runner(lctxs[0], psi_options, bucket_num, false, receiver_pre_f,
-                      receiver_post_f);
-    runner.AsyncRun(0, false);
+                      receiver_post_f, receiver_datasize_f);
+    runner.AsyncRun(0, false, true);
   });
 
   auto psi_sender_proc = std::async([&] {
     Rr22Runner runner(lctxs[1], psi_options, bucket_num, false, sender_pre_f,
-                      sender_post_f);
-    runner.AsyncRun(0, true);
+                      sender_post_f, sender_datasize_f);
+    runner.AsyncRun(0, true, true);
   });
 
   psi_sender_proc.get();

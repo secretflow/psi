@@ -14,7 +14,14 @@
 
 #include "psi/algorithm/rr22/rr22_operator.h"
 
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
 #include <memory>
+#include <utility>
+#include <vector>
+
+#include "psi/algorithm/rr22/rr22_psi.h"
 
 namespace psi::rr22 {
 
@@ -63,6 +70,20 @@ void Rr22Operator::OnRun() {
         recevier->Add(std::move(indices));
       };
 
+  std::vector<uint32_t> self_sizes(input_store_->GetBucketNum());
+  for (size_t i = 0; i < self_sizes.size(); i++) {
+    self_sizes[i] = input_store_->Load(i)->Size();
+  }
+  std::vector<uint32_t> peer_sizes(input_store_->GetBucketNum());
+  yacl::ByteContainerView buffer(self_sizes.data(),
+                                 self_sizes.size() * sizeof(uint32_t));
+  auto data = yacl::link::AllGather(link_ctx_, buffer, "exchange size");
+  std::memcpy(peer_sizes.data(), data[link_ctx_->Rank()].data(),
+              self_sizes.size() * sizeof(uint32_t));
+  DataSizeFunc datasize_func = [&](size_t bucket_idx) {
+    return std::make_pair(self_sizes[bucket_idx], peer_sizes[bucket_idx]);
+  };
+
   size_t bucket_idx =
       recovery_manager_
           ? std::min(recovery_manager_->parsed_bucket_count_from_peer(),
@@ -70,8 +91,8 @@ void Rr22Operator::OnRun() {
           : 0;
 
   Rr22Runner runner(link_ctx_, opts_.rr22_opts, input_store_->GetBucketNum(),
-                    opts_.broadcast_result, pre_process_func,
-                    post_process_func);
+                    opts_.broadcast_result, pre_process_func, post_process_func,
+                    datasize_func);
 
   if (opts_.pipeline_mode) {
     runner.AsyncRun(bucket_idx, opts_.lctx->Rank() != opts_.receiver_rank);

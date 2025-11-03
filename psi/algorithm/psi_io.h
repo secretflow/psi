@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <vector>
@@ -50,20 +51,19 @@ class IResultStore {
  public:
   [[nodiscard]] virtual size_t GetBucketNum() const = 0;
   virtual std::shared_ptr<IResultReceiver> GetReceiver(size_t tag) = 0;
-  virtual ~IResultStore() = default;
 };
 
 class IDataProvider {
  public:
   virtual std::vector<PsiItemData> ReadNext(size_t size) = 0;
   virtual std::vector<PsiItemData> ReadAll() = 0;
+  [[nodiscard]] virtual size_t Size() const = 0;
 };
 
 class IDataStore {
  public:
   [[nodiscard]] virtual size_t GetBucketNum() const = 0;
   virtual std::shared_ptr<IDataProvider> Load(size_t tag) = 0;
-  virtual ~IDataStore() = default;
 };
 
 }  // namespace psi

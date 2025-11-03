@@ -124,10 +124,9 @@ static void BM_Rr22FastPsi(benchmark::State& state) {
     }
 
     auto psi_receiver_proc = std::async([&] {
-      size_t mask_size;
-      size_t peer_size;
-      std::tie(mask_size, peer_size) =
-          ExchangeTruncateSize(lctxs[0], inputs_a.size(), psi_options);
+      size_t peer_size = inputs_b.size();
+      size_t mask_size = psi::rr22::ComputeMaskSize(psi_options, inputs_a.size(),
+                                             peer_size);
       psi::rr22::Rr22OprfReceiver oprf_receiver(
           kRr22OprfBinSize, kRr22DefaultSsp, psi_options.mode);
       oprf_receiver.Init(lctxs[0], inputs_a.size(), psi_options.num_threads);
@@ -138,13 +137,12 @@ static void BM_Rr22FastPsi(benchmark::State& state) {
     });
 
     auto psi_sender_proc = std::async([&] {
-      size_t mask_size;
-      size_t peer_size;
-      std::tie(mask_size, peer_size) =
-          ExchangeTruncateSize(lctxs[1], inputs_b.size(), psi_options);
+      size_t peer_size = inputs_a.size();
+      size_t mask_size = psi::rr22::ComputeMaskSize(psi_options, inputs_b.size(),
+                                             peer_size);
       psi::rr22::Rr22OprfSender oprf_sender(kRr22OprfBinSize, kRr22DefaultSsp,
                                             psi_options.mode);
-      oprf_sender.Init(lctxs[1], std::max(peer_size, inputs_b.size()),
+      oprf_sender.Init(lctxs[1], peer_size,
                        psi_options.num_threads);
       auto inputs_hash = oprf_sender.Send(lctxs[1], inputs_b);
       auto oprfs = oprf_sender.Eval(inputs_b, inputs_hash);

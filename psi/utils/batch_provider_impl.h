@@ -48,6 +48,8 @@ class MemoryBatchProvider : public IBasicBatchProvider,
 
   [[nodiscard]] size_t batch_size() const override { return batch_size_; }
 
+  [[nodiscard]] size_t Size() const override { return items_.size(); }
+
   [[nodiscard]] const std::vector<std::string>& items() const;
 
   [[nodiscard]] const std::vector<std::string>& labels() const;

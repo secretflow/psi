@@ -81,7 +81,7 @@ size_t ComputeMaskSize(const Rr22PsiOptions& options, size_t self_size,
 void BucketRr22Sender::Vole(const std::shared_ptr<yacl::link::Context>& lctx,
                             bool cache_vole,
                             const std::filesystem::path& cache_dir) {
-  std::tie(self_size_, peer_size_) = datasize_f_(bucket_idx_);
+  std::tie(self_size_, peer_size_) = data_processor_->GetBucketDatasize(bucket_idx_);
   mask_size_ = ComputeMaskSize(rr22_options_, self_size_, peer_size_);
   SPDLOG_INFO("mask size: {}", mask_size_);
   if ((peer_size_ == 0) || (self_size_ == 0)) {
@@ -96,7 +96,7 @@ void BucketRr22Sender::RunOprf(const std::shared_ptr<yacl::link::Context>&) {
   if (null_bucket_) {
     return;
   }
-  bucket_items_ = pre_f_(bucket_idx_);
+  bucket_items_ = data_processor_->GetBucketItems(bucket_idx_);
   std::mt19937 g(yacl::crypto::SecureRandU64());
   std::shuffle(bucket_items_.begin(), bucket_items_.end(), g);
 
@@ -111,7 +111,7 @@ void BucketRr22Sender::RunOprf(const std::shared_ptr<yacl::link::Context>&) {
 void BucketRr22Sender::Intersection(
     const std::shared_ptr<yacl::link::Context>& lctx) {
   if (null_bucket_) {
-    post_f_(bucket_idx_, bucket_items_, {}, {});
+    data_processor_->WriteIntersetionItems(bucket_idx_, bucket_items_, {}, {});
     return;
   }
   auto inputs_hash = oprf_sender_.Send(lctx, inputs_hash_);
@@ -163,14 +163,14 @@ void BucketRr22Sender::BroadCastResult(
 }
 
 void BucketRr22Sender::WriteResult() {
-  post_f_(bucket_idx_, bucket_items_, indices_, peer_cnt_);
+  data_processor_->WriteIntersetionItems(bucket_idx_, bucket_items_, indices_, peer_cnt_);
   SPDLOG_INFO("sender write bucket idx {} result", bucket_idx_);
 }
 
 void BucketRr22Receiver::Vole(const std::shared_ptr<yacl::link::Context>& lctx,
                               bool cache_vole,
                               const std::filesystem::path& cache_dir) {
-  std::tie(self_size_, peer_size_) = datasize_f_(bucket_idx_);
+  std::tie(self_size_, peer_size_) = data_processor_->GetBucketDatasize(bucket_idx_);
   mask_size_ = ComputeMaskSize(rr22_options_, self_size_, peer_size_);
   SPDLOG_INFO("mask size: {}", mask_size_);
   if ((peer_size_ == 0) || (self_size_ == 0)) {
@@ -187,7 +187,7 @@ void BucketRr22Receiver::RunOprf(
     return;
   }
 
-  bucket_items_ = pre_f_(bucket_idx_);
+  bucket_items_ = data_processor_->GetBucketItems(bucket_idx_);
 
   inputs_hash_ = std::vector<uint128_t>(bucket_items_.size());
   yacl::parallel_for(0, bucket_items_.size(), [&](int64_t begin, int64_t end) {
@@ -201,7 +201,7 @@ void BucketRr22Receiver::RunOprf(
 void BucketRr22Receiver::Intersection(
     const std::shared_ptr<yacl::link::Context>& lctx) {
   if (null_bucket_) {
-    post_f_(bucket_idx_, bucket_items_, {}, {});
+    data_processor_->WriteIntersetionItems(bucket_idx_, bucket_items_, {}, {});
     return;
   }
   SPDLOG_INFO("get intersection begin");
@@ -302,7 +302,7 @@ void BucketRr22Receiver::BroadCastResult(
 }
 
 void BucketRr22Receiver::WriteResult() {
-  post_f_(bucket_idx_, bucket_items_, self_indices_, peer_cnt_);
+  data_processor_->WriteIntersetionItems(bucket_idx_, bucket_items_, self_indices_, peer_cnt_);
   SPDLOG_INFO("receiver write bucket idx {} result", bucket_idx_);
 }
 

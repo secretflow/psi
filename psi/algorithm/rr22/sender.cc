@@ -105,45 +105,12 @@ void Rr22PsiSender::Online() {
 
   Rr22PsiOptions rr22_options = GenerateRr22PsiOptions(
       config_.protocol_config().rr22_config().low_comm_mode());
-
-  PreProcessFunc pre_f =
-      [&](size_t idx) -> std::vector<HashBucketCache::BucketItem> {
-    if (idx >= input_bucket_store_->BucketNum()) {
-      return {};
-    }
-    return input_bucket_store_->LoadBucketItems(idx);
-  };
-  PostProcessFunc post_f =
-      [&](size_t bucket_idx,
-          const std::vector<HashBucketCache::BucketItem>& bucket_items,
-          const std::vector<uint32_t>& indices,
-          const std::vector<uint32_t>& peer_cnt) {
-        for (size_t i = 0; i != indices.size(); ++i) {
-          intersection_indices_writer_->WriteCache(
-              bucket_items[indices[i]].index, peer_cnt[i]);
-        }
-        intersection_indices_writer_->Commit();
-        if (recovery_manager_) {
-          recovery_manager_->UpdateParsedBucketCount(bucket_idx + 1);
-        }
-      };
-
-  std::vector<uint32_t> self_sizes(input_bucket_store_->BucketNum());
-  for (size_t i = 0; i < self_sizes.size(); i++) {
-    self_sizes[i] = input_bucket_store_->GetBucketSize(i);
-  }
-  std::vector<uint32_t> peer_sizes(input_bucket_store_->BucketNum());
-  yacl::ByteContainerView buffer(self_sizes.data(),
-                                 self_sizes.size() * sizeof(uint32_t));
-  auto data = yacl::link::AllGather(lctx_, buffer, "exchange size");
-  std::memcpy(peer_sizes.data(), data[lctx_->NextRank()].data(),
-              self_sizes.size() * sizeof(uint32_t));
-  DataSizeFunc datasize_func = [&](size_t bucket_idx) {
-    return std::make_pair(self_sizes[bucket_idx], peer_sizes[bucket_idx]);
-  };
+  DataProcessorImpl data_processor(lctx_, input_bucket_store_.get(),
+                                   intersection_indices_writer_.get(),
+                                   recovery_manager_.get());
   Rr22Runner runner(lctx_, rr22_options, input_bucket_store_->BucketNum(),
-                    config_.protocol_config().broadcast_result(), pre_f, post_f,
-                    datasize_func);
+                    config_.protocol_config().broadcast_result(),
+                    &data_processor);
   SyncWait(lctx_, [&] { runner.AsyncRun(bucket_idx, true, true); });
   SPDLOG_INFO("[Rr22PsiSender::Online] end");
 }

@@ -20,6 +20,7 @@
 #include <random>
 #include <string>
 #include <tuple>
+#include <utility>
 #include <vector>
 
 #include "gtest/gtest.h"
@@ -74,6 +75,45 @@ struct TestParams {
 
 class Rr22PsiTest : public testing::TestWithParam<TestParams> {};
 
+class DataProcessorImpl : public DataProcessor {
+ public:
+  DataProcessorImpl(const std::vector<uint128_t>& inputs,
+                    const uint32_t peer_size)
+      : inputs_(inputs), peer_size_(peer_size){};
+
+  std::vector<HashBucketCache::BucketItem> GetBucketItems(size_t) override {
+    std::vector<HashBucketCache::BucketItem> bucket_items(inputs_.size());
+    for (size_t i = 0; i < bucket_items.size(); ++i) {
+      bucket_items[i] = {.index = i,
+                         .base64_data = fmt::format("{}", inputs_[i])};
+    }
+    return bucket_items;
+  };
+
+  void WriteIntersetionItems(
+      size_t, const std::vector<HashBucketCache::BucketItem>& items,
+      const std::vector<uint32_t>& intersection_indices,
+      const std::vector<uint32_t>& peer_dup_cnts) override {
+    for (size_t i = 0; i < intersection_indices.size(); ++i) {
+      indices_result_.push_back(items[intersection_indices[i]].index);
+      for (size_t j = 0; j < peer_dup_cnts[i]; ++j) {
+        indices_result_.push_back(items[intersection_indices[i]].index);
+      }
+    }
+  };
+
+  std::pair<size_t, size_t> GetBucketDatasize(size_t) override {
+    return std::make_pair(inputs_.size(), peer_size_);
+  };
+
+  std::vector<uint32_t> GetResult() { return indices_result_; }
+
+ private:
+  std::vector<uint128_t> inputs_;
+  uint32_t peer_size_;
+  std::vector<uint32_t> indices_result_;
+};
+
 TEST_P(Rr22PsiTest, CorrectTest) {
   auto params = GetParam();
 
@@ -93,65 +133,23 @@ TEST_P(Rr22PsiTest, CorrectTest) {
 
   psi_options.mode = params.mode;
   psi_options.malicious = params.malicious;
-  std::vector<uint32_t> indices_psi;
-  PreProcessFunc receiver_pre_f = [&](size_t) {
-    std::vector<HashBucketCache::BucketItem> bucket_items(inputs_a.size());
-    for (size_t i = 0; i < inputs_a.size(); ++i) {
-      bucket_items[i] = {.index = i,
-                         .base64_data = fmt::format("{}", inputs_a[i])};
-    }
-    return bucket_items;
-  };
-  std::mutex mtx;
-  PostProcessFunc receiver_post_f =
-      [&](size_t, const std::vector<HashBucketCache::BucketItem>& bucket_items,
-          const std::vector<uint32_t>& indices,
-          const std::vector<uint32_t>& peer_dup_cnt) {
-        SPDLOG_INFO("receiver_post_f: {}, {}", indices.size(),
-                    peer_dup_cnt.size());
-        std::unique_lock lock(mtx);
-        for (size_t i = 0; i < indices.size(); ++i) {
-          indices_psi.push_back(bucket_items[indices[i]].index);
-          for (size_t j = 0; j < peer_dup_cnt[i]; ++j) {
-            indices_psi.push_back(bucket_items[indices[i]].index);
-          }
-        }
-      };
-  DataSizeFunc receiver_datasize_f = [&](size_t) {
-    return std::make_pair(inputs_a.size(), inputs_b.size());
-  };
-  PreProcessFunc sender_pre_f = [&](size_t) {
-    std::vector<HashBucketCache::BucketItem> bucket_items(inputs_b.size());
-    for (size_t i = 0; i < inputs_b.size(); ++i) {
-      bucket_items[i] = {.index = i,
-                         .base64_data = fmt::format("{}", inputs_b[i])};
-    }
-    return bucket_items;
-  };
-  size_t bucket_num = 1;
-  PostProcessFunc sender_post_f =
-      [&](size_t, const std::vector<HashBucketCache::BucketItem>&,
-          const std::vector<uint32_t>&,
-          const std::vector<uint32_t>&) { return; };
+  DataProcessorImpl receiver_data(inputs_a, inputs_b.size());
+  DataProcessorImpl sender_data(inputs_b, inputs_a.size());
 
-  DataSizeFunc sender_datasize_f = [&](size_t) {
-    return std::make_pair(inputs_b.size(), inputs_a.size());
-  };
-
+  constexpr size_t bucket_num = 1;
   auto psi_receiver_proc = std::async([&] {
-    Rr22Runner runner(lctxs[0], psi_options, bucket_num, false, receiver_pre_f,
-                      receiver_post_f, receiver_datasize_f);
+    Rr22Runner runner(lctxs[0], psi_options, bucket_num, false, &receiver_data);
     runner.AsyncRun(0, false, true);
   });
 
   auto psi_sender_proc = std::async([&] {
-    Rr22Runner runner(lctxs[1], psi_options, bucket_num, false, sender_pre_f,
-                      sender_post_f, sender_datasize_f);
+    Rr22Runner runner(lctxs[1], psi_options, bucket_num, false, &sender_data);
     runner.AsyncRun(0, true, true);
   });
 
   psi_sender_proc.get();
   psi_receiver_proc.get();
+  auto indices_psi = receiver_data.GetResult();
   std::sort(indices_psi.begin(), indices_psi.end());
   std::vector<uint32_t> indices_result;
   for (size_t i = 0; i < bucket_num; i++) {

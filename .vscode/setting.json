@@ -1,0 +1,14 @@
+{
+    "editor.formatOnSave": true,
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
+    "files.watcherExclude": {
+        "**/.git/**": true,
+        "**/.cache/**": true,
+        "**/bazel-*/**": true,
+        "**/external/**": true
+    },
+    "files.insertFinalNewline": true,
+    "files.trimTrailingWhitespace": true
+}

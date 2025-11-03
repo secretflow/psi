@@ -129,6 +129,10 @@ class MemoryDataStore : public IDataStore {
     return provider_;
   }
 
+  [[nodiscard]] size_t GetBucketDatasize(size_t) const override {
+    return provider_->ReadAll().size();
+  }
+
  private:
   std::shared_ptr<MemoryBatchProvider> provider_;
 };

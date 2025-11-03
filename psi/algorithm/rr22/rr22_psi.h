@@ -36,8 +36,8 @@
 
 #include "psi/algorithm/rr22/rr22_oprf.h"
 #include "psi/utils/bucket.h"
-#include "psi/utils/simple_channel.h"
 #include "psi/utils/hash_bucket_cache.h"
+#include "psi/utils/simple_channel.h"
 
 // [RR22] Blazing Fast PSI from Improved OKVS and Subfield VOLE, CCS 2022
 // https://eprint.iacr.org/2022/320
@@ -79,32 +79,28 @@ struct Rr22PsiOptions {
   const size_t oprf_bin_size = 1 << 14;
 };
 
-using PreProcessFunc =
-    std::function<std::vector<HashBucketCache::BucketItem>(size_t)>;
-// input: bucket index, bucket_items, intersection indices, dup cnt
-using PostProcessFunc = std::function<void(
-    size_t, const std::vector<HashBucketCache::BucketItem>&,
-    const std::vector<uint32_t>&, const std::vector<uint32_t>&)>;
-using DataSizeFunc = std::function<std::pair<size_t, size_t>(size_t)>;
-
-// class DataProcessor {
-//   virtual std::vector<HashBucketCache::BucketItem> GetBucketItems(size_t bucket_idx) = 0;
-//   virtual void WriteIntersetionItems(size_t bucket_idx, const std::vector<HashBucketCache::BucketItem>& items,
-//     const std::vector<uint32_t>& indices, const std::vector<uint32_t>& peer_cnt) = 0;
-//   virtual std::pair<size_t, size_t> GetBucketDatasize(size_t bucket_idx) = 0;
-//   virtual ~DataProcessor() = default;
-// };
+class DataProcessor {
+ public:
+  virtual std::vector<HashBucketCache::BucketItem> GetBucketItems(
+      size_t bucket_idx) = 0;
+  virtual void WriteIntersetionItems(
+      size_t bucket_idx, const std::vector<HashBucketCache::BucketItem>& items,
+      const std::vector<uint32_t>& intersection_indices,
+      const std::vector<uint32_t>& peer_dup_cnts) = 0;
+  virtual std::pair<size_t, size_t> GetBucketDatasize(size_t bucket_idx) = 0;
+  virtual ~DataProcessor() = default;
+};
 
 class BucketRr22Core {
  public:
   BucketRr22Core(const Rr22PsiOptions& rr22_options, size_t bucket_num,
                  size_t bucket_idx, bool broadcast_result,
-                 DataSizeFunc& datasize_f)
+                 DataProcessor* data_processor)
       : rr22_options_(rr22_options),
         bucket_num_(bucket_num),
         broadcast_result_(broadcast_result),
         bucket_idx_(bucket_idx),
-        datasize_f_(datasize_f) {}
+        data_processor_(data_processor) {}
 
   virtual ~BucketRr22Core() = default;
   virtual void Vole(const std::shared_ptr<yacl::link::Context>& lctx,
@@ -135,19 +131,16 @@ class BucketRr22Core {
   std::vector<uint128_t> oprfs_;
   std::vector<HashBucketCache::BucketItem> bucket_items_;
   bool null_bucket_ = false;
-  DataSizeFunc datasize_f_;
+  DataProcessor* data_processor_;
 };
 
 class BucketRr22Sender : public BucketRr22Core {
  public:
   BucketRr22Sender(const Rr22PsiOptions& rr22_options, size_t bucket_num,
                    size_t bucket_idx, bool broadcast_result,
-                   PreProcessFunc& pre_f, PostProcessFunc& post_f,
-                   DataSizeFunc& datasize_f)
+                   DataProcessor* data_processor)
       : BucketRr22Core(rr22_options, bucket_num, bucket_idx, broadcast_result,
-                       datasize_f),
-        pre_f_(pre_f),
-        post_f_(post_f),
+                       data_processor),
         oprf_sender_(rr22_options.oprf_bin_size, rr22_options_.ssp,
                      rr22_options_.mode, rr22_options_.code_type,
                      rr22_options_.malicious) {}
@@ -164,8 +157,6 @@ class BucketRr22Sender : public BucketRr22Core {
   bool IsSender() override { return true; }
 
  private:
-  PreProcessFunc pre_f_;
-  PostProcessFunc post_f_;
   Rr22OprfSender oprf_sender_;
   std::vector<uint32_t> indices_;
   std::vector<uint32_t> peer_cnt_;
@@ -175,12 +166,9 @@ class BucketRr22Receiver : public BucketRr22Core {
  public:
   BucketRr22Receiver(const Rr22PsiOptions& rr22_options, size_t bucket_num,
                      size_t bucket_idx, bool broadcast_result,
-                     PreProcessFunc& pre_f, PostProcessFunc& post_f,
-                     DataSizeFunc& datasize_f)
+                     DataProcessor* data_processor)
       : BucketRr22Core(rr22_options, bucket_num, bucket_idx, broadcast_result,
-                       datasize_f),
-        pre_f_(pre_f),
-        post_f_(post_f),
+                       data_processor),
         oprf_receiver_(rr22_options.oprf_bin_size, rr22_options_.ssp,
                        rr22_options_.mode, rr22_options_.code_type,
                        rr22_options_.malicious) {}
@@ -197,8 +185,6 @@ class BucketRr22Receiver : public BucketRr22Core {
   bool IsSender() override { return false; }
 
  private:
-  PreProcessFunc pre_f_;
-  PostProcessFunc post_f_;
   Rr22OprfReceiver oprf_receiver_;
   std::vector<uint32_t> self_cnt_;
   std::vector<uint32_t> peer_cnt_;
@@ -210,15 +196,12 @@ class Rr22Runner {
  public:
   Rr22Runner(const std::shared_ptr<yacl::link::Context>& lctx,
              const Rr22PsiOptions& rr22_options, size_t bucket_num,
-             bool broadcast_result, PreProcessFunc& pre_f,
-             PostProcessFunc& post_f, DataSizeFunc& datasize_f)
+             bool broadcast_result, DataProcessor* data_processor)
       : lctx_(lctx),
         rr22_options_(rr22_options),
         bucket_num_(bucket_num),
         broadcast_result_(broadcast_result),
-        pre_f_(pre_f),
-        post_f_(post_f),
-        datasize_f_(datasize_f) {}
+        data_processor_(data_processor) {}
   void Run(size_t start_idx, bool is_sender) {
     for (size_t idx = start_idx; idx < bucket_num_; ++idx) {
       auto bucket_runner = CreateBucketRunner(idx, is_sender);
@@ -423,12 +406,10 @@ class Rr22Runner {
     std::shared_ptr<BucketRr22Core> bucker_runner;
     if (is_sender) {
       bucker_runner = std::make_shared<BucketRr22Sender>(
-          rr22_options_, bucket_num_, idx, broadcast_result_, pre_f_, post_f_,
-          datasize_f_);
+          rr22_options_, bucket_num_, idx, broadcast_result_, data_processor_);
     } else {
       bucker_runner = std::make_shared<BucketRr22Receiver>(
-          rr22_options_, bucket_num_, idx, broadcast_result_, pre_f_, post_f_,
-          datasize_f_);
+          rr22_options_, bucket_num_, idx, broadcast_result_, data_processor_);
     }
     return bucker_runner;
   }
@@ -437,9 +418,7 @@ class Rr22Runner {
   Rr22PsiOptions rr22_options_;
   size_t bucket_num_;
   bool broadcast_result_;
-  PreProcessFunc pre_f_;
-  PostProcessFunc post_f_;
-  DataSizeFunc datasize_f_;
+  DataProcessor* data_processor_;
 };
 
 size_t ComputeMaskSize(const Rr22PsiOptions& options, size_t self_size,

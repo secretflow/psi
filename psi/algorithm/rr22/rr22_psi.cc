@@ -81,7 +81,8 @@ size_t ComputeMaskSize(const Rr22PsiOptions& options, size_t self_size,
 void BucketRr22Sender::Vole(const std::shared_ptr<yacl::link::Context>& lctx,
                             bool cache_vole,
                             const std::filesystem::path& cache_dir) {
-  std::tie(self_size_, peer_size_) = data_processor_->GetBucketDatasize(bucket_idx_);
+  std::tie(self_size_, peer_size_) =
+      data_processor_->GetBucketDatasize(bucket_idx_);
   mask_size_ = ComputeMaskSize(rr22_options_, self_size_, peer_size_);
   SPDLOG_INFO("mask size: {}", mask_size_);
   if ((peer_size_ == 0) || (self_size_ == 0)) {
@@ -163,14 +164,16 @@ void BucketRr22Sender::BroadCastResult(
 }
 
 void BucketRr22Sender::WriteResult() {
-  data_processor_->WriteIntersetionItems(bucket_idx_, bucket_items_, indices_, peer_cnt_);
+  data_processor_->WriteIntersetionItems(bucket_idx_, bucket_items_, indices_,
+                                         peer_cnt_);
   SPDLOG_INFO("sender write bucket idx {} result", bucket_idx_);
 }
 
 void BucketRr22Receiver::Vole(const std::shared_ptr<yacl::link::Context>& lctx,
                               bool cache_vole,
                               const std::filesystem::path& cache_dir) {
-  std::tie(self_size_, peer_size_) = data_processor_->GetBucketDatasize(bucket_idx_);
+  std::tie(self_size_, peer_size_) =
+      data_processor_->GetBucketDatasize(bucket_idx_);
   mask_size_ = ComputeMaskSize(rr22_options_, self_size_, peer_size_);
   SPDLOG_INFO("mask size: {}", mask_size_);
   if ((peer_size_ == 0) || (self_size_ == 0)) {
@@ -302,7 +305,8 @@ void BucketRr22Receiver::BroadCastResult(
 }
 
 void BucketRr22Receiver::WriteResult() {
-  data_processor_->WriteIntersetionItems(bucket_idx_, bucket_items_, self_indices_, peer_cnt_);
+  data_processor_->WriteIntersetionItems(bucket_idx_, bucket_items_,
+                                         self_indices_, peer_cnt_);
   SPDLOG_INFO("receiver write bucket idx {} result", bucket_idx_);
 }
 

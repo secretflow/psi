@@ -213,10 +213,8 @@ class Rr22Runner {
     }
   }
 
-  void AsyncRun(size_t start_idx, bool is_sender, bool cache_vole = false,
-                const std::filesystem::path& cache_dir =
-                    std::filesystem::temp_directory_path() /
-                    GetRandomString()) {
+  void AsyncRun(size_t start_idx, bool is_sender,
+                const std::filesystem::path& cache_dir) {
     // cache size meaning the size you can prepare input data into queue
     // bigger cache size may run a little fast but consume more memory
     constexpr size_t cache_size = 1;
@@ -225,7 +223,7 @@ class Rr22Runner {
       return;
     }
     // create cache dir if not exist
-    if (cache_vole && (!std::filesystem::exists(cache_dir))) {
+    if (!std::filesystem::exists(cache_dir)) {
       std::filesystem::create_directory(cache_dir);
     }
     auto helper =
@@ -292,24 +290,11 @@ class Rr22Runner {
           [&](size_t thread_idx) {
             for (size_t j = 0; j < bucket_num_; j++) {
               if (j % futures.size() == thread_idx) {
-                bool choose_as_sender = is_sender;
-                // If the broadcast result is true, to balance the traffic for
-                // receiving and sending, swap the sender and receiver of some
-                // buckets.
-                if (broadcast_result_) {
-                  if (is_sender) {
-                    choose_as_sender = j % 2 == 0;
-                  } else {
-                    choose_as_sender = j % 2 == 1;
-                  }
-                }
-
-                SPDLOG_INFO("idx: {}, is_sender: {}, choose_as_sender: {}", j,
-                            is_sender, choose_as_sender);
-                auto runner = CreateBucketRunner(j, choose_as_sender);
+                SPDLOG_INFO("idx: {}, is_sender: {}", j, is_sender);
+                auto runner = CreateBucketRunner(j, is_sender);
                 std::shared_ptr<yacl::link::Context> spawn_lctx =
                     lctx_->Spawn(std::to_string(runner->BucketIdx()));
-                runner->Vole(spawn_lctx, cache_vole, cache_dir);
+                runner->Vole(spawn_lctx, true, cache_dir);
                 runners[runner->BucketIdx()] = runner;
               }
             }
@@ -320,54 +305,21 @@ class Rr22Runner {
       f.get();
     }
     constexpr size_t Capacity = 2;
-    if (broadcast_result_) {
-      SimpleChannel<std::shared_ptr<BucketRr22Core>> odd_queue(bucket_num_);
-      SimpleChannel<std::shared_ptr<BucketRr22Core>> even_queue(bucket_num_);
-      for (size_t idx = start_idx; idx < bucket_num_; idx++) {
-        if (idx % 2 == 0) {
-          even_queue.Push(runners[idx]);
-        } else {
-          odd_queue.Push(runners[idx]);
-        }
-      }
-      runners.clear();
-      odd_queue.Close();
-      even_queue.Close();
-      SimpleChannel<std::shared_ptr<BucketRr22Core>> odd_result_queue(Capacity);
-      SimpleChannel<std::shared_ptr<BucketRr22Core>> even_result_queue(
-          Capacity);
-      auto odd_f = std::async(std::launch::async, helper, &odd_queue,
-                              &odd_result_queue, Capacity);
-      auto even_f = std::async(std::launch::async, helper, &even_queue,
-                               &even_result_queue, Capacity);
-      for (size_t idx = start_idx; idx < bucket_num_; idx++) {
-        if (idx % 2 == 0) {
-          auto data = even_result_queue.Pop();
-          data.value()->WriteResult();
-        } else {
-          auto data = odd_result_queue.Pop();
-          data.value()->WriteResult();
-        }
-      }
-      odd_f.get();
-      even_f.get();
-    } else {
-      SimpleChannel<std::shared_ptr<BucketRr22Core>> run_queue(bucket_num_);
-      for (size_t idx = start_idx; idx < bucket_num_; idx++) {
-        run_queue.Push(runners[idx]);
-      }
-      runners.clear();
-      run_queue.Close();
-      SimpleChannel<std::shared_ptr<BucketRr22Core>> result_queue(Capacity);
-      auto f = std::async(std::launch::async, helper, &run_queue, &result_queue,
-                          Capacity);
-
-      for (size_t idx = start_idx; idx < bucket_num_; idx++) {
-        auto data = result_queue.Pop();
-        data.value()->WriteResult();
-      }
-      f.get();
+    SimpleChannel<std::shared_ptr<BucketRr22Core>> run_queue(bucket_num_);
+    for (size_t idx = start_idx; idx < bucket_num_; idx++) {
+      run_queue.Push(runners[idx]);
     }
+    runners.clear();
+    run_queue.Close();
+    SimpleChannel<std::shared_ptr<BucketRr22Core>> result_queue(Capacity);
+    auto f = std::async(std::launch::async, helper, &run_queue, &result_queue,
+                        Capacity);
+
+    for (size_t idx = start_idx; idx < bucket_num_; idx++) {
+      auto data = result_queue.Pop();
+      data.value()->WriteResult();
+    }
+    f.get();
   }
 
   void ParallelRun(size_t start_idx, bool is_sender, int parallel_num = 6) {

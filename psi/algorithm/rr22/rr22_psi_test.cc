@@ -139,12 +139,14 @@ TEST_P(Rr22PsiTest, CorrectTest) {
   constexpr size_t bucket_num = 1;
   auto psi_receiver_proc = std::async([&] {
     Rr22Runner runner(lctxs[0], psi_options, bucket_num, false, &receiver_data);
-    runner.AsyncRun(0, false, true);
+    runner.AsyncRun(0, false,
+                    std::filesystem::temp_directory_path() / GetRandomString());
   });
 
   auto psi_sender_proc = std::async([&] {
     Rr22Runner runner(lctxs[1], psi_options, bucket_num, false, &sender_data);
-    runner.AsyncRun(0, true, true);
+    runner.AsyncRun(0, true,
+                    std::filesystem::temp_directory_path() / GetRandomString());
   });
 
   psi_sender_proc.get();

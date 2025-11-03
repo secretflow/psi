@@ -126,7 +126,8 @@ void Rr22Operator::OnRun() {
                     opts_.broadcast_result, &data_processor);
 
   if (opts_.pipeline_mode) {
-    runner.AsyncRun(bucket_idx, opts_.lctx->Rank() != opts_.receiver_rank);
+    runner.AsyncRun(bucket_idx, opts_.lctx->Rank() != opts_.receiver_rank,
+                    opts_.cache_dir);
   } else {
     runner.ParallelRun(bucket_idx, opts_.lctx->Rank() != opts_.receiver_rank,
                        opts_.parallel_level);

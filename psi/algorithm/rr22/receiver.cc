@@ -118,7 +118,9 @@ void Rr22PsiReceiver::Online() {
   Rr22Runner runner(lctx_, rr22_options, input_bucket_store_->BucketNum(),
                     config_.protocol_config().broadcast_result(),
                     &data_processor);
-  SyncWait(lctx_, [&] { runner.AsyncRun(bucket_idx, false, true); });
+  SyncWait(lctx_, [&] {
+    runner.AsyncRun(bucket_idx, false, GetTaskDir() / "cache_vole");
+  });
   SPDLOG_INFO("[Rr22PsiReceiver::Online] end");
 }
 

@@ -1,8 +1,5 @@
 {
     "editor.formatOnSave": true,
-    "[python]": {
-        "editor.defaultFormatter": "ms-python.black-formatter"
-    },
     "files.watcherExclude": {
         "**/.git/**": true,
         "**/.cache/**": true,

@@ -5,7 +5,7 @@ set -ex
 cp -r src src_copied
 cd src_copied
 
-conda install -y perl=5.20.3.1
+conda install -y perl=5.32.1
 conda update -y sysroot_linux-64
 
 

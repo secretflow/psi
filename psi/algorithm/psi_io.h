@@ -51,6 +51,7 @@ class IResultStore {
  public:
   [[nodiscard]] virtual size_t GetBucketNum() const = 0;
   virtual std::shared_ptr<IResultReceiver> GetReceiver(size_t tag) = 0;
+  virtual ~IResultStore() = default;
 };
 
 class IDataProvider {
@@ -65,6 +66,7 @@ class IDataStore {
   [[nodiscard]] virtual size_t GetBucketNum() const = 0;
   [[nodiscard]] virtual size_t GetBucketDatasize(size_t tag) const = 0;
   virtual std::shared_ptr<IDataProvider> Load(size_t tag) = 0;
+  virtual ~IDataStore() = default;
 };
 
 }  // namespace psi

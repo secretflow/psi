@@ -118,8 +118,10 @@ void Rr22PsiReceiver::Online() {
   Rr22Runner runner(lctx_, rr22_options, input_bucket_store_->BucketNum(),
                     config_.protocol_config().broadcast_result(),
                     &data_processor);
+  auto scoped_temp_dir = std::make_unique<ScopedTempDir>();
+  scoped_temp_dir->CreateUniqueTempDirUnderPath(GetTaskDir());
   SyncWait(lctx_, [&] {
-    runner.AsyncRun(bucket_idx, false, GetTaskDir() / "cache_vole");
+    runner.AsyncRun(bucket_idx, false, scoped_temp_dir->path());
   });
   SPDLOG_INFO("[Rr22PsiReceiver::Online] end");
 }

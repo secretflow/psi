@@ -25,6 +25,7 @@
 #include "psi/algorithm/rr22/rr22_utils.h"
 #include "psi/trace_categories.h"
 #include "psi/utils/bucket.h"
+#include "psi/utils/multiplex_disk_cache.h"
 #include "psi/utils/sync.h"
 
 namespace psi::rr22 {
@@ -111,9 +112,10 @@ void Rr22PsiSender::Online() {
   Rr22Runner runner(lctx_, rr22_options, input_bucket_store_->BucketNum(),
                     config_.protocol_config().broadcast_result(),
                     &data_processor);
-  SyncWait(lctx_, [&] {
-    runner.AsyncRun(bucket_idx, true, GetTaskDir() / "cache_vole");
-  });
+  auto scoped_temp_dir = std::make_unique<ScopedTempDir>();
+  scoped_temp_dir->CreateUniqueTempDirUnderPath(GetTaskDir());
+  SyncWait(lctx_,
+           [&] { runner.AsyncRun(bucket_idx, true, scoped_temp_dir->path()); });
   SPDLOG_INFO("[Rr22PsiSender::Online] end");
 }
 

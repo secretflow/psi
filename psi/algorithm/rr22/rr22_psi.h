@@ -304,16 +304,15 @@ class Rr22Runner {
     for (auto& f : futures) {
       f.get();
     }
-    constexpr size_t Capacity = 2;
     SimpleChannel<std::shared_ptr<BucketRr22Core>> run_queue(bucket_num_);
     for (size_t idx = start_idx; idx < bucket_num_; idx++) {
       run_queue.Push(runners[idx]);
     }
     runners.clear();
     run_queue.Close();
-    SimpleChannel<std::shared_ptr<BucketRr22Core>> result_queue(Capacity);
+    SimpleChannel<std::shared_ptr<BucketRr22Core>> result_queue(cache_size);
     auto f = std::async(std::launch::async, helper, &run_queue, &result_queue,
-                        Capacity);
+                        cache_size);
 
     for (size_t idx = start_idx; idx < bucket_num_; idx++) {
       auto data = result_queue.Pop();
@@ -322,6 +321,7 @@ class Rr22Runner {
     f.get();
   }
 
+  // deprecated
   void ParallelRun(size_t start_idx, bool is_sender, int parallel_num = 6) {
     if (static_cast<int>(bucket_num_) <= parallel_num) {
       Run(start_idx, is_sender);

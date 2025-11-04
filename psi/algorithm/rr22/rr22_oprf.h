@@ -48,28 +48,25 @@ enum class Rr22PsiMode {
 class VectorCache {
  public:
   explicit VectorCache(const std::string& file_name) {
-    io::FileIoOptions file_options;
-    file_options.file_name = file_name;
-    output_stream_ = io::BuildOutputStream(file_options);
-    input_stream_ = io::BuildInputStream(file_options);
+    file_options_.file_name = file_name;
   }
   template <typename T>
   void WriteVector(const std::vector<T>& v) {
-    output_stream_->Write(v.data(), v.size() * sizeof(T));
+    auto output_stream = io::BuildOutputStream(file_options_);
+    output_stream->Write(v.data(), v.size() * sizeof(T));
     len_ = v.size();
-    output_stream_->Close();
+    output_stream->Close();
   }
   template <typename T>
   std::vector<T> ReadVector() {
+    auto input_stream = io::BuildInputStream(file_options_);
     std::vector<T> v(len_);
-    input_stream_->Read(v.data(), len_ * sizeof(T));
-    input_stream_->Close();
+    input_stream->Read(v.data(), len_ * sizeof(T));
+    input_stream->Close();
     return v;
   }
-  std::unique_ptr<io::OutputStream> output_stream_;
-  std::unique_ptr<io::InputStream> input_stream_;
+  io::FileIoOptions file_options_;
   size_t len_ = 0;
-  std::unique_ptr<ScopedTempDir> scoped_temp_dir_;
 };
 
 class MocRr22VoleSender {

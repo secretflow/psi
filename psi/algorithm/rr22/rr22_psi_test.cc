@@ -79,7 +79,7 @@ class DataProcessorImpl : public DataProcessor {
  public:
   DataProcessorImpl(const std::vector<uint128_t>& inputs,
                     const uint32_t peer_size)
-      : inputs_(inputs), peer_size_(peer_size){};
+      : inputs_(inputs), peer_size_(peer_size) {}
 
   std::vector<HashBucketCache::BucketItem> GetBucketItems(size_t) override {
     std::vector<HashBucketCache::BucketItem> bucket_items(inputs_.size());
@@ -88,7 +88,7 @@ class DataProcessorImpl : public DataProcessor {
                          .base64_data = fmt::format("{}", inputs_[i])};
     }
     return bucket_items;
-  };
+  }
 
   void WriteIntersetionItems(
       size_t, const std::vector<HashBucketCache::BucketItem>& items,
@@ -100,11 +100,11 @@ class DataProcessorImpl : public DataProcessor {
         indices_result_.push_back(items[intersection_indices[i]].index);
       }
     }
-  };
+  }
 
   std::pair<size_t, size_t> GetBucketDatasize(size_t) override {
     return std::make_pair(inputs_.size(), peer_size_);
-  };
+  }
 
   std::vector<uint32_t> GetResult() { return indices_result_; }
 

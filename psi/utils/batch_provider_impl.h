@@ -130,7 +130,7 @@ class MemoryDataStore : public IDataStore {
   }
 
   [[nodiscard]] size_t GetBucketDatasize(size_t) const override {
-    return provider_->ReadAll().size();
+    return provider_->Size();
   }
 
  private:

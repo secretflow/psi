@@ -217,7 +217,7 @@ class Rr22Runner {
                 const std::filesystem::path& cache_dir) {
     // cache size meaning the size you can prepare input data into queue
     // bigger cache size may run a little fast but consume more memory
-    constexpr size_t cache_size = 1;
+    constexpr size_t cache_size = 2;
     if (bucket_num_ <= cache_size) {
       Run(start_idx, is_sender);
       return;
@@ -242,7 +242,7 @@ class Rr22Runner {
               }
               auto runner = data.value();
               std::shared_ptr<yacl::link::Context> lctx =
-                  lctx_->Spawn(std::to_string(runner->BucketIdx()));
+                  lctx_->Spawn("oprf-" + std::to_string(runner->BucketIdx()));
               runner->RunOprf(lctx);
               intersection_queue.Push(runner);
             }
@@ -255,8 +255,8 @@ class Rr22Runner {
                 break;
               }
               auto runner = data.value();
-              std::shared_ptr<yacl::link::Context> lctx =
-                  lctx_->Spawn(std::to_string(runner->BucketIdx()));
+              std::shared_ptr<yacl::link::Context> lctx = lctx_->Spawn(
+                  "intersection-" + std::to_string(runner->BucketIdx()));
               runner->Intersection(lctx);
               broadcast_queue.Push(runner);
             }
@@ -269,8 +269,8 @@ class Rr22Runner {
                 break;
               }
               auto runner = data.value();
-              std::shared_ptr<yacl::link::Context> lctx =
-                  lctx_->Spawn(std::to_string(runner->BucketIdx()));
+              std::shared_ptr<yacl::link::Context> lctx = lctx_->Spawn(
+                  "broadcasrt-" + std::to_string(runner->BucketIdx()));
               runner->BroadCastResult(lctx);
               result_queue->Push(runner);
             }
@@ -293,7 +293,7 @@ class Rr22Runner {
                 SPDLOG_INFO("idx: {}, is_sender: {}", j, is_sender);
                 auto runner = CreateBucketRunner(j, is_sender);
                 std::shared_ptr<yacl::link::Context> spawn_lctx =
-                    lctx_->Spawn(std::to_string(runner->BucketIdx()));
+                    lctx_->Spawn("vole-" + std::to_string(runner->BucketIdx()));
                 runner->Vole(spawn_lctx, true, cache_dir);
                 runners[runner->BucketIdx()] = runner;
               }

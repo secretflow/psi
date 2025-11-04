@@ -62,17 +62,16 @@ class SimpleChannel {
   }
 
   std::optional<T> Pop() {
-    T item;
+    std::optional<T> item;
     {
       std::unique_lock<std::mutex> lock(mutex_);
-      while (queue_.empty() && !closed_) {
-        cond_.wait(lock, [&] { return !queue_.empty() || closed_; });
-      }
-      // return empty item if queue is closed and queue is empty
-      if (closed_ && queue_.empty()) {
+      cond_.wait(lock, [&] { return !queue_.empty() || closed_; });
+
+      if (queue_.empty()) {
+        // queue is empty and closed
         return std::nullopt;
       }
-      item = queue_.front();
+      item = std::move(queue_.front());
       queue_.pop();
     }
     cond_.notify_all();

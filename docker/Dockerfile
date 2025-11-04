@@ -1,4 +1,4 @@
-FROM openanolis/anolisos:8.8 as builder
+FROM openanolis/anolisos:8.8 AS builder
 
 # build nsjail
 RUN yum install -y \

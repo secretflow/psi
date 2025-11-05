@@ -61,6 +61,15 @@ TEST_P(ThresholdEcdhUbPsiTest, Works) {
                                    uuid_str};
   std::filesystem::create_directories(tmp_folder);
 
+  ON_SCOPE_EXIT([&] {
+    std::error_code ec;
+    std::filesystem::remove_all(tmp_folder, ec);
+    if (ec.value() != 0) {
+      SPDLOG_WARN("can not remove temp file folder: {}, msg: {}",
+                  tmp_folder.string(), ec.message());
+    }
+  });
+
   std::string server_output_path = tmp_folder / "server_output.csv";
   std::string client_output_path = tmp_folder / "client_output.csv";
 
@@ -114,15 +123,6 @@ TEST_P(ThresholdEcdhUbPsiTest, Works) {
   EXPECT_EQ(result_server.size(), target_size);
 
   psi::ResourceManager::GetInstance().RemoveAllResource();
-
-  {
-    std::error_code ec;
-    std::filesystem::remove_all(tmp_folder, ec);
-    if (ec.value() != 0) {
-      SPDLOG_WARN("can not remove temp file folder: {}, msg: {}",
-                  tmp_folder.string(), ec.message());
-    }
-  }
 }
 
 INSTANTIATE_TEST_SUITE_P(

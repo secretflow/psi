@@ -79,23 +79,11 @@ struct Rr22PsiOptions {
   const size_t oprf_bin_size = 1 << 14;
 };
 
-class DataProcessor {
- public:
-  virtual std::vector<HashBucketCache::BucketItem> GetBucketItems(
-      size_t bucket_idx) = 0;
-  virtual void WriteIntersetionItems(
-      size_t bucket_idx, const std::vector<HashBucketCache::BucketItem>& items,
-      const std::vector<uint32_t>& intersection_indices,
-      const std::vector<uint32_t>& peer_dup_cnts) = 0;
-  virtual std::pair<size_t, size_t> GetBucketDatasize(size_t bucket_idx) = 0;
-  virtual ~DataProcessor() = default;
-};
-
 class BucketRr22Core {
  public:
   BucketRr22Core(const Rr22PsiOptions& rr22_options, size_t bucket_num,
                  size_t bucket_idx, bool broadcast_result,
-                 DataProcessor* data_processor)
+                 IBucketDataStore* data_processor)
       : rr22_options_(rr22_options),
         bucket_num_(bucket_num),
         broadcast_result_(broadcast_result),
@@ -131,14 +119,14 @@ class BucketRr22Core {
   std::vector<uint128_t> oprfs_;
   std::vector<HashBucketCache::BucketItem> bucket_items_;
   bool null_bucket_ = false;
-  DataProcessor* data_processor_;
+  IBucketDataStore* data_processor_;
 };
 
 class BucketRr22Sender : public BucketRr22Core {
  public:
   BucketRr22Sender(const Rr22PsiOptions& rr22_options, size_t bucket_num,
                    size_t bucket_idx, bool broadcast_result,
-                   DataProcessor* data_processor)
+                   IBucketDataStore* data_processor)
       : BucketRr22Core(rr22_options, bucket_num, bucket_idx, broadcast_result,
                        data_processor),
         oprf_sender_(rr22_options.oprf_bin_size, rr22_options_.ssp,
@@ -166,7 +154,7 @@ class BucketRr22Receiver : public BucketRr22Core {
  public:
   BucketRr22Receiver(const Rr22PsiOptions& rr22_options, size_t bucket_num,
                      size_t bucket_idx, bool broadcast_result,
-                     DataProcessor* data_processor)
+                     IBucketDataStore* data_processor)
       : BucketRr22Core(rr22_options, bucket_num, bucket_idx, broadcast_result,
                        data_processor),
         oprf_receiver_(rr22_options.oprf_bin_size, rr22_options_.ssp,
@@ -196,7 +184,7 @@ class Rr22Runner {
  public:
   Rr22Runner(const std::shared_ptr<yacl::link::Context>& lctx,
              const Rr22PsiOptions& rr22_options, size_t bucket_num,
-             bool broadcast_result, DataProcessor* data_processor)
+             bool broadcast_result, IBucketDataStore* data_processor)
       : lctx_(lctx),
         rr22_options_(rr22_options),
         bucket_num_(bucket_num),
@@ -370,7 +358,7 @@ class Rr22Runner {
   Rr22PsiOptions rr22_options_;
   size_t bucket_num_;
   bool broadcast_result_;
-  DataProcessor* data_processor_;
+  IBucketDataStore* data_processor_;
 };
 
 size_t ComputeMaskSize(const Rr22PsiOptions& options, size_t self_size,

@@ -112,9 +112,9 @@ void Rr22PsiReceiver::Online() {
   Rr22PsiOptions rr22_options = GenerateRr22PsiOptions(
       config_.protocol_config().rr22_config().low_comm_mode());
 
-  DataProcessorImpl data_processor(lctx_, input_bucket_store_.get(),
-                                   intersection_indices_writer_.get(),
-                                   recovery_manager_.get());
+  BucketDataStoreImpl data_processor(lctx_, input_bucket_store_.get(),
+                                     intersection_indices_writer_.get(),
+                                     recovery_manager_.get());
   Rr22Runner runner(lctx_, rr22_options, input_bucket_store_->BucketNum(),
                     config_.protocol_config().broadcast_result(),
                     &data_processor);

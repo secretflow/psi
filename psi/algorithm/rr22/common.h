@@ -31,12 +31,12 @@ constexpr bool kDefaultCompress = true;
 
 Rr22PsiOptions GenerateRr22PsiOptions(bool low_comm_mode);
 
-class DataProcessorImpl : public DataProcessor {
+class BucketDataStoreImpl : public IBucketDataStore {
  public:
-  DataProcessorImpl(std::shared_ptr<yacl::link::Context> lctx,
-                    HashBucketCache* input_bucket_store,
-                    IndexWriter* intersection_indices_writer,
-                    RecoveryManager* recovery_manager);
+  BucketDataStoreImpl(std::shared_ptr<yacl::link::Context> lctx,
+                      HashBucketCache* input_bucket_store,
+                      IndexWriter* intersection_indices_writer,
+                      RecoveryManager* recovery_manager);
 
   std::vector<HashBucketCache::BucketItem> GetBucketItems(
       size_t bucket_idx) override;

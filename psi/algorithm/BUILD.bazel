@@ -29,6 +29,7 @@ psi_cc_library(
     hdrs = ["psi_io.h"],
     deps = [
         ":types",
+        "//psi/utils:hash_bucket_cache",
     ],
 )
 

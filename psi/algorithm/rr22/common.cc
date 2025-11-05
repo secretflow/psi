@@ -29,11 +29,11 @@ Rr22PsiOptions GenerateRr22PsiOptions(bool low_comm_mode) {
   return options;
 }
 
-DataProcessorImpl::DataProcessorImpl(std::shared_ptr<yacl::link::Context> lctx,
-                                     HashBucketCache* input_bucket_store,
-                                     IndexWriter* intersection_indices_writer,
-                                     RecoveryManager* recovery_manager)
-    : DataProcessor(),
+BucketDataStoreImpl::BucketDataStoreImpl(
+    std::shared_ptr<yacl::link::Context> lctx,
+    HashBucketCache* input_bucket_store,
+    IndexWriter* intersection_indices_writer, RecoveryManager* recovery_manager)
+    : IBucketDataStore(),
       input_bucket_store_(input_bucket_store),
       intersection_indices_writer_(intersection_indices_writer),
       recovery_manager_(recovery_manager),
@@ -50,7 +50,7 @@ DataProcessorImpl::DataProcessorImpl(std::shared_ptr<yacl::link::Context> lctx,
               self_sizes_.size() * sizeof(uint32_t));
 }
 
-std::vector<HashBucketCache::BucketItem> DataProcessorImpl::GetBucketItems(
+std::vector<HashBucketCache::BucketItem> BucketDataStoreImpl::GetBucketItems(
     size_t bucket_idx) {
   if (bucket_idx >= input_bucket_store_->BucketNum()) {
     return {};
@@ -58,7 +58,7 @@ std::vector<HashBucketCache::BucketItem> DataProcessorImpl::GetBucketItems(
   return input_bucket_store_->LoadBucketItems(bucket_idx);
 }
 
-void DataProcessorImpl::WriteIntersetionItems(
+void BucketDataStoreImpl::WriteIntersetionItems(
     size_t bucket_idx, const std::vector<HashBucketCache::BucketItem>& items,
     const std::vector<uint32_t>& intersection_indices,
     const std::vector<uint32_t>& peer_dup_cnts) {
@@ -72,7 +72,7 @@ void DataProcessorImpl::WriteIntersetionItems(
   }
 }
 
-std::pair<size_t, size_t> DataProcessorImpl::GetBucketDatasize(
+std::pair<size_t, size_t> BucketDataStoreImpl::GetBucketDatasize(
     size_t bucket_idx) {
   return std::make_pair(self_sizes_[bucket_idx], peer_sizes_[bucket_idx]);
 }

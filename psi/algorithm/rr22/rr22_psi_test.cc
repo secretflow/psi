@@ -75,10 +75,10 @@ struct TestParams {
 
 class Rr22PsiTest : public testing::TestWithParam<TestParams> {};
 
-class DataProcessorImpl : public DataProcessor {
+class BucketDataStoreImpl : public IBucketDataStore {
  public:
-  DataProcessorImpl(const std::vector<uint128_t>& inputs,
-                    const uint32_t peer_size)
+  BucketDataStoreImpl(const std::vector<uint128_t>& inputs,
+                      const uint32_t peer_size)
       : inputs_(inputs), peer_size_(peer_size) {}
 
   std::vector<HashBucketCache::BucketItem> GetBucketItems(size_t) override {
@@ -133,8 +133,8 @@ TEST_P(Rr22PsiTest, CorrectTest) {
 
   psi_options.mode = params.mode;
   psi_options.malicious = params.malicious;
-  DataProcessorImpl receiver_data(inputs_a, inputs_b.size());
-  DataProcessorImpl sender_data(inputs_b, inputs_a.size());
+  BucketDataStoreImpl receiver_data(inputs_a, inputs_b.size());
+  BucketDataStoreImpl sender_data(inputs_b, inputs_a.size());
 
   constexpr size_t bucket_num = 1;
   auto psi_receiver_proc = std::async([&] {

@@ -26,11 +26,11 @@
 namespace psi::rr22 {
 
 namespace {
-class DataProcessorImpl : public DataProcessor {
+class BucketDataStoreImpl : public IBucketDataStore {
  public:
-  DataProcessorImpl(std::shared_ptr<yacl::link::Context> lctx,
-                    IDataStore* input_store, IResultStore* output_store,
-                    RecoveryManager* recovery_manager)
+  BucketDataStoreImpl(std::shared_ptr<yacl::link::Context> lctx,
+                      IDataStore* input_store, IResultStore* output_store,
+                      RecoveryManager* recovery_manager)
       : input_store_(input_store),
         output_store_(output_store),
         recovery_manager_(recovery_manager),
@@ -112,9 +112,9 @@ bool Rr22Operator::ReceiveResult() {
 void Rr22Operator::OnInit() {}
 
 void Rr22Operator::OnRun() {
-  DataProcessorImpl data_processor(link_ctx_, input_store_.get(),
-                                   output_store_.get(),
-                                   recovery_manager_.get());
+  BucketDataStoreImpl data_processor(link_ctx_, input_store_.get(),
+                                     output_store_.get(),
+                                     recovery_manager_.get());
 
   size_t bucket_idx =
       recovery_manager_

@@ -18,6 +18,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <functional>
 #include <future>
 #include <memory>
@@ -122,7 +123,7 @@ void BucketRr22Sender::Intersection(
   auto* data_ptr = reinterpret_cast<std::byte*>(oprfs_.data());
   if (compress) {
     for (size_t i = 0; i < oprfs_.size(); ++i) {
-      std::memcpy(data_ptr + (i * mask_size_), &oprfs_[i], mask_size_);
+      std::memmove(data_ptr + (i * mask_size_), &oprfs_[i], mask_size_);
     }
   }
   yacl::ByteContainerView send_buffer(data_ptr, oprfs_.size() * mask_size_);

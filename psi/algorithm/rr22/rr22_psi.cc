@@ -118,17 +118,9 @@ void BucketRr22Sender::Intersection(
   auto inputs_hash = oprf_sender_.Send(lctx, inputs_hash_);
   oprfs_ = oprf_sender_.Eval(inputs_hash_, inputs_hash);
   SPDLOG_INFO("get intersection begin");
-  std::vector<uint32_t> result;
   bool compress = mask_size_ != sizeof(uint128_t);
-  auto truncate_mask = yacl::MakeUint128(0, 0);
   auto* data_ptr = reinterpret_cast<std::byte*>(oprfs_.data());
   if (compress) {
-    for (size_t i = 0; i < mask_size_; ++i) {
-      truncate_mask = 0xff | (truncate_mask << 8);
-      SPDLOG_DEBUG(
-          "{}, truncate_mask:{}", i,
-          (std::ostringstream() << okvs::Galois128(truncate_mask)).str());
-    }
     for (size_t i = 0; i < oprfs_.size(); ++i) {
       std::memcpy(data_ptr + (i * mask_size_), &oprfs_[i], mask_size_);
     }

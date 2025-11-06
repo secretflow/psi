@@ -53,20 +53,22 @@ class VectorCache {
   template <typename T>
   void WriteVector(const std::vector<T>& v) {
     auto output_stream = io::BuildOutputStream(file_options_);
-    output_stream->Write(v.data(), v.size() * sizeof(T));
-    len_ = v.size();
+    size_in_bytes_ = v.size() * sizeof(T);
+    output_stream->Write(v.data(), size_in_bytes_);
     output_stream->Close();
   }
   template <typename T>
   std::vector<T> ReadVector() {
     auto input_stream = io::BuildInputStream(file_options_);
-    std::vector<T> v(len_);
-    input_stream->Read(v.data(), len_ * sizeof(T));
+    YACL_ENFORCE(size_in_bytes_ % sizeof(T) == 0,
+                 "Size mismatch in VectorCache ReadVector");
+    std::vector<T> v(size_in_bytes_ / sizeof(T));
+    input_stream->Read(v.data(), size_in_bytes_);
     input_stream->Close();
     return v;
   }
   io::FileIoOptions file_options_;
-  size_t len_ = 0;
+  size_t size_in_bytes_ = 0;
 };
 
 class MocRr22VoleSender {

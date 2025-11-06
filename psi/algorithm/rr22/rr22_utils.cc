@@ -236,7 +236,7 @@ std::pair<std::vector<uint32_t>, std::vector<uint32_t>> GetIntersectionSender(
   auto* data_ptr = reinterpret_cast<std::byte*>(self_oprfs.data());
   if (compress) {
     for (size_t i = 0; i < self_oprfs.size(); ++i) {
-      std::memcpy(data_ptr + (i * mask_size), &self_oprfs[i], mask_size);
+      std::memmove(data_ptr + (i * mask_size), &self_oprfs[i], mask_size);
     }
   }
   yacl::ByteContainerView send_buffer(data_ptr, self_oprfs.size() * mask_size);
@@ -274,7 +274,7 @@ std::vector<uint32_t> GetIntersectionSender(
   auto* data_ptr = reinterpret_cast<std::byte*>(self_oprfs.data());
   if (compress) {
     for (size_t i = 0; i < self_oprfs.size(); ++i) {
-      std::memcpy(data_ptr + (i * mask_size), &self_oprfs[i], mask_size);
+      std::memmove(data_ptr + (i * mask_size), &self_oprfs[i], mask_size);
     }
   }
   for (size_t i = 0; i < self_oprfs.size(); i += kSendChunkSize) {

@@ -214,6 +214,8 @@ class Rr22Runner {
     if (!std::filesystem::exists(cache_dir)) {
       std::filesystem::create_directory(cache_dir);
     }
+    // main computation flow of rr22 - takes bucket data as input, returns
+    // intersection index
     auto helper =
         [&](SimpleChannel<std::shared_ptr<BucketRr22Core>>* run_queue,
             SimpleChannel<std::shared_ptr<BucketRr22Core>>* result_queue,
@@ -289,6 +291,7 @@ class Rr22Runner {
           },
           i);
     }
+    // waiting for futures completed
     for (auto& f : futures) {
       f.get();
     }

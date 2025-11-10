@@ -21,7 +21,7 @@ namespace psi {
 yacl::crypto::EcPoint Sm2Cryptor::HashToCurve(
     absl::Span<const char> item_data) const {
   return ec_group_->HashToCurve(
-      yacl::crypto::HashToCurveStrategy::TryAndRehash_SHA2,
+      yacl::crypto::HashToCurveStrategy::TryAndRehash_SM,
       std::string_view(item_data.data(), item_data.size()));
 }
 

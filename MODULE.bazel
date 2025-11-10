@@ -26,6 +26,7 @@ single_version_override(
     ],
     version = "0.15.0",
 )
+
 bazel_dep(name = "protobuf", version = "27.3")
 bazel_dep(name = "spdlog", version = "1.14.1")
 bazel_dep(name = "fmt", version = "11.0.2")

@@ -31,6 +31,8 @@ class Rr22Operator : public PsiOperator {
     size_t parallel_level = 6;
 
     std::shared_ptr<RecoveryManager> recovery_manager = nullptr;
+    std::string cache_dir =
+        std::filesystem::temp_directory_path() / GetRandomString();
   };
 
  public:

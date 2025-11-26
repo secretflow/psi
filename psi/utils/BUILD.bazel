@@ -427,3 +427,8 @@ psi_cc_test(
         "@com_google_googletest//:gtest",
     ],
 )
+
+cc_library(
+    name = "simple_channel",
+    hdrs = ["simple_channel.h"],
+)

@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <vector>
@@ -21,6 +22,7 @@
 #include "yacl/base/int128.h"
 
 #include "psi/algorithm/types.h"
+#include "psi/utils/hash_bucket_cache.h"
 
 namespace psi {
 
@@ -57,13 +59,27 @@ class IDataProvider {
  public:
   virtual std::vector<PsiItemData> ReadNext(size_t size) = 0;
   virtual std::vector<PsiItemData> ReadAll() = 0;
+  [[nodiscard]] virtual size_t Size() const = 0;
 };
 
 class IDataStore {
  public:
   [[nodiscard]] virtual size_t GetBucketNum() const = 0;
+  [[nodiscard]] virtual size_t GetBucketDatasize(size_t tag) const = 0;
   virtual std::shared_ptr<IDataProvider> Load(size_t tag) = 0;
   virtual ~IDataStore() = default;
+};
+
+class IBucketDataStore {
+ public:
+  virtual std::vector<HashBucketCache::BucketItem> GetBucketItems(
+      size_t bucket_idx) = 0;
+  virtual void WriteIntersetionItems(
+      size_t bucket_idx, const std::vector<HashBucketCache::BucketItem>& items,
+      const std::vector<uint32_t>& intersection_indices,
+      const std::vector<uint32_t>& peer_dup_cnts) = 0;
+  virtual std::pair<size_t, size_t> GetBucketDatasize(size_t bucket_idx) = 0;
+  virtual ~IBucketDataStore() = default;
 };
 
 }  // namespace psi

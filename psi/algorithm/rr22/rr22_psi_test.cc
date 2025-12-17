@@ -157,9 +157,11 @@ TEST_P(Rr22PsiTest, CorrectTest) {
 
 INSTANTIATE_TEST_SUITE_P(
     CorrectTest_Instances, Rr22PsiTest,
-    testing::Values(TestParams{1 << 17, 1 << 17, Rr22PsiMode::FastMode},
+    testing::Values(TestParams{6789, 7890, Rr22PsiMode::FastMode},
+                    TestParams{1 << 17, 1 << 17, Rr22PsiMode::FastMode},
                     TestParams{1 << 17, 1 << 20, Rr22PsiMode::FastMode},
                     TestParams{1 << 20, 1 << 17, Rr22PsiMode::FastMode},
                     TestParams{1 << 17, 1 << 17, Rr22PsiMode::FastMode, true},
+                    TestParams{6789, 7890, Rr22PsiMode::LowCommMode},
                     TestParams{1 << 17, 1 << 17, Rr22PsiMode::LowCommMode}));
 }  // namespace psi::rr22

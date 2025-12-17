@@ -1997,7 +1997,7 @@ void Paxos<IdxType>::Decode32U64(absl::Span<IdxType> rows_span,
 
       YACL_ENFORCE(dense_size <= 64);
       for (uint64_t i = 0; i < 8; ++i) {
-        d2[i] = yacl::DecomposeUInt128(dense[i]).first;
+        d2[i] = yacl::DecomposeUInt128(dense[i]).second;
       }
 
       for (uint64_t i = 0; i < dense_size; ++i) {
@@ -2182,7 +2182,7 @@ void Paxos<IdxType>::Decode32(absl::Span<IdxType> rows_span,
 
       YACL_ENFORCE(dense_size <= 64);
       for (uint64_t i = 0; i < 8; ++i) {
-        d2[i] = yacl::DecomposeUInt128(dense[i]).first;
+        d2[i] = yacl::DecomposeUInt128(dense[i]).second;
       }
 
       for (uint64_t i = 0; i < dense_size; ++i) {

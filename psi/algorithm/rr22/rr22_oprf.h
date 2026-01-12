@@ -15,7 +15,9 @@
 #pragma once
 
 #include <cstdint>
+#include <filesystem>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "yacl/base/int128.h"
@@ -23,6 +25,9 @@
 #include "yacl/link/context.h"
 
 #include "psi/algorithm/rr22/okvs/baxos.h"
+#include "psi/utils/io.h"
+#include "psi/utils/multiplex_disk_cache.h"
+#include "psi/utils/random_str.h"
 
 // Reference:
 // Blazing Fast PSI from Improved OKVS and Subfield VOLE
@@ -37,6 +42,33 @@ namespace psi::rr22 {
 enum class Rr22PsiMode {
   FastMode,
   LowCommMode,
+};
+
+// can only write one vector
+class VectorCache {
+ public:
+  explicit VectorCache(const std::string& file_name) {
+    file_options_.file_name = file_name;
+  }
+  template <typename T>
+  void WriteVector(const std::vector<T>& v) {
+    auto output_stream = io::BuildOutputStream(file_options_);
+    size_in_bytes_ = v.size() * sizeof(T);
+    output_stream->Write(v.data(), size_in_bytes_);
+    output_stream->Close();
+  }
+  template <typename T>
+  std::vector<T> ReadVector() {
+    auto input_stream = io::BuildInputStream(file_options_);
+    YACL_ENFORCE(size_in_bytes_ % sizeof(T) == 0,
+                 "Size mismatch in VectorCache ReadVector");
+    std::vector<T> v(size_in_bytes_ / sizeof(T));
+    input_stream->Read(v.data(), size_in_bytes_);
+    input_stream->Close();
+    return v;
+  }
+  io::FileIoOptions file_options_;
+  size_t size_in_bytes_ = 0;
 };
 
 class MocRr22VoleSender {
@@ -116,6 +148,8 @@ class Rr22Oprf {
   bool debug_ = false;
 
   size_t paxos_size_ = 0;
+
+  bool cache_vole_ = false;
 };
 
 class Rr22OprfSender : public Rr22Oprf {
@@ -129,8 +163,10 @@ class Rr22OprfSender : public Rr22Oprf {
       YACL_THROW("RR22 malicious psi not support LowCommMode");
     }
   }
-  void Init(const std::shared_ptr<yacl::link::Context>& lctx, size_t init_size,
-            size_t num_threads = 0);
+  void Init(const std::shared_ptr<yacl::link::Context>& lctx, size_t peer_size,
+            size_t num_threads = 0, bool cache_vole = false,
+            const std::filesystem::path& cache_dir =
+                std::filesystem::temp_directory_path() / GetRandomString());
 
   std::vector<uint128_t> Send(const std::shared_ptr<yacl::link::Context>& lctx,
                               const absl::Span<const uint128_t>& inputs);
@@ -159,6 +195,8 @@ class Rr22OprfSender : public Rr22Oprf {
   // b = delta * a + c
   uint128_t delta_ = 0;
   std::vector<uint128_t> b_;
+  std::shared_ptr<VectorCache> v_b_;
+  std::unique_ptr<ScopedTempDir> scoped_temp_dir_;
 };
 
 class Rr22OprfReceiver : public Rr22Oprf {
@@ -173,8 +211,10 @@ class Rr22OprfReceiver : public Rr22Oprf {
     }
   }
 
-  void Init(const std::shared_ptr<yacl::link::Context>& lctx, size_t init_size,
-            size_t num_threads = 0);
+  void Init(const std::shared_ptr<yacl::link::Context>& lctx, size_t self_size,
+            size_t num_threads = 0, bool cache_vole = false,
+            const std::filesystem::path& cache_dir =
+                std::filesystem::temp_directory_path() / GetRandomString());
 
   std::vector<uint128_t> Recv(const std::shared_ptr<yacl::link::Context>& lctx,
                               const absl::Span<const uint128_t>& inputs);
@@ -196,6 +236,10 @@ class Rr22OprfReceiver : public Rr22Oprf {
   // low comm use int64
   std::vector<uint64_t> a64_;
   std::vector<uint128_t> c_;
+  std::shared_ptr<VectorCache> v_a_;
+  std::shared_ptr<VectorCache> v_a64_;
+  std::shared_ptr<VectorCache> v_c_;
+  std::unique_ptr<ScopedTempDir> scoped_temp_dir_;
 };
 
 }  // namespace psi::rr22

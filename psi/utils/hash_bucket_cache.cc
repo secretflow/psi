@@ -16,10 +16,12 @@
 
 #include <spdlog/spdlog.h>
 
+#include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include "absl/strings/escaping.h"
 
@@ -39,6 +41,7 @@ HashBucketCache::HashBucketCache(const std::string& target_dir,
       std::filesystem::path(target_dir), use_scoped_tmp_dir);
   YACL_ENFORCE(disk_cache_, "cannot create disk cache from dir={}", target_dir);
   disk_cache_->CreateOutputStreams(bucket_num_, &bucket_os_vec_);
+  bucket_data_sizes_ = std::vector<size_t>(bucket_num, 0);
 }
 
 HashBucketCache::~HashBucketCache() {
@@ -52,12 +55,13 @@ void HashBucketCache::WriteItem(const std::string& data,
   bucket_item.index = item_index_;
   bucket_item.extra_dup_cnt = duplicate_cnt;
   bucket_item.base64_data = absl::Base64Escape(data);
-
-  auto& out = bucket_os_vec_[std::hash<std::string>()(bucket_item.base64_data) %
-                             bucket_os_vec_.size()];
+  size_t bucket_idx =
+      std::hash<std::string>()(bucket_item.base64_data) % bucket_os_vec_.size();
+  auto& out = bucket_os_vec_[bucket_idx];
   out->Write(bucket_item.Serialize());
   out->Write("\n");
   item_index_++;
+  bucket_data_sizes_[bucket_idx]++;
 }
 
 void HashBucketCache::Flush() {
@@ -78,6 +82,10 @@ std::vector<HashBucketCache::BucketItem> HashBucketCache::LoadBucketItems(
     ret.push_back(std::move(item));
   }
   return ret;
+}
+
+size_t HashBucketCache::GetBucketSize(uint32_t index) {
+  return bucket_data_sizes_[index];
 }
 
 std::unique_ptr<HashBucketCache> CreateCacheFromCsv(

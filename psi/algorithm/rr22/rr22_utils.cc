@@ -233,17 +233,10 @@ std::pair<std::vector<uint32_t>, std::vector<uint32_t>> GetIntersectionSender(
     bool broadcast_result) {
   std::vector<uint32_t> result;
   bool compress = mask_size != sizeof(uint128_t);
-  auto truncate_mask = yacl::MakeUint128(0, 0);
   auto* data_ptr = reinterpret_cast<std::byte*>(self_oprfs.data());
   if (compress) {
-    for (size_t i = 0; i < mask_size; ++i) {
-      truncate_mask = 0xff | (truncate_mask << 8);
-      SPDLOG_DEBUG(
-          "{}, truncate_mask:{}", i,
-          (std::ostringstream() << okvs::Galois128(truncate_mask)).str());
-    }
     for (size_t i = 0; i < self_oprfs.size(); ++i) {
-      std::memcpy(data_ptr + (i * mask_size), &self_oprfs[i], mask_size);
+      std::memmove(data_ptr + (i * mask_size), &self_oprfs[i], mask_size);
     }
   }
   yacl::ByteContainerView send_buffer(data_ptr, self_oprfs.size() * mask_size);
@@ -278,17 +271,10 @@ std::vector<uint32_t> GetIntersectionSender(
     bool broadcast_result) {
   std::vector<uint32_t> result;
   bool compress = mask_size != sizeof(uint128_t);
-  auto truncate_mask = yacl::MakeUint128(0, 0);
   auto* data_ptr = reinterpret_cast<std::byte*>(self_oprfs.data());
   if (compress) {
-    for (size_t i = 0; i < mask_size; ++i) {
-      truncate_mask = 0xff | (truncate_mask << 8);
-      SPDLOG_DEBUG(
-          "{}, truncate_mask:{}", i,
-          (std::ostringstream() << okvs::Galois128(truncate_mask)).str());
-    }
     for (size_t i = 0; i < self_oprfs.size(); ++i) {
-      std::memcpy(data_ptr + (i * mask_size), &self_oprfs[i], mask_size);
+      std::memmove(data_ptr + (i * mask_size), &self_oprfs[i], mask_size);
     }
   }
   for (size_t i = 0; i < self_oprfs.size(); i += kSendChunkSize) {

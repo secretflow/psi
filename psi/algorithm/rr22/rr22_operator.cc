@@ -14,9 +14,91 @@
 
 #include "psi/algorithm/rr22/rr22_operator.h"
 
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
 #include <memory>
+#include <utility>
+#include <vector>
+
+#include "psi/algorithm/rr22/rr22_psi.h"
 
 namespace psi::rr22 {
+
+namespace {
+
+// TODO: refactor to reduce duplicated code
+class BucketDataStoreImpl : public IBucketDataStore {
+ public:
+  BucketDataStoreImpl(std::shared_ptr<yacl::link::Context> lctx,
+                      IDataStore* input_store, IResultStore* output_store,
+                      RecoveryManager* recovery_manager)
+      : input_store_(input_store),
+        output_store_(output_store),
+        recovery_manager_(recovery_manager),
+        lctx_(std::move(lctx)) {
+    self_sizes_ = std::vector<uint32_t>(input_store_->GetBucketNum());
+    for (size_t i = 0; i < self_sizes_.size(); i++) {
+      self_sizes_[i] = input_store_->GetBucketDatasize(i);
+    }
+    peer_sizes_ = std::vector<uint32_t>(input_store_->GetBucketNum());
+    yacl::ByteContainerView buffer(self_sizes_.data(),
+                                   self_sizes_.size() * sizeof(uint32_t));
+    auto data = yacl::link::AllGather(lctx_, buffer, "exchange size");
+    std::memcpy(peer_sizes_.data(), data[lctx_->NextRank()].data(),
+                self_sizes_.size() * sizeof(uint32_t));
+  };
+
+  std::vector<HashBucketCache::BucketItem> GetBucketItems(
+      size_t bucket_idx) override {
+    if (bucket_idx >= input_store_->GetBucketNum()) {
+      return {};
+    }
+    std::vector<HashBucketCache::BucketItem> bucket_items;
+    auto provider = input_store_->Load(bucket_idx);
+    auto item_datas = provider->ReadAll();
+    bucket_items.reserve(item_datas.size());
+    for (size_t i = 0; i < item_datas.size(); ++i) {
+      bucket_items.emplace_back(HashBucketCache::BucketItem{
+          .index = i,
+          .extra_dup_cnt = item_datas[i].cnt - 1,
+          .base64_data = std::move(item_datas[i].buf)});
+    }
+    return bucket_items;
+  };
+
+  void WriteIntersetionItems(
+      size_t bucket_idx, const std::vector<HashBucketCache::BucketItem>& items,
+      const std::vector<uint32_t>& intersection_indices,
+      const std::vector<uint32_t>& peer_dup_cnts) override {
+    std::vector<PsiResultIndex> indices;
+    indices.reserve(intersection_indices.size());
+
+    for (size_t i = 0; i < intersection_indices.size(); ++i) {
+      indices.emplace_back(
+          PsiResultIndex{.data = items[intersection_indices[i]].index,
+                         .peer_item_cnt = peer_dup_cnts[i] + 1});
+    }
+    auto recevier = output_store_->GetReceiver(bucket_idx);
+    recevier->Add(std::move(indices));
+    if (recovery_manager_ != nullptr) {
+      recovery_manager_->UpdateParsedBucketCount(bucket_idx + 1);
+    }
+  };
+
+  std::pair<size_t, size_t> GetBucketDatasize(size_t bucket_idx) override {
+    return std::make_pair(self_sizes_[bucket_idx], peer_sizes_[bucket_idx]);
+  };
+
+ private:
+  IDataStore* input_store_;
+  IResultStore* output_store_;
+  RecoveryManager* recovery_manager_;
+  std::shared_ptr<yacl::link::Context> lctx_;
+  std::vector<uint32_t> peer_sizes_;
+  std::vector<uint32_t> self_sizes_;
+};
+}  // namespace
 
 Rr22Operator::Rr22Operator(Options opts,
                            std::shared_ptr<IDataStore> input_store,
@@ -32,36 +114,9 @@ bool Rr22Operator::ReceiveResult() {
 void Rr22Operator::OnInit() {}
 
 void Rr22Operator::OnRun() {
-  PreProcessFunc pre_process_func =
-      [this](size_t bucket_idx) -> std::vector<HashBucketCache::BucketItem> {
-    std::vector<HashBucketCache::BucketItem> bucket_items;
-    auto provider = input_store_->Load(bucket_idx);
-    auto item_datas = provider->ReadAll();
-    bucket_items.reserve(item_datas.size());
-    for (size_t i = 0; i < item_datas.size(); ++i) {
-      bucket_items.emplace_back(HashBucketCache::BucketItem{
-          .index = i,
-          .extra_dup_cnt = item_datas[i].cnt - 1,
-          .base64_data = std::move(item_datas[i].buf)});
-    }
-    return bucket_items;
-  };
-  PostProcessFunc post_process_func =
-      [this](size_t bucket_idx,
-             const std::vector<HashBucketCache::BucketItem>& bucket_items,
-             const std::vector<uint32_t>& intersection_indices,
-             const std::vector<uint32_t>& peer_dup_cnts) {
-        std::vector<PsiResultIndex> indices;
-        indices.reserve(intersection_indices.size());
-
-        for (size_t i = 0; i < intersection_indices.size(); ++i) {
-          indices.emplace_back(PsiResultIndex{
-              .data = bucket_items[intersection_indices[i]].index,
-              .peer_item_cnt = peer_dup_cnts[i] + 1});
-        }
-        auto recevier = output_store_->GetReceiver(bucket_idx);
-        recevier->Add(std::move(indices));
-      };
+  BucketDataStoreImpl data_processor(link_ctx_, input_store_.get(),
+                                     output_store_.get(),
+                                     recovery_manager_.get());
 
   size_t bucket_idx =
       recovery_manager_
@@ -70,11 +125,11 @@ void Rr22Operator::OnRun() {
           : 0;
 
   Rr22Runner runner(link_ctx_, opts_.rr22_opts, input_store_->GetBucketNum(),
-                    opts_.broadcast_result, pre_process_func,
-                    post_process_func);
+                    opts_.broadcast_result, &data_processor);
 
   if (opts_.pipeline_mode) {
-    runner.AsyncRun(bucket_idx, opts_.lctx->Rank() != opts_.receiver_rank);
+    runner.AsyncRun(bucket_idx, opts_.lctx->Rank() != opts_.receiver_rank,
+                    opts_.cache_dir);
   } else {
     runner.ParallelRun(bucket_idx, opts_.lctx->Rank() != opts_.receiver_rank,
                        opts_.parallel_level);

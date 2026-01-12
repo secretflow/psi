@@ -112,32 +112,17 @@ void Rr22PsiReceiver::Online() {
   Rr22PsiOptions rr22_options = GenerateRr22PsiOptions(
       config_.protocol_config().rr22_config().low_comm_mode());
 
-  PreProcessFunc pre_f =
-      [&](size_t idx) -> std::vector<HashBucketCache::BucketItem> {
-    if (idx >= input_bucket_store_->BucketNum()) {
-      return {};
-    }
-    return input_bucket_store_->LoadBucketItems(idx);
-  };
-  PostProcessFunc post_f =
-      [&](size_t bucket_idx,
-          const std::vector<HashBucketCache::BucketItem>& bucket_items,
-          const std::vector<uint32_t>& indices,
-          const std::vector<uint32_t>& peer_cnt) {
-        for (size_t i = 0; i != indices.size(); ++i) {
-          intersection_indices_writer_->WriteCache(
-              bucket_items[indices[i]].index, peer_cnt[i]);
-        }
-        intersection_indices_writer_->Commit();
-        if (recovery_manager_) {
-          recovery_manager_->UpdateParsedBucketCount(bucket_idx + 1);
-        }
-      };
-
+  BucketDataStoreImpl data_processor(lctx_, input_bucket_store_.get(),
+                                     intersection_indices_writer_.get(),
+                                     recovery_manager_.get());
   Rr22Runner runner(lctx_, rr22_options, input_bucket_store_->BucketNum(),
-                    config_.protocol_config().broadcast_result(), pre_f,
-                    post_f);
-  SyncWait(lctx_, [&] { runner.AsyncRun(bucket_idx, false); });
+                    config_.protocol_config().broadcast_result(),
+                    &data_processor);
+  auto scoped_temp_dir = std::make_unique<ScopedTempDir>();
+  scoped_temp_dir->CreateUniqueTempDirUnderPath(GetTaskDir());
+  SyncWait(lctx_, [&] {
+    runner.AsyncRun(bucket_idx, false, scoped_temp_dir->path());
+  });
   SPDLOG_INFO("[Rr22PsiReceiver::Online] end");
 }
 

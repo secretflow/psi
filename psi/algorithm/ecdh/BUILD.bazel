@@ -51,6 +51,15 @@ psi_cc_binary(
     ],
 )
 
+psi_cc_binary(
+    name = "ecdh_psi_mask_benchmark",
+    srcs = ["ecdh_psi_mask_benchmark.cc"],
+    deps = [
+        "//psi/cryptor:cryptor_selector",
+        "@com_github_google_benchmark//:benchmark_main",
+    ],
+)
+
 psi_cc_library(
     name = "ecdh_3pc_psi",
     srcs = ["ecdh_3pc_psi.cc"],

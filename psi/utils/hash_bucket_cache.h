@@ -87,6 +87,8 @@ class HashBucketCache {
 
   std::vector<BucketItem> LoadBucketItems(uint32_t index);
 
+  size_t GetBucketSize(uint32_t index);
+
   uint32_t BucketNum() const { return bucket_num_; }
 
   uint64_t ItemCount() const { return item_index_; }
@@ -95,6 +97,8 @@ class HashBucketCache {
   std::unique_ptr<MultiplexDiskCache> disk_cache_;
 
   std::vector<std::unique_ptr<io::OutputStream>> bucket_os_vec_;
+
+  std::vector<size_t> bucket_data_sizes_;
 
   uint32_t bucket_num_;
 

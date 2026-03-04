@@ -102,6 +102,7 @@ psi_cc_library(
         ":rr22_utils",
         "//psi/proto:psi_v2_cc_proto",
         "//psi/utils:bucket",
+        "//psi/utils:simple_channel",
         "//psi/utils:sync",
     ],
 )

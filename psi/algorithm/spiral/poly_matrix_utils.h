@@ -45,11 +45,13 @@ void AddPoly(const Params& params, absl::Span<uint64_t> res,
 void AddPolyInto(const Params& params, absl::Span<const uint64_t> res,
                  absl::Span<const uint64_t> a);
 // res = -a
-void InvertPoly(const Params& params, absl::Span<uint64_t> res,
+void NegatePoly(const Params& params, absl::Span<uint64_t> res,
                 absl::Span<const uint64_t> a);
 
-void AutomotphPoly(const Params& params, absl::Span<uint64_t> res,
-                   absl::Span<const uint64_t> a, size_t t);
+void AutomorphismPoly(const Params& params, absl::Span<uint64_t> res,
+                      absl::Span<const uint64_t> a, size_t t);
+void AutomorphismPolyUncrtd(const Params& params, absl::Span<uint64_t> res,
+                            absl::Span<const uint64_t> a, size_t t);
 
 // in is a PolyRaw, res is a RNS
 void ReduceCopy(const Params& params, absl::Span<uint64_t> res,
@@ -83,6 +85,9 @@ void Multiply(const Params& params, PolyMatrixNtt& res, const PolyMatrixNtt& a,
 PolyMatrixNtt Multiply(const Params& params, const PolyMatrixNtt& a,
                        const PolyMatrixNtt& b);
 
+void MultiplyNoReduce(PolyMatrixNtt& res, const PolyMatrixNtt& a,
+                      const PolyMatrixNtt& b, size_t start_inner_dim);
+
 void Automorphism(const Params& params, PolyMatrixRaw& res,
                   const PolyMatrixRaw& a, size_t t);
 PolyMatrixRaw Automorphism(const Params& params, const PolyMatrixRaw& a,
@@ -98,11 +103,13 @@ void AddInto(const Params& params, PolyMatrixNtt& res, const PolyMatrixNtt& a);
 void AddIntoAt(const Params& params, PolyMatrixNtt& res, const PolyMatrixNtt& a,
                size_t t_row, size_t t_col);
 
-void Invert(const Params& params, PolyMatrixRaw& res, const PolyMatrixRaw& a);
-PolyMatrixRaw Invert(const Params& params, const PolyMatrixRaw& a);
+void Negate(const Params& params, PolyMatrixRaw& res, const PolyMatrixRaw& a);
+PolyMatrixRaw Negate(const Params& params, const PolyMatrixRaw& a);
 
 void FromNtt(const Params& params, PolyMatrixRaw& out, const PolyMatrixNtt& in);
 PolyMatrixRaw FromNtt(const Params& params, const PolyMatrixNtt& in);
+void FromNttScratch(const Params& params, PolyMatrixRaw& out,
+                    absl::Span<uint64_t> scratch, const PolyMatrixNtt& in);
 
 void ToNtt(const Params& params, PolyMatrixNtt& out, const PolyMatrixRaw& in);
 PolyMatrixNtt ToNtt(const Params& params, const PolyMatrixRaw& in);

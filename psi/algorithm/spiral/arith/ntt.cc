@@ -77,15 +77,14 @@ void NttForward(const Params& params, absl::Span<uint64_t> operand_overall) {
               curr_x + (static_cast<uint64_t>(two_times_modulus_small) - q_new);
         }
       }
-
-      // Update the operand with modulus constraints
-      for (std::size_t i = 0; i < n; ++i) {
-        operand[i] -=
-            static_cast<std::uint64_t>(operand[i] >= two_times_modulus_small) *
-            two_times_modulus_small;
-        operand[i] -= static_cast<std::uint64_t>(operand[i] >= modulus_small) *
-                      modulus_small;
-      }
+    }
+    // Update the operand with modulus constraints
+    for (std::size_t i = 0; i < n; ++i) {
+      operand[i] -=
+          static_cast<std::uint64_t>(operand[i] >= two_times_modulus_small) *
+          two_times_modulus_small;
+      operand[i] -= static_cast<std::uint64_t>(operand[i] >= modulus_small) *
+                    modulus_small;
     }
   }
 }
@@ -99,6 +98,7 @@ void NttForward(const Params& params, absl::Span<uint64_t> operand_overall) {
   std::size_t log_n = params.PolyLenLog2();
   std::size_t n = static_cast<size_t>(1) << log_n;
 
+  YACL_ENFORCE(n >= 4, "PolyLen must be >= 4 for AVX2 impl");
   YACL_ENFORCE(operand_overall.size() >= params.CrtCount() * n);
 
   for (std::size_t coeff_mod = 0; coeff_mod < params.CrtCount(); ++coeff_mod) {
@@ -116,10 +116,7 @@ void NttForward(const Params& params, absl::Span<uint64_t> operand_overall) {
       for (std::size_t i = 0; i < m; ++i) {
         uint64_t w = forward_table[m + i];
         uint64_t w_prime = forward_table_prime[m + i];
-
         auto op = operand.subspan(i * (2 * t), 2 * t);
-
-        SPDLOG_DEBUG("Processing coeff_mod: {}, m: {}, i: {}", coeff_mod, m, i);
 
         if (t < 4) {
           for (std::size_t j = 0; j < t; ++j) {
@@ -129,6 +126,7 @@ void NttForward(const Params& params, absl::Span<uint64_t> operand_overall) {
             std::uint32_t curr_x =
                 x - (two_times_modulus_small *
                      static_cast<std::uint32_t>(x >= two_times_modulus_small));
+
             std::uint64_t q_tmp = (static_cast<std::uint64_t>(y) *
                                    static_cast<std::uint64_t>(w_prime)) >>
                                   32;
@@ -143,46 +141,36 @@ void NttForward(const Params& params, absl::Span<uint64_t> operand_overall) {
           }
         } else {
           for (std::size_t j = 0; j < t; j += 4) {
-            if (j + 4 > t) break;  // Ensure we do not exceed bounds
-
             __m256i* p_x = reinterpret_cast<__m256i*>(&op[j]);
             __m256i* p_y = reinterpret_cast<__m256i*>(&op[j + t]);
 
             __m256i x = _mm256_loadu_si256(p_x);
             __m256i y = _mm256_loadu_si256(p_y);
 
-            __m256i cmp_val = _mm256_set1_epi64x(
+            __m256i threshold_2q = _mm256_set1_epi64x(
+                static_cast<int64_t>(two_times_modulus_small - 1));
+            __m256i val_2q = _mm256_set1_epi64x(
                 static_cast<int64_t>(two_times_modulus_small));
-            // reuse this variable to reduce variable num
-            // gt_mask
-            __m256i tmp1 = _mm256_cmpgt_epi64(x, cmp_val);
 
-            // __m256i to_subtract = _mm256_and_si256(gt_mask_reused, cmp_val);
-            tmp1 = _mm256_and_si256(tmp1, cmp_val);
-            __m256i curr_x = _mm256_sub_epi64(x, tmp1);
+            __m256i gt_mask = _mm256_cmpgt_epi64(x, threshold_2q);
+            __m256i to_subtract = _mm256_and_si256(gt_mask, val_2q);
+            __m256i curr_x = _mm256_sub_epi64(x, to_subtract);
 
-            // __m256i w_prime_vec =
-            //     _mm256_set1_epi64x(static_cast<int64_t>(w_prime));
-            tmp1 = _mm256_set1_epi64x(static_cast<int64_t>(w_prime));
-            // __m256i product = _mm256_mul_epu32(y, tmp1);
-            tmp1 = _mm256_mul_epu32(y, tmp1);
-            // __m256i q_val = _mm256_srli_epi64(tmp1, 32);
-            tmp1 = _mm256_srli_epi64(tmp1, 32);
+            __m256i w_prime_vec =
+                _mm256_set1_epi64x(static_cast<int64_t>(w_prime));
+            __m256i product = _mm256_mul_epu32(y, w_prime_vec);
+            __m256i q_val = _mm256_srli_epi64(product, 32);
 
-            // __m256i w_vec = _mm256_set1_epi64x(static_cast<int64_t>(w));
-            __m256i tmp2 = _mm256_set1_epi64x(static_cast<int64_t>(w));
-            // __m256i w_times_y = _mm256_mul_epu32(y, w_vec);
-            // __m256i w_times_y = _mm256_mul_epu32(y, tmp2);
-            tmp2 = _mm256_mul_epu32(y, tmp2);
+            __m256i w_vec = _mm256_set1_epi64x(static_cast<int64_t>(w));
+            __m256i w_times_y = _mm256_mul_epu32(y, w_vec);
 
             __m256i modulus_small_vec =
                 _mm256_set1_epi64x(static_cast<int64_t>(modulus_small));
-            // __m256i q_scaled = _mm256_mul_epu32(q_val, modulus_small_vec);
-            __m256i q_scaled = _mm256_mul_epu32(tmp1, modulus_small_vec);
-            __m256i q_final = _mm256_sub_epi64(tmp2, q_scaled);
+            __m256i q_scaled = _mm256_mul_epu32(q_val, modulus_small_vec);
+            __m256i q_final = _mm256_sub_epi64(w_times_y, q_scaled);
 
             __m256i new_x = _mm256_add_epi64(curr_x, q_final);
-            __m256i q_final_inverted = _mm256_sub_epi64(cmp_val, q_final);
+            __m256i q_final_inverted = _mm256_sub_epi64(val_2q, q_final);
             __m256i new_y = _mm256_add_epi64(curr_x, q_final_inverted);
 
             _mm256_storeu_si256(p_x, new_x);
@@ -193,21 +181,28 @@ void NttForward(const Params& params, absl::Span<uint64_t> operand_overall) {
     }
 
     for (std::size_t i = 0; i < n; i += 4) {
-      if (i + 4 > n) break;  // Ensure we do not exceed bounds
       __m256i* p_x = reinterpret_cast<__m256i*>(&operand[i]);
-
-      __m256i cmp_val1 =
-          _mm256_set1_epi64x(static_cast<int64_t>(two_times_modulus_small));
       __m256i x = _mm256_loadu_si256(p_x);
-      __m256i gt_mask = _mm256_cmpgt_epi64(x, cmp_val1);
-      __m256i to_subtract = _mm256_and_si256(gt_mask, cmp_val1);
+
+      // Check >= 2q
+      __m256i threshold_2q =
+          _mm256_set1_epi64x(static_cast<int64_t>(two_times_modulus_small - 1));
+      __m256i val_2q =
+          _mm256_set1_epi64x(static_cast<int64_t>(two_times_modulus_small));
+
+      __m256i gt_mask = _mm256_cmpgt_epi64(x, threshold_2q);
+      __m256i to_subtract = _mm256_and_si256(gt_mask, val_2q);
       x = _mm256_sub_epi64(x, to_subtract);
 
-      __m256i cmp_val2 =
-          _mm256_set1_epi64x(static_cast<int64_t>(modulus_small));
-      gt_mask = _mm256_cmpgt_epi64(x, cmp_val2);
-      to_subtract = _mm256_and_si256(gt_mask, cmp_val2);
+      // Check >= q
+      __m256i threshold_q =
+          _mm256_set1_epi64x(static_cast<int64_t>(modulus_small - 1));
+      __m256i val_q = _mm256_set1_epi64x(static_cast<int64_t>(modulus_small));
+
+      gt_mask = _mm256_cmpgt_epi64(x, threshold_q);
+      to_subtract = _mm256_and_si256(gt_mask, val_q);
       x = _mm256_sub_epi64(x, to_subtract);
+
       _mm256_storeu_si256(p_x, x);
     }
   }
@@ -265,7 +260,7 @@ void NttInverse(const Params& params, absl::Span<uint64_t> operand_overall) {
 #else
 
 void NttInverse(const Params& params, absl::Span<uint64_t> operand_overall) {
-  SPDLOG_DEBUG("use AVX2 NttInverse");
+  SPDLOG_DEBUG("using AVX2 NttInverse");
 
   for (size_t coeff_mod = 0; coeff_mod < params.CrtCount(); ++coeff_mod) {
     size_t n = params.PolyLen();
@@ -295,7 +290,9 @@ void NttInverse(const Params& params, absl::Span<uint64_t> operand_overall) {
             uint64_t y = op[t + j];
 
             uint64_t t_tmp = two_times_modulus - y + x;
-            uint64_t curr_x = x + y - (two_times_modulus * ((x << 1) >= t_tmp));
+            uint64_t curr_x =
+                x + y -
+                (two_times_modulus * static_cast<uint64_t>((x << 1) >= t_tmp));
             uint64_t h_tmp = (t_tmp * w_prime) >> 32;
 
             uint64_t res_x = (curr_x + (modulus * (t_tmp & 1))) >> 1;

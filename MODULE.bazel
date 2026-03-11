@@ -70,6 +70,12 @@ new_local_repository(
     path = "/opt/homebrew/opt/libomp/",
 )
 
+new_local_repository(
+    name = "hexl",
+    build_file = "//bazel:hexl.BUILD",
+    path = "/usr/local",
+)
+
 bazel_dep(name = "kuscia", version = "0.14.0b0")
 bazel_dep(name = "perfetto", version = "41.0")
 

@@ -210,4 +210,66 @@ std::vector<uint8_t> ConvertBytesToU8Coeffs(
   return coeff_array;
 }
 
+uint64_t ReadArbitraryBits(const std::vector<uint8_t>& buffer,
+                           size_t bit_offset, size_t num_bits) {
+  assert(num_bits > 0 && num_bits <= 64 && "num_bits must be between 1 and 64");
+
+  const size_t word_offset = bit_offset / 64;
+  const size_t bit_offset_within_word = bit_offset % 64;
+  const size_t byte_offset = word_offset * 8;
+
+  if (bit_offset_within_word + num_bits <= 64) {
+    assert(byte_offset + 8 <= buffer.size() && "Buffer read-out-of-bounds");
+
+    uint64_t val;
+    memcpy(&val, buffer.data() + byte_offset, sizeof(uint64_t));
+    const uint64_t mask = (num_bits == 64) ? ~0ULL : (1ULL << num_bits) - 1;
+    return (val >> bit_offset_within_word) & mask;
+
+  } else {
+    assert(byte_offset + 16 <= buffer.size() && "Buffer read-out-of-bounds");
+
+    uint128_t val;
+    memcpy(&val, buffer.data() + byte_offset, sizeof(uint128_t));
+
+    const uint128_t mask = (static_cast<uint128_t>(1) << num_bits) - 1;
+
+    return static_cast<uint64_t>((val >> bit_offset_within_word) & mask);
+  }
+}
+
+void WriteArbitraryBits(std::vector<uint8_t>& buffer, uint64_t val,
+                        size_t bit_offset, size_t num_bits) {
+  assert(num_bits > 0 && num_bits <= 64 && "num_bits must be between 1 and 64");
+
+  const size_t word_offset = bit_offset / 64;
+  const size_t bit_offset_within_word = bit_offset % 64;
+  const size_t byte_offset = word_offset * 8;
+
+  const uint64_t val_mask = (num_bits == 64) ? ~0ULL : (1ULL << num_bits) - 1;
+  val &= val_mask;
+
+  if (bit_offset_within_word + num_bits <= 64) {
+    assert(byte_offset + 8 <= buffer.size() && "Buffer write-out-of-bounds");
+
+    uint64_t current_val;
+    std::memcpy(&current_val, buffer.data() + byte_offset, sizeof(uint64_t));
+    const uint64_t write_mask = val_mask << bit_offset_within_word;
+    current_val &= ~write_mask;
+    current_val |= (val << bit_offset_within_word);
+    std::memcpy(buffer.data() + byte_offset, &current_val, sizeof(uint64_t));
+
+  } else {
+    assert(byte_offset + 16 <= buffer.size() && "Buffer write-out-of-bounds");
+
+    uint128_t current_val;
+    std::memcpy(&current_val, buffer.data() + byte_offset, sizeof(uint128_t));
+
+    const uint128_t wide_val_mask = (static_cast<uint128_t>(1) << num_bits) - 1;
+    const uint128_t write_mask = wide_val_mask << bit_offset_within_word;
+    current_val &= ~write_mask;
+    current_val |= (static_cast<uint128_t>(val) << bit_offset_within_word);
+    std::memcpy(buffer.data() + byte_offset, &current_val, sizeof(uint128_t));
+  }
+}
 }  // namespace psi::spiral::util

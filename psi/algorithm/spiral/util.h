@@ -49,5 +49,8 @@ std::vector<uint8_t> ConvertCoeffsToBytes(
 
 std::vector<uint8_t> ConvertCoeffsToBytes(absl::Span<uint64_t> coeff_array,
                                           size_t logt);
-
+uint64_t ReadArbitraryBits(const std::vector<uint8_t>& buffer,
+                           size_t bit_offset, size_t num_bits);
+void WriteArbitraryBits(std::vector<uint8_t>& buffer, uint64_t val,
+                        size_t bit_offset, size_t num_bits);
 }  // namespace psi::spiral::util

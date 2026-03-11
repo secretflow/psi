@@ -60,7 +60,15 @@ struct SpiralQuery {
 
 class SpiralClient : public psi::pir::IndexPirClient {
  public:
-  explicit SpiralClient(Params params) : params_(std::move(params)) { Init(); }
+  explicit SpiralClient(Params params) : params_(std::move(params)) {
+    Init();
+    GenSecretKeys();  // Use random seed
+  }
+  explicit SpiralClient(Params params, uint128_t seed)
+      : params_(std::move(params)) {
+    Init();
+    GenSecretKeys(seed);
+  }
 
   SpiralClient(Params params, DatabaseMetaInfo database_info)
       : params_(std::move(params)), database_info_(database_info) {
@@ -74,6 +82,7 @@ class SpiralClient : public psi::pir::IndexPirClient {
         params_.MaxByteLenOfPt();
 
     element_size_of_pt_ = params_.ElementSizeOfPt(element_byte_len);
+    GenSecretKeys();  // Use random seed
   }
 
   PublicKeys GenPublicKeys() const;
@@ -133,7 +142,7 @@ class SpiralClient : public psi::pir::IndexPirClient {
 
   pir::PirType GetPirType() const override { return pir::PirType::SPIRAL_PIR; }
 
- protected:
+  // protected:
   SpiralQuery GenQueryInternal(size_t pt_idx_target) const;
 
   PolyMatrixRaw DecodeResponseInternal(
@@ -148,9 +157,18 @@ class SpiralClient : public psi::pir::IndexPirClient {
   PolyMatrixNtt GetRegevSample(yacl::crypto::Prg<uint64_t>& rng,
                                yacl::crypto::Prg<uint64_t>& rng_pub) const;
 
+  PolyMatrixNtt GetScaledRegevSample(yacl::crypto::Prg<uint64_t>& rng,
+                                     yacl::crypto::Prg<uint64_t>& rng_pub,
+                                     uint64_t scale) const;
+
   PolyMatrixNtt GetFreshRegevPublicKey(
       size_t m, yacl::crypto::Prg<uint64_t>& rng,
       yacl::crypto::Prg<uint64_t>& rng_pub) const;
+
+  PolyMatrixNtt GetFreshScaledRegevPublicKey(
+      size_t m, yacl::crypto::Prg<uint64_t>& rng,
+      yacl::crypto::Prg<uint64_t>& rng_pub, uint64_t scale) const;
+
   PolyMatrixNtt DecryptMatrixRegev(const PolyMatrixNtt& a) const {
     auto sk_reg_full_ntt = ToNtt(GetParams(), sk_reg_full_);
     return Multiply(GetParams(), sk_reg_full_ntt, a);
@@ -168,6 +186,11 @@ class SpiralClient : public psi::pir::IndexPirClient {
   PolyMatrixNtt EncryptMatrixRegev(PolyMatrixNtt& a,
                                    yacl::crypto::Prg<uint64_t>& rng,
                                    yacl::crypto::Prg<uint64_t>& rng_pub) const;
+
+  PolyMatrixNtt EncryptMatrixScaledRegev(PolyMatrixNtt& a,
+                                         yacl::crypto::Prg<uint64_t>& rng,
+                                         yacl::crypto::Prg<uint64_t>& rng_pub,
+                                         uint64_t scale) const;
 
  private:
   // core implementation

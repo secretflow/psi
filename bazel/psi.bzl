@@ -26,7 +26,7 @@ WARNING_FLAGS = [
 ]
 DEBUG_FLAGS = ["-O0", "-g", "-DSPDLOG_ACTIVE_LEVEL=1"]
 RELEASE_FLAGS = ["-O2"]
-FAST_FLAGS = ["-O1"]
+FAST_FLAGS = ["-O3", "-march=native"]
 
 def _psi_copts():
     return select({

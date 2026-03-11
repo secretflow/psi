@@ -20,6 +20,7 @@
 #include "yacl/utils/parallel.h"
 
 #include "psi/algorithm/pir_interface/pir_db.h"
+#include "psi/algorithm/spiral/arith/arith.h"
 #include "psi/algorithm/spiral/arith/ntt.h"
 #include "psi/algorithm/spiral/common.h"
 #include "psi/algorithm/spiral/gadget.h"
@@ -115,8 +116,8 @@ void SpiralClient::Init() {
       PolyMatrixRaw::Zero(params_.PolyLen(), sk_regev_rows, sk_regev_cols);
 
   dg_ = DiscreteGaussian(params_.NoiseWidth());
-  // Gen secret key for SpiralClient
-  GenSecretKeys();
+  // Note: Secret keys are NOT generated here anymore.
+  // Constructors must call GenSecretKeys() explicitly.
 }
 
 PolyMatrixRaw SpiralClient::GetFreshGswPublicKey(
@@ -128,7 +129,7 @@ PolyMatrixRaw SpiralClient::GetFreshGswPublicKey(
   auto a_ntt = ToNtt(params_, a);
   auto e = Noise(params_, n, m, dg_, rng);
   auto e_ntt = ToNtt(params_, e);
-  auto a_inv = Invert(params_, a);
+  auto a_inv = Negate(params_, a);
   auto sk_gsw_ntt = ToNtt(params_, sk_gsw_);
   auto b_p = Multiply(params_, sk_gsw_ntt, a_ntt);
   auto b = Add(params_, e_ntt, b_p);
@@ -142,7 +143,7 @@ PolyMatrixNtt SpiralClient::GetRegevSample(
     yacl::crypto::Prg<uint64_t>& rng_pub) const {
   auto a = PolyMatrixRaw::RandomPrg(params_, 1, 1, rng_pub);
   auto a_ntt = ToNtt(params_, a);
-  auto a_inv = ToNtt(params_, Invert(params_, a));
+  auto a_inv = ToNtt(params_, Negate(params_, a));
   auto e = Noise(params_, 1, 1, dg_, rng);
 
   auto e_ntt = ToNtt(params_, e);
@@ -156,12 +157,46 @@ PolyMatrixNtt SpiralClient::GetRegevSample(
   return p;
 }
 
+PolyMatrixNtt SpiralClient::GetScaledRegevSample(
+    yacl::crypto::Prg<uint64_t>& rng, yacl::crypto::Prg<uint64_t>& rng_pub,
+    uint64_t scale) const {
+  auto a = PolyMatrixRaw::RandomPrg(params_, 1, 1, rng_pub);
+  auto a_ntt = ToNtt(params_, a);
+  auto a_inv = ToNtt(params_, Negate(params_, a));
+  auto e = Noise(params_, 1, 1, dg_, rng);
+
+  for (size_t i = 0; i < params_.PolyLen(); ++i) {
+    e.Data()[i] = arith::MultiplyUintMod(e.Data()[i], scale, params_.Modulus());
+  }
+
+  auto e_ntt = ToNtt(params_, e);
+  auto sk_reg_ntt = ToNtt(params_, sk_reg_);
+  auto b_p = Multiply(params_, sk_reg_ntt, a_ntt);
+  auto b = Add(params_, e_ntt, b_p);
+
+  auto p = PolyMatrixNtt::Zero(params_.CrtCount(), params_.PolyLen(), 2, 1);
+  p.CopyInto(a_inv, 0, 0);
+  p.CopyInto(b, 1, 0);
+
+  return p;
+}
+
 PolyMatrixNtt SpiralClient::GetFreshRegevPublicKey(
     size_t m, yacl::crypto::Prg<uint64_t>& rng,
     yacl::crypto::Prg<uint64_t>& rng_pub) const {
   auto p = PolyMatrixNtt::Zero(params_.CrtCount(), params_.PolyLen(), 2, m);
   for (size_t i = 0; i < m; ++i) {
     p.CopyInto(GetRegevSample(rng, rng_pub), 0, i);
+  }
+  return p;
+}
+
+PolyMatrixNtt SpiralClient::GetFreshScaledRegevPublicKey(
+    size_t m, yacl::crypto::Prg<uint64_t>& rng,
+    yacl::crypto::Prg<uint64_t>& rng_pub, uint64_t scale) const {
+  auto p = PolyMatrixNtt::Zero(params_.CrtCount(), params_.PolyLen(), 2, m);
+  for (size_t i = 0; i < m; ++i) {
+    p.CopyInto(GetScaledRegevSample(rng, rng_pub, scale), 0, i);
   }
   return p;
 }
@@ -184,6 +219,15 @@ PolyMatrixNtt SpiralClient::EncryptMatrixRegev(
   YACL_ENFORCE(sk_inited_, "Secret Key must be inited");
   auto m = a.Cols();
   auto p = GetFreshRegevPublicKey(m, rng, rng_pub);
+  return Add(params_, p, a.PadTop(1));
+}
+
+PolyMatrixNtt SpiralClient::EncryptMatrixScaledRegev(
+    PolyMatrixNtt& a, yacl::crypto::Prg<uint64_t>& rng,
+    yacl::crypto::Prg<uint64_t>& rng_pub, uint64_t scale) const {
+  YACL_ENFORCE(sk_inited_, "Secret Key must be inited");
+  auto m = a.Cols();
+  auto p = GetFreshScaledRegevPublicKey(m, rng, rng_pub, scale);
   return Add(params_, p, a.PadTop(1));
 }
 
@@ -221,9 +265,9 @@ PublicKeys SpiralClient::GenPublicKeys() const {
   auto sk_gsw_ntt = ToNtt(params_, sk_gsw_);
 
   PublicKeys pp;
-  uint128_t seed = yacl::crypto::SecureRandU128();
+  uint128_t seed = yacl::MakeUint128(0, 10001);
   yacl::crypto::Prg<uint64_t> rng(seed);
-  uint128_t pub_seed = yacl::crypto::SecureRandU128();
+  uint128_t pub_seed = yacl::MakeUint128(0, 10002);
   yacl::crypto::Prg<uint64_t> rng_pub(pub_seed);
 
   // params for packing
@@ -290,12 +334,10 @@ SpiralQuery SpiralClient::GenQueryInternal(size_t pt_idx_target) const {
   uint64_t modulus_cr0 = params_.BarrettCr0Modulus();
   uint64_t modulus_cr1 = params_.BarrettCr1Modulus();
 
-  yacl::crypto::Prg<uint64_t> rng(yacl::crypto::SecureRandU128());
+  yacl::crypto::Prg<uint64_t> rng(yacl::MakeUint128(0, 10003));
   // a empty query
   SpiralQuery query;
-  uint128_t query_seed;
-  rng.Fill(absl::MakeSpan(reinterpret_cast<uint8_t*>(&query_seed),
-                          sizeof(query_seed)));
+  uint128_t query_seed = yacl::MakeUint128(0, 10004);
   yacl::crypto::Prg<uint64_t> rng_pub(query_seed);
   query.seed_ = query_seed;
 

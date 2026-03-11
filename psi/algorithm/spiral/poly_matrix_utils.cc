@@ -121,15 +121,15 @@ void AddPolyInto(const Params& params, absl::Span<uint64_t> res,
   }
 }
 
-void InvertPoly(const Params& params, absl::Span<uint64_t> res,
+void NegatePoly(const Params& params, absl::Span<uint64_t> res,
                 absl::Span<const uint64_t> a) {
   for (size_t i = 0; i < params.PolyLen(); ++i) {
     res[i] = params.Modulus() - a[i];
   }
 }
 
-void AutomotphPoly(const Params& params, absl::Span<uint64_t> res,
-                   absl::Span<const uint64_t> a, size_t t) {
+void AutomorphismPoly(const Params& params, absl::Span<uint64_t> res,
+                      absl::Span<const uint64_t> a, size_t t) {
   auto poly_len = params.PolyLen();
   for (size_t i = 0; i < poly_len; ++i) {
     uint64_t num = (i * t) / poly_len;
@@ -138,6 +138,32 @@ void AutomotphPoly(const Params& params, absl::Span<uint64_t> res,
       res[rem] = a[i];
     } else {
       res[rem] = params.Modulus() - a[i];
+    }
+  }
+}
+
+void AutomorphismPolyUncrtd(const Params& params, absl::Span<uint64_t> res,
+                            absl::Span<const uint64_t> a, size_t t) {
+  size_t poly_len = params.PolyLen();
+  size_t crt_count = params.CrtCount();
+  for (size_t m = 0; m < crt_count; ++m) {
+    size_t offset = m * poly_len;
+    auto a_chunk = a.subspan(offset, poly_len);
+    auto res_chunk = res.subspan(offset, poly_len);
+    uint64_t current_modulus = params.Moduli(m);
+    for (size_t i = 0; i < poly_len; ++i) {
+      size_t num = (i * t) / poly_len;
+      size_t rem = (i * t) % poly_len;
+
+      if (num % 2 == 0) {
+        res_chunk[rem] = a_chunk[i];
+      } else {
+        if (a_chunk[i] == 0) {
+          res_chunk[rem] = 0;
+        } else {
+          res_chunk[rem] = current_modulus - a_chunk[i];
+        }
+      }
     }
   }
 }
@@ -250,7 +276,7 @@ void Automorphism(const Params& params, PolyMatrixRaw& res,
     for (size_t j = 0; j < a.Cols(); ++j) {
       auto poly_a = a.Poly(i, j);
       auto poly_res = res.Poly(i, j);
-      AutomotphPoly(params, poly_res, poly_a, t);
+      AutomorphismPoly(params, poly_res, poly_a, t);
     }
   }
 }
@@ -320,7 +346,7 @@ void AddIntoAt(const Params& params, PolyMatrixNtt& res, const PolyMatrixNtt& a,
   }
 }
 
-void Invert(const Params& params, PolyMatrixRaw& res, const PolyMatrixRaw& a) {
+void Negate(const Params& params, PolyMatrixRaw& res, const PolyMatrixRaw& a) {
   WEAK_ENFORCE(res.Rows() == a.Rows());
   WEAK_ENFORCE(res.Cols() == a.Cols());
 
@@ -328,18 +354,18 @@ void Invert(const Params& params, PolyMatrixRaw& res, const PolyMatrixRaw& a) {
     for (size_t j = 0; j < a.Cols(); ++j) {
       auto res_poly = res.Poly(i, j);
       auto a_poly = a.Poly(i, j);
-      InvertPoly(params, res_poly, a_poly);
+      NegatePoly(params, res_poly, a_poly);
     }
   }
 }
 
-PolyMatrixRaw Invert(const Params& params, const PolyMatrixRaw& a) {
+PolyMatrixRaw Negate(const Params& params, const PolyMatrixRaw& a) {
   PolyMatrixRaw res(params.PolyLen(), a.Rows(), a.Cols());
   for (size_t i = 0; i < a.Rows(); ++i) {
     for (size_t j = 0; j < a.Cols(); ++j) {
       auto res_poly = res.Poly(i, j);
       auto a_poly = a.Poly(i, j);
-      InvertPoly(params, res_poly, a_poly);
+      NegatePoly(params, res_poly, a_poly);
     }
   }
   return res;
@@ -373,6 +399,34 @@ PolyMatrixRaw FromNtt(const Params& params, const PolyMatrixNtt& in) {
       PolyMatrixRaw::Zero(params.PolyLen(), in.Rows(), in.Cols());
   FromNtt(params, res, in);
   return res;
+}
+
+void FromNttScratch(const Params& params, PolyMatrixRaw& out,
+                    absl::Span<uint64_t> scratch, const PolyMatrixNtt& in) {
+  YACL_ENFORCE(in.Rows() == 2, "in rows must be 2, got {}", in.Rows());
+  YACL_ENFORCE(in.Cols() == 1, "in cols must be 1, got {}", in.Cols());
+
+  size_t poly_size = in.Poly(0, 0).size();
+  YACL_ENFORCE(scratch.size() >= poly_size, "scratch size too small: {} < {}",
+               scratch.size(), poly_size);
+
+  for (size_t r = 0; r < in.Rows(); ++r) {
+    size_t c = 0;
+
+    auto in_poly = in.Poly(r, c);
+    auto scratch_sub = scratch.subspan(0, poly_size);
+    std::copy(in_poly.begin(), in_poly.end(), scratch_sub.begin());
+
+    arith::NttInverse(params, scratch_sub);
+
+    if (r == 0) {
+      size_t raw_poly_idx = out.PolyStartIndex(r, c);
+      std::vector<uint64_t> temp_vec(scratch_sub.begin(), scratch_sub.end());
+      for (size_t i = 0; i < params.PolyLen(); ++i) {
+        out.Data()[raw_poly_idx + i] = params.CrtCompose(temp_vec, i);
+      }
+    }
+  }
 }
 
 void ToNtt(const Params& params, PolyMatrixNtt& out, const PolyMatrixRaw& in) {
@@ -454,6 +508,32 @@ PolyMatrixNtt Multiply(const Params& params, const PolyMatrixNtt& a,
   }
 
   return res;
+}
+
+void MultiplyNoReduce(PolyMatrixNtt& res, const PolyMatrixNtt& a,
+                      const PolyMatrixNtt& b, size_t start_inner_dim) {
+  WEAK_ENFORCE(res.Rows() == a.Rows(), "Row mismatch: res={}, a={}", res.Rows(),
+               a.Rows());
+  WEAK_ENFORCE(res.Cols() == b.Cols(), "Col mismatch: res={}, b={}", res.Cols(),
+               b.Cols());
+  WEAK_ENFORCE(a.Cols() == b.Rows(), "Inner dim mismatch: a.cols={}, b.rows={}",
+               a.Cols(), b.Rows());
+
+  for (size_t i = 0; i < a.Rows(); ++i) {
+    for (size_t j = 0; j < b.Cols(); ++j) {
+      auto res_poly = res.Poly(i, j);
+      for (size_t k = start_inner_dim; k < a.Cols(); ++k) {
+        auto a_poly = a.Poly(i, k);
+        auto b_poly = b.Poly(k, j);
+
+        size_t total_len = res_poly.size();
+
+        for (size_t z = 0; z < total_len; ++z) {
+          res_poly[z] += a_poly[z] * b_poly[z];
+        }
+      }
+    }
+  }
 }
 
 PolyMatrixRaw MatrixWithIdentity(const PolyMatrixRaw& p) {

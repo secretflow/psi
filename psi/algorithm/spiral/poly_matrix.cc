@@ -225,7 +225,7 @@ PolyMatrixRaw PolyMatrixRaw::SingleValue(size_t poly_len, uint64_t value) {
 
 PolyMatrixRaw PolyMatrixRaw::Random(const Params& params, size_t rows,
                                     size_t cols) {
-  yacl::crypto::Prg<uint64_t> prg(yacl::crypto::SecureRandU128());
+  yacl::crypto::Prg<uint64_t> prg(yacl::MakeUint128(0, 20001));
   return RandomPrg(params, rows, cols, prg);
 }
 
@@ -238,7 +238,38 @@ PolyMatrixRaw PolyMatrixRaw::RandomPrg(const Params& params, size_t rows,
   return out;
 }
 
-//--------------- PolyMatrixNtt
+PolyMatrixRaw PolyMatrixRaw::Recover(const Params& params, uint64_t q_1,
+                                     uint64_t q_2,
+                                     const std::vector<uint8_t>& ciphertext) {
+  const size_t q_1_bits =
+      static_cast<size_t>(std::ceil(std::log2(static_cast<double>(q_2))));
+  const size_t q_2_bits =
+      static_cast<size_t>(std::ceil(std::log2(static_cast<double>(q_1))));
+
+  const size_t total_sz_bits = (q_1_bits + q_2_bits) * params.PolyLen();
+  const size_t total_sz_bytes = (total_sz_bits + 7) / 8;
+  assert(ciphertext.size() == total_sz_bytes && "Ciphertext size mismatch");
+
+  PolyMatrixRaw res = PolyMatrixRaw::Zero(params.PolyLen(), 2, 1);
+  size_t bit_offs = 0;
+
+  uint64_t* row_0_ptr = res.Data().data();
+  uint64_t* row_1_ptr = res.Data().data() + params.PolyLen();
+
+  for (size_t z = 0; z < params.PolyLen(); ++z) {
+    uint64_t val = util::ReadArbitraryBits(ciphertext, bit_offs, q_1_bits);
+    row_0_ptr[z] = arith::Rescale(val, q_2, params.Modulus());
+    bit_offs += q_1_bits;
+  }
+
+  for (size_t z = 0; z < params.PolyLen(); ++z) {
+    uint64_t val = util::ReadArbitraryBits(ciphertext, bit_offs, q_2_bits);
+    row_1_ptr[z] = arith::Rescale(val, q_1, params.Modulus());
+    bit_offs += q_2_bits;
+  }
+
+  return res;
+}
 
 void PolyMatrixNtt::CopyInto(const PolyMatrixNtt& p, size_t target_row,
                              size_t target_col) {
@@ -299,7 +330,7 @@ absl::Span<const uint64_t> PolyMatrixNtt::Poly(size_t r, size_t c) const {
 
 PolyMatrixNtt PolyMatrixNtt::Random(const Params& params, size_t rows,
                                     size_t cols) {
-  yacl::crypto::Prg<uint64_t> prg(yacl::crypto::SecureRandU128());
+  yacl::crypto::Prg<uint64_t> prg(yacl::MakeUint128(0, 20002));
   return RandomPrg(params, rows, cols, prg);
 }
 

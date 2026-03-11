@@ -276,9 +276,9 @@ class Params {
 
   [[nodiscard]] size_t CrtCount() const { return crt_params_.crt_count_; }
 
-  [[nodiscard]] uint64_t DbDim2() const { return query_params_.db_dim2_; }
+  [[nodiscard]] size_t DbDim2() const { return query_params_.db_dim2_; }
 
-  [[nodiscard]] uint64_t DbDim1() const { return query_params_.db_dim1_; }
+  [[nodiscard]] size_t DbDim1() const { return query_params_.db_dim1_; }
 
   [[nodiscard]] uint64_t Modulus() const {
     return crt_params_.modulus_.value();
@@ -310,7 +310,15 @@ class Params {
 
   std::uint64_t CrtCompose(const std::vector<std::uint64_t>& a,
                            std::size_t idx) const;
+  uint64_t GetQPrime1() const { return 1 << 20; }
 
+  uint64_t GetQPrime2() const {
+    if (Q2Bits() == ModulusLog2()) {
+      return Modulus();
+    } else {
+      return kQ2Values[Q2Bits()];
+    }
+  }
   // other util methods
 
   [[nodiscard]] std::string ToString();
@@ -385,10 +393,16 @@ class Params {
 
   ParamsId Id() const { return id_; }
 
- private:
-  void ComputeId();
+  size_t DbRowsPadded() const {
+    return 1 << (query_params_.db_dim1_ + poly_len_log2_);
+  }
+
+  size_t Rho() const;
   void SetDbDim1(size_t v1) { query_params_.db_dim1_ = v1; }
   void SetDbDim2(size_t v2) { query_params_.db_dim2_ = v2; }
+
+ private:
+  void ComputeId();
 
   // d in R = Z[x]/x^d + 1
   std::size_t poly_len_ = 0;

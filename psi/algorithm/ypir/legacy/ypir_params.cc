@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "psi/algorithm/ypir/ypir_params.h"
+#include "psi/algorithm/ypir/legacy/ypir_params.h"
 
 #include <algorithm>
 #include <chrono>
@@ -20,7 +20,7 @@
 #include <utility>
 #include "yacl/base/exception.h"
 
-namespace psi::ypir::byhe {
+namespace psi::ypir::ypir_internal {
 namespace {
 
 uint64_t Log2Exact(uint64_t n) {
@@ -100,8 +100,7 @@ FheParams::FheParams(uint64_t rlwe_degree, uint64_t rlwe_ct_modulus,
   YACL_ENFORCE(lwe_ct_modulus_ > 0);
   YACL_ENFORCE(rlwe_pt_modulus_ > 0);
   YACL_ENFORCE(lwe_pt_modulus_ > 0);
-  YACL_ENFORCE(byhe::IsPowerOfTwo(rlwe_degree_),
-               "rlwe_degree must be power of two");
+  YACL_ENFORCE(IsPowerOfTwo(rlwe_degree_), "rlwe_degree must be power of two");
 
   rlwe_degree_log2_ = Log2Exact(rlwe_degree_);
 }
@@ -139,7 +138,7 @@ PirParams::PirParams(uint64_t rows, uint64_t cols)
 }
 
 // ======================================================================
-// Byhe utilities that depend on FheParams (moved from byhe_util.cc)
+// YPIR utilities that depend on FheParams.
 // ======================================================================
 
 void ApplyAutoNttForm(const std::vector<uint64_t>& vec,
@@ -178,7 +177,7 @@ void KeyswitchPreprocess(
   const uint64_t length = fparm.get_poly_degree();
   const uint64_t modulus = fparm.get_rlwe_cmod();
 
-  ByheHexlNtt& ntt = fparm.get_ntt();
+  YpirHexlNtt& ntt = fparm.get_ntt();
   std::vector<std::vector<uint64_t>> decomp_a(t,
                                               std::vector<uint64_t>(length, 0));
   ntt.Inverse(a_in.data(), length);
@@ -431,7 +430,7 @@ std::vector<uint64_t> PackrlweOnlineConstantRows(
 }
 
 void Cdks21Lwe2RlweInplace(uint64_t* lwe_a, uint64_t degree, uint64_t cmod,
-                           ByheHexlNtt& ntt) {
+                           YpirHexlNtt& ntt) {
   uint64_t a0 = lwe_a[0];
 
   for (uint64_t i = 1; i < (degree + 1) / 2; ++i) {
@@ -451,4 +450,4 @@ void Cdks21Lwe2RlweInplace(uint64_t* lwe_a, uint64_t degree, uint64_t cmod,
   ntt.Forward(lwe_a, degree);
 }
 
-}  // namespace psi::ypir::byhe
+}  // namespace psi::ypir::ypir_internal

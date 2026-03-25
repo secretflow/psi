@@ -20,7 +20,7 @@
 
 #include <immintrin.h>
 
-namespace psi::ypir::byhe {
+namespace psi::ypir::ypir_internal {
 
 #define AES_128_ASSIST(t1, t2, rc)                     \
   t2 = _mm_aeskeygenassist_si128(t1, rc);              \
@@ -48,4 +48,4 @@ class AESCTR_PRNG {
   uint64_t ctr_hi_ = 0;
 };
 
-}  // namespace psi::ypir::byhe
+}  // namespace psi::ypir::ypir_internal

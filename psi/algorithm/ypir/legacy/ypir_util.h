@@ -19,10 +19,10 @@
 #include <random>
 #include <vector>
 
-#include "psi/algorithm/ypir/aes_prng.h"
-#include "psi/algorithm/ypir/hexl.h"
+#include "psi/algorithm/ypir/legacy/aes_prng.h"
+#include "psi/algorithm/ypir/legacy/hexl.h"
 
-namespace psi::ypir::byhe {
+namespace psi::ypir::ypir_internal {
 
 class FheParams;
 
@@ -54,7 +54,7 @@ void PrecomputeAutomap(uint32_t length, uint32_t idx,
 void PseudorandomMatrixGenerate(std::vector<std::vector<uint64_t>>& matrix,
                                 uint64_t modulus, AESCTR_PRNG& prng);
 
-// Helpers for byhe-style precomputation buffers.
+// Helpers for ypir-internal precomputation buffers.
 void SetPseudorandomMatrixSimplepir(std::vector<std::vector<uint64_t>>& matrix,
                                     std::vector<uint64_t>& matrix_flat,
                                     uint64_t rows, uint64_t cols,
@@ -79,7 +79,7 @@ void SetPrecomputedPt(std::vector<std::vector<uint64_t>>& precomputed_pt,
                       uint64_t poly_degree, uint64_t max_lh,
                       NttForwardFn ntt_forward);
 
-// byhe server-side helpers
+// ypir server-side helpers
 void VectorColDecompose(const std::vector<uint32_t>& vec,
                         std::vector<std::vector<uint16_t>>& decomp_matrix,
                         uint64_t b, uint64_t z, uint64_t t);
@@ -129,6 +129,6 @@ std::vector<uint64_t> PackrlweOnlineConstantRows(
     const FheParams& fparm);
 
 void Cdks21Lwe2RlweInplace(uint64_t* lwe_a, uint64_t degree, uint64_t cmod,
-                           ByheHexlNtt& ntt);
+                           YpirHexlNtt& ntt);
 
-}  // namespace psi::ypir::byhe
+}  // namespace psi::ypir::ypir_internal

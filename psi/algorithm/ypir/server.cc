@@ -1,160 +1,186 @@
 #include "psi/algorithm/ypir/server.h"
 
+#include <cstring>
+#include <ostream>
+#include <string>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
-namespace psi::ypir::byhe {
+#include "yacl/base/exception.h"
+
+#include "psi/algorithm/ypir/legacy/util.h"
+#include "psi/algorithm/ypir/serialize.h"
+
+namespace psi::ypir {
 namespace {
 
-void DoublepirAnswer(const uint8_t* db, uint32_t* qu0,
-                     std::vector<uint64_t>& qu1,
-                     std::vector<std::vector<uint64_t>>& server_hint,
-                     std::vector<uint64_t>& h2,
-                     std::vector<std::vector<uint64_t>>& h3,
-                     std::vector<uint64_t>& h4, const FheParams& fparm,
-                     const PirParams& pparm) {
-  const uint64_t row = pparm.get_row();
-  const uint64_t col = pparm.get_col();
-  const uint64_t rlwe_cmod = fparm.get_rlwe_cmod();
-  const uint64_t b = fparm.get_b_decomp();
-  const uint64_t z = fparm.get_z_decomp();
-  const uint64_t t = fparm.get_t_decomp();
+template <typename T>
+std::vector<T> RowBytesToValues(const std::vector<uint8_t>& bytes) {
+  YACL_ENFORCE_EQ(bytes.size() % sizeof(T), 0U);
+  std::vector<T> out(bytes.size() / sizeof(T));
+  std::memcpy(out.data(), bytes.data(), bytes.size());
+  return out;
+}
 
-  std::vector<uint32_t> simple_res(row, 0);
-  MatVecU8U32Mod2p32(db, qu0, simple_res.data(), row, col);
-
-  std::vector<std::vector<uint16_t>> trans_simple_res_decomp;
-  VectorColDecompose(simple_res, trans_simple_res_decomp, b, z, t);
-
-  const uint64_t* matrix_d2_flat = fparm.get_persudo_matrix_doublepir_flat();
-  const uint64_t poly_degree = fparm.get_poly_degree();
-
-  MatrixVectorFirstDimension(h2, server_hint, qu1, rlwe_cmod);
-
-  MatrixMultiplicationFlatU16(h3, trans_simple_res_decomp, matrix_d2_flat,
-                              poly_degree, rlwe_cmod);
-
-  MatrixVectorMultiplicationU16(h4, trans_simple_res_decomp, qu1, rlwe_cmod);
+template <typename T>
+T ReadScalarValue(const std::vector<uint8_t>& bytes) {
+  YACL_ENFORCE_EQ(bytes.size(), sizeof(T));
+  T out = 0;
+  std::memcpy(&out, bytes.data(), sizeof(T));
+  return out;
 }
 
 }  // namespace
 
-void YpirHintGenerate(std::vector<std::vector<uint64_t>>& db,
-                      std::vector<uint64_t>& h0,
-                      std::vector<std::vector<uint64_t>>& double_server_hint,
-                      std::vector<std::vector<std::vector<uint64_t>>>& decomp_buf,
-                      AESCTR_PRNG& prng,
-                      const FheParams& fparm, const PirParams& pparm) {
-  const uint64_t lwe_dimension = fparm.get_lwe_dimension();
-  const uint64_t poly_degree = fparm.get_poly_degree();
-  const uint64_t rlwe_cmod = fparm.get_rlwe_cmod();
-  const uint64_t t_auto = fparm.get_t_auto();
-  const uint64_t t_decomp = fparm.get_t_decomp();
-  const uint64_t expo = GetLog2(poly_degree);
-  const uint64_t pack_num = lwe_dimension * t_decomp;
-
-  std::vector<std::vector<uint64_t>> double_client_hint(
-      lwe_dimension * t_decomp, std::vector<uint64_t>(poly_degree, 0));
-
-  const uint64_t* matrix_flat = fparm.get_persudo_matrix_simplepir_flat();
-  std::vector<std::vector<uint64_t>> simple_hint(
-      pparm.get_row(), std::vector<uint64_t>(lwe_dimension, 0));
-  MatrixMultiplicationFlat(simple_hint, db, matrix_flat, lwe_dimension,
-                           fparm.get_lwe_cmod());
-
-  std::vector<std::vector<uint64_t>> matrix_decomp;
-  MatrixRowDecompose(simple_hint, matrix_decomp, fparm.get_b_decomp(),
-                     fparm.get_z_decomp(), fparm.get_t_decomp());
-  MatrixTranspose(matrix_decomp, double_server_hint);
-
-  const uint64_t* matrix_d2_flat = fparm.get_persudo_matrix_doublepir_flat();
-  MatrixMultiplicationFlat(double_client_hint, double_server_hint,
-                           matrix_d2_flat, poly_degree, rlwe_cmod);
-
-  std::vector<std::vector<std::vector<uint64_t>>> ksk_a(
-      expo,
-      std::vector<std::vector<uint64_t>>(t_auto,
-                                         std::vector<uint64_t>(poly_degree)));
-  prng.refresh(kThirdDimensionSeed);
-  for (uint64_t i = 0; i < expo; ++i) {
-    PseudorandomMatrixGenerate(ksk_a[i], rlwe_cmod, prng);
+template <typename T>
+YpirServer<T>::YpirServer(YpirParameters params)
+    : psi::pir::IndexPirDataBase(psi::pir::PirType::YPIR_PIR),
+      params_(std::move(params)) {
+  if (params_.mode == YpirMode::kDoublepir) {
+    ypir_context_ = std::make_unique<internal::ypir::Context>(
+        internal::ypir::CreateContext(params_));
   }
-
-  const uint64_t mod_inv = ModInverse(static_cast<int64_t>(pack_num),
-                                      static_cast<int64_t>(rlwe_cmod));
-  ByheHexlNtt& ntt = fparm.get_ntt();
-  for (uint64_t i = 0; i < pack_num; ++i) {
-    Cdks21Lwe2RlweInplace(double_client_hint[i].data(), poly_degree, rlwe_cmod,
-                         ntt);
-    EltwiseFMAMod(double_client_hint[i].data(), double_client_hint[i].data(),
-                  mod_inv, nullptr, poly_degree, rlwe_cmod);
-  }
-
-  h0 = PackrlwePreprocess(double_client_hint, GetLog2(pack_num),
-                          GetLog2(poly_degree) - GetLog2(pack_num), ksk_a,
-                          decomp_buf, fparm);
 }
 
-void YpirAnswer(const uint8_t* db, uint32_t* qu0, std::vector<uint64_t>& qu1,
-                const std::vector<std::vector<std::vector<uint64_t>>>& ksk_b,
-                std::vector<std::vector<std::vector<uint64_t>>>& decomp_buf,
-                std::vector<std::vector<uint64_t>>& server_hint,
-                std::vector<std::vector<uint64_t>>& res,
-                const FheParams& fparm, const PirParams& pparm) {
-  const uint64_t lwe_dimension = fparm.get_lwe_dimension();
-  const uint64_t poly_degree = fparm.get_poly_degree();
-  const uint64_t rlwe_cmod = fparm.get_rlwe_cmod();
-  const uint64_t t_decomp = fparm.get_t_decomp();
-  const uint64_t pack_num = lwe_dimension * t_decomp;
-  const uint64_t mod_inv = ModInverse(static_cast<int64_t>(pack_num),
-                                      static_cast<int64_t>(rlwe_cmod));
-  const uint64_t pack_num_log2 = GetLog2(pack_num);
-  const uint64_t t_decomp_log2 = GetLog2(t_decomp);
-  const uint64_t poly_degree_log2 = GetLog2(poly_degree);
+template <typename T>
+void YpirServer<T>::GenerateFromRawData(const psi::pir::RawDatabase& raw_database) {
+  static_assert(std::is_same_v<T, uint8_t> || std::is_same_v<T, uint16_t>,
+                "YpirServer only supports uint8_t and uint16_t values");
 
-  res.reserve(res.size() + 3);
+  const bool item_layout =
+      raw_database.Rows() <= params_.NumItems() &&
+      raw_database.RowByteLen() == params_.value_bytes;
+  const bool matrix_layout =
+      raw_database.Rows() == params_.db_rows &&
+      raw_database.RowByteLen() == params_.db_cols * sizeof(T);
+  YACL_ENFORCE(item_layout || matrix_layout,
+               "raw database shape does not match YPIR parameters");
 
-  std::vector<std::vector<uint64_t>> h3(t_decomp,
-                                        std::vector<uint64_t>(poly_degree, 0));
-  std::vector<uint64_t> h2(lwe_dimension * t_decomp, 0);
-  std::vector<uint64_t> h4(t_decomp, 0);
-
-  DoublepirAnswer(db, qu0, qu1, server_hint, h2, h3, h4, fparm, pparm);
-
-  for (uint64_t i = 0; i < pack_num; ++i) {
-    h2[i] =
-        (static_cast<unsigned __int128>(h2[i]) * mod_inv) % rlwe_cmod;
+  if (params_.mode == YpirMode::kSimplepir) {
+    simplepir_db_column_major_.assign(params_.db_rows * params_.db_cols, 0);
+    if (item_layout) {
+      YACL_ENFORCE_EQ(params_.value_bytes, sizeof(T));
+      for (uint64_t raw_idx = 0; raw_idx < raw_database.Rows(); ++raw_idx) {
+        const uint64_t row = raw_idx / params_.db_cols;
+        const uint64_t col = raw_idx % params_.db_cols;
+        simplepir_db_column_major_[col * params_.db_rows + row] =
+            ReadScalarValue<T>(raw_database.At(raw_idx));
+      }
+    } else {
+      for (uint64_t row = 0; row < params_.db_rows; ++row) {
+        auto row_values = RowBytesToValues<T>(raw_database.At(row));
+        for (uint64_t col = 0; col < params_.db_cols; ++col) {
+          simplepir_db_column_major_[col * params_.db_rows + row] =
+              row_values[col];
+        }
+      }
+    }
+  } else {
+    YACL_ENFORCE(sizeof(T) == 1, "DoublePIR currently expects uint8_t rows");
+    doublepir_db_row_major_.assign(params_.db_rows * params_.db_cols, 0);
+    if (item_layout) {
+      YACL_ENFORCE_EQ(params_.value_bytes, sizeof(uint8_t));
+      for (uint64_t raw_idx = 0; raw_idx < raw_database.Rows(); ++raw_idx) {
+        doublepir_db_row_major_[raw_idx] =
+            ReadScalarValue<uint8_t>(raw_database.At(raw_idx));
+      }
+    } else {
+      for (uint64_t row = 0; row < params_.db_rows; ++row) {
+        const auto& row_bytes = raw_database.At(row);
+        std::memcpy(doublepir_db_row_major_.data() + row * params_.db_cols,
+                    row_bytes.data(), row_bytes.size());
+      }
+    }
   }
 
-  uint64_t ptr = 0;
-  res.push_back(PackrlweOnlineConstantRows(
-      h2, pack_num_log2, poly_degree_log2 - pack_num_log2, ksk_b, decomp_buf,
-      ptr, fparm));
-
-  std::vector<std::vector<uint64_t>> h4_matrix(
-      t_decomp, std::vector<uint64_t>(poly_degree, 0));
-  const uint64_t mod_inv_2 = ModInverse(static_cast<int64_t>(t_decomp),
-                                        static_cast<int64_t>(rlwe_cmod));
-  ByheHexlNtt& ntt = fparm.get_ntt();
-
-  for (uint64_t i = 0; i < t_decomp; ++i) {
-    Cdks21Lwe2RlweInplace(h3[i].data(), poly_degree, rlwe_cmod, ntt);
-    h4_matrix[i][0] = h4[i];
-    ntt.Forward(h4_matrix[i].data(), poly_degree);
-    EltwiseFMAMod(h3[i].data(), h3[i].data(), mod_inv_2, nullptr, poly_degree,
-                  rlwe_cmod);
-    EltwiseFMAMod(h4_matrix[i].data(), h4_matrix[i].data(), mod_inv_2, nullptr,
-                  poly_degree, rlwe_cmod);
-  }
-
-  const auto& ksk_a = fparm.get_persudo_hcube_ypir();
-  std::vector<std::vector<std::vector<uint64_t>>> decomp_b_buf;
-  ptr = 0;
-  res.push_back(PackrlwePreprocess(h3, t_decomp_log2,
-                                   poly_degree_log2 - t_decomp_log2, ksk_a,
-                                   decomp_b_buf, fparm));
-  res.push_back(PackrlweOnline(h4_matrix, t_decomp_log2,
-                               poly_degree_log2 - t_decomp_log2, ksk_b,
-                               decomp_b_buf, ptr, fparm));
+  db_set_ = true;
 }
 
-}  // namespace psi::ypir::byhe
+template <typename T>
+void YpirServer<T>::GenerateFromSimpleHashTable(
+    const psi::pir::RawDatabase& raw_database) {
+  GenerateFromRawData(raw_database);
+}
+
+template <typename T>
+void YpirServer<T>::Dump(std::ostream& out_stream) const {
+  out_stream << "YpirServer{mode="
+             << (params_.mode == YpirMode::kSimplepir ? "simplepir"
+                                                      : "doublepir")
+             << ", db_rows=" << params_.db_rows << ", db_cols="
+             << params_.db_cols << ", value_bytes=" << params_.value_bytes
+             << ", db_set=" << db_set_ << "}";
+}
+
+template <typename T>
+YpirPrecomputedState YpirServer<T>::PerformOfflinePrecomputation() const {
+  YACL_ENFORCE(db_set_, "database must be loaded before precomputation");
+
+  if (params_.mode == YpirMode::kSimplepir) {
+    YpirPrecomputedState state;
+    state.mode = YpirMode::kSimplepir;
+    return state;
+  }
+
+  YACL_ENFORCE(ypir_context_ != nullptr);
+  return internal::ypir::PrepareOfflineState(doublepir_db_row_major_, params_,
+                                             *ypir_context_);
+}
+
+template <typename T>
+YpirResponse YpirServer<T>::ProcessQuery(const YpirQuery& query) const {
+  return ProcessQuery(query, PerformOfflinePrecomputation());
+}
+
+template <typename T>
+YpirResponse YpirServer<T>::ProcessQuery(const YpirQuery& query,
+                                         const YpirPrecomputedState& state) const {
+  YACL_ENFORCE(db_set_, "database must be loaded before query processing");
+  YACL_ENFORCE(query.mode == params_.mode);
+
+  if (params_.mode == YpirMode::kSimplepir) {
+    YACL_ENFORCE_EQ(query.packed_query_row.size(), params_.db_rows);
+
+    std::vector<uint64_t> result(params_.db_cols, 0);
+    psi::ypir::FastBatchedDotProduct<T>(
+        params_.spiral_params, result.data(), query.packed_query_row.data(),
+        params_.db_rows, simplepir_db_column_major_.data(), params_.db_rows,
+        params_.db_cols);
+
+    YpirResponse response;
+    response.mode = YpirMode::kSimplepir;
+    response.simplepir_response = std::move(result);
+    return response;
+  }
+
+  YACL_ENFORCE(ypir_context_ != nullptr);
+  return internal::ypir::ProcessQuery(doublepir_db_row_major_, query, state,
+                                      params_, *ypir_context_);
+}
+
+template <typename T>
+yacl::Buffer YpirServer<T>::Response(
+    const yacl::ByteContainerView& query_buffer) const {
+  return SerializeResponse(ProcessQuery(DeserializeQuery(query_buffer)));
+}
+
+template <typename T>
+yacl::Buffer YpirServer<T>::Response(
+    const yacl::ByteContainerView& query_buffer,
+    const yacl::Buffer& /*pks_buffer*/) const {
+  return Response(query_buffer);
+}
+
+template <typename T>
+std::string YpirServer<T>::Response(
+    const yacl::ByteContainerView& query_buffer,
+    const std::string& /*pks_buffer*/) const {
+  auto buffer = Response(query_buffer);
+  return std::string(static_cast<std::string_view>(buffer));
+}
+
+template class YpirServer<uint8_t>;
+template class YpirServer<uint16_t>;
+
+}  // namespace psi::ypir

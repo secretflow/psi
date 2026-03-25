@@ -13,6 +13,8 @@ Supported Protocols
 +----------------+-------------+---------------+
 | APSI           | Keyword PIR | Single Server |
 +----------------+-------------+---------------+
+| YPIR           | Index PIR   | Single Server |
++----------------+-------------+---------------+
 
 At this moment, SealPIR is under development.
 

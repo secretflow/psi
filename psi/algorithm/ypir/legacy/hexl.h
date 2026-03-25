@@ -19,16 +19,16 @@
 
 #include "hexl/hexl.hpp"
 
-namespace psi::ypir::byhe {
+namespace psi::ypir::ypir_internal {
 
 constexpr uint64_t kCrtQ1 = 268369921ULL;
 constexpr uint64_t kCrtQ2 = 249561089ULL;
 constexpr uint64_t kCrtMod = kCrtQ1 * kCrtQ2;
 constexpr uint64_t kRootOfUnityCrt = 38878761190133527ULL;
 
-class ByheHexlNtt {
+class YpirHexlNtt {
  public:
-  ByheHexlNtt(uint64_t degree, uint64_t modulus, uint64_t root_of_unity);
+  YpirHexlNtt(uint64_t degree, uint64_t modulus, uint64_t root_of_unity);
 
   void Forward(uint64_t* data, size_t len);
   void Inverse(uint64_t* data, size_t len);
@@ -50,4 +50,4 @@ void EltwiseSubMod(uint64_t* out, const uint64_t* a, const uint64_t* b,
 void EltwiseFMAMod(uint64_t* out, const uint64_t* a, uint64_t scalar,
                    const uint64_t* add, size_t len, uint64_t modulus);
 
-}  // namespace psi::ypir::byhe
+}  // namespace psi::ypir::ypir_internal

@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "psi/algorithm/ypir/hexl.h"
+#include "psi/algorithm/ypir/legacy/hexl.h"
 
 #include "yacl/base/exception.h"
 
-namespace psi::ypir::byhe {
+namespace psi::ypir::ypir_internal {
 
-ByheHexlNtt::ByheHexlNtt(uint64_t degree, uint64_t modulus,
+YpirHexlNtt::YpirHexlNtt(uint64_t degree, uint64_t modulus,
                          uint64_t root_of_unity)
     : ntt_(degree, modulus, root_of_unity),
       degree_(degree),
@@ -27,13 +27,13 @@ ByheHexlNtt::ByheHexlNtt(uint64_t degree, uint64_t modulus,
   YACL_ENFORCE(modulus_ > 0);
 }
 
-void ByheHexlNtt::Forward(uint64_t* data, size_t len) {
+void YpirHexlNtt::Forward(uint64_t* data, size_t len) {
   YACL_ENFORCE(len == degree_,
                "NTT Forward expects len == degree ({} != {})", len, degree_);
   ntt_.ComputeForward(data, data, 1, 1);
 }
 
-void ByheHexlNtt::Inverse(uint64_t* data, size_t len) {
+void YpirHexlNtt::Inverse(uint64_t* data, size_t len) {
   YACL_ENFORCE(len == degree_,
                "NTT Inverse expects len == degree ({} != {})", len, degree_);
   ntt_.ComputeInverse(data, data, 1, 1);
@@ -59,4 +59,4 @@ void EltwiseFMAMod(uint64_t* out, const uint64_t* a, uint64_t scalar,
   intel::hexl::EltwiseFMAMod(out, a, scalar, add, len, modulus, 1);
 }
 
-}  // namespace psi::ypir::byhe
+}  // namespace psi::ypir::ypir_internal

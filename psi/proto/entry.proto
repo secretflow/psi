@@ -47,5 +47,9 @@ message LaunchConfig {
     DkPirSenderConfig dk_pir_sender_config = 8;
 
     DkPirReceiverConfig dk_pir_receiver_config = 9;
+
+    YpirSenderConfig ypir_sender_config = 10;
+
+    YpirReceiverConfig ypir_receiver_config = 11;
   }
 }

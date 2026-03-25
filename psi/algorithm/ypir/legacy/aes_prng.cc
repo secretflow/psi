@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "psi/algorithm/ypir/aes_prng.h"
+#include "psi/algorithm/ypir/legacy/aes_prng.h"
 
-namespace psi::ypir::byhe {
+namespace psi::ypir::ypir_internal {
 
 AESCTR_PRNG::AESCTR_PRNG() {
   const uint8_t key[16] = {};
@@ -95,4 +95,4 @@ void AESCTR_PRNG::fill_bytes(uint8_t* dst, size_t len) {
   }
 }
 
-}  // namespace psi::ypir::byhe
+}  // namespace psi::ypir::ypir_internal

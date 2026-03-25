@@ -225,6 +225,49 @@ message DkPirReceiverConfig {
   bool skip_count_check = 11;
 }
 
+enum YpirProtocolMode {
+  YPIR_PROTOCOL_MODE_UNSPECIFIED = 0;
+  YPIR_PROTOCOL_MODE_SIMPLEPIR = 1;
+  YPIR_PROTOCOL_MODE_DOUBLEPIR = 2;
+}
+
+message YpirSenderConfig {
+  // YPIR mode. SIMPLEPIR currently supports up to 16-bit values and DOUBLEPIR
+  // currently supports 8-bit values.
+  YpirProtocolMode mode = 1;
+
+  // Logical database shape.
+  uint64 db_rows = 2;
+  uint64 db_cols = 3;
+
+  // Plaintext bit width of each value.
+  uint64 item_size_bits = 4;
+
+  // Path to a text file that contains exactly db_rows * db_cols hex-encoded
+  // values, one per line, without a header.
+  string db_file = 5;
+}
+
+message YpirReceiverConfig {
+  // YPIR mode. Must match sender config.
+  YpirProtocolMode mode = 1;
+
+  // Logical database shape. Must match sender config.
+  uint64 db_rows = 2;
+  uint64 db_cols = 3;
+
+  // Plaintext bit width of each value. Must match sender config.
+  uint64 item_size_bits = 4;
+
+  // Path to a text file containing raw indexes in decimal, one per line,
+  // without a header.
+  string query_file = 5;
+
+  // Path to a text file where hex-encoded results will be written, one per
+  // line, without a header.
+  string output_file = 6;
+}
+
 // The report of pir task.
 message PirResultReport {
   int64 match_cnt = 1;

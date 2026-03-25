@@ -1,29 +1,47 @@
 #pragma once
 
-#include <cstdint>
+#include <memory>
+#include <string>
 #include <vector>
 
-#include "psi/algorithm/ypir/ypir_params.h"
+#include "yacl/base/buffer.h"
+#include "yacl/base/byte_container_view.h"
+
+#include "psi/algorithm/pir_interface/index_pir.h"
+#include "psi/algorithm/ypir/ypir_internal_client.h"
+#include "psi/algorithm/ypir/params.h"
+#include "psi/algorithm/ypir/types.h"
 
 namespace psi::ypir {
 
-namespace byhe {
+class YpirClient : public psi::pir::IndexPirClient {
+ public:
+  explicit YpirClient(YpirParameters params);
 
-struct YpirQuery {
-  std::vector<uint64_t> qu0;
-  std::vector<uint64_t> qu1;
-  std::vector<std::vector<std::vector<uint64_t>>> ksk_b;
+  const YpirParameters& GetParameters() const { return params_; }
+
+  pir::PirType GetPirType() const override { return pir::PirType::YPIR_PIR; }
+
+  yacl::Buffer GeneratePksBuffer() const override;
+  std::string GeneratePksString() const override;
+
+  YpirQuery GenerateQuery(uint64_t raw_idx) const;
+  yacl::Buffer GenerateQueryBuffer(uint64_t raw_idx) const;
+  yacl::Buffer GenerateIndexQuery(uint64_t raw_idx) const override;
+  std::string GenerateIndexQueryStr(uint64_t raw_idx) const override;
+
+  std::vector<uint8_t> DecodeResponse(const YpirResponse& response,
+                                      uint64_t raw_idx) const;
+  std::vector<uint8_t> DecodeResponseBuffer(
+      const yacl::ByteContainerView& response_buffer, uint64_t raw_idx) const;
+  std::vector<uint8_t> DecodeIndexResponse(
+      const yacl::ByteContainerView& response_buffer,
+      uint64_t raw_idx) const override;
+
+ private:
+  YpirParameters params_;
+  mutable std::unique_ptr<internal::ypir::Context> ypir_context_;
+  mutable internal::ypir::ClientSecrets client_secrets_;
 };
-
-void YpirRecover(Secret& simple_sk, Secret& double_sk,
-                 std::vector<std::vector<uint64_t>>& res, uint64_t& message,
-                 const FheParams& fparm, const PirParams& pparm);
-
-YpirQuery Generate_query_ypir(uint64_t c_idx, uint64_t r_idx, Secret& lwe_sk,
-                              Secret& rlwe_sk, AESCTR_PRNG& prng,
-                              const FheParams& fparm,
-                              const PirParams& pparm);
-
-}  // namespace byhe
 
 }  // namespace psi::ypir

@@ -21,6 +21,7 @@ enum PirType {
   INVALID = 0;
   SEAL_PIR = 1;
   SPIRAL_PIR = 2;
+  YPIR_PIR = 3;
 }
 
 message PirTypeProto {

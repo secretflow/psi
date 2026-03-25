@@ -17,9 +17,9 @@
 #include <cstdint>
 #include <vector>
 
-#include "psi/algorithm/ypir/ypir_util.h"
+#include "psi/algorithm/ypir/legacy/ypir_util.h"
 
-namespace psi::ypir::byhe {
+namespace psi::ypir::ypir_internal {
 
 class Secret {
  public:
@@ -61,7 +61,7 @@ class FheParams {
             double sigma_ring, AutoParams auto_params,
             DecompParams decomp_params);
 
-  // byhe-style getters
+  // ypir-internal getters
   uint64_t get_poly_degree() const { return rlwe_degree_; }
   uint64_t get_rlwe_cmod() const { return rlwe_ct_modulus_; }
   uint64_t get_rlwe_pmod() const { return rlwe_pt_modulus_; }
@@ -76,7 +76,7 @@ class FheParams {
   uint64_t get_t_decomp() const { return decomp_params_.t; }
   double get_sig() const { return sigma_; }
   double get_sig_ring() const { return sigma_ring_; }
-  ByheHexlNtt& get_ntt() const noexcept { return ntt_; }
+  YpirHexlNtt& get_ntt() const noexcept { return ntt_; }
 
   const std::vector<std::vector<uint64_t>>& get_persudo_matrix_simplepir()
       const noexcept {
@@ -127,7 +127,7 @@ class FheParams {
   DecompParams decomp_params_;
 
   uint64_t rlwe_degree_log2_ = 0;
-  mutable ByheHexlNtt ntt_;
+  mutable YpirHexlNtt ntt_;
 
   std::vector<std::vector<uint64_t>> persudo_matrix_simplepir_;
   std::vector<std::vector<uint64_t>> persudo_matrix_doublepir_;
@@ -152,4 +152,4 @@ class PirParams {
   uint64_t cols_ = 0;
 };
 
-}  // namespace psi::ypir::byhe
+}  // namespace psi::ypir::ypir_internal

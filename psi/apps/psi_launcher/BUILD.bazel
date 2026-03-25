@@ -43,11 +43,24 @@ psi_cc_library(
 )
 
 psi_cc_library(
+    name = "launch_ypir",
+    srcs = ["ypir_launch.cc"],
+    hdrs = ["ypir_launch.h"],
+    deps = [
+        "//psi/algorithm/ypir:entry",
+        "//psi/proto:pir_cc_proto",
+        "@yacl//yacl/base:exception",
+        "@yacl//yacl/link:context",
+    ],
+)
+
+psi_cc_library(
     name = "launch",
     srcs = ["launch.cc"],
     hdrs = ["launch.h"],
     deps = [
         ":factory",
+        ":launch_ypir",
         ":report",
         "//psi:trace_categories",
         "//psi/algorithm/dkpir:entry",
@@ -69,6 +82,16 @@ psi_cc_test(
         ":launch",
         "//psi/utils:arrow_csv_batch_provider",
         "@yacl//yacl/utils:scope_guard",
+    ],
+)
+
+psi_cc_test(
+    name = "ypir_test",
+    srcs = ["ypir_test.cc"],
+    deps = [
+        ":launch_ypir",
+        "@abseil-cpp//absl/strings",
+        "@yacl//yacl/link:test_util",
     ],
 )
 

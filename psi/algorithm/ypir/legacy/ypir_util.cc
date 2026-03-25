@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "psi/algorithm/ypir/ypir_util.h"
+#include "psi/algorithm/ypir/legacy/ypir_util.h"
 
 #include <algorithm>
 #include <cmath>
@@ -24,7 +24,7 @@
 #endif
 
 
-namespace psi::ypir::byhe {
+namespace psi::ypir::ypir_internal {
 namespace {
 
 int64_t ExGcd(int64_t a, int64_t b, int64_t& x, int64_t& y) {
@@ -516,4 +516,4 @@ void MatVecU8U32Mod2p32(const uint8_t* A, const uint32_t* x, uint32_t* y,
   MatVecU8U32Mod2p32Scalar(A, x, y, rows, cols);
 }
 
-}  // namespace psi::ypir::byhe
+}  // namespace psi::ypir::ypir_internal

@@ -48,3 +48,4 @@ ossutil_output/
 
 psi/apps/pir/docker/linux/
 psi/apps/pir/docker/version.txt
+.vscode/

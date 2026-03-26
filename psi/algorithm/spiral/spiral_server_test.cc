@@ -382,7 +382,7 @@ TEST(SpiralServer, FoldCiphertexts) {
   auto ct_gsw_inv = PolyMatrixRaw::Zero(params.PolyLen(), 2, 2 * params.TGsw());
 
   for (size_t i = 0; i < params.DbDim2(); ++i) {
-    Invert(params, ct_gsw_inv, FromNtt(params, v_folding[i]));
+    Negate(params, ct_gsw_inv, FromNtt(params, v_folding[i]));
 
     auto ct_gsw_neg = PolyMatrixNtt::Zero(params.CrtCount(), params.PolyLen(),
                                           2, 2 * params.TGsw());

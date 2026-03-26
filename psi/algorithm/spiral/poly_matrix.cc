@@ -225,7 +225,7 @@ PolyMatrixRaw PolyMatrixRaw::SingleValue(size_t poly_len, uint64_t value) {
 
 PolyMatrixRaw PolyMatrixRaw::Random(const Params& params, size_t rows,
                                     size_t cols) {
-  yacl::crypto::Prg<uint64_t> prg(yacl::MakeUint128(0, 20001));
+  yacl::crypto::Prg<uint64_t> prg(yacl::crypto::SecureRandU128());
   return RandomPrg(params, rows, cols, prg);
 }
 
@@ -330,7 +330,7 @@ absl::Span<const uint64_t> PolyMatrixNtt::Poly(size_t r, size_t c) const {
 
 PolyMatrixNtt PolyMatrixNtt::Random(const Params& params, size_t rows,
                                     size_t cols) {
-  yacl::crypto::Prg<uint64_t> prg(yacl::MakeUint128(0, 20002));
+  yacl::crypto::Prg<uint64_t> prg(yacl::crypto::SecureRandU128());
   return RandomPrg(params, rows, cols, prg);
 }
 

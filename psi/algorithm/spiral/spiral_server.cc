@@ -970,7 +970,7 @@ std::vector<PolyMatrixNtt> GetVneg1(const Params& params) {
 
 std::pair<PolyMatrixRaw, std::vector<uint64_t>> GenRandomDbAndGetItem(
     const Params& params, size_t item_idx) {
-  yacl::crypto::Prg<uint64_t> rng(yacl::MakeUint128(0, 30001));
+  yacl::crypto::Prg<uint64_t> rng(yacl::crypto::SecureRandU128());
   size_t instances = params.Instances();
   size_t trials = params.N() * params.N();
   size_t dim0 = 1 << params.DbDim1();

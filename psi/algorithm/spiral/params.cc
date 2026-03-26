@@ -193,23 +193,4 @@ std::uint64_t Params::CrtCompose(const std::vector<std::uint64_t>& a,
   return ss.str();
 }
 
-size_t Params::Rho() const {
-  const size_t q2_bits = 28;
-  const size_t lwe_q_prime_bits = q2_bits;
-
-  const size_t pt_bits = PtModulusBitLen();
-  const double blowup_factor =
-      static_cast<double>(lwe_q_prime_bits) / static_cast<double>(pt_bits);
-  const double num_polys_needed =
-      (blowup_factor * static_cast<double>(1024 + 1)) /
-      static_cast<double>(PolyLen());
-
-  const size_t smaller_params_db_dim_2 =
-      static_cast<size_t>(std::ceil(std::log2(num_polys_needed)));
-
-  const size_t rho = 1ULL << smaller_params_db_dim_2;
-
-  return rho;
-}
-
 }  // namespace psi::spiral

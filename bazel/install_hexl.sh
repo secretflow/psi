@@ -4,6 +4,17 @@ set -euo pipefail
 
 hexl_version="${HEXL_VERSION:-v1.2.6}"
 install_prefix="${1:-${HEXL_ROOT:-${HOME}/.local/hexl}}"
+arch="$(uname -m)"
+
+case "${arch}" in
+  x86_64|amd64)
+    ;;
+  *)
+    printf 'Skipping Intel HEXL installation on unsupported architecture %s\n' \
+      "${arch}"
+    exit 0
+    ;;
+esac
 
 if [[ -f "${install_prefix}/lib/libhexl.a" && -d "${install_prefix}/include/hexl" ]]; then
   printf 'Intel HEXL already installed at %s\n' "${install_prefix}"

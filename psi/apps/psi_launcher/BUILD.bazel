@@ -44,14 +44,24 @@ psi_cc_library(
 
 psi_cc_library(
     name = "launch_ypir",
-    srcs = ["ypir_launch.cc"],
+    srcs = select({
+        "@platforms//cpu:x86_64": ["ypir_launch.cc"],
+        "//conditions:default": ["ypir_launch_stub.cc"],
+    }),
     hdrs = ["ypir_launch.h"],
-    deps = [
-        "//psi/algorithm/ypir:entry",
-        "//psi/proto:pir_cc_proto",
-        "@yacl//yacl/base:exception",
-        "@yacl//yacl/link:context",
-    ],
+    deps = select({
+        "@platforms//cpu:x86_64": [
+            "//psi/algorithm/ypir:entry",
+            "//psi/proto:pir_cc_proto",
+            "@yacl//yacl/base:exception",
+            "@yacl//yacl/link:context",
+        ],
+        "//conditions:default": [
+            "//psi/proto:pir_cc_proto",
+            "@yacl//yacl/base:exception",
+            "@yacl//yacl/link:context",
+        ],
+    }),
 )
 
 psi_cc_library(
@@ -88,6 +98,7 @@ psi_cc_test(
 psi_cc_test(
     name = "ypir_test",
     srcs = ["ypir_test.cc"],
+    target_compatible_with = ["@platforms//cpu:x86_64"],
     deps = [
         ":launch_ypir",
         "@abseil-cpp//absl/strings",

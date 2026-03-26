@@ -248,7 +248,8 @@ PolyMatrixRaw PolyMatrixRaw::Recover(const Params& params, uint64_t q_1,
 
   const size_t total_sz_bits = (q_1_bits + q_2_bits) * params.PolyLen();
   const size_t total_sz_bytes = (total_sz_bits + 7) / 8;
-  assert(ciphertext.size() == total_sz_bytes && "Ciphertext size mismatch");
+  YACL_ENFORCE_EQ(ciphertext.size(), total_sz_bytes,
+                  "Ciphertext size mismatch");
 
   PolyMatrixRaw res = PolyMatrixRaw::Zero(params.PolyLen(), 2, 1);
   size_t bit_offs = 0;

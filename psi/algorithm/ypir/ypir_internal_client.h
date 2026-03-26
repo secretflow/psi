@@ -3,8 +3,8 @@
 #include <vector>
 
 #include "psi/algorithm/ypir/legacy/client.h"
-#include "psi/algorithm/ypir/ypir_internal_params.h"
 #include "psi/algorithm/ypir/types.h"
+#include "psi/algorithm/ypir/ypir_internal_params.h"
 
 namespace psi::ypir::internal::ypir {
 

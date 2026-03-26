@@ -34,10 +34,10 @@ TEST(YpirParamsTest, ScenarioHelpersRespectRequestedValueSize) {
 }
 
 TEST(YpirParamsTest, ShapeHelpersPreserveRequestedShape) {
-  const auto simple_params = CreateParamsForShapeSimplePIR(1ULL << 11,
-                                                           3ULL << 10, 16);
-  const auto double_params = CreateParamsForShapeDoublePIR(1ULL << 11,
-                                                           1ULL << 12, 8);
+  const auto simple_params =
+      CreateParamsForShapeSimplePIR(1ULL << 11, 3ULL << 10, 16);
+  const auto double_params =
+      CreateParamsForShapeDoublePIR(1ULL << 11, 1ULL << 12, 8);
 
   EXPECT_EQ(simple_params.db_rows, 1ULL << 11);
   EXPECT_EQ(simple_params.db_cols, 3ULL << 10);

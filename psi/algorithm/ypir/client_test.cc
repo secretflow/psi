@@ -1,9 +1,10 @@
 #include "psi/algorithm/ypir/client.h"
-#include "psi/algorithm/ypir/serialize.h"
 
 #include <cstdint>
 
 #include "gtest/gtest.h"
+
+#include "psi/algorithm/ypir/serialize.h"
 
 namespace psi::ypir {
 namespace {

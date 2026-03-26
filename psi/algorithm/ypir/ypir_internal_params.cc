@@ -9,7 +9,9 @@ namespace {
 
 thread_local psi::ypir::ypir_internal::YpirHexlNtt* g_ntt = nullptr;
 
-void NttForwardWrapper(uint64_t* data, size_t len) { g_ntt->Forward(data, len); }
+void NttForwardWrapper(uint64_t* data, size_t len) {
+  g_ntt->Forward(data, len);
+}
 
 Context BuildContext(uint64_t rows, uint64_t cols) {
   using namespace psi::ypir::ypir_internal;

@@ -38,12 +38,11 @@ void DoublepirAnswer(const uint8_t* db, uint32_t* qu0,
 
 }  // namespace
 
-void YpirHintGenerate(std::vector<std::vector<uint64_t>>& db,
-                      std::vector<uint64_t>& h0,
-                      std::vector<std::vector<uint64_t>>& double_server_hint,
-                      std::vector<std::vector<std::vector<uint64_t>>>& decomp_buf,
-                      AESCTR_PRNG& prng,
-                      const FheParams& fparm, const PirParams& pparm) {
+void YpirHintGenerate(
+    std::vector<std::vector<uint64_t>>& db, std::vector<uint64_t>& h0,
+    std::vector<std::vector<uint64_t>>& double_server_hint,
+    std::vector<std::vector<std::vector<uint64_t>>>& decomp_buf,
+    AESCTR_PRNG& prng, const FheParams& fparm, const PirParams& pparm) {
   const uint64_t lwe_dimension = fparm.get_lwe_dimension();
   const uint64_t poly_degree = fparm.get_poly_degree();
   const uint64_t rlwe_cmod = fparm.get_rlwe_cmod();
@@ -71,9 +70,8 @@ void YpirHintGenerate(std::vector<std::vector<uint64_t>>& db,
                            matrix_d2_flat, poly_degree, rlwe_cmod);
 
   std::vector<std::vector<std::vector<uint64_t>>> ksk_a(
-      expo,
-      std::vector<std::vector<uint64_t>>(t_auto,
-                                         std::vector<uint64_t>(poly_degree)));
+      expo, std::vector<std::vector<uint64_t>>(
+                t_auto, std::vector<uint64_t>(poly_degree)));
   prng.refresh(kThirdDimensionSeed);
   for (uint64_t i = 0; i < expo; ++i) {
     PseudorandomMatrixGenerate(ksk_a[i], rlwe_cmod, prng);
@@ -84,7 +82,7 @@ void YpirHintGenerate(std::vector<std::vector<uint64_t>>& db,
   YpirHexlNtt& ntt = fparm.get_ntt();
   for (uint64_t i = 0; i < pack_num; ++i) {
     Cdks21Lwe2RlweInplace(double_client_hint[i].data(), poly_degree, rlwe_cmod,
-                         ntt);
+                          ntt);
     EltwiseFMAMod(double_client_hint[i].data(), double_client_hint[i].data(),
                   mod_inv, nullptr, poly_degree, rlwe_cmod);
   }
@@ -98,8 +96,8 @@ void YpirAnswer(const uint8_t* db, uint32_t* qu0, std::vector<uint64_t>& qu1,
                 const std::vector<std::vector<std::vector<uint64_t>>>& ksk_b,
                 std::vector<std::vector<std::vector<uint64_t>>>& decomp_buf,
                 const std::vector<std::vector<uint64_t>>& server_hint,
-                std::vector<std::vector<uint64_t>>& res,
-                const FheParams& fparm, const PirParams& pparm) {
+                std::vector<std::vector<uint64_t>>& res, const FheParams& fparm,
+                const PirParams& pparm) {
   const uint64_t lwe_dimension = fparm.get_lwe_dimension();
   const uint64_t poly_degree = fparm.get_poly_degree();
   const uint64_t rlwe_cmod = fparm.get_rlwe_cmod();
@@ -121,14 +119,13 @@ void YpirAnswer(const uint8_t* db, uint32_t* qu0, std::vector<uint64_t>& qu1,
   DoublepirAnswer(db, qu0, qu1, server_hint, h2, h3, h4, fparm, pparm);
 
   for (uint64_t i = 0; i < pack_num; ++i) {
-    h2[i] =
-        (static_cast<unsigned __int128>(h2[i]) * mod_inv) % rlwe_cmod;
+    h2[i] = (static_cast<unsigned __int128>(h2[i]) * mod_inv) % rlwe_cmod;
   }
 
   uint64_t ptr = 0;
-  res.push_back(PackrlweOnlineConstantRows(
-      h2, pack_num_log2, poly_degree_log2 - pack_num_log2, ksk_b, decomp_buf,
-      ptr, fparm));
+  res.push_back(PackrlweOnlineConstantRows(h2, pack_num_log2,
+                                           poly_degree_log2 - pack_num_log2,
+                                           ksk_b, decomp_buf, ptr, fparm));
 
   std::vector<std::vector<uint64_t>> h4_matrix(
       t_decomp, std::vector<uint64_t>(poly_degree, 0));

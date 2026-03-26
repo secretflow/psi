@@ -57,9 +57,9 @@ void LweDecrypt(Secret& sk, std::vector<uint64_t>& a, uint64_t& message,
   }
 
   if (b > (cmod >> 1)) {
-    b = static_cast<uint64_t>(std::llround((static_cast<long double>(b) -
-                                            static_cast<long double>(cmod)) /
-                                           delta)) %
+    b = static_cast<uint64_t>(std::llround(
+            (static_cast<long double>(b) - static_cast<long double>(cmod)) /
+            delta)) %
         pmod;
   } else {
     b = static_cast<uint64_t>(
@@ -129,10 +129,10 @@ void RlweDecrypt(Secret& sk, std::vector<uint64_t>& a,
                                     static_cast<long double>(delta))) %
                    rlwe_pmod;
     } else {
-      message[i] = static_cast<uint64_t>(
-                       std::llround(static_cast<long double>(b[i]) /
-                                    static_cast<long double>(delta))) %
-                   rlwe_pmod;
+      message[i] =
+          static_cast<uint64_t>(std::llround(static_cast<long double>(b[i]) /
+                                             static_cast<long double>(delta))) %
+          rlwe_pmod;
     }
   }
 }
@@ -168,10 +168,10 @@ void GadgetEncrypt(Secret& sk, const std::vector<std::vector<uint64_t>>& a,
   }
 }
 
-void GenerateAutokey(Secret& sk,
-                     const std::vector<std::vector<std::vector<uint64_t>>>& ksk_a,
-                     std::vector<std::vector<std::vector<uint64_t>>>& ksk_b,
-                     const FheParams& fparm) {
+void GenerateAutokey(
+    Secret& sk, const std::vector<std::vector<std::vector<uint64_t>>>& ksk_a,
+    std::vector<std::vector<std::vector<uint64_t>>>& ksk_b,
+    const FheParams& fparm) {
   const uint64_t degree = fparm.get_poly_degree();
   const uint64_t cmod = fparm.get_rlwe_cmod();
   const uint64_t expo = GetLog2(degree);
@@ -223,8 +223,7 @@ void YpirRecover(Secret& simple_sk, Secret& double_sk,
 
 YpirQuery Generate_query_ypir(uint64_t c_idx, uint64_t r_idx, Secret& lwe_sk,
                               Secret& rlwe_sk, AESCTR_PRNG& prng,
-                              const FheParams& fparm,
-                              const PirParams& pparm) {
+                              const FheParams& fparm, const PirParams& pparm) {
   YpirQuery out;
 
   const uint64_t cols = pparm.get_col();
@@ -236,8 +235,7 @@ YpirQuery Generate_query_ypir(uint64_t c_idx, uint64_t r_idx, Secret& lwe_sk,
   const uint64_t lwe_pmod = fparm.get_lwe_pmod();
   const auto& matrix0 = fparm.get_persudo_matrix_simplepir();
   for (uint64_t i = 0; i < cols; ++i) {
-    LweEncrypt(lwe_sk, matrix0[i], query_vec_col[i], out.qu0[i], lwe_pmod,
-               sig);
+    LweEncrypt(lwe_sk, matrix0[i], query_vec_col[i], out.qu0[i], lwe_pmod, sig);
   }
 
   const uint64_t rows = pparm.get_row();
@@ -259,14 +257,12 @@ YpirQuery Generate_query_ypir(uint64_t c_idx, uint64_t r_idx, Secret& lwe_sk,
 
   const uint64_t t_auto = fparm.get_t_auto();
   const uint64_t expo = GetLog2(degree);
-  out.ksk_b.assign(
-      expo, std::vector<std::vector<uint64_t>>(t_auto,
-                                               std::vector<uint64_t>(degree, 0)));
+  out.ksk_b.assign(expo, std::vector<std::vector<uint64_t>>(
+                             t_auto, std::vector<uint64_t>(degree, 0)));
 
   std::vector<std::vector<std::vector<uint64_t>>> ksk_a(
-      expo,
-      std::vector<std::vector<uint64_t>>(t_auto,
-                                         std::vector<uint64_t>(degree, 0)));
+      expo, std::vector<std::vector<uint64_t>>(
+                t_auto, std::vector<uint64_t>(degree, 0)));
   prng.refresh(kThirdDimensionSeed);
   for (uint64_t i = 0; i < expo; ++i) {
     PseudorandomMatrixGenerate(ksk_a[i], fparm.get_rlwe_cmod(), prng);

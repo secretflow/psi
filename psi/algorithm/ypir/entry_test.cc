@@ -96,13 +96,13 @@ TEST(YpirEntryTest, SimplepirOnlineFlowWorksWithHexFiles) {
   EXPECT_EQ(sender.get(), 0);
   EXPECT_EQ(receiver.get(), 0);
 
-  EXPECT_EQ(ReadLines(output_path),
-            (std::vector<std::string>{
-                HexUint16(0),
-                HexUint16((120ULL * 17 + 576ULL * 3) %
-                          params.spiral_params.PtModulus()),
-                HexUint16((1023ULL * 17 + 1023ULL * 3) %
-                          params.spiral_params.PtModulus())}));
+  EXPECT_EQ(
+      ReadLines(output_path),
+      (std::vector<std::string>{HexUint16(0),
+                                HexUint16((120ULL * 17 + 576ULL * 3) %
+                                          params.spiral_params.PtModulus()),
+                                HexUint16((1023ULL * 17 + 1023ULL * 3) %
+                                          params.spiral_params.PtModulus())}));
 
   std::filesystem::remove_all(tmp_dir);
 }
@@ -153,9 +153,10 @@ TEST(YpirEntryTest, DoublepirOnlineFlowWorksWithHexFiles) {
   EXPECT_EQ(sender.get(), 0);
   EXPECT_EQ(receiver.get(), 0);
 
-  EXPECT_EQ(ReadLines(output_path),
-            (std::vector<std::string>{HexByte(0), HexByte((111ULL + 222ULL) % 251),
-                                      HexByte((1023ULL + 1023ULL) % 251)}));
+  EXPECT_EQ(
+      ReadLines(output_path),
+      (std::vector<std::string>{HexByte(0), HexByte((111ULL + 222ULL) % 251),
+                                HexByte((1023ULL + 1023ULL) % 251)}));
 
   std::filesystem::remove_all(tmp_dir);
 }

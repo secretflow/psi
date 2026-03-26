@@ -34,8 +34,7 @@ uint64_t GetLog2(uint64_t num);
 bool IsPowerOfTwo(uint64_t num);
 uint64_t GetAutokeyIdx(uint64_t idx, uint64_t expo);
 
-uint64_t SampleGauss(double st_dev, uint64_t modulus,
-                     std::mt19937_64& rng);
+uint64_t SampleGauss(double st_dev, uint64_t modulus, std::mt19937_64& rng);
 void SampleGauss(std::vector<uint64_t>& err, double st_dev, uint64_t modulus,
                  std::mt19937_64& rng);
 
@@ -88,15 +87,15 @@ void MatrixRowDecompose(const std::vector<std::vector<uint64_t>>& matrix,
                         std::vector<std::vector<uint64_t>>& decomp_matrix,
                         uint64_t b, uint64_t z, uint64_t t);
 
-void MatrixVectorFirstDimension(std::vector<uint64_t>& result,
-                                const std::vector<std::vector<uint64_t>>& matrix,
-                                const std::vector<uint64_t>& vec,
-                                uint64_t mod);
+void MatrixVectorFirstDimension(
+    std::vector<uint64_t>& result,
+    const std::vector<std::vector<uint64_t>>& matrix,
+    const std::vector<uint64_t>& vec, uint64_t mod);
 
-void MatrixMultiplicationFlat(
-    std::vector<std::vector<uint64_t>>& db_mul_matrix,
-    const std::vector<std::vector<uint64_t>>& db, const uint64_t* matrix_flat,
-    uint64_t matrix_col, uint64_t mod);
+void MatrixMultiplicationFlat(std::vector<std::vector<uint64_t>>& db_mul_matrix,
+                              const std::vector<std::vector<uint64_t>>& db,
+                              const uint64_t* matrix_flat, uint64_t matrix_col,
+                              uint64_t mod);
 
 void MatrixMultiplicationFlatU16(
     std::vector<std::vector<uint64_t>>& db_mul_matrix,
@@ -104,7 +103,8 @@ void MatrixMultiplicationFlatU16(
     uint64_t matrix_col, uint64_t mod);
 
 void MatrixVectorMultiplicationU16(
-    std::vector<uint64_t>& result, const std::vector<std::vector<uint16_t>>& matrix,
+    std::vector<uint64_t>& result,
+    const std::vector<std::vector<uint16_t>>& matrix,
     const std::vector<uint64_t>& vec, uint64_t mod);
 
 void MatVecU8U32Mod2p32(const uint8_t* A, const uint32_t* x, uint32_t* y,

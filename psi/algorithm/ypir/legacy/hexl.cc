@@ -20,22 +20,20 @@ namespace psi::ypir::ypir_internal {
 
 YpirHexlNtt::YpirHexlNtt(uint64_t degree, uint64_t modulus,
                          uint64_t root_of_unity)
-    : ntt_(degree, modulus, root_of_unity),
-      degree_(degree),
-      modulus_(modulus) {
+    : ntt_(degree, modulus, root_of_unity), degree_(degree), modulus_(modulus) {
   YACL_ENFORCE(degree_ > 0);
   YACL_ENFORCE(modulus_ > 0);
 }
 
 void YpirHexlNtt::Forward(uint64_t* data, size_t len) {
-  YACL_ENFORCE(len == degree_,
-               "NTT Forward expects len == degree ({} != {})", len, degree_);
+  YACL_ENFORCE(len == degree_, "NTT Forward expects len == degree ({} != {})",
+               len, degree_);
   ntt_.ComputeForward(data, data, 1, 1);
 }
 
 void YpirHexlNtt::Inverse(uint64_t* data, size_t len) {
-  YACL_ENFORCE(len == degree_,
-               "NTT Inverse expects len == degree ({} != {})", len, degree_);
+  YACL_ENFORCE(len == degree_, "NTT Inverse expects len == degree ({} != {})",
+               len, degree_);
   ntt_.ComputeInverse(data, data, 1, 1);
 }
 

@@ -1,11 +1,11 @@
-#include "psi/algorithm/ypir/client.h"
-#include "psi/algorithm/ypir/server.h"
-
 #include <cstdint>
 #include <cstring>
 #include <vector>
 
 #include "gtest/gtest.h"
+
+#include "psi/algorithm/ypir/client.h"
+#include "psi/algorithm/ypir/server.h"
 
 namespace psi::ypir {
 namespace {
@@ -19,12 +19,15 @@ uint64_t BytesToU64(const std::vector<uint8_t>& bytes) {
 }
 
 psi::pir::RawDatabase BuildSimplepirDatabase(const YpirParameters& params) {
-  std::vector<std::vector<uint8_t>> rows(params.db_rows,
-                                         std::vector<uint8_t>(params.db_cols * sizeof(uint16_t), 0));
+  std::vector<std::vector<uint8_t>> rows(
+      params.db_rows,
+      std::vector<uint8_t>(params.db_cols * sizeof(uint16_t), 0));
   for (uint64_t row = 0; row < params.db_rows; ++row) {
     for (uint64_t col = 0; col < params.db_cols; ++col) {
-      const uint16_t value = static_cast<uint16_t>((row * 17 + col * 3) % params.spiral_params.PtModulus());
-      std::memcpy(rows[row].data() + col * sizeof(uint16_t), &value, sizeof(value));
+      const uint16_t value = static_cast<uint16_t>(
+          (row * 17 + col * 3) % params.spiral_params.PtModulus());
+      std::memcpy(rows[row].data() + col * sizeof(uint16_t), &value,
+                  sizeof(value));
     }
   }
   return psi::pir::RawDatabase(std::move(rows));
@@ -44,7 +47,8 @@ TEST(YpirSimplepirFlowTest, EndToEndSmallDatabase) {
   const auto response_buffer = server.Response(query_buffer);
   const auto decoded = client.DecodeResponseBuffer(response_buffer, raw_idx);
 
-  const uint64_t expected = (row * 17 + col * 3) % params.spiral_params.PtModulus();
+  const uint64_t expected =
+      (row * 17 + col * 3) % params.spiral_params.PtModulus();
   EXPECT_EQ(BytesToU64(decoded), expected);
 }
 

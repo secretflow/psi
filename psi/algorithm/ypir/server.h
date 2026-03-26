@@ -10,9 +10,9 @@
 #include "yacl/base/byte_container_view.h"
 
 #include "psi/algorithm/pir_interface/pir_db.h"
-#include "psi/algorithm/ypir/ypir_internal_server.h"
 #include "psi/algorithm/ypir/params.h"
 #include "psi/algorithm/ypir/types.h"
+#include "psi/algorithm/ypir/ypir_internal_server.h"
 
 namespace psi::ypir {
 

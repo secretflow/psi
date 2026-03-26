@@ -18,6 +18,7 @@
 #include <chrono>
 #include <random>
 #include <utility>
+
 #include "yacl/base/exception.h"
 
 namespace psi::ypir::ypir_internal {
@@ -34,7 +35,8 @@ uint64_t Log2Exact(uint64_t n) {
 
 // Thread-local buffer pool for PackrlweOnline* recursive functions.
 // Each recursion depth gets 6 dedicated scratch vectors:
-//   0=tmp, 1=tmp1, 2=tmp2, 3=result, 4=b_e (left child result), 5=b_o (right child result)
+//   0=tmp, 1=tmp1, 2=tmp2, 3=result, 4=b_e (left child result), 5=b_o (right
+//   child result)
 // Slots 4/5 eliminate the ~1022 × 16 KB heap copies for b_e/b_o in
 // PackrlweOnlineConstantRowsImpl.
 struct PackrlwePool {
@@ -47,8 +49,7 @@ struct PackrlwePool {
     if (len == length) return;
     len = length;
     for (auto& row : v)
-      for (auto& buf : row)
-        buf.resize(length);
+      for (auto& buf : row) buf.resize(length);
   }
 
   std::vector<uint64_t>& Get(size_t depth, size_t slot) {
@@ -61,10 +62,8 @@ thread_local PackrlwePool g_packrlwe_pool;
 }  // namespace
 
 Secret::Secret(uint64_t length, uint64_t cmod) : len_(length), mod_(cmod) {
-  std::mt19937_64 rng(
-      static_cast<uint64_t>(std::chrono::high_resolution_clock::now()
-                                .time_since_epoch()
-                                .count()));
+  std::mt19937_64 rng(static_cast<uint64_t>(
+      std::chrono::high_resolution_clock::now().time_since_epoch().count()));
   std::uniform_int_distribution<int> dist(-1, 1);
   data.reserve(length);
   for (uint64_t i = 0; i < length; ++i) {
@@ -131,8 +130,7 @@ void FheParams::set_precomputed_pt(uint64_t max_lh) {
   SetPrecomputedPt(precomputed_pt_, rlwe_degree_, max_lh, ntt_forward_);
 }
 
-PirParams::PirParams(uint64_t rows, uint64_t cols)
-    : rows_(rows), cols_(cols) {
+PirParams::PirParams(uint64_t rows, uint64_t cols) : rows_(rows), cols_(cols) {
   YACL_ENFORCE(rows_ > 0);
   YACL_ENFORCE(cols_ > 0);
 }
@@ -200,15 +198,13 @@ void KeyswitchPreprocess(
   std::vector<uint64_t> tmp(length, 0);
   for (uint64_t i = 0; i < t; ++i) {
     EltwiseMultMod(tmp.data(), ksk_a[i].data(), decomp_buf.back()[i].data(),
-                   length,
-                   modulus);
+                   length, modulus);
     EltwiseSubMod(a_out.data(), a_out.data(), tmp.data(), length, modulus);
   }
 }
 
 void KeyswitchOnline(const std::vector<std::vector<uint64_t>>& ksk_b,
-                     std::vector<uint64_t>& b_in,
-                     std::vector<uint64_t>& b_out,
+                     std::vector<uint64_t>& b_in, std::vector<uint64_t>& b_out,
                      std::vector<std::vector<uint64_t>>& decomp_buf,
                      const FheParams& fparm) {
   const uint64_t t = fparm.get_t_auto();
@@ -230,18 +226,19 @@ void KeyswitchOnline(const std::vector<std::vector<uint64_t>>& ksk_b,
 }
 
 namespace {
-void EvalAutoPreprocess(std::vector<uint64_t>& a_in, std::vector<uint64_t>& a_out,
-                        const std::vector<std::vector<uint64_t>>& ksk_a,
-                        uint64_t idx,
-                        std::vector<std::vector<std::vector<uint64_t>>>& decomp_buf,
-                        const FheParams& fparm) {
+void EvalAutoPreprocess(
+    std::vector<uint64_t>& a_in, std::vector<uint64_t>& a_out,
+    const std::vector<std::vector<uint64_t>>& ksk_a, uint64_t idx,
+    std::vector<std::vector<std::vector<uint64_t>>>& decomp_buf,
+    const FheParams& fparm) {
   ApplyAutoNttForm(a_in, a_in, idx, fparm);
   KeyswitchPreprocess(ksk_a, a_in, a_out, decomp_buf, fparm);
 }
 
 void EvalAutoOnline(std::vector<uint64_t>& b_in, std::vector<uint64_t>& b_out,
                     const std::vector<std::vector<uint64_t>>& ksk_b,
-                    uint64_t idx, std::vector<std::vector<uint64_t>>& decomp_buf,
+                    uint64_t idx,
+                    std::vector<std::vector<uint64_t>>& decomp_buf,
                     const FheParams& fparm) {
   // Permute b_in into b_out (out-of-place: no scratch copy needed).
   // Then key-switch b_out in place, avoiding the extra copy in KeyswitchOnline.
@@ -263,12 +260,10 @@ std::vector<uint64_t> PackrlwePreprocessImpl(
   const uint64_t modulus = fparm.get_rlwe_cmod();
   const uint64_t expo = GetLog2(length);
 
-  std::vector<uint64_t> a_e =
-      PackrlwePreprocessImpl(a, start, stride << 1, l - 1, h, ksk_a,
-                             decomp_buf, fparm);
-  std::vector<uint64_t> a_o =
-      PackrlwePreprocessImpl(a, start + stride, stride << 1, l - 1, h, ksk_a,
-                             decomp_buf, fparm);
+  std::vector<uint64_t> a_e = PackrlwePreprocessImpl(
+      a, start, stride << 1, l - 1, h, ksk_a, decomp_buf, fparm);
+  std::vector<uint64_t> a_o = PackrlwePreprocessImpl(
+      a, start + stride, stride << 1, l - 1, h, ksk_a, decomp_buf, fparm);
 
   const std::vector<uint64_t>& pt = fparm.get_precomputed_pt(l + h);
   std::vector<uint64_t> tmp(length, 0);
@@ -280,10 +275,9 @@ std::vector<uint64_t> PackrlwePreprocessImpl(
   EltwiseAddMod(result.data(), a_e.data(), tmp.data(), length, modulus);
   EltwiseSubMod(tmp1.data(), a_e.data(), tmp.data(), length, modulus);
 
-  EvalAutoPreprocess(
-      tmp1, tmp2,
-      ksk_a[GetAutokeyIdx((1ULL << (l + h)) + 1, expo)],
-      (1ULL << (l + h)) + 1, decomp_buf, fparm);
+  EvalAutoPreprocess(tmp1, tmp2,
+                     ksk_a[GetAutokeyIdx((1ULL << (l + h)) + 1, expo)],
+                     (1ULL << (l + h)) + 1, decomp_buf, fparm);
   EltwiseAddMod(result.data(), result.data(), tmp2.data(), length, modulus);
   return result;
 }
@@ -312,19 +306,17 @@ std::vector<uint64_t> PackrlweOnlineImpl(
   const std::vector<uint64_t>& pt = fparm.get_precomputed_pt(l + h);
 
   g_packrlwe_pool.Init(length);
-  auto& tmp    = g_packrlwe_pool.Get(depth, 0);
-  auto& tmp1   = g_packrlwe_pool.Get(depth, 1);
-  auto& tmp2   = g_packrlwe_pool.Get(depth, 2);
+  auto& tmp = g_packrlwe_pool.Get(depth, 0);
+  auto& tmp1 = g_packrlwe_pool.Get(depth, 1);
+  auto& tmp2 = g_packrlwe_pool.Get(depth, 2);
   auto& result = g_packrlwe_pool.Get(depth, 3);
 
   EltwiseMultMod(tmp.data(), pt.data(), b_o.data(), length, modulus);
   EltwiseAddMod(result.data(), b_e.data(), tmp.data(), length, modulus);
   EltwiseSubMod(tmp1.data(), b_e.data(), tmp.data(), length, modulus);
 
-  EvalAutoOnline(
-      tmp1, tmp2,
-      ksk_b[GetAutokeyIdx((1ULL << (l + h)) + 1, expo)],
-      (1ULL << (l + h)) + 1, decomp_buf[ptr++], fparm);
+  EvalAutoOnline(tmp1, tmp2, ksk_b[GetAutokeyIdx((1ULL << (l + h)) + 1, expo)],
+                 (1ULL << (l + h)) + 1, decomp_buf[ptr++], fparm);
   EltwiseAddMod(result.data(), result.data(), tmp2.data(), length, modulus);
   return result;
 }
@@ -333,9 +325,8 @@ std::vector<uint64_t> PackrlweOnlineImpl(
 // owned by the parent frame), eliminating the ~16 KB copy-on-return that the
 // previous return-by-value version produced at each of 1023 recursive calls.
 void PackrlweOnlineConstantRowsImpl(
-    std::vector<uint64_t>& output,
-    const std::vector<uint64_t>& b, uint64_t start, uint64_t stride,
-    uint64_t l, uint64_t h,
+    std::vector<uint64_t>& output, const std::vector<uint64_t>& b,
+    uint64_t start, uint64_t stride, uint64_t l, uint64_t h,
     const std::vector<std::vector<std::vector<uint64_t>>>& ksk_b,
     std::vector<std::vector<std::vector<uint64_t>>>& decomp_buf, uint64_t& ptr,
     const FheParams& fparm, uint64_t depth = 0) {
@@ -354,9 +345,9 @@ void PackrlweOnlineConstantRowsImpl(
   //   0=tmp, 1=tmp1, 2=tmp2  (scratch)
   //   4=b_e (left child writes here), 5=b_o (right child writes here)
   // `output` is provided by the parent (or the top-level wrapper).
-  auto& tmp    = g_packrlwe_pool.Get(depth, 0);
-  auto& tmp1   = g_packrlwe_pool.Get(depth, 1);
-  auto& tmp2   = g_packrlwe_pool.Get(depth, 2);
+  auto& tmp = g_packrlwe_pool.Get(depth, 0);
+  auto& tmp1 = g_packrlwe_pool.Get(depth, 1);
+  auto& tmp2 = g_packrlwe_pool.Get(depth, 2);
 
   if (l == 1) {
     const std::vector<uint64_t>& pt = fparm.get_precomputed_pt(l + h);
@@ -368,10 +359,9 @@ void PackrlweOnlineConstantRowsImpl(
       if (output[i] >= modulus) output[i] -= modulus;
       tmp1[i] = scalar >= tmp[i] ? scalar - tmp[i] : scalar + modulus - tmp[i];
     }
-    EvalAutoOnline(
-        tmp1, tmp2,
-        ksk_b[GetAutokeyIdx((1ULL << (l + h)) + 1, expo)],
-        (1ULL << (l + h)) + 1, decomp_buf[ptr++], fparm);
+    EvalAutoOnline(tmp1, tmp2,
+                   ksk_b[GetAutokeyIdx((1ULL << (l + h)) + 1, expo)],
+                   (1ULL << (l + h)) + 1, decomp_buf[ptr++], fparm);
     EltwiseAddMod(output.data(), output.data(), tmp2.data(), length, modulus);
     return;
   }
@@ -381,10 +371,10 @@ void PackrlweOnlineConstantRowsImpl(
   auto& b_e = g_packrlwe_pool.Get(depth, 4);
   auto& b_o = g_packrlwe_pool.Get(depth, 5);
 
-  PackrlweOnlineConstantRowsImpl(b_e, b, start, stride << 1, l - 1, h,
+  PackrlweOnlineConstantRowsImpl(b_e, b, start, stride << 1, l - 1, h, ksk_b,
+                                 decomp_buf, ptr, fparm, depth + 1);
+  PackrlweOnlineConstantRowsImpl(b_o, b, start + stride, stride << 1, l - 1, h,
                                  ksk_b, decomp_buf, ptr, fparm, depth + 1);
-  PackrlweOnlineConstantRowsImpl(b_o, b, start + stride, stride << 1, l - 1,
-                                 h, ksk_b, decomp_buf, ptr, fparm, depth + 1);
 
   const std::vector<uint64_t>& pt = fparm.get_precomputed_pt(l + h);
 
@@ -392,10 +382,8 @@ void PackrlweOnlineConstantRowsImpl(
   EltwiseAddMod(output.data(), b_e.data(), tmp.data(), length, modulus);
   EltwiseSubMod(tmp1.data(), b_e.data(), tmp.data(), length, modulus);
 
-  EvalAutoOnline(
-      tmp1, tmp2,
-      ksk_b[GetAutokeyIdx((1ULL << (l + h)) + 1, expo)],
-      (1ULL << (l + h)) + 1, decomp_buf[ptr++], fparm);
+  EvalAutoOnline(tmp1, tmp2, ksk_b[GetAutokeyIdx((1ULL << (l + h)) + 1, expo)],
+                 (1ULL << (l + h)) + 1, decomp_buf[ptr++], fparm);
   EltwiseAddMod(output.data(), output.data(), tmp2.data(), length, modulus);
 }
 }  // namespace
@@ -424,8 +412,8 @@ std::vector<uint64_t> PackrlweOnlineConstantRows(
   g_packrlwe_pool.Init(fparm.get_poly_degree());
   // Use the depth-0 result slot as output; one final copy on return.
   auto& result = g_packrlwe_pool.Get(0, 3);
-  PackrlweOnlineConstantRowsImpl(result, b, 0, 1, l, h, ksk_b, decomp_buf,
-                                 ptr, fparm, 0);
+  PackrlweOnlineConstantRowsImpl(result, b, 0, 1, l, h, ksk_b, decomp_buf, ptr,
+                                 fparm, 0);
   return result;
 }
 

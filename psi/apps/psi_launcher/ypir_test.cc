@@ -1,5 +1,3 @@
-#include "psi/apps/psi_launcher/ypir_launch.h"
-
 #include <filesystem>
 #include <fstream>
 #include <future>
@@ -9,6 +7,8 @@
 #include "absl/strings/escaping.h"
 #include "gtest/gtest.h"
 #include "yacl/link/test_util.h"
+
+#include "psi/apps/psi_launcher/ypir_launch.h"
 
 namespace psi {
 namespace {
@@ -81,12 +81,10 @@ TEST(YpirLauncherTest, RunPirSimplepirUsesLauncherEntry) {
   receiver_config.set_output_file(output_path);
 
   auto lctxs = yacl::link::test::SetupWorld(2);
-  auto sender = std::async(std::launch::async, [&] {
-    return RunPir(sender_config, lctxs[0]);
-  });
-  auto receiver = std::async(std::launch::async, [&] {
-    return RunPir(receiver_config, lctxs[1]);
-  });
+  auto sender = std::async(std::launch::async,
+                           [&] { return RunPir(sender_config, lctxs[0]); });
+  auto receiver = std::async(std::launch::async,
+                             [&] { return RunPir(receiver_config, lctxs[1]); });
 
   EXPECT_EQ(sender.get().match_cnt(), 0);
   EXPECT_EQ(receiver.get().match_cnt(), 0);
@@ -131,12 +129,10 @@ TEST(YpirLauncherTest, RunPirDoublepirUsesLauncherEntry) {
   receiver_config.set_output_file(output_path);
 
   auto lctxs = yacl::link::test::SetupWorld(2);
-  auto sender = std::async(std::launch::async, [&] {
-    return RunPir(sender_config, lctxs[0]);
-  });
-  auto receiver = std::async(std::launch::async, [&] {
-    return RunPir(receiver_config, lctxs[1]);
-  });
+  auto sender = std::async(std::launch::async,
+                           [&] { return RunPir(sender_config, lctxs[0]); });
+  auto receiver = std::async(std::launch::async,
+                             [&] { return RunPir(receiver_config, lctxs[1]); });
 
   EXPECT_EQ(sender.get().match_cnt(), 0);
   EXPECT_EQ(receiver.get().match_cnt(), 0);

@@ -7,9 +7,8 @@
 namespace psi::ypir::internal::ypir {
 namespace {
 
-std::vector<std::vector<uint64_t>> ExpandDatabase(const std::vector<uint8_t>& db,
-                                                  uint64_t rows,
-                                                  uint64_t cols) {
+std::vector<std::vector<uint64_t>> ExpandDatabase(
+    const std::vector<uint8_t>& db, uint64_t rows, uint64_t cols) {
   YACL_ENFORCE_EQ(db.size(), rows * cols);
   std::vector<std::vector<uint64_t>> out(rows, std::vector<uint64_t>(cols, 0));
   for (uint64_t row = 0; row < rows; ++row) {
@@ -31,9 +30,9 @@ YpirPrecomputedState PrepareOfflineState(const std::vector<uint8_t>& db,
   YpirPrecomputedState state;
   state.mode = YpirMode::kDoublepir;
   std::vector<std::vector<uint64_t>> server_hint;
-  psi::ypir::ypir_internal::YpirHintGenerate(db_matrix, state.hint_0, server_hint,
-                                    state.decomp_buf, *context.prng,
-                                    *context.fhe_params, *context.pir_params);
+  psi::ypir::ypir_internal::YpirHintGenerate(
+      db_matrix, state.hint_0, server_hint, state.decomp_buf, *context.prng,
+      *context.fhe_params, *context.pir_params);
   psi::ypir::ypir_internal::MatrixTranspose(server_hint, state.server_hint);
   return state;
 }
@@ -58,9 +57,9 @@ YpirResponse ProcessQuery(const std::vector<uint8_t>& db,
 
   std::vector<std::vector<uint64_t>> result;
   result.push_back(state.hint_0);
-  psi::ypir::ypir_internal::YpirAnswer(db.data(), qu0.data(), qu1, query.ksk_b,
-                              decomp_buf, server_hint, result,
-                              *context.fhe_params, *context.pir_params);
+  psi::ypir::ypir_internal::YpirAnswer(
+      db.data(), qu0.data(), qu1, query.ksk_b, decomp_buf, server_hint, result,
+      *context.fhe_params, *context.pir_params);
 
   YpirResponse response;
   response.mode = YpirMode::kDoublepir;

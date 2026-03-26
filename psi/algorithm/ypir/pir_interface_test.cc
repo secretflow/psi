@@ -1,11 +1,11 @@
-#include "psi/algorithm/ypir/client.h"
-#include "psi/algorithm/ypir/server.h"
-
 #include <cstdint>
 #include <cstring>
 #include <vector>
 
 #include "gtest/gtest.h"
+
+#include "psi/algorithm/ypir/client.h"
+#include "psi/algorithm/ypir/server.h"
 
 namespace psi::ypir {
 namespace {
@@ -38,12 +38,12 @@ TEST(YpirPirInterfaceTest, SimplepirImplementsIndexPirInterfaces) {
   psi::pir::IndexPirClient& client = concrete_client;
   psi::pir::IndexPirDataBase& server = concrete_server;
 
-  const auto raw_db = BuildItemDatabase<uint16_t>(
-      params, [&](uint64_t raw_idx) {
+  const auto raw_db =
+      BuildItemDatabase<uint16_t>(params, [&](uint64_t raw_idx) {
         const uint64_t row = raw_idx / params.db_cols;
         const uint64_t col = raw_idx % params.db_cols;
-        return static_cast<uint16_t>(
-            (row * 17 + col * 3) % params.spiral_params.PtModulus());
+        return static_cast<uint16_t>((row * 17 + col * 3) %
+                                     params.spiral_params.PtModulus());
       });
   server.GenerateFromRawData(raw_db);
 
@@ -69,12 +69,11 @@ TEST(YpirPirInterfaceTest, DoublepirImplementsIndexPirInterfaces) {
   psi::pir::IndexPirClient& client = concrete_client;
   psi::pir::IndexPirDataBase& server = concrete_server;
 
-  const auto raw_db = BuildItemDatabase<uint8_t>(
-      params, [&](uint64_t raw_idx) {
-        const uint64_t row = raw_idx / params.db_cols;
-        const uint64_t col = raw_idx % params.db_cols;
-        return static_cast<uint8_t>((row + col) % 251);
-      });
+  const auto raw_db = BuildItemDatabase<uint8_t>(params, [&](uint64_t raw_idx) {
+    const uint64_t row = raw_idx / params.db_cols;
+    const uint64_t col = raw_idx % params.db_cols;
+    return static_cast<uint8_t>((row + col) % 251);
+  });
   server.GenerateFromRawData(raw_db);
 
   const uint64_t raw_idx = 111ULL * params.db_cols + 222ULL;

@@ -1,7 +1,8 @@
 #include "psi/apps/psi_launcher/ypir_launch.h"
 
-#include "psi/algorithm/ypir/entry.h"
 #include "yacl/base/exception.h"
+
+#include "psi/algorithm/ypir/entry.h"
 
 namespace psi {
 namespace {

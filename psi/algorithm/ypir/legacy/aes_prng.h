@@ -14,11 +14,11 @@
 
 #pragma once
 
+#include <immintrin.h>
+
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-
-#include <immintrin.h>
 
 namespace psi::ypir::ypir_internal {
 

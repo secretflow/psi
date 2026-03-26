@@ -22,7 +22,10 @@ def _hexl_repository_impl(repository_ctx):
         roots.append(env_root)
 
     roots.extend([
+        "/usr/local/opt/intel-hexl",
         "/usr/local",
+        "/opt/homebrew/opt/intel-hexl",
+        "/opt/homebrew",
         "/usr",
     ])
 
@@ -40,8 +43,8 @@ def _hexl_repository_impl(repository_ctx):
                 return
 
     fail(
-        "HEXL was not found. Set HEXL_ROOT to the installation prefix, "
-        + "or install HEXL under /usr/local or /usr."
+        "HEXL was not found. Set HEXL_ROOT to the installation prefix, " +
+        "or install HEXL under /usr/local or /usr.",
     )
 
 hexl_repository = repository_rule(

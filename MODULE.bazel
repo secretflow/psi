@@ -57,6 +57,7 @@ use_repo(
 )
 
 new_local_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:local.bzl", "new_local_repository")
+
 hexl_repository = use_repo_rule("//bazel:hexl_repo.bzl", "hexl_repository")
 
 new_local_repository(

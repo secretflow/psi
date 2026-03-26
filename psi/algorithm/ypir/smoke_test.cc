@@ -1,7 +1,7 @@
+#include "gtest/gtest.h"
+
 #include "psi/algorithm/ypir/client.h"
 #include "psi/algorithm/ypir/server.h"
-
-#include "gtest/gtest.h"
 
 namespace psi::ypir {
 namespace {

@@ -13,6 +13,8 @@ part of the project.
 
 In general, please use clang-format to format code, and follow clang-tidy tips.
 
+For Bazel files (`MODULE.bazel`, `*.bzl`, `BUILD`, `BUILD.bazel`), please use `buildifier`.
+
 Most of the code style is derived from the
 [Google C++ style guidelines](https://google.github.io/styleguide/cppguide.html), except:
 
@@ -57,6 +59,10 @@ docker exec -it psi-dev-$(whoami) bash
 
 ```sh
 Install gcc>=11.2, cmake>=3.26, ninja, nasm>=2.15, python>=3.10, bazelisk, xxd, lld
+
+# Install Intel HEXL, or set HEXL_ROOT to an existing install prefix.
+./bazel/install_hexl.sh "$HOME/.local/hexl"
+export HEXL_ROOT="$HOME/.local/hexl"
 ```
 
 #### macOS
@@ -80,6 +86,10 @@ brew install bazelisk cmake ninja libomp wget
 
 # For Intel mac only
 brew install nasm
+
+# Install Intel HEXL, or set HEXL_ROOT to an existing install prefix.
+./bazel/install_hexl.sh "$HOME/.local/hexl"
+export HEXL_ROOT="$HOME/.local/hexl"
 ```
 
 ### Build & UnitTest

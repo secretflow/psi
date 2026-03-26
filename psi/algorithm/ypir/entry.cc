@@ -82,7 +82,8 @@ std::vector<std::string> ReadLines(const std::string& path) {
   return lines;
 }
 
-void WriteLines(const std::string& path, const std::vector<std::string>& lines) {
+void WriteLines(const std::string& path,
+                const std::vector<std::string>& lines) {
   std::ofstream output(path, std::ios::out | std::ios::trunc);
   YACL_ENFORCE(output.is_open(), "failed to open output file: {}", path);
   for (const auto& line : lines) {
@@ -111,8 +112,8 @@ std::string ResponseTag(uint64_t idx) {
   return fmt::format("ypir/response/{}", idx);
 }
 
-YpirParameters BuildParameters(YpirMode mode, uint64_t db_rows, uint64_t db_cols,
-                               uint64_t item_size_bits) {
+YpirParameters BuildParameters(YpirMode mode, uint64_t db_rows,
+                               uint64_t db_cols, uint64_t item_size_bits) {
   YACL_ENFORCE_GT(db_rows, 0U);
   YACL_ENFORCE_GT(db_cols, 0U);
   YACL_ENFORCE_GT(item_size_bits, 0U);
@@ -156,9 +157,8 @@ std::vector<std::string> EncodeOutputLines(
   std::vector<std::string> out;
   out.reserve(values.size());
   for (const auto& value : values) {
-    out.push_back(
-        absl::BytesToHexString(absl::string_view(
-            reinterpret_cast<const char*>(value.data()), value.size())));
+    out.push_back(absl::BytesToHexString(absl::string_view(
+        reinterpret_cast<const char*>(value.data()), value.size())));
   }
   return out;
 }
@@ -168,8 +168,8 @@ int RunSenderWithServer(const YpirParameters& params,
                         const YpirSenderOptions& options,
                         std::shared_ptr<yacl::link::Context> lctx) {
   YpirServer<T> server(params);
-  server.GenerateFromRawData(psi::pir::RawDatabase(
-      LoadDatabaseRows(options.db_file, params.value_bytes, params.NumItems())));
+  server.GenerateFromRawData(psi::pir::RawDatabase(LoadDatabaseRows(
+      options.db_file, params.value_bytes, params.NumItems())));
 
   lctx->ConnectToMesh();
   const uint64_t query_count =
@@ -195,8 +195,9 @@ int SenderOnline(const YpirSenderOptions& options,
               params.db_rows, params.db_cols);
 
   if (params.mode == YpirMode::kSimplepir) {
-    YACL_ENFORCE_LE(params.value_bytes, sizeof(uint16_t),
-                    "SimplePIR launcher currently supports up to 16-bit values");
+    YACL_ENFORCE_LE(
+        params.value_bytes, sizeof(uint16_t),
+        "SimplePIR launcher currently supports up to 16-bit values");
     if (params.value_bytes == 1) {
       return RunSenderWithServer<uint8_t>(params, options, std::move(lctx));
     }
@@ -213,7 +214,8 @@ int ReceiverOnline(const YpirReceiverOptions& options,
   YACL_ENFORCE(lctx != nullptr, "link context is required for YPIR receiver");
   const auto params = BuildParameters(options.mode, options.db_rows,
                                       options.db_cols, options.item_size_bits);
-  const auto query_indices = LoadQueryIndices(options.query_file, params.NumItems());
+  const auto query_indices =
+      LoadQueryIndices(options.query_file, params.NumItems());
 
   SPDLOG_INFO("Starting YPIR receiver, mode={}, query_count={}",
               params.mode == YpirMode::kSimplepir ? "simplepir" : "doublepir",

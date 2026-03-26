@@ -111,14 +111,12 @@ YpirParameters CreateParamsForScenarioDoublePIR(uint64_t num_items,
   return BuildDoublepirParamsForShape(shape.rows, shape.cols, item_size_bits);
 }
 
-YpirParameters CreateParamsForShapeSimplePIR(uint64_t db_rows,
-                                             uint64_t db_cols,
+YpirParameters CreateParamsForShapeSimplePIR(uint64_t db_rows, uint64_t db_cols,
                                              uint64_t item_size_bits) {
   return BuildSimplepirParamsForShape(db_rows, db_cols, item_size_bits);
 }
 
-YpirParameters CreateParamsForShapeDoublePIR(uint64_t db_rows,
-                                             uint64_t db_cols,
+YpirParameters CreateParamsForShapeDoublePIR(uint64_t db_rows, uint64_t db_cols,
                                              uint64_t item_size_bits) {
   return BuildDoublepirParamsForShape(db_rows, db_cols, item_size_bits);
 }

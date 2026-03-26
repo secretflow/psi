@@ -8,9 +8,9 @@
 #include "yacl/base/byte_container_view.h"
 
 #include "psi/algorithm/pir_interface/index_pir.h"
-#include "psi/algorithm/ypir/ypir_internal_client.h"
 #include "psi/algorithm/ypir/params.h"
 #include "psi/algorithm/ypir/types.h"
+#include "psi/algorithm/ypir/ypir_internal_client.h"
 
 namespace psi::ypir {
 

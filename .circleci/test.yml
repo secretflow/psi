@@ -38,6 +38,12 @@ commands:
           name: Setup BuildBuddy Cache
           command: ../devtools/bazel_cache_setup.py
       - run:
+          name: Install Intel HEXL
+          command: |
+            export HEXL_ROOT="${HOME}/.local/hexl"
+            ./bazel/install_hexl.sh "${HEXL_ROOT}"
+            echo "export HEXL_ROOT=${HEXL_ROOT}" >> "${BASH_ENV}"
+      - run:
           name: "build"
           command: bazel build //... -c opt --ui_event_filters=-info,-debug,-warning --jobs 20
       - run:

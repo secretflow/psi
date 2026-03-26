@@ -24,7 +24,7 @@ psi_cc_library(
     ],
     copts = ["-maes"],
     deps = [
-        "@hexl//:hexl",
+        "@hexl",
         "@yacl//yacl/base:exception",
     ],
 )
@@ -109,10 +109,10 @@ psi_cc_library(
     srcs = ["ypir_internal_client.cc"],
     hdrs = ["ypir_internal_client.h"],
     deps = [
-        ":ypir_internal_params",
         ":legacy_ypir_impl",
         ":types",
         ":util",
+        ":ypir_internal_params",
         "@yacl//yacl/base:exception",
     ],
 )
@@ -122,9 +122,9 @@ psi_cc_library(
     srcs = ["ypir_internal_server.cc"],
     hdrs = ["ypir_internal_server.h"],
     deps = [
-        ":ypir_internal_params",
         ":legacy_ypir_impl",
         ":types",
+        ":ypir_internal_params",
         "@yacl//yacl/base:exception",
     ],
 )
@@ -134,12 +134,12 @@ psi_cc_library(
     srcs = ["client.cc"],
     hdrs = ["client.h"],
     deps = [
-        "//psi/algorithm/pir_interface:index_pir",
-        "//psi/algorithm/pir_interface:pir_db",
-        ":ypir_internal_client",
         ":params",
         ":serialize",
         ":util",
+        ":ypir_internal_client",
+        "//psi/algorithm/pir_interface:index_pir",
+        "//psi/algorithm/pir_interface:pir_db",
         "@yacl//yacl/base:buffer",
         "@yacl//yacl/base:byte_container_view",
         "@yacl//yacl/base:exception",
@@ -151,10 +151,10 @@ psi_cc_library(
     srcs = ["server.cc"],
     hdrs = ["server.h"],
     deps = [
-        ":ypir_internal_server",
         ":legacy_simplepir",
         ":params",
         ":serialize",
+        ":ypir_internal_server",
         "//psi/algorithm/pir_interface:pir_db",
         "@yacl//yacl/base:buffer",
         "@yacl//yacl/base:byte_container_view",

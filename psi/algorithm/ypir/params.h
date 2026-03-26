@@ -22,11 +22,9 @@ YpirParameters CreateParamsForScenarioSimplePIR(uint64_t num_items,
                                                 uint64_t item_size_bits);
 YpirParameters CreateParamsForScenarioDoublePIR(uint64_t num_items,
                                                 uint64_t item_size_bits);
-YpirParameters CreateParamsForShapeSimplePIR(uint64_t db_rows,
-                                             uint64_t db_cols,
+YpirParameters CreateParamsForShapeSimplePIR(uint64_t db_rows, uint64_t db_cols,
                                              uint64_t item_size_bits);
-YpirParameters CreateParamsForShapeDoublePIR(uint64_t db_rows,
-                                             uint64_t db_cols,
+YpirParameters CreateParamsForShapeDoublePIR(uint64_t db_rows, uint64_t db_cols,
                                              uint64_t item_size_bits);
 YpirParameters CreateSmallTestParamsSimplePIR();
 YpirParameters CreateSmallTestParamsDoublePIR();

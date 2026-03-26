@@ -4,15 +4,15 @@
 #include <cstring>
 #include <vector>
 
+#include "yacl/base/int128.h"
+
 #include "psi/algorithm/spiral/arith/arith_params.h"
 #include "psi/algorithm/spiral/arith/ntt.h"
 #include "psi/algorithm/spiral/discrete_gaussian.h"
 #include "psi/algorithm/spiral/gadget.h"
-#include "psi/algorithm/spiral/poly_matrix_utils.h"
-#include "yacl/base/int128.h"
-
 #include "psi/algorithm/spiral/params.h"
 #include "psi/algorithm/spiral/poly_matrix.h"
+#include "psi/algorithm/spiral/poly_matrix_utils.h"
 #include "psi/algorithm/spiral/util.h"
 
 namespace psi::ypir {

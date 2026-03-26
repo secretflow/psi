@@ -11,8 +11,8 @@ namespace {
 
 template <typename T>
 psi::pir::RawDatabase BuildDatabase(const YpirParameters& params) {
-  std::vector<std::vector<uint8_t>> rows(params.db_rows,
-                                         std::vector<uint8_t>(params.db_cols * sizeof(T), 0));
+  std::vector<std::vector<uint8_t>> rows(
+      params.db_rows, std::vector<uint8_t>(params.db_cols * sizeof(T), 0));
   for (uint64_t row = 0; row < params.db_rows; ++row) {
     for (uint64_t col = 0; col < params.db_cols; ++col) {
       const T value = static_cast<T>((row * 17 + col * 3) % 251);

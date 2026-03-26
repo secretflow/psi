@@ -6,7 +6,6 @@
 
 #include "psi/algorithm/spiral/params.h"
 #include "psi/algorithm/spiral/poly_matrix.h"
-
 #include "psi/algorithm/ypir/legacy/types.h"
 namespace psi::ypir {
 

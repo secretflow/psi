@@ -19,7 +19,6 @@ void YpirRecover(Secret& simple_sk, Secret& double_sk,
 
 YpirQuery Generate_query_ypir(uint64_t c_idx, uint64_t r_idx, Secret& lwe_sk,
                               Secret& rlwe_sk, AESCTR_PRNG& prng,
-                              const FheParams& fparm,
-                              const PirParams& pparm);
+                              const FheParams& fparm, const PirParams& pparm);
 
 }  // namespace psi::ypir::ypir_internal

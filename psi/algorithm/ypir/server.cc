@@ -44,13 +44,13 @@ YpirServer<T>::YpirServer(YpirParameters params)
 }
 
 template <typename T>
-void YpirServer<T>::GenerateFromRawData(const psi::pir::RawDatabase& raw_database) {
+void YpirServer<T>::GenerateFromRawData(
+    const psi::pir::RawDatabase& raw_database) {
   static_assert(std::is_same_v<T, uint8_t> || std::is_same_v<T, uint16_t>,
                 "YpirServer only supports uint8_t and uint16_t values");
 
-  const bool item_layout =
-      raw_database.Rows() <= params_.NumItems() &&
-      raw_database.RowByteLen() == params_.value_bytes;
+  const bool item_layout = raw_database.Rows() <= params_.NumItems() &&
+                           raw_database.RowByteLen() == params_.value_bytes;
   const bool matrix_layout =
       raw_database.Rows() == params_.db_rows &&
       raw_database.RowByteLen() == params_.db_cols * sizeof(T);
@@ -108,8 +108,9 @@ void YpirServer<T>::Dump(std::ostream& out_stream) const {
   out_stream << "YpirServer{mode="
              << (params_.mode == YpirMode::kSimplepir ? "simplepir"
                                                       : "doublepir")
-             << ", db_rows=" << params_.db_rows << ", db_cols="
-             << params_.db_cols << ", value_bytes=" << params_.value_bytes
+             << ", db_rows=" << params_.db_rows
+             << ", db_cols=" << params_.db_cols
+             << ", value_bytes=" << params_.value_bytes
              << ", db_set=" << db_set_ << "}";
 }
 
@@ -134,8 +135,8 @@ YpirResponse YpirServer<T>::ProcessQuery(const YpirQuery& query) const {
 }
 
 template <typename T>
-YpirResponse YpirServer<T>::ProcessQuery(const YpirQuery& query,
-                                         const YpirPrecomputedState& state) const {
+YpirResponse YpirServer<T>::ProcessQuery(
+    const YpirQuery& query, const YpirPrecomputedState& state) const {
   YACL_ENFORCE(db_set_, "database must be loaded before query processing");
   YACL_ENFORCE(query.mode == params_.mode);
 
@@ -173,9 +174,8 @@ yacl::Buffer YpirServer<T>::Response(
 }
 
 template <typename T>
-std::string YpirServer<T>::Response(
-    const yacl::ByteContainerView& query_buffer,
-    const std::string& /*pks_buffer*/) const {
+std::string YpirServer<T>::Response(const yacl::ByteContainerView& query_buffer,
+                                    const std::string& /*pks_buffer*/) const {
   auto buffer = Response(query_buffer);
   return std::string(static_cast<std::string_view>(buffer));
 }

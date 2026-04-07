@@ -60,13 +60,8 @@ void matMulVecPacked8(uint32_t* out, const uint32_t* a, const uint32_t* b_full,
 
 // Wrapper function that matches the Rust signature
 void MatMulVecPacked(uint32_t* out, const uint32_t* a, const uint32_t* b,
-                     size_t a_rows, size_t a_cols, size_t b_rows,
-                     size_t b_cols) {
-  // Debug output (equivalent to Rust's debug! macro)
-
-  // Assertions
-  assert(a_rows * a_cols == a_rows * a_cols);  // a.len() == a_rows * a_cols
-  assert(b_rows * b_cols == b_rows * b_cols);  // b.len() == b_rows * b_cols
+                     size_t a_rows, size_t a_cols,
+                     [[maybe_unused]] size_t b_rows, size_t b_cols) {
   assert(a_cols * 4 == b_rows);
   // Note: out.len() >= a_rows + 8 should be checked by caller
 

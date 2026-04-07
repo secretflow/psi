@@ -46,6 +46,7 @@ build:linux-release --action_env=BAZEL_LINKLIBS=-l%:libstdc++.a:-l%:libgcc.a
 # platform specific config
 # Bazel will automatic pick platform config since we have enable_platform_specific_config set
 build:macos --copt=-Wno-unused-command-line-argument
+build:macos --copt=-Wno-vla-cxx-extension
 build:macos --features=-supports_dynamic_linker
 build:macos --macos_minimum_os=12.0
 build:macos --host_macos_minimum_os=12.0

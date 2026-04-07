@@ -480,8 +480,12 @@ void MatrixVectorMultiplicationU16(
     const std::vector<uint64_t>& vec, uint64_t mod) {
 #if defined(__x86_64__) || defined(_M_X64)
 #if defined(__GNUC__) || defined(__clang__)
-  MatrixVectorMultiplicationU16Avx512(result, matrix, vec, mod);
-  return;
+  if (__builtin_cpu_supports("avx512f") &&
+      __builtin_cpu_supports("avx512bw") &&
+      __builtin_cpu_supports("avx512vl")) {
+    MatrixVectorMultiplicationU16Avx512(result, matrix, vec, mod);
+    return;
+  }
 #endif
 #endif
   const uint64_t mat_row = matrix.size();
@@ -503,8 +507,12 @@ void MatVecU8U32Mod2p32(const uint8_t* A, const uint32_t* x, uint32_t* y,
                         size_t rows, size_t cols) {
 #if defined(__x86_64__) || defined(_M_X64)
 #if defined(__GNUC__) || defined(__clang__)
-  MatVecU8U32Mod2p32Avx512(A, x, y, rows, cols);
-  return;
+  if (__builtin_cpu_supports("avx512f") &&
+      __builtin_cpu_supports("avx512bw") &&
+      __builtin_cpu_supports("avx512vl")) {
+    MatVecU8U32Mod2p32Avx512(A, x, y, rows, cols);
+    return;
+  }
 #endif
 #endif
   MatVecU8U32Mod2p32Scalar(A, x, y, rows, cols);

@@ -15,6 +15,15 @@ cc_library(
 )
 """
 
+_HEXL_STUB_BUILD = """load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "hexl",
+)
+"""
+
 def _hexl_repository_impl(repository_ctx):
     roots = []
     env_root = repository_ctx.os.environ.get("HEXL_ROOT", "")
@@ -42,10 +51,12 @@ def _hexl_repository_impl(repository_ctx):
                 repository_ctx.file("WORKSPACE.bazel", "workspace(name = \"hexl\")\n")
                 return
 
-    fail(
-        "HEXL was not found. Set HEXL_ROOT to the installation prefix, " +
-        "or install HEXL under /usr/local or /usr.",
-    )
+    # HEXL not found — create a stub so the workspace resolves on non-x86
+    # platforms.  Targets that actually depend on @hexl are gated by
+    # target_compatible_with = ["@platforms//cpu:x86_64"] and will never be
+    # built on ARM / macOS Apple Silicon.
+    repository_ctx.file("BUILD.bazel", _HEXL_STUB_BUILD)
+    repository_ctx.file("WORKSPACE.bazel", "workspace(name = \"hexl\")\n")
 
 hexl_repository = repository_rule(
     implementation = _hexl_repository_impl,

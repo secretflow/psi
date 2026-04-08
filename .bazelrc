@@ -51,6 +51,9 @@ build:macos --features=-supports_dynamic_linker
 build:macos --macos_minimum_os=12.0
 build:macos --host_macos_minimum_os=12.0
 
+# Fix yacl VLA warning on macOS Clang (Xcode 16.4+)
+build --per_file_copt=external/yacl.*openssl.*@-Wno-vla-cxx-extension
+
 # NOTE: fix build on linux_aarch64, since `build:linux_aarch64` works only if `--config linux_aarch64` option included.
 build:linux --cxxopt=-Wno-mismatched-new-delete
 

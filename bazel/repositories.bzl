@@ -63,10 +63,10 @@ def _com_google_flatbuffers():
     maybe(
         http_archive,
         name = "com_google_flatbuffers",
-        sha256 = "4157c5cacdb59737c5d627e47ac26b140e9ee28b1102f812b36068aab728c1ed",
-        strip_prefix = "flatbuffers-24.3.25",
+        sha256 = "f81c3162b1046fe8b84b9a0dbdd383e24fdbcf88583b9cb6028f90d04d90696a",
+        strip_prefix = "flatbuffers-25.12.19",
         urls = [
-            "https://github.com/google/flatbuffers/archive/refs/tags/v24.3.25.tar.gz",
+            "https://github.com/google/flatbuffers/archive/refs/tags/v25.12.19.tar.gz",
         ],
         patch_cmds = [
             # hack to make sure this file is removed
